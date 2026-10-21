@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "slow-push-in",
+  "type": "camera_move",
+  "title": "Slow push-in",
+  "purpose": "Gradual zoom toward the subject to build focus and quiet tension.",
+  "intents": [
+    "slow zoom in",
+    "build focus",
+    "gentle push toward product",
+    "premium feel"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "scale_end",
+      "unit": "x",
+      "min": 1.03,
+      "max": 1.25,
+      "default": 1.1
+    },
+    {
+      "kind": "enum",
+      "name": "easing",
+      "options": [
+        "linear",
+        "ease_in_out"
+      ],
+      "default": "ease_in_out"
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1.5,
+    "max_duration_s": 8,
+    "max_uses_per_film": null,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image"
+    ]
+  },
+  "implementation_ref": "remotion/slow-push-in"
+}

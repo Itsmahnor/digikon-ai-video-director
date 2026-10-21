@@ -1,0 +1,71 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_overlay_text",
+      "message": "lower-third-slide needs overlay text on the scene"
+    },
+    {
+      "kind": "param_lte_duration_fraction",
+      "param": "hold_s",
+      "fraction": 0.9,
+      "message": "hold must fit inside the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "lower-third-slide",
+  "type": "animation",
+  "title": "Lower-third slide",
+  "purpose": "A name, feature or label slides in near the bottom of the safe area and leaves again.",
+  "intents": [
+    "label product feature",
+    "name tag",
+    "feature callout",
+    "info bar"
+  ],
+  "parameters": [
+    {
+      "kind": "enum",
+      "name": "align",
+      "options": [
+        "left",
+        "center"
+      ],
+      "default": "left"
+    },
+    {
+      "kind": "number",
+      "name": "hold_s",
+      "unit": "s",
+      "min": 1,
+      "max": 5,
+      "default": 2.5
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 3,
+    "max_duration_s": 10,
+    "max_uses_per_film": 3,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image"
+    ]
+  },
+  "implementation_ref": "remotion/lower-third-slide"
+}

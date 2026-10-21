@@ -1,0 +1,22 @@
+{
+  "name": "@digikon/console",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "start": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@digikon/contracts": "*",
+    "@digikon/director": "*",
+    "@digikon/media": "*",
+    "@digikon/rag": "*",
+    "@digikon/recipes": "*",
+    "@digikon/router": "*",
+    "@digikon/speech": "*",
+    "@hono/node-server": "^2.1.5",
+    "hono": "^4.13.13",
+    "zod": "^3.23.8"
+  }
+}

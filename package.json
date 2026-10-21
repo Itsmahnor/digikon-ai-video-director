@@ -1,0 +1,32 @@
+{
+  "name": "digikon-ai-video-director",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "director": "tsx packages/director/src/cli.ts",
+    "console": "tsx apps/console/src/server.ts",
+    "eval": "tsx packages/evals/src/cli.ts",
+    "eval:live": "tsx packages/evals/src/cli.ts --live",
+    "console:demo": "tsx apps/console/src/server.ts --demo",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

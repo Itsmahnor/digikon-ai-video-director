@@ -1,0 +1,71 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_overlay_text",
+      "message": "end-card-cta needs overlay text on the scene"
+    },
+    {
+      "kind": "param_lte_scene_duration",
+      "param": "hold_s",
+      "message": "hold cannot be longer than the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "end-card-cta",
+  "type": "animation",
+  "title": "End card with call to action",
+  "purpose": "Closing card holding the call to action and brand line long enough to read.",
+  "intents": [
+    "call to action",
+    "closing card",
+    "end screen",
+    "final message"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "hold_s",
+      "unit": "s",
+      "min": 1.5,
+      "max": 4,
+      "default": 2
+    },
+    {
+      "kind": "enum",
+      "name": "background",
+      "options": [
+        "brand",
+        "dark",
+        "light"
+      ],
+      "default": "brand"
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 2,
+    "max_duration_s": 6,
+    "max_uses_per_film": 1,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "remotion/end-card-cta"
+}

@@ -1,0 +1,73 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_asset",
+      "message": "crop-to-detail needs a source asset"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "crop-to-detail",
+  "type": "shot",
+  "title": "Crop to detail",
+  "purpose": "Reframe the supplied footage to a tighter crop on one detail, such as texture or a label. Quality depends on source resolution.",
+  "intents": [
+    "close up detail",
+    "macro texture",
+    "zoom on label",
+    "reveal ingredient"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "center_x_pct",
+      "unit": "%",
+      "min": 10,
+      "max": 90,
+      "default": 50
+    },
+    {
+      "kind": "number",
+      "name": "center_y_pct",
+      "unit": "%",
+      "min": 10,
+      "max": 90,
+      "default": 50
+    },
+    {
+      "kind": "number",
+      "name": "zoom",
+      "unit": "x",
+      "min": 1.3,
+      "max": 3,
+      "default": 1.8
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1,
+    "max_duration_s": 5,
+    "max_uses_per_film": null,
+    "energy": "medium"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image"
+    ]
+  },
+  "implementation_ref": "remotion/crop-to-detail"
+}

@@ -1,0 +1,71 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "music-bed-duck",
+    "type":  "sound_cue",
+    "title":  "Music bed with ducking",
+    "purpose":  "Lowers the music under speech or a key sound effect, then restores it.",
+    "intents":  [
+                    "lower music under voice",
+                    "duck music",
+                    "keep dialogue clear",
+                    "sidechain"
+                ],
+    "parameters":  [
+                       {
+                           "kind":  "number",
+                           "name":  "duck_db",
+                           "unit":  "dB",
+                           "min":  -18,
+                           "max":  -6,
+                           "default":  -12
+                       },
+                       {
+                           "kind":  "number",
+                           "name":  "attack_ms",
+                           "unit":  "ms",
+                           "min":  20,
+                           "max":  300,
+                           "default":  80
+                       },
+                       {
+                           "kind":  "number",
+                           "name":  "release_ms",
+                           "unit":  "ms",
+                           "min":  100,
+                           "max":  1000,
+                           "default":  400
+                       }
+                   ],
+    "constraints":  {
+                        "min_duration_s":  2,
+                        "max_duration_s":  180,
+                        "max_uses_per_film":  null,
+                        "energy":  "low"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "ffmpeg"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "video",
+                                              "image",
+                                              "audio",
+                                              "none"
+                                          ]
+                      },
+    "implementation_ref":  "ffmpeg/sidechain-duck"
+}

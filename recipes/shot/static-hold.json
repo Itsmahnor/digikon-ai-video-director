@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "static-hold",
+  "type": "shot",
+  "title": "Static hold",
+  "purpose": "Hold the frame still so the viewer can read the product or a line of text.",
+  "intents": [
+    "hold on product",
+    "let the shot breathe",
+    "read the text",
+    "calm beat"
+  ],
+  "parameters": [],
+  "constraints": {
+    "min_duration_s": 1,
+    "max_duration_s": 6,
+    "max_uses_per_film": null,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image"
+    ]
+  },
+  "implementation_ref": "ffmpeg/trim-hold"
+}

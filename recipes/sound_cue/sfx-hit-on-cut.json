@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_asset",
+      "message": "sfx-hit-on-cut needs a licensed sound effect asset"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "sfx-hit-on-cut",
+  "type": "sound_cue",
+  "title": "Sound effect on cut",
+  "purpose": "Places a short licensed sound effect on or near a cut to add weight. Needs a licensed audio asset.",
+  "intents": [
+    "whoosh on cut",
+    "impact sound",
+    "transition sound",
+    "accent hit"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "offset_ms",
+      "unit": "ms",
+      "min": -80,
+      "max": 80,
+      "default": 0
+    },
+    {
+      "kind": "number",
+      "name": "gain_db",
+      "unit": "dB",
+      "min": -24,
+      "max": 0,
+      "default": -12
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 0.5,
+    "max_duration_s": 60,
+    "max_uses_per_film": 6,
+    "energy": "medium"
+  },
+  "compatibility": {
+    "renderers": [
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "ffmpeg/sfx-place"
+}

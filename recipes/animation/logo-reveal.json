@@ -1,0 +1,63 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_asset",
+      "message": "logo-reveal needs the logo image as an asset"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "logo-reveal",
+  "type": "animation",
+  "title": "Logo reveal",
+  "purpose": "Brand mark scales in softly. Needs a supplied logo image.",
+  "intents": [
+    "show logo",
+    "brand sting",
+    "reveal brand mark",
+    "sign off"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "scale_from",
+      "unit": "x",
+      "min": 0.8,
+      "max": 0.98,
+      "default": 0.9
+    },
+    {
+      "kind": "number",
+      "name": "duration_s",
+      "unit": "s",
+      "min": 0.4,
+      "max": 1.5,
+      "default": 0.8
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1.5,
+    "max_duration_s": 6,
+    "max_uses_per_film": 2,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "image"
+    ]
+  },
+  "implementation_ref": "remotion/logo-reveal"
+}

@@ -1,0 +1,79 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_overlay_text",
+      "message": "text-fade-up needs overlay text on the scene"
+    },
+    {
+      "kind": "param_lte_duration_fraction",
+      "param": "duration_s",
+      "fraction": 0.6,
+      "message": "entrance must take at most 60% of the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "text-fade-up",
+  "type": "animation",
+  "title": "Text fade up",
+  "purpose": "On-screen line fades in while rising slightly. Clear, safe default for headlines and captions.",
+  "intents": [
+    "headline appears",
+    "fade in text",
+    "simple title",
+    "caption entrance"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "delay_s",
+      "unit": "s",
+      "min": 0,
+      "max": 2,
+      "default": 0.2
+    },
+    {
+      "kind": "number",
+      "name": "duration_s",
+      "unit": "s",
+      "min": 0.2,
+      "max": 1.2,
+      "default": 0.5
+    },
+    {
+      "kind": "number",
+      "name": "distance_px",
+      "unit": "px",
+      "min": 8,
+      "max": 80,
+      "default": 24
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1,
+    "max_duration_s": 10,
+    "max_uses_per_film": null,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "remotion/text-fade-up"
+}

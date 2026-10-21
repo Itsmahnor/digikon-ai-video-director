@@ -1,0 +1,44 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "hard-cut",
+  "type": "transition",
+  "title": "Hard cut",
+  "purpose": "Instant change between scenes. The default; keeps pace tight.",
+  "intents": [
+    "straight cut",
+    "quick change",
+    "no transition",
+    "keep pace"
+  ],
+  "parameters": [],
+  "constraints": {
+    "min_duration_s": 0.5,
+    "max_duration_s": 60,
+    "max_uses_per_film": null,
+    "energy": "medium"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "ffmpeg/concat-cut"
+}

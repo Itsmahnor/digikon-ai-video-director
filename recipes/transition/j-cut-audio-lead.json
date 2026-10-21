@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "param_lte_duration_fraction",
+      "param": "lead_s",
+      "fraction": 0.4,
+      "message": "audio lead must not exceed 40% of the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "j-cut-audio-lead",
+  "type": "transition",
+  "title": "J-cut audio lead",
+  "purpose": "The next scene's audio begins before its picture, pulling the viewer forward.",
+  "intents": [
+    "audio leads picture",
+    "j cut",
+    "pull into next scene",
+    "sound before cut"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "lead_s",
+      "unit": "s",
+      "min": 0.2,
+      "max": 1,
+      "default": 0.5
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1.5,
+    "max_duration_s": 60,
+    "max_uses_per_film": 4,
+    "energy": "medium"
+  },
+  "compatibility": {
+    "renderers": [
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video"
+    ]
+  },
+  "implementation_ref": "ffmpeg/audio-lead"
+}

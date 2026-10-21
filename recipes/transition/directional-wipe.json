@@ -1,0 +1,71 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "param_lte_duration_fraction",
+      "param": "duration_s",
+      "fraction": 0.5,
+      "message": "wipe must not exceed half the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "directional-wipe",
+  "type": "transition",
+  "title": "Directional wipe",
+  "purpose": "A clean wipe that reads as energetic and graphic. Suits UI and product reveals.",
+  "intents": [
+    "wipe to next",
+    "graphic transition",
+    "energetic change",
+    "slide reveal"
+  ],
+  "parameters": [
+    {
+      "kind": "enum",
+      "name": "direction",
+      "options": [
+        "left",
+        "right",
+        "up",
+        "down"
+      ],
+      "default": "left"
+    },
+    {
+      "kind": "number",
+      "name": "duration_s",
+      "unit": "s",
+      "min": 0.2,
+      "max": 1,
+      "default": 0.5
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1,
+    "max_duration_s": 60,
+    "max_uses_per_film": 3,
+    "energy": "high"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "ffmpeg/xfade-wipe"
+}

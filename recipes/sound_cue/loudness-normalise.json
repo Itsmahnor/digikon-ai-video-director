@@ -1,0 +1,63 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "loudness-normalise",
+    "type":  "sound_cue",
+    "title":  "Loudness normalise",
+    "purpose":  "Normalises the final mix to a target loudness. The default target is a placeholder: confirm it against the destination platform before use.",
+    "intents":  [
+                    "normalise loudness",
+                    "match platform loudness",
+                    "final mix level",
+                    "true peak limit"
+                ],
+    "parameters":  [
+                       {
+                           "kind":  "number",
+                           "name":  "target_lufs",
+                           "unit":  "LUFS",
+                           "min":  -23,
+                           "max":  -12,
+                           "default":  -16
+                       },
+                       {
+                           "kind":  "number",
+                           "name":  "true_peak_db",
+                           "unit":  "dBTP",
+                           "min":  -3,
+                           "max":  -0.5,
+                           "default":  -1.5
+                       }
+                   ],
+    "constraints":  {
+                        "min_duration_s":  1,
+                        "max_duration_s":  180,
+                        "max_uses_per_film":  1,
+                        "energy":  "low"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "ffmpeg"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "video",
+                                              "image",
+                                              "audio",
+                                              "none"
+                                          ]
+                      },
+    "implementation_ref":  "ffmpeg/loudnorm"
+}

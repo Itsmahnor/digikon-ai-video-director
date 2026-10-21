@@ -1,0 +1,22 @@
+[
+  { "query": "zoom out slowly to show the whole bottle", "collection": "shot_recipes", "expect": ["pull-out-reveal"] },
+  { "query": "gentle zoom toward the product for a premium feel", "collection": "shot_recipes", "expect": ["slow-push-in"] },
+  { "query": "fast zoom to emphasise the key feature", "collection": "shot_recipes", "expect": ["punch-in-emphasis"] },
+  { "query": "slide the frame across the product", "collection": "shot_recipes", "expect": ["pan-reframe"] },
+  { "query": "dissolve softly into the next scene", "collection": "shot_recipes", "expect": ["crossfade"] },
+  { "query": "fade to black before the final scene", "collection": "shot_recipes", "expect": ["dip-to-black"] },
+  { "query": "sound from the next scene starts before we see it", "collection": "shot_recipes", "expect": ["j-cut-audio-lead"] },
+  { "query": "headline fades in with a small rise", "collection": "shot_recipes", "expect": ["text-fade-up"] },
+  { "query": "words appear one at a time for rhythm", "collection": "shot_recipes", "expect": ["text-word-stagger"] },
+  { "query": "closing screen with the call to action", "collection": "shot_recipes", "expect": ["end-card-cta"] },
+  { "query": "show the brand logo at the end", "collection": "shot_recipes", "expect": ["logo-reveal"] },
+  { "query": "lower the music while someone talks", "collection": "shot_recipes", "expect": ["music-bed-duck"] },
+  { "query": "whoosh sound when the scene changes", "collection": "shot_recipes", "expect": ["sfx-hit-on-cut"] },
+  { "query": "match the final mix to a loudness target", "collection": "shot_recipes", "expect": ["loudness-normalise"] },
+  { "query": "what should the first scene of an ad show", "collection": "ad_playbooks", "expect": ["hook-first-seconds"] },
+  { "query": "how many calls to action at the end", "collection": "ad_playbooks", "expect": ["single-clear-cta"] },
+  { "query": "can we say the product is healthy without a source", "collection": "ad_playbooks", "expect": ["claims-discipline"] },
+  { "query": "audio continues over the next picture", "collection": "directing_principles", "expect": ["j-and-l-cuts"] },
+  { "query": "what is the loudness target for broadcast", "collection": "directing_principles", "expect": ["audio-ducking-loudness"] },
+  { "query": "what is lost when we crop supplied footage", "collection": "directing_principles", "expect": ["reframing-limits"] }
+]

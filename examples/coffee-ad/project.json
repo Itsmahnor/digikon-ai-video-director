@@ -1,0 +1,10 @@
+{
+  "project_id": "coffee-demo",
+  "owner_id": "demo-user",
+  "brief": "A 15 second vertical Instagram ad for a small-batch coffee roaster. Show the beans and the roast, end with a clear invitation to place a first order.",
+  "objective": "Drive first-time orders",
+  "audience": "Home coffee drinkers who care about freshness",
+  "platform": "instagram",
+  "aspect_ratio": "9:16",
+  "target_duration": 15
+}

@@ -1,0 +1,4 @@
+[
+  { "fact_id": "F01", "text": "Beans are roasted weekly in small batches.", "source": "example brand sheet (replace with the client's approved facts)" },
+  { "fact_id": "F02", "text": "Orders ship within two days of roasting.", "source": "example brand sheet (replace with the client's approved facts)" }
+]

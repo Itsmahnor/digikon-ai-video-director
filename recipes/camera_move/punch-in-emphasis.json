@@ -1,0 +1,67 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "param_lte_duration_fraction",
+      "param": "zoom_duration_s",
+      "fraction": 0.6,
+      "message": "punch-in zoom must take at most 60% of the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "punch-in-emphasis",
+  "type": "camera_move",
+  "title": "Punch-in emphasis",
+  "purpose": "Fast zoom that lands on a key moment, number or feature. Use sparingly: it loses impact when repeated.",
+  "intents": [
+    "emphasise key moment",
+    "quick zoom",
+    "punch in",
+    "impact beat"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "scale_end",
+      "unit": "x",
+      "min": 1.15,
+      "max": 1.6,
+      "default": 1.3
+    },
+    {
+      "kind": "number",
+      "name": "zoom_duration_s",
+      "unit": "s",
+      "min": 0.2,
+      "max": 0.8,
+      "default": 0.4
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 0.8,
+    "max_duration_s": 4,
+    "max_uses_per_film": 2,
+    "energy": "high"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion",
+      "ffmpeg"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image"
+    ]
+  },
+  "implementation_ref": "remotion/punch-in-emphasis"
+}

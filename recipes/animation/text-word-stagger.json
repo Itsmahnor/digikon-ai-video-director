@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_overlay_text",
+      "message": "text-word-stagger needs overlay text on the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "text-word-stagger",
+  "type": "animation",
+  "title": "Word-by-word stagger",
+  "purpose": "Words enter one after another to give a short line rhythm and emphasis.",
+  "intents": [
+    "words appear one by one",
+    "kinetic text",
+    "rhythmic title",
+    "emphasise phrase"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "stagger_ms",
+      "unit": "ms",
+      "min": 20,
+      "max": 120,
+      "default": 60
+    },
+    {
+      "kind": "number",
+      "name": "word_duration_s",
+      "unit": "s",
+      "min": 0.15,
+      "max": 0.6,
+      "default": 0.3
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 1.5,
+    "max_duration_s": 10,
+    "max_uses_per_film": 4,
+    "energy": "medium"
+  },
+  "compatibility": {
+    "renderers": [
+      "remotion"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "video",
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "remotion/text-word-stagger"
+}
