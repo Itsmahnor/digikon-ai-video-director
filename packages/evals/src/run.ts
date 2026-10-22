@@ -1,7 +1,7 @@
 import { Asset, AssetNotes, BrandFact, Project, Turn } from "@digikon/contracts";
 import type { Retriever } from "@digikon/rag";
 import { RecipeLibrary, validateEditPlan } from "@digikon/recipes";
-import { buildDirectorGraph, classifyLlmError, type DirectorStateType, type LlmClient, type SkillLibrary } from "@digikon/director";
+import { approveCurrent, buildDirectorGraph, classifyLlmError, type DirectorStateType, type LlmClient, type SkillLibrary } from "@digikon/director";
 import { routeRequest } from "@digikon/router";
 import { z } from "zod";
 
@@ -134,7 +134,10 @@ export async function runDirectorCases(cases: DirectorCase[], deps: DirectorRunD
       const notes = (c.notes ?? []).map((n) => AssetNotes.parse(n));
       const facts = c.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "eval" }));
       const graph = buildDirectorGraph({ llm: client, skills: deps.skills, retriever: deps.retriever, recipes: deps.recipes });
-      const state = await wrapModelErrors(() => graph.invoke({ project, assets, facts, notes }, { configurable: { thread_id: `eval-${c.id}-${Date.now()}` } }));
+      const config = { configurable: { thread_id: `eval-${c.id}-${Date.now()}` } };
+      // The harness stands in for the reviewer at gate 1 only, so each case ends at the edit-plan gate with a full plan to check.
+      let state = await wrapModelErrors(() => graph.invoke({ project, assets, facts, notes }, config));
+      if (state.status === "awaiting_approval" && state.gate === "storyboard") state = await wrapModelErrors(() => graph.invoke(approveCurrent(state), config));
       const checks = checkFinalState(state, c, deps.recipes);
       results.push({ id: c.id, kind: "director", ok: checks.every((x) => x.ok), checks, llm_calls: calls(), ms: Date.now() - started });
     } catch (e) {

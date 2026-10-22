@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { Asset, Project, type BrandFact } from "@digikon/contracts";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
-import { ScriptedClient, SkillLibrary, type Deps } from "./index.js";
+import { ScriptedClient, SkillLibrary, approveCurrent, type buildDirectorGraph, type Deps } from "./index.js";
 
 export const root = (p: string) => fileURLToPath(new URL(`../../../${p}`, import.meta.url));
 export const recipes = loadRecipes(root("recipes"));
@@ -62,4 +62,9 @@ export function deps(llm: ScriptedClient, status: "draft" | "reviewed" = "draft"
   return { llm, skills: new SkillLibrary(root("skills")), retriever: new KeywordRetriever(docs), recipes: new RecipeLibrary(recipes, status) };
 }
 export const cfg = (id: string) => ({ configurable: { thread_id: id } });
+/** Runs to the storyboard gate, approves exactly that version, and returns the state waiting at the edit-plan gate (or wherever it stopped). */
+export async function throughGate1(graph: ReturnType<typeof buildDirectorGraph>, inp: Record<string, unknown>, id: string) {
+  const first = await graph.invoke(inp as never, cfg(id));
+  return first.status === "awaiting_approval" && first.gate === "storyboard" ? graph.invoke(approveCurrent(first), cfg(id)) : first;
+}
 export const input = { project, assets, facts };

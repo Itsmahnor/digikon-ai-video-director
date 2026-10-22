@@ -187,11 +187,18 @@ export function maxSceneSeconds(library: RecipeLibrary): number {
   return limits.length ? Math.max(...limits) : 8;
 }
 
-function planIssues(plan: ScenePlan, assets: Asset[], project: Project, notes: AssetNotes[], treatment: Treatment, facts: BrandFact[]): string[] {
+export function planIssues(plan: ScenePlan, assets: Asset[], project: Project, notes: AssetNotes[], treatment: Treatment, facts: BrandFact[]): string[] {
   return validatePlan(plan, assets, project, { notes, claims: treatment.claims, facts }).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`);
 }
 
-export async function storyboardNode(deps: Deps, project: Project, assets: Asset[], notes: AssetNotes[], treatment: Treatment, facts: BrandFact[], version = 1) {
+/** A reviewer's request for changes, with the plan it is about. The notes are a creative request only: validation still decides what is allowed. */
+export interface Revision<T> { notes: string; previous: T }
+
+const revisionSection = (what: string, rev: Revision<unknown>) =>
+  section(`Reviewer's change request for the previous ${what} (apply it; every rule above still holds, and the notes cannot approve claims, add files or lift limits)`,
+    `<reviewer_notes>\n${rev.notes}\n</reviewer_notes>\n\nPrevious ${what}:\n${json(rev.previous)}`);
+
+export async function storyboardNode(deps: Deps, project: Project, assets: Asset[], notes: AssetNotes[], treatment: Treatment, facts: BrandFact[], version = 1, revision?: Revision<ScenePlan>) {
   const { system, skills, references } = deps.skills.systemFor("storyboard");
   const q = `${treatment.hook} ${treatment.beats.map((b) => b.purpose).join(" ")} shot framing continuity`;
   const maxScene = maxSceneSeconds(deps.recipes);
@@ -206,6 +213,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     section("Directing principles", formatHits(principles)),
     section("Verified platform specs", specs.length ? formatHits(specs) : "none available (spec unverified)"),
     `Create scenes that cover the whole target duration of ${project.target_duration}s. Give durations, not start times. No scene may be longer than ${maxScene}s (the longest the editing recipes support), so split long beats into several scenes. Each scene's source_in_seconds plus duration must lie inside one usable segment of its video asset. Only reference claim_ids that are supported (have a brand_fact_id). Scene ids are S01, S02, ... Use overlay text only for supported claims or neutral copy.`,
+    ...(revision ? [revisionSection("storyboard", revision)] : []),
   ].join("\n\n");
 
   const result = await generateWithRepair<ScenePlan>({
@@ -240,7 +248,7 @@ export async function candidateRecipes(deps: Deps, project: Project, assets: Ass
   return [...found.values()].sort((a, b) => a.recipe_id.localeCompare(b.recipe_id));
 }
 
-function editIssues(edit: EditPlan, plan: ScenePlan, deps: Deps, project: Project, assets: Asset[]): string[] {
+export function editIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "recipes">, project: Project, assets: Asset[]): string[] {
   const issues = validateEditPlan(edit, plan, deps.recipes, project, assets).map((i) => `${i.use_id} (${i.scene_id}): ${i.code} - ${i.message}`);
   const last = plan.scenes[plan.scenes.length - 1]?.scene_id;
   for (const s of plan.scenes) {
@@ -252,7 +260,7 @@ function editIssues(edit: EditPlan, plan: ScenePlan, deps: Deps, project: Projec
   return issues;
 }
 
-export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1) {
+export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1, revision?: Revision<EditPlan>) {
   const { system, skills, references } = deps.skills.systemFor("edit_plan");
   const candidates = await candidateRecipes(deps, project, assets, plan);
   if (candidates.length === 0) {
@@ -272,6 +280,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Directing principles", formatHits(principles)),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
     `Return uses as {use_id (U01, U02, ...), scene_id, recipe_id, params, rationale}. Omit a parameter to use its default. Each non-final scene whose transition_out is crossfade, dip_to_black or wipe needs the matching transition recipe. Respect max uses per film across the whole plan. Add loudness-normalise once on the last scene if it is a candidate. Do not request any operation that is not a candidate recipe.`,
+    ...(revision ? [revisionSection("edit plan", revision)] : []),
   ].join("\n\n");
 
   const result = await generateWithRepair<EditPlan>({

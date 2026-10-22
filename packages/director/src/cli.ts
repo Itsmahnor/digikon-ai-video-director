@@ -7,7 +7,7 @@ import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import { z } from "zod";
 import { AnthropicClient } from "./llm.js";
-import { Command, buildDirectorGraph, type ApprovalDecision } from "./graph.js";
+import { approveCurrent, buildDirectorGraph, gateDecision } from "./graph.js";
 import { buildRunRecord } from "./record.js";
 import { SkillLibrary } from "./skills.js";
 
@@ -32,7 +32,7 @@ async function main() {
   const assetsPath = arg("assets");
   if (!projectPath || !assetsPath) {
     console.log("Usage: npm run director -- --project project.json --assets assets.json [--facts facts.json] [--notes notes.json] [--draft] [--yes]");
-    console.log("  --draft  allow draft recipes (development until recipes are reviewed)\n  --yes    approve the plan without prompting");
+    console.log("  --draft  allow draft recipes (development until recipes are reviewed)\n  --yes    approve both gates (storyboard, then edit plan) without prompting");
     process.exit(2);
   }
 
@@ -69,23 +69,38 @@ async function main() {
     return;
   }
 
-  write(outDir, "treatment.json", state.treatmentDoc);
-  write(outDir, "scene-plan.json", state.scenePlan);
-  write(outDir, "edit-plan.json", state.editPlan);
-  console.log(`\nPlan ready: ${state.scenePlan!.scenes.length} scenes, ${state.editPlan!.uses.length} recipe uses. Files in storage/${project.project_id}/`);
+  // Two human gates: the storyboard first, then the edit plan. A "no" asks for notes and sends the plan back for a new version.
+  while (state.status === "awaiting_approval" && state.gate) {
+    write(outDir, "treatment.json", state.treatmentDoc);
+    write(outDir, "scene-plan.json", state.scenePlan);
+    if (state.editPlan) write(outDir, "edit-plan.json", state.editPlan);
+    const stage = state.gate;
+    const version = stage === "storyboard" ? state.scenePlan!.version : state.editPlan!.version;
+    console.log(stage === "storyboard"
+      ? `\nStoryboard version ${version} ready: ${state.scenePlan!.scenes.length} scenes. Files in storage/${project.project_id}/`
+      : `\nEdit plan version ${version} ready: ${state.editPlan!.uses.length} recipe uses. Files in storage/${project.project_id}/`);
 
-  let decision: ApprovalDecision = { approved: true };
-  if (!flag("yes")) {
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const answer = (await rl.question("Approve this plan for rendering? (y/n) ")).trim().toLowerCase();
-    rl.close();
-    decision = { approved: answer === "y" || answer === "yes" };
+    if (flag("yes")) { state = await graph.invoke(approveCurrent(state), config); }
+    else {
+      const rl = createInterface({ input: process.stdin, output: process.stdout });
+      const answer = (await rl.question(`Approve this ${stage === "storyboard" ? "storyboard" : "edit plan"}? (y/n) `)).trim().toLowerCase();
+      const approved = answer === "y" || answer === "yes";
+      const notes = approved ? "" : (await rl.question("What should change? ")).trim();
+      rl.close();
+      if (!approved && !notes) { console.log("A change request needs notes. Stopping here."); return; }
+      state = await graph.invoke(gateDecision(stage, version, approved ? "approved" : "revision_requested", notes, state.scenePlan!.version), config);
+    }
+    for (const line of state.trace.slice(-3)) console.log(`  ${line}`);
   }
-  state = await graph.invoke(new Command({ resume: decision }), config);
 
   write(outDir, "run-record.json", buildRunRecord(state, { model: llm.model, skills, library }));
+  if (state.status === "escalated") {
+    write(outDir, "escalation.json", state.escalation);
+    console.log("\nEscalated to a human. See storage/" + project.project_id + "/escalation.json");
+    process.exitCode = 1;
+  }
   console.log(`\nStatus: ${state.status}. Audit record: storage/${project.project_id}/run-record.json`);
-  if (state.status === "approved") console.log("Rendering is the next milestone: approved plans are not rendered yet.");
+  if (state.status === "approved") console.log("Both approvals are recorded. Rendering is the next milestone: nothing is rendered yet, and a render must pass assertRenderable first.");
 }
 
 main().catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });

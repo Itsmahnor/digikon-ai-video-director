@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Project, type BrandFact } from "@digikon/contracts";
 import { ScriptedClient, STEP_REFERENCES, STEP_SKILLS, buildDirectorGraph, maxSceneSeconds, selectFacts, type Step } from "./index.js";
-import { cfg, deps, facts, goodEdit, goodStoryboard, input, project, recipes, root, scene, treatment } from "./fixtures.js";
+import { deps, facts, goodEdit, goodStoryboard, input, project, recipes, root, scene, throughGate1, treatment } from "./fixtures.js";
 import { RecipeLibrary } from "@digikon/recipes";
 import { SkillLibrary } from "./index.js";
 
@@ -9,7 +9,7 @@ const idsIn = (prompt: string) => [...prompt.matchAll(/^\[([A-Za-z0-9-]+)\] /gm)
 
 async function run(overrides: Partial<typeof input> = {}) {
   const llm = new ScriptedClient([{ status: "ready", questions: [] }, treatment, goodStoryboard, goodEdit]);
-  await buildDirectorGraph(deps(llm)).invoke({ ...input, ...overrides }, cfg(`g-${Math.random()}`));
+  await throughGate1(buildDirectorGraph(deps(llm)), { ...input, ...overrides }, `g-${Math.random()}`);
   const by = (name: string) => llm.calls.find((c) => c.name === name)!;
   return { treatment: by("treatment"), storyboard: by("storyboard"), edit: by("edit_plan"), llm };
 }
@@ -69,7 +69,7 @@ describe("each step is shown the right knowledge", () => {
 
   it("shows the model the reference files for its step and records them", async () => {
     const llm = new ScriptedClient([{ status: "ready", questions: [] }, treatment, goodStoryboard, goodEdit]);
-    const out = await buildDirectorGraph(deps(llm)).invoke(input, cfg("g-refs"));
+    const out = await throughGate1(buildDirectorGraph(deps(llm)), input, "g-refs");
     expect(out.referencesUsed).toEqual(expect.arrayContaining([
       "commercial-strategy/claims-register.md", "cinematography/footage-limits.md", "editing-director/edit-operations.md", "sound-design/loudness.md",
     ]));
@@ -104,7 +104,7 @@ describe("brand facts", () => {
       { ...treatment, claims: [{ claim_id: "C01", text: "x", brand_fact_id: "F25" }, { claim_id: "C02", text: "y", brand_fact_id: "F99" }] },
       goodStoryboard, goodEdit,
     ]);
-    const out = await buildDirectorGraph(deps(llm)).invoke({ ...input, facts: many }, cfg("g-full"));
+    const out = await throughGate1(buildDirectorGraph(deps(llm)), { ...input, facts: many }, "g-full");
     const claims = out.treatmentDoc!.claims;
     expect(claims.find((c) => c.claim_id === "C01")!.brand_fact_id).toBe("F25"); // real fact, kept
     expect(claims.find((c) => c.claim_id === "C02")!.brand_fact_id).toBeNull(); // invented fact, demoted
@@ -129,7 +129,7 @@ describe("scene length is checked where it can still be fixed cheaply", () => {
     // 12s target in two scenes: one is 10s, beyond what any recipe supports.
     const tooLong = { scenes: [scene("S01", 9, { asset_ids: ["asset_beans"], source_in_seconds: 0 }), scene("S02", 3, { asset_ids: ["asset_logo"], overlay: { text: "Order", safe_area: "platform_safe" } })] };
     const llm = new ScriptedClient([{ status: "ready", questions: [] }, treatment, tooLong, goodStoryboard, goodEdit]);
-    const out = await buildDirectorGraph(deps(llm)).invoke(input, cfg("g-long"));
+    const out = await throughGate1(buildDirectorGraph(deps(llm)), input, "g-long");
     expect(out.status).toBe("awaiting_approval");
     const calls = llm.calls.filter((c) => c.name === "storyboard");
     expect(calls[0]!.user).toContain("No scene may be longer than 8s");

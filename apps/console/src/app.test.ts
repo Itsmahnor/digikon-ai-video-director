@@ -129,25 +129,100 @@ describe("routing and the Director run", () => {
     expect(second.result.request).toMatchObject({ mode: "create_minimal", project: { aspect_ratio: "9:16", target_duration: 12 } });
   });
 
-  it("streams a full run, then waits for approval and records the decision", async () => {
+  /** Routes and builds the plan up to the storyboard gate; returns the app, session id and the gate-1 state. */
+  async function atGate1() {
     const app = build(); const id = await newSession(app);
     await app.request(`/api/sessions/${id}/route`, json({ text: "A 12 second Instagram ad for my coffee roaster." }));
     const res = await app.request(`/api/sessions/${id}/direct`, json({ facts: ["Beans are roasted weekly.", "Ships within two days."] }));
     expect(res.headers.get("content-type")).toContain("text/event-stream");
     const events = await readSse(res);
-    expect(events.filter((e) => e.event === "step").map((e) => e.data.node)).toEqual(["intake", "analyse_assets", "treatment", "storyboard", "edit_plan"]);
-    const state = events.find((e) => e.event === "state")!.data;
-    expect(state.status).toBe("awaiting_approval");
+    return { app, id, events, state: events.find((e) => e.event === "state")!.data };
+  }
+  const decide = (app: ReturnType<typeof build>, id: string, body: Record<string, unknown>) => app.request(`/api/sessions/${id}/approve`, json(body));
+  const decided = async (res: Response) => (await res.json()) as any;
+
+  it("streams the run up to the storyboard gate and stops there, with no edit plan", async () => {
+    const { events, state } = await atGate1();
+    expect(events.filter((e) => e.event === "step").map((e) => e.data.node)).toEqual(["intake", "analyse_assets", "treatment", "storyboard"]);
+    expect(state).toMatchObject({ status: "awaiting_approval", gate: "storyboard", editPlan: null, versions: { storyboard: 1, edit_plan: null } });
+    expect(state.hashes.storyboard).toMatch(/^[a-f0-9]{64}$/);
     expect(state.scenePlan.scenes.reduce((a: number, s: any) => a + s.duration_seconds, 0)).toBeCloseTo(12, 1);
     expect(state.treatment.claims.find((c: any) => c.claim_id === "C09").brand_fact_id).toBeNull(); // unsupported claim is kept visible, not used
     expect(state.scenePlan.scenes.flatMap((s: any) => s.claim_ids)).not.toContain("C09");
-    expect(state.editPlan.uses.length).toBeGreaterThan(2);
+    expect(state.renderable.ok).toBe(false);
+    expect(state.revisions).toEqual({ used: { storyboard: 0, edit_plan: 0 }, max: 2 });
+  });
 
-    const approved = (await (await app.request(`/api/sessions/${id}/approve`, json({ approved: true }))).json()) as any;
-    expect(approved.state.status).toBe("approved");
-    expect(approved.record).toMatchObject({ status: "approved", recipe_library_mode: "draft" });
-    expect(approved.record.skills.length).toBeGreaterThan(4);
-    expect((await app.request(`/api/sessions/${id}/approve`, json({ approved: true }))).status).toBe(409); // cannot approve twice
+  it("walks both gates, records each decision, and stays non-renderable until both match", async () => {
+    const { app, id } = await atGate1();
+    const g2 = await decided(await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved", notes: "good" }));
+    expect(g2.state).toMatchObject({ status: "awaiting_approval", gate: "edit_plan", versions: { storyboard: 1, edit_plan: 1 } });
+    expect(g2.state.editPlan.uses.length).toBeGreaterThan(2);
+    expect(g2.state.approvals).toHaveLength(1);
+    expect(g2.state.renderable.ok).toBe(false);
+    expect(g2.state.renderable.reasons).toEqual(["the edit plan has not been approved"]);
+
+    const done = await decided(await decide(app, id, { stage: "edit_plan", plan_version: 1, storyboard_version: 1, decision: "approved" }));
+    expect(done.state.status).toBe("approved");
+    expect(done.state.approvals.map((a: any) => [a.stage, a.plan_version, a.decision])).toEqual([["storyboard", 1, "approved"], ["edit_plan", 1, "approved"]]);
+    expect(done.state.renderable).toEqual({ ok: true, reasons: [] });
+    expect(done.record).toMatchObject({ status: "approved", recipe_library_mode: "draft" });
+    expect(done.record.approvals).toHaveLength(2);
+    expect(done.record.plans.storyboard.hash).toBe(done.state.hashes.storyboard);
+    expect(done.record.skills.length).toBeGreaterThan(4);
+    expect((await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" })).status).toBe(409); // cannot approve twice
+  });
+
+  it("requires the stage and plan version, and answers 409 for a stale stage or version without changing anything", async () => {
+    const { app, id } = await atGate1();
+    expect((await decide(app, id, { decision: "approved" })).status).toBe(400); // the old body shape is not enough
+    expect((await decide(app, id, { stage: "storyboard", decision: "approved" })).status).toBe(400); // no version
+    expect((await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "revision_requested" })).status).toBe(400); // no notes
+
+    const wrongStage = await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" });
+    expect(wrongStage.status).toBe(409);
+    expect((await decided(wrongStage)).error).toBe("stale_stage");
+    const wrongVersion = await decide(app, id, { stage: "storyboard", plan_version: 5, decision: "approved" });
+    expect(wrongVersion.status).toBe(409);
+    expect((await decided(wrongVersion)).error).toBe("stale_version");
+
+    // Still at gate 1 with nothing recorded: the correct decision works.
+    const ok = await decided(await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" }));
+    expect(ok.state.gate).toBe("edit_plan");
+    expect(ok.state.approvals).toHaveLength(1);
+
+    // The gate-1 screen is now stale.
+    expect((await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" })).status).toBe(409);
+    // A gate-2 decision that assumes another storyboard version is stale too.
+    const wrongSb = await decide(app, id, { stage: "edit_plan", plan_version: 1, storyboard_version: 9, decision: "approved" });
+    expect(wrongSb.status).toBe(409);
+    expect((await decided(wrongSb)).error).toBe("stale_storyboard");
+  });
+
+  it("turns change notes into the next version at the same gate, and refuses the old version afterwards", async () => {
+    const { app, id } = await atGate1();
+    const rev = await decided(await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "revision_requested", notes: "Shorter opening" }));
+    expect(rev.state).toMatchObject({ status: "awaiting_approval", gate: "storyboard", editPlan: null, versions: { storyboard: 2 }, revisions: { used: { storyboard: 1 } } });
+    expect(rev.state.approvals[0]).toMatchObject({ plan_version: 1, decision: "revision_requested", notes: "Shorter opening" });
+    expect((await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" })).status).toBe(409); // the old screen
+    const g2 = await decided(await decide(app, id, { stage: "storyboard", plan_version: 2, decision: "approved" }));
+    expect(g2.state).toMatchObject({ gate: "edit_plan", versions: { storyboard: 2, edit_plan: 1 } });
+
+    const rev2 = await decided(await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "revision_requested", notes: "Calmer edits" }));
+    expect(rev2.state).toMatchObject({ gate: "edit_plan", versions: { storyboard: 2, edit_plan: 2 } });
+    const done = await decided(await decide(app, id, { stage: "edit_plan", plan_version: 2, decision: "approved" }));
+    expect(done.state.status).toBe("approved");
+    expect(done.state.renderable.ok).toBe(true);
+  });
+
+  it("escalates after the revision limit instead of looping", async () => {
+    const { app, id } = await atGate1();
+    for (const v of [1, 2]) await decide(app, id, { stage: "storyboard", plan_version: v, decision: "revision_requested", notes: `change ${v}` });
+    const last = await decided(await decide(app, id, { stage: "storyboard", plan_version: 3, decision: "revision_requested", notes: "still wrong" }));
+    expect(last.state.status).toBe("escalated");
+    expect(last.state.escalation.what_failed).toContain("2 revisions");
+    expect(last.state.gate).toBeNull();
+    expect((await decide(app, id, { stage: "storyboard", plan_version: 3, decision: "approved" })).status).toBe(409); // nothing is waiting any more
   });
 
   it("B: builds around a real uploaded clip", async () => {

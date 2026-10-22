@@ -9,8 +9,11 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { BrandFact, Turn, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
-import { Command, buildDirectorGraph, buildRunRecord, classifyLlmError, type LlmClient, type SkillLibrary } from "@digikon/director";
+import { ApprovalSubmission, BrandFact, Turn, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
+import {
+  Command, MAX_REVISIONS, StaleApprovalError, buildDirectorGraph, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
+  type DirectorStateType, type LlmClient, type SkillLibrary,
+} from "@digikon/director";
 import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, probeFile } from "@digikon/media";
 import type { Retriever } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
@@ -53,6 +56,8 @@ interface Session {
   pending: Map<string, Promise<void>>;
   graph?: Graph;
   threadId?: string;
+  /** True while a decision is being applied, so two submissions cannot both act on the same gate. */
+  deciding?: boolean;
 }
 
 const ID = /^[a-f0-9]{12}$/;
@@ -65,7 +70,6 @@ const RouteBody = z.object({
   language: z.string().max(20).nullable().default(null),
 });
 const DirectBody = z.object({ facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]) });
-const ApproveBody = z.object({ approved: z.boolean() });
 
 class HttpError extends Error {
   constructor(readonly status: 400 | 404 | 409 | 413 | 422 | 503, readonly code: string, message: string) { super(message); }
@@ -94,6 +98,7 @@ export function createApp(ctx: AppContext) {
 
   app.onError((err, c) => {
     if (err instanceof HttpError) return c.json({ error: err.code, message: err.message }, err.status);
+    if (err instanceof StaleApprovalError) return c.json({ error: "stale_approval", message: err.message }, 409);
     const llmErr = classifyLlmError(err, ctx.llm?.model);
     if (llmErr) {
       noteLlm(llmErr);
@@ -319,7 +324,7 @@ export function createApp(ctx: AppContext) {
     return streamSSE(c, async (stream) => {
       const send = (event: string, data: unknown) => stream.writeSSE({ event, data: JSON.stringify(data) });
       try {
-        await send("start", { nodes: ["intake", "analyse_assets", "treatment", "storyboard", "edit_plan", "approve"] });
+        await send("start", { nodes: ["intake", "analyse_assets", "treatment", "storyboard", "storyboard_gate", "edit_plan", "edit_plan_gate"] });
         for await (const chunk of await graph.stream({ project, assets, facts, notes }, { ...config, streamMode: "updates" })) {
           for (const [node, update] of Object.entries(chunk as Record<string, unknown>)) {
             if (node === "__interrupt__") continue;
@@ -329,7 +334,7 @@ export function createApp(ctx: AppContext) {
         }
         const state = (await graph.getState(config)).values;
         llmProblem = null;
-        await send("state", summarise(state));
+        await send("state", summarise(state, ctx));
       } catch (e) {
         const llmErr = classifyLlmError(e, llm.model);
         noteLlm(llmErr);
@@ -339,28 +344,57 @@ export function createApp(ctx: AppContext) {
     });
   });
 
+  /**
+   * One decision at one gate. The body must name the stage and the plan version the reviewer was looking at; a decision for
+   * any other stage or version is refused with 409 and changes nothing. Approving the storyboard continues to the edit plan,
+   * a change request produces the next version of the same plan.
+   */
   app.post("/api/sessions/:id/approve", async (c) => {
     const s = session(c.req.param("id"));
     const llm = needLlm();
-    const body = ApproveBody.parse(await c.req.json().catch(() => ({})));
+    const sub = ApprovalSubmission.parse(await c.req.json().catch(() => ({})));
     if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no plan waiting for approval.");
-    const config = { configurable: { thread_id: s.threadId } };
-    const before = (await s.graph.getState(config)).values;
-    if (before.status !== "awaiting_approval") throw new HttpError(409, "not_waiting", "This plan is not waiting for approval.");
-    const state = await s.graph.invoke(new Command({ resume: { approved: body.approved } }), config);
-    const record = buildRunRecord(state, { model: llm.model, skills: ctx.skills, library: ctx.recipes });
-    return c.json({ state: summarise(state), record });
+    if (s.deciding) throw new HttpError(409, "busy", "Another decision is being applied to this plan. Wait for it to finish.");
+    s.deciding = true;
+    try {
+      const config = { configurable: { thread_id: s.threadId } };
+      const before = (await s.graph.getState(config)).values as DirectorStateType;
+      if (before.status !== "awaiting_approval" || !before.gate) throw new HttpError(409, "not_waiting", "No plan is waiting for a decision.");
+      if (sub.stage !== before.gate) throw new HttpError(409, "stale_stage", `This decision is for the ${label(sub.stage)}, but the ${label(before.gate)} is the one waiting.`);
+      const waiting = before.gate === "storyboard" ? currentStoryboard(before)! : currentEditPlan(before)!;
+      if (sub.plan_version !== waiting.version) throw new HttpError(409, "stale_version", `This decision is for ${label(sub.stage)} version ${sub.plan_version}, but version ${waiting.version} is the current one. Reload the plan and review it again.`);
+      if (sub.storyboard_version !== undefined && sub.storyboard_version !== before.scenePlan!.version) {
+        throw new HttpError(409, "stale_storyboard", `This decision assumes storyboard version ${sub.storyboard_version}, but the storyboard is version ${before.scenePlan!.version}.`);
+      }
+      const state = await s.graph.invoke(new Command({ resume: sub }), config);
+      llmProblem = null;
+      const record = buildRunRecord(state, { model: llm.model, skills: ctx.skills, library: ctx.recipes });
+      return c.json({ state: summarise(state, ctx), record });
+    } finally {
+      s.deciding = false;
+    }
   });
 
   app.use("/*", serveStatic({ root: ctx.publicDir }));
   return app;
 }
 
-function summarise(state: Record<string, unknown>) {
+const label = (stage: "storyboard" | "edit_plan") => (stage === "storyboard" ? "storyboard" : "edit plan");
+
+function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipes">) {
   const s = state as Record<string, unknown>;
+  const d = state as unknown as DirectorStateType;
+  const sb = currentStoryboard(d), ep = currentEditPlan(d);
+  const check = checkRenderable(d, ctx); // the same guard a future render must pass; shown so the console never implies more than is true
   return {
     status: s["status"], intake: s["intakeResult"] ?? null, treatment: s["treatmentDoc"] ?? null,
     scenePlan: s["scenePlan"] ?? null, editPlan: s["editPlan"] ?? null, escalation: s["escalation"] ?? null,
+    gate: s["gate"] ?? null,
+    versions: { storyboard: sb?.version ?? null, edit_plan: ep?.version ?? null },
+    hashes: { storyboard: sb?.hash ?? null, edit_plan: ep?.hash ?? null },
+    approvals: s["approvals"] ?? [],
+    revisions: { used: s["revisions"] ?? { storyboard: 0, edit_plan: 0 }, max: MAX_REVISIONS },
+    renderable: check.ok ? { ok: true, reasons: [] as string[] } : { ok: false, reasons: check.reasons },
     citations: s["citations"] ?? [], skillsUsed: s["skillsUsed"] ?? [], referencesUsed: s["referencesUsed"] ?? [], trace: s["trace"] ?? [], notes: s["notes"] ?? [],
   };
 }

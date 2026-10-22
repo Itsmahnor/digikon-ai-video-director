@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { DemoClient, SkillLibrary, buildDirectorGraph, type LlmClient } from "@digikon/director";
+import { DemoClient, SkillLibrary, approveCurrent, buildDirectorGraph, type LlmClient } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import { Asset, BrandFact, Project } from "@digikon/contracts";
@@ -74,7 +74,9 @@ describe("the harness is not vacuous: it catches a misbehaving model", () => {
     const c = first("shoes-tiktok-with-video")[0]!;
     const project = Project.parse({ project_id: "p", owner_id: "e", ...c.project });
     const graph = buildDirectorGraph({ llm: new DemoClient(), skills, retriever, recipes: library });
-    const good = await graph.invoke({ project, assets: c.assets.map((a) => Asset.parse(a)), facts: [] as BrandFact[], notes: [] }, { configurable: { thread_id: "chk" } });
+    const cfg = { configurable: { thread_id: "chk" } };
+    const atGate1 = await graph.invoke({ project, assets: c.assets.map((a) => Asset.parse(a)), facts: [] as BrandFact[], notes: [] }, cfg);
+    const good = await graph.invoke(approveCurrent(atGate1), cfg);
     expect(checkFinalState(good, c, library).every((x) => x.ok)).toBe(true);
 
     const bad = structuredClone(good);

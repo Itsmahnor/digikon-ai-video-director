@@ -19,7 +19,7 @@ Step 1 is complete: one front door (text or voice), routing into three cases, me
 | Recipe library | `recipes/` (19 original), `packages/recipes` | Done. All `draft` until a template is test-rendered |
 | Seven skills | `skills/` | Written; their reference files are loaded into the prompts for each step. Evals not yet run against live Claude |
 | Retrieval | `packages/rag`, `knowledge/` | Keyword (BM25) with topic filters, pinned policy notes and access rules. Qdrant not built |
-| Director graph | `packages/director` | LangGraph.js: intake, asset notes, treatment, storyboard, edit plan, approval pause |
+| Director graph | `packages/director` | LangGraph.js: intake, asset notes, treatment, storyboard, **approval 1**, edit plan, **approval 2**. Versioned, hashed approvals; change requests loop back (max 2 per gate); `assertRenderable` guards a future render |
 | Editing agent, rendering, vision pass | n/a | **Not built** |
 
 ## Run it

@@ -18,7 +18,8 @@ const MODES = {
 };
 const STEPS = [
   ["intake", "Understand the brief"], ["analyse_assets", "Check your files"], ["treatment", "Write the treatment and claims"],
-  ["storyboard", "Storyboard the scenes"], ["edit_plan", "Choose a recipe for every edit"], ["approve", "Wait for your approval"],
+  ["storyboard", "Storyboard the scenes"], ["storyboard_gate", "Your approval of the storyboard"],
+  ["edit_plan", "Choose a recipe for every edit"], ["edit_plan_gate", "Your approval of the edit plan"],
 ];
 const PHASES = ["Describe", "Understand", "Plan", "Approve"];
 
@@ -26,7 +27,7 @@ const state = {
   sid: null, health: null, offline: false, assets: [], analysis: {}, turns: [], route: null, busy: false,
   fromVoice: false, language: null,
   run: null, // { steps: {node: {status, lines}}, result, error }
-  approval: null, tab: "treatment", transcripts: {}, mic: null,
+  approval: null, gateNotes: "", tab: "treatment", transcripts: {}, mic: null,
 };
 
 // ---------- api ----------
@@ -189,12 +190,38 @@ function drawWave(active) {
 }
 const micStatus = (t, err = false) => { const el = $("#mic-status"); el.textContent = t; el.className = `mic-status${err ? " err" : ""}`; };
 
+/** Says what actually went wrong, so the user knows whether to plug something in, change a setting or close another app. */
+function micErrorMessage(e) {
+  const upload = " You can also upload a recording below.";
+  switch (e?.name) {
+    case "NotAllowedError": case "PermissionDeniedError":
+      return "Microphone access is blocked. Allow it for this site in the browser (the icon next to the address), and check Windows Settings > Privacy > Microphone." + upload;
+    case "NotFoundError": case "DevicesNotFoundError":
+      return "No microphone is connected. Plug one in or connect your headset, then try again." + upload;
+    case "NotReadableError": case "TrackStartError": case "AbortError":
+      return "The microphone could not start. Another app may be using it, or it is switched off. Close other apps that use the microphone and try again." + upload;
+    case "SecurityError":
+      return "The browser blocked the microphone on this page. Open the console at http://localhost:4173." + upload;
+    default:
+      return `The microphone could not be used (${e?.name || "unknown error"}).` + upload;
+  }
+}
+
 async function toggleMic() {
   if (state.mic) return stopMic();
-  if (!navigator.mediaDevices?.getUserMedia) return micStatus("Recording needs a secure page. Open this console at localhost.", true);
+  if (!navigator.mediaDevices?.getUserMedia) return micStatus("Recording needs a secure page. Open this console at http://localhost:4173." + " You can also upload a recording below.", true);
+  // Without any input device there is nothing to ask permission for, so say so straight away.
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    if (!devices.some((d) => d.kind === "audioinput")) return micStatus(micErrorMessage({ name: "NotFoundError" }), true);
+  } catch { /* some browsers hide the list before permission is granted; carry on and let getUserMedia decide */ }
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
-  catch (e) { return micStatus(e.name === "NotAllowedError" ? "Microphone permission was denied. Allow it in the browser and try again." : "No microphone found.", true); }
+  catch (first) {
+    // A device that cannot do echo cancellation or noise suppression rejects those options. Retry plainly before giving up.
+    if (first?.name !== "OverconstrainedError") return micStatus(micErrorMessage(first), true);
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (second) { return micStatus(micErrorMessage(second), true); }
+  }
   const ctx = new AudioContext(); const src = ctx.createMediaStreamSource(stream);
   const analyser = ctx.createAnalyser(); analyser.fftSize = 256; src.connect(analyser);
   Object.assign(wave, { ctx, analyser });
@@ -202,7 +229,7 @@ async function toggleMic() {
   const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
   const chunks = []; const started = Date.now();
   rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
-  rec.onstop = () => { stream.getTracks().forEach((t) => t.stop()); ctx.close(); cancelAnimationFrame(wave.raf); drawWave(false); finishRecording(new Blob(chunks, { type: rec.mimeType })); };
+  rec.onstop = () => { stream.getTracks().forEach((t) => t.stop()); ctx.close(); cancelAnimationFrame(wave.raf); drawWave(false); transcribeBlob(new Blob(chunks, { type: rec.mimeType }), "voice.webm"); };
   const max = state.health?.limits.maxVoicePromptSeconds ?? 180;
   const tick = setInterval(() => {
     const s = (Date.now() - started) / 1000;
@@ -220,11 +247,13 @@ function stopMic() {
   $("#mic").classList.remove("rec"); $("#mic").setAttribute("aria-pressed", "false");
   m.rec.stop();
 }
-async function finishRecording(blob) {
-  if (blob.size < 1500) return micStatus("That was too short. Tap the microphone and speak for a moment.", true);
+
+/** Turns a recording, or an uploaded audio file, into text in the request box. Shared by the microphone and the upload button. */
+async function transcribeBlob(blob, filename) {
+  if (blob.size < 1500) return micStatus("That was too short or empty. Record again, or choose a longer file.", true);
   const mic = $("#mic"); mic.classList.add("busy");
   micStatus(state.health?.whisper.state === "ready" ? "Transcribing on this computer..." : "Warming up speech recognition, then transcribing...");
-  const fd = new FormData(); fd.append("audio", blob, "voice.webm");
+  const fd = new FormData(); fd.append("audio", blob, filename);
   try {
     const t = await api(`/api/sessions/${state.sid}/transcribe`, { method: "POST", body: fd });
     const box = $("#prompt");
@@ -238,7 +267,6 @@ async function finishRecording(blob) {
   } catch (e) { micStatus(e.message, true); }
   mic.classList.remove("busy");
 }
-
 // ---------- routing ----------
 const updateCount = () => { $("#count").textContent = `${$("#prompt").value.length} / 4000`; };
 
@@ -282,6 +310,7 @@ async function buildPlan() {
   state.busy = true;
   state.run = { steps: Object.fromEntries(STEPS.map(([k]) => [k, { status: "pending", lines: [] }])), result: null, error: null };
   state.run.steps.intake.status = "run";
+  state.gateNotes = "";
   state.tab = "treatment"; renderAll();
   const order = STEPS.map(([k]) => k);
   try {
@@ -312,22 +341,44 @@ function onRunEvent(ev, d, order) {
   if (ev === "step") {
     if (steps[d.node]) { steps[d.node].status = "done"; steps[d.node].lines = d.trace; }
     const next = order[order.indexOf(d.node) + 1];
-    if (next && steps[next].status === "pending") steps[next].status = "run";
+    if (next && !next.endsWith("_gate") && steps[next].status === "pending") steps[next].status = "run"; // gates are set from the result, not from the stream
   } else if (ev === "state") {
     state.run.result = d;
     for (const k of order) if (steps[k].status === "run" && d.status !== "awaiting_approval") steps[k].status = d.status === "escalated" ? "fail" : "done";
-    if (d.status === "awaiting_approval") steps.approve.status = "run";
+    if (d.status === "awaiting_approval") syncSteps(d);
   } else if (ev === "failure") { state.run.error = d.message; if (String(d.code ?? "").startsWith("llm_")) refreshHealth(); for (const k of order) if (steps[k].status === "run") steps[k].status = "fail"; }
   renderAll();
 }
-async function decide(approved) {
-  if (state.busy) return; state.busy = true; renderAll();
+/** Marks the pipeline steps from the server's summary, so each gate shows as waiting, done or not reached yet. */
+function syncSteps(d) {
+  const st = state.run.steps;
+  const sbApproved = d.approvals.some((a) => a.stage === "storyboard" && a.decision === "approved" && a.plan_version === d.versions.storyboard);
+  if (d.scenePlan) st.storyboard.status = "done";
+  st.storyboard_gate.status = d.gate === "storyboard" ? "run" : sbApproved ? "done" : "pending";
+  st.edit_plan.status = d.editPlan ? "done" : sbApproved ? "run" : "pending";
+  st.edit_plan_gate.status = d.gate === "edit_plan" ? "run" : d.status === "approved" ? "done" : "pending";
+}
+
+/** Sends one decision for the gate on screen, naming its stage and version so a decision on an out-of-date screen is refused. */
+async function decide(decision) {
+  const cur = state.run?.result;
+  if (state.busy || !cur?.gate) return;
+  const notes = state.gateNotes.trim();
+  if (decision === "revision_requested" && !notes) { toast("Say what should change, then request changes.", ""); $("#gate-notes")?.focus(); return; }
+  state.busy = true; renderAll();
   try {
-    const res = await post(`/api/sessions/${state.sid}/approve`, { approved });
-    state.run.result = res.state; state.approval = res.record;
-    state.run.steps.approve.status = approved ? "done" : "fail";
-    state.tab = "audit";
-    toast(approved ? "Plan approved. Rendering comes with the editing agent." : "Plan rejected.", approved ? "ok" : "");
+    const res = await post(`/api/sessions/${state.sid}/approve`, {
+      stage: cur.gate, plan_version: cur.versions[cur.gate], storyboard_version: cur.versions.storyboard, decision, notes,
+    });
+    const d = res.state;
+    state.run.result = d; state.approval = res.record; state.gateNotes = "";
+    if (d.status === "escalated") for (const k of Object.keys(state.run.steps)) { if (state.run.steps[k].status === "run") state.run.steps[k].status = "fail"; }
+    else syncSteps(d);
+    state.tab = d.status === "approved" ? "audit" : d.gate === "edit_plan" ? "edits" : "scenes";
+    if (d.status === "escalated") toast("The change limit was reached, so this needs your decision.", "");
+    else if (d.status === "approved") toast("Both approvals are recorded. Nothing is rendered yet.", "ok");
+    else if (decision === "approved") toast("Storyboard approved. The edit plan is ready for review.", "ok");
+    else toast(`Changes applied. Version ${d.versions[d.gate]} is ready for review.`, "ok");
   } catch (e) { fail(e); }
   state.busy = false; renderAll();
 }
@@ -384,7 +435,7 @@ function planSection() {
     return `<div class="card"><h3>Next</h3><p style="color:var(--muted)">This is an edit request, so it goes to the editing agent. That agent is the next milestone, so nothing is executed yet. Your request, source video and instructions are validated and ready for it.</p></div>`;
   }
   if (!state.run) {
-    return `<div class="card"><h3>Ready</h3><p style="color:var(--muted);margin-bottom:14px">The Director will write the treatment, storyboard it against your real files, choose a recipe for every edit, and validate everything before you approve.</p>
+    return `<div class="card"><h3>Ready</h3><p style="color:var(--muted);margin-bottom:14px">The Director will write the treatment and storyboard it against your real files, then wait for your approval. After that it chooses a recipe for every edit and waits for your second approval.</p>
       <button class="primary sm" data-action="build" ${state.busy ? "disabled" : ""}>Build the plan</button></div>`;
   }
   const run = state.run, res = run.result;
@@ -403,8 +454,10 @@ function planSection() {
 }
 
 function results(res) {
-  const tabs = [["treatment", "Treatment"], ["scenes", "Scenes"], ["edits", "Edit plan"], ["claims", "Claims"], ["audit", "Audit"]];
   const t = res.treatment, sp = res.scenePlan, ep = res.editPlan;
+  // The edit plan does not exist until the storyboard is approved, so its tab appears only then.
+  const tabs = [["treatment", "Treatment"], ["scenes", "Scenes"], ...(ep ? [["edits", "Edit plan"]] : []), ["claims", "Claims"], ["audit", "Audit"]];
+  const tab = tabs.some(([k]) => k === state.tab) ? state.tab : "treatment";
   const body = {
     treatment: () => `<dl class="kv"><dt>Logline</dt><dd>${esc(t.logline)}</dd><dt>Hook</dt><dd>${esc(t.hook)}</dd><dt>Tone</dt><dd>${esc(t.tone)}</dd><dt>Call to action</dt><dd>${esc(t.cta)}</dd></dl>
       <h3 style="margin:16px 0 8px">Beats</h3>${t.beats.map((b) => `<div class="scene"><div class="head"><b>${esc(b.beat)}</b><span class="chip">${fmtDur(b.approx_seconds)}</span></div><div class="sub">${esc(b.purpose)}</div></div>`).join("")}
@@ -418,9 +471,9 @@ function results(res) {
           ${s.overlay ? `<div class="overlay-txt">${esc(s.overlay.text)}</div>` : ""}
           <div class="chips">${s.asset_ids.length ? s.asset_ids.map((a) => `<span class="chip">${esc(assetName(a))}${s.source_in_seconds ? ` @${fmtDur(s.source_in_seconds)}` : ""}</span>`).join("") : '<span class="chip warn">graphics only</span>'}${s.claim_ids.map((c) => `<span class="chip ok">claim ${esc(c)}</span>`).join("")}<span class="chip">then ${esc(s.transition_out.replaceAll("_", " "))}</span></div></div>`).join("")}`;
     },
-    edits: () => sp.scenes.map((s) => {
+    edits: () => `<div class="notice info" style="margin-bottom:12px">Built on storyboard version ${res.versions.storyboard} <span class="mono">(${esc(String(res.hashes.storyboard).slice(0, 12))})</span>, which you approved. Edit plan version ${res.versions.edit_plan}.</div>` + sp.scenes.map((s) => {
       const uses = ep.uses.filter((u) => u.scene_id === s.scene_id);
-      return `<div class="scene"><div class="head"><b>${s.scene_id}</b></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}</div>`;
+      return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}</div>`;
     }).join(""),
     claims: () => `<table><thead><tr><th>Claim</th><th>Text</th><th>Support</th><th>Used in</th></tr></thead><tbody>${t.claims.map((c) => {
       const used = sp.scenes.filter((s) => s.claim_ids.includes(c.claim_id)).map((s) => s.scene_id);
@@ -429,14 +482,30 @@ function results(res) {
     audit: () => `<h3 style="margin-bottom:8px">Skills applied</h3><div class="chips">${res.skillsUsed.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
       <h3 style="margin:16px 0 8px">Skill reference files shown to the model</h3><div class="chips">${(res.referencesUsed ?? []).map((s) => `<span class="chip">${esc(s)}</span>`).join("") || '<span class="hint">none</span>'}</div>
       <h3 style="margin:16px 0 8px">Knowledge, facts and recipes shown to the model</h3><div class="chips">${res.citations.map((s) => `<span class="chip recipe">${esc(s)}</span>`).join("") || '<span class="hint">none</span>'}</div>
+      <h3 style="margin:16px 0 8px">Approvals</h3>${approvalsHtml(res)}
       <h3 style="margin:16px 0 8px">Trace</h3><div class="mono" style="color:var(--muted)">${res.trace.map(esc).join("<br>")}</div>
       ${state.approval ? `<h3 style="margin:16px 0 8px">Run record</h3><pre class="mono" style="white-space:pre-wrap;color:var(--muted);margin:0">${esc(JSON.stringify(state.approval, null, 2))}</pre>` : ""}`,
   };
-  const waiting = res.status === "awaiting_approval";
-  const done = res.status === "approved" || res.status === "rejected";
-  return `<div class="card"><div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${state.tab === k ? "on" : ""}" role="tab" data-action="tab" data-tab="${k}">${l}</button>`).join("")}</div><div style="padding-top:16px">${body[state.tab]()}</div></div>
-    ${waiting ? `<div class="approve-bar"><div><b>Approve this plan?</b><div class="hint">Every edit is a validated recipe with parameters in range. Nothing is rendered yet.</div></div><div class="row"><button class="ghost" data-action="reject" ${state.busy ? "disabled" : ""}>Reject</button><button class="primary sm" data-action="approve" ${state.busy ? "disabled" : ""}>Approve plan</button></div></div>` : ""}
-    ${done ? `<div class="notice ${res.status === "approved" ? "info" : "warn"}">${res.status === "approved" ? "Plan approved. The editing agent will render it in the next milestone." : "Plan rejected. Change your request and send it again."}</div>` : ""}`;
+  const gate = res.status === "awaiting_approval" ? res.gate : null;
+  const done = res.status === "approved";
+  const what = gate === "edit_plan" ? "edit plan" : "storyboard";
+  const used = gate ? res.revisions.used[gate] : 0, max = res.revisions.max;
+  const earlier = gate ? res.approvals.filter((a) => a.stage === gate && a.decision === "revision_requested") : [];
+  const header = gate ? `<div class="card gate-head"><div class="row"><b>${gate === "edit_plan" ? "Gate 2 of 2: edit plan" : "Gate 1 of 2: storyboard"}</b><span class="chip">version ${res.versions[gate]}</span><span class="chip mono">${esc(String(res.hashes[gate]).slice(0, 12))}</span><span class="chip ${used >= max ? "warn" : ""}">changes requested ${used} of ${max}</span></div>
+      ${earlier.length ? `<div class="notice info" style="margin-top:10px"><b>Your earlier requests</b>${earlier.map((a) => `<div>Version ${a.plan_version}: ${esc(a.notes)}</div>`).join("")}</div>` : ""}</div>` : "";
+  const bar = gate ? `<div class="approve-bar gate"><div><b>Approve this ${what}?</b><div class="hint">Version ${res.versions[gate]}. ${gate === "storyboard" ? "Approving lets the Director make the edit plan." : "Approving records your second approval."} Nothing is rendered. ${used >= max ? "This is the last change request: another one needs a human decision." : ""}</div></div>
+      <textarea id="gate-notes" rows="2" aria-label="What should change?" placeholder="To request changes, say what should change in this ${what}">${esc(state.gateNotes)}</textarea>
+      <div class="row"><button class="ghost" data-action="revise" ${state.busy ? "disabled" : ""}>Request changes</button><button class="primary sm" data-action="approve" ${state.busy ? "disabled" : ""}>Approve ${what}</button></div></div>` : "";
+  const finished = done ? `<div class="notice info">Both approvals are recorded (storyboard version ${res.versions.storyboard}, edit plan version ${res.versions.edit_plan}). Nothing is rendered: rendering is not built yet, and a future render must pass the approval check first. ${res.renderable.ok ? "The check passes for these exact versions." : `The check does not pass: ${esc(res.renderable.reasons.join("; "))}`}</div>` : "";
+  return `${header}<div class="card"><div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? "on" : ""}" role="tab" data-action="tab" data-tab="${k}">${l}</button>`).join("")}</div><div style="padding-top:16px">${body[tab]()}</div></div>
+    ${bar}
+    ${finished}`;
+}
+
+function approvalsHtml(res) {
+  const rows = res.approvals.map((a) => `<tr><td>${esc(a.stage === "edit_plan" ? "edit plan" : "storyboard")}</td><td>v${a.plan_version}</td><td>${a.decision === "approved" ? '<span class="chip ok">approved</span>' : '<span class="chip warn">changes requested</span>'}</td><td>${esc(a.notes) || "-"}</td><td class="mono">${esc(a.plan_hash.slice(0, 12))}</td></tr>`).join("");
+  return `<table><thead><tr><th>Stage</th><th>Version</th><th>Decision</th><th>Notes</th><th>Plan hash</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="hint">No decisions yet.</td></tr>'}</tbody></table>
+    <p class="hint" style="margin-top:8px">Approval check for a future render: ${res.renderable.ok ? "passes for these exact plan versions." : `not passed. ${res.renderable.reasons.map(esc).join("; ")}.`}</p>`;
 }
 const assetName = (id) => state.assets.find((a) => a.asset_id === id)?.metadata.original_name ?? id;
 
@@ -466,18 +535,21 @@ document.addEventListener("click", async (e) => {
     else { try { state.transcripts[id] = await api(`/api/sessions/${state.sid}/assets/${id}/transcript`); } catch (er) { fail(er); } }
     renderAll();  } else if (a === "reply") sendText($("#reply").value);
   else if (a === "build") buildPlan();
-  else if (a === "approve") decide(true);
-  else if (a === "reject") decide(false);
+  else if (a === "approve") decide("approved");
+  else if (a === "revise") decide("revision_requested");
   else if (a === "tab") { state.tab = el.dataset.tab; renderStage(); }
 });
 
 async function init() {
   $("#kbd-hint").textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ Enter to send" : "Ctrl Enter to send";
   document.addEventListener("keydown", (e) => { if (e.target.id === "reply" && e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendText(e.target.value); });
+  document.addEventListener("input", (e) => { if (e.target.id === "gate-notes") state.gateNotes = e.target.value; }); // survives re-renders and failed requests
   $("#prompt").addEventListener("input", updateCount);
   $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendText($("#prompt").value); });
   $("#send").addEventListener("click", () => sendText($("#prompt").value));
   $("#mic").addEventListener("click", toggleMic);
+  $("#voice-file").addEventListener("click", () => $("#voice-input").click());
+  $("#voice-input").addEventListener("change", (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) transcribeBlob(f, f.name); });
   const drop = $("#drop"), file = $("#file");
   drop.addEventListener("click", () => file.click());
   drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); file.click(); } });
