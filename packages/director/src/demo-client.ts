@@ -18,6 +18,7 @@ export class DemoClient implements LlmClient {
       case "treatment": return this.treatment(user);
       case "storyboard": return this.storyboard(user);
       case "edit_plan": return this.editPlan(user);
+      case "editor_review": return { conflicts: [], revision_requests: [] }; // the demo reviewer has no opinions
       default: throw new Error(`demo client does not know "${name}"`);
     }
   }

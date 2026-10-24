@@ -9,7 +9,8 @@ import { Asset, OperationType, Project, ScenePlan } from "./schemas.js";
  * Version of the handoff shape. A consumer refuses any other value instead of guessing. Bump the major part when a field
  * is removed or changes meaning, the minor part when an optional field is added.
  */
-export const HANDOFF_SCHEMA_VERSION = "1.2.0" as const;
+export const HANDOFF_SCHEMA_VERSION = "1.3.0" as const;
+// 1.3.0: assets carry an optional licence declaration and a genuine-product-UI declaration (both null unless the user recorded them).
 // 1.1.0: approval records carry evidence_hash, and it is checked.
 // 1.2.0: scenes carry voiceover, production method and required assets; adds claims_audit, asset_feasibility,
 //        required_operations and readiness; the project no longer carries owner_id. Older handoffs are refused, not converted.

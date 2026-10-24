@@ -7,4 +7,5 @@ export * from "./record.js";
 export * from "./handoff.js";
 export * from "./store.js";
 export * from "./resume.js";
+export * from "./editor-agent.js";
 export * from "./demo-client.js";

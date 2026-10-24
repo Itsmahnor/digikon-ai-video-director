@@ -323,6 +323,13 @@ export function checkEditorOutput(raw: unknown, handoff: DirectorHandoff, ctx: {
   const parsed = EditorOutput.safeParse(raw);
   if (!parsed.success) return { ok: false, issues: parsed.error.issues.map((i) => `editor output ${i.path.join(".") || "root"}: ${i.message}`), requires_reapproval: false };
   const o = parsed.data;
+  const { issues, drift } = editorOutputIssues(o, handoff, ctx);
+  if (o.validation.ok && issues.length) issues.push("the result says it is valid, but these checks failed");
+  return { ok: issues.length === 0, issues, requires_reapproval: o.revision_requests.length > 0 || drift };
+}
+
+/** Every way an already-parsed Editor output departs from the handoff. The Editor agent runs this on its own output before it states `validation`. */
+export function editorOutputIssues(o: EditorOutput, handoff: DirectorHandoff, ctx: { recipes: RecipeLibrary }): { issues: string[]; drift: boolean } {
   const issues: string[] = [];
   if (o.handoff_id !== handoff.handoff_id || o.handoff_content_hash !== handoff.content_hash) issues.push("the result was made from a different handoff");
   if (canonicalJson(o.approved) !== canonicalJson(handoff.approved)) issues.push("the result names different approved plan versions or hashes than the handoff");
@@ -376,6 +383,5 @@ export function checkEditorOutput(raw: unknown, handoff: DirectorHandoff, ctx: {
   for (const i of validateEditPlan(asPlan, handoff.storyboard, ctx.recipes, projectOf(handoff.project), handoff.assets)) {
     if (i.code !== "max_uses" && i.code !== "duplicate_use") issues.push(`operation ${i.use_id}: ${i.code} - ${i.message}`);
   }
-  if (o.validation.ok && issues.length) issues.push("the result says it is valid, but these checks failed");
-  return { ok: issues.length === 0, issues, requires_reapproval: o.revision_requests.length > 0 || drift };
+  return { issues, drift };
 }

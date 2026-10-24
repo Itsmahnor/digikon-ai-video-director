@@ -8,7 +8,7 @@ import {
   HandoffRefusedError, ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, checkEditorOutput, checkHandoff, currentEvidenceHash,
   gateDecision, type DirectorStateType,
 } from "./index.js";
-import { cfg, deps, goodEdit, goodStoryboard, input, knowledge, root, treatment } from "./fixtures.js";
+import { cfg, deps, goodEdit, goodStoryboard, input, knowledge, noExecution, root, treatment } from "./fixtures.js";
 
 const ready = { status: "ready", questions: [] };
 const skills = new SkillLibrary(root("skills"));
@@ -246,6 +246,7 @@ function outputFor(h: DirectorHandoff, ops: EditorOperation[], over: Record<stri
     schema_version: EDITOR_SCHEMA_VERSION, handoff_schema_version: h.schema_version, handoff_id: h.handoff_id, handoff_content_hash: h.content_hash, approved: h.approved,
     status: "ready", operations: ops, validation: { ok: true, issues: [] }, conflicts: [], revision_requests: [],
     provenance: { skills: ["editing-director@0.1.0"], recipes: h.provenance.recipes.map((r) => `${r.recipe_id}@${r.version}`), retrievals: [] },
+    execution: noExecution(ops),
     ...over,
   };
 }

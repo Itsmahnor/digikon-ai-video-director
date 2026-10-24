@@ -14,7 +14,7 @@ Defines the one flow every Editor job follows and the line between work the Edit
 At the start of every Editor job, before any other Editor skill. Re-read it before returning a result.
 
 ## Inputs and outputs
-- In: `EditorInput` = a `DirectorHandoff` (schema 1.2.0), `retrieval_scope: "editor"`, the skill list (`packages/contracts/src/editor.ts`).
+- In: `EditorInput` = a `DirectorHandoff` (schema 1.3.0), `retrieval_scope: "editor"`, the skill list (`packages/contracts/src/editor.ts`).
 - Out: one `EditorOutput`: `status` (`ready` | `needs_director_revision` | `blocked`), `operations`, `validation`, `conflicts`, `revision_requests`, `provenance`.
 
 ## Guardrails (shared by all Editor skills)

@@ -9,7 +9,7 @@ import { SkillLibrary } from "./index.js";
 const dir = fileURLToPath(new URL("../../../skills/editor", import.meta.url));
 const Manifest = z.object({
   manifest_version: z.literal(1),
-  status: z.literal("authored_not_loaded"),
+  status: z.literal("loaded_by_editor_agent"),
   handoff_schema_version: z.string(),
   editor_schema_version: z.string(),
   skills: z.array(z.object({

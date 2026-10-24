@@ -23,8 +23,18 @@ export const Project = z.object({
   approval_status: ApprovalStatus.default("draft"),
 });
 
+/** What the user has said about the right to use a file. Never inferred: null means nothing was recorded. */
+export const AssetLicense = z.object({
+  status: z.enum(["user_owned", "licensed", "unknown"]),
+  note: z.string().max(300).nullable().default(null),
+});
+
 export const Asset = z.object({
   asset_id: z.string().min(1),
+  /** Right-to-use declaration for the file. The Editor requires one for audio. */
+  license: AssetLicense.nullable().default(null),
+  /** true: the user says this is a real capture of their product. false: illustrative. null: not declared. */
+  genuine_product_ui: z.boolean().nullable().default(null),
   uri: z.string().min(1),
   media_type: z.enum(["video", "image", "audio"]),
   duration: z.number().nonnegative().nullable(),

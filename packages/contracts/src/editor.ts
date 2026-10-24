@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DirectorHandoff, HANDOFF_SCHEMA_VERSION } from "./handoff.js";
+import { Renderer } from "./recipe.js";
 import { EditOperation } from "./schemas.js";
 
 /**
@@ -7,7 +8,9 @@ import { EditOperation } from "./schemas.js";
  * changes the approved creative direction: anything that would is returned as a revision request for the Director, which
  * goes back through the human gates. No renderer exists yet; these operations are data for a future, allowlisted renderer.
  */
-export const EDITOR_SCHEMA_VERSION = "1.0.0" as const;
+export const EDITOR_SCHEMA_VERSION = "1.1.0" as const;
+// 1.1.0: EditorOutput carries `execution`, which keeps four states apart: valid structured output (it parses), contract-valid
+//        (`validation.ok`), executable by an available renderer (`execution.executable`), and rendered (`execution.rendered`, always false here).
 
 const Sha256 = z.string().regex(/^[a-f0-9]{64}$/);
 const PlanRef = z.object({ version: z.number().int().positive(), hash: Sha256 });
@@ -71,6 +74,47 @@ export const RevisionRequest = z.object({
 });
 export type RevisionRequest = z.infer<typeof RevisionRequest>;
 
+/** Whether one operation could run today. A registered template and an available renderer are needed; review evidence makes it production-executable. */
+export const OperationExecution = z.object({
+  operation_id: z.string(),
+  /** The renderer that would run it, or null when none is available. */
+  renderer: Renderer.nullable(),
+  executable: z.boolean(),
+  production_executable: z.boolean(),
+  blockers: z.array(z.string()),
+});
+export type OperationExecution = z.infer<typeof OperationExecution>;
+
+/**
+ * Where the output stands on the way to a video. Valid structured output and contract validation are separate from this;
+ * `rendered` is always false because the Editor never calls a renderer.
+ */
+export const ExecutionReport = z
+  .object({
+    rendered: z.literal(false),
+    executable: z.boolean(),
+    production_executable: z.boolean(),
+    operations: z.array(OperationExecution),
+    /** What a renderer will need that the handoff does not carry (resolution, frame rate, a verified platform spec, ...). */
+    missing_inputs: z.array(z.string()),
+    notes: z.array(z.string()),
+  })
+  .superRefine((e, ctx) => {
+    const bad = (message: string) => ctx.addIssue({ code: "custom", message });
+    if (e.production_executable && !e.executable) bad("production_executable needs executable");
+    if (e.executable && !e.operations.every((o) => o.executable)) bad("executable needs every operation to be executable");
+    if (e.production_executable && !e.operations.every((o) => o.production_executable)) bad("production_executable needs every operation to be production-executable");
+    if (e.operations.some((o) => o.production_executable && !o.executable)) bad("an operation cannot be production-executable without being executable");
+  });
+export type ExecutionReport = z.infer<typeof ExecutionReport>;
+
+/** What the optional model review may add. It cannot change, add or remove an operation. */
+export const EditorReview = z.object({
+  conflicts: z.array(EditorConflict).max(20).default([]),
+  revision_requests: z.array(RevisionRequest).max(10).default([]),
+});
+export type EditorReview = z.infer<typeof EditorReview>;
+
 export const EditorOutput = z
   .object({
     schema_version: z.literal(EDITOR_SCHEMA_VERSION),
@@ -89,6 +133,7 @@ export const EditorOutput = z
       recipes: z.array(z.string()),
       retrievals: z.array(RetrievalRecord),
     }),
+    execution: ExecutionReport,
   })
   .superRefine((o, ctx) => {
     const issue = (message: string, path: string) => ctx.addIssue({ code: "custom", message, path: [path] });
@@ -100,5 +145,8 @@ export const EditorOutput = z
     if (o.revision_requests.length && o.status !== "needs_director_revision") issue("a revision request must set status needs_director_revision", "status");
     if (o.status === "needs_director_revision" && !o.revision_requests.length) issue("needs_director_revision needs at least one revision request", "revision_requests");
     if (o.status === "blocked" && !o.conflicts.length && o.validation.ok) issue("a blocked result must say what blocks it", "conflicts");
+    if (o.execution.executable && (o.conflicts.length || o.revision_requests.length || !o.validation.ok)) issue("a result with open conflicts, revision requests or failed validation cannot be executable", "execution");
+    const ids = new Set(o.operations.map((op) => op.operation_id));
+    if (o.execution.operations.length !== o.operations.length || o.execution.operations.some((e) => !ids.has(e.operation_id))) issue("execution must report exactly the operations of this result", "execution");
   });
 export type EditorOutput = z.infer<typeof EditorOutput>;

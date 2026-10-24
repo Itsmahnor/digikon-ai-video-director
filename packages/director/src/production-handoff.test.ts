@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Project, handoffContentHash, storyboardHash, type DirectorHandoff, type EditorOperation } from "@digikon/contracts";
+import { EDITOR_SCHEMA_VERSION, Project, handoffContentHash, storyboardHash, type DirectorHandoff, type EditorOperation } from "@digikon/contracts";
 import { resolveParams } from "@digikon/recipes";
 import {
   HandoffRefusedError, ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, checkEditorOutput, checkHandoff, checkRenderable,
   gateDecision, readinessOf, requiredOperations, secretFindings, type DirectorStateType,
 } from "./index.js";
-import { cfg, deps, knowledge, root } from "./fixtures.js";
+import { cfg, deps, knowledge, noExecution, root } from "./fixtures.js";
 
 // The latest real run: a 30-second, 16:9 online-learning explainer with six scenes and no supplied files.
 const project = Project.parse({
@@ -92,7 +92,7 @@ describe("the production handoff", () => {
   it("carries the claims audit, asset feasibility, required operations and readiness", async () => {
     const t = await approved("p-handoff");
     const h = buildHandoff(t.done, t.ctx);
-    expect(h.schema_version).toBe("1.2.0");
+    expect(h.schema_version).toBe("1.3.0");
     expect(h.claims_audit.map((e) => [e.claim_id, e.status, e.scene_ids])).toEqual([["C01", "illustrative", ["S04"]], ["C02", "illustrative", ["S05"]], ["C03", "illustrative", ["S03"]]]);
     expect(h.claims).toEqual([]); // nothing is grounded in a supplied fact
     expect(h.asset_feasibility.counts).toEqual({ supplied: 0, generate_graphics: 6, needs_external: 0, missing_blocking: 0 });
@@ -213,9 +213,10 @@ describe("Editor operations and the recipe's operation type", () => {
       };
     });
   const output = (h: DirectorHandoff, operations: EditorOperation[]) => ({
-    schema_version: "1.0.0", handoff_schema_version: h.schema_version, handoff_id: h.handoff_id, handoff_content_hash: h.content_hash, approved: h.approved,
+    schema_version: EDITOR_SCHEMA_VERSION, handoff_schema_version: h.schema_version, handoff_id: h.handoff_id, handoff_content_hash: h.content_hash, approved: h.approved,
     status: "ready", operations, validation: { ok: true, issues: [] }, conflicts: [], revision_requests: [],
     provenance: { skills: [], recipes: h.required_operations.map((o) => `${o.recipe_id}@${o.recipe_version}`), retrievals: [] },
+    execution: noExecution(operations),
   });
 
   it("accepts operations whose type is the one their recipe declares, and rejects any other", async () => {
