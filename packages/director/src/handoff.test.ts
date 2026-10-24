@@ -54,7 +54,7 @@ describe("Director handoff", () => {
     expect(h.approvals.edit_plan).toMatchObject({ stage: "edit_plan", decision: "approved", plan_version: 1, storyboard_version: 1 });
     expect(h.assets.map((a) => a.asset_id).sort()).toEqual(["asset_beans", "asset_logo"]);
     // Only the grounded claim that a scene uses; the unsupported ones never reach the Editor.
-    expect(h.claims).toEqual([{ claim: { claim_id: "C01", text: "Roasted weekly in small batches", brand_fact_id: "F01" }, fact: input.facts[0], scene_ids: ["S02"] }]);
+    expect(h.claims).toEqual([{ claim: { claim_id: "C01", text: "Roasted weekly in small batches", brand_fact_id: "F01", kind: "factual", safe_alternative: null }, fact: input.facts[0], scene_ids: ["S02"] }]);
     expect(h.qa).toMatchObject({ target_duration_s: 12, aspect_ratio: "9:16", grounded_claim_ids: ["C01"], loudness_target_lufs: null });
     expect(h.qa.scene_spans).toEqual([{ scene_id: "S01", start: 0, end: 4 }, { scene_id: "S02", start: 4, end: 9 }, { scene_id: "S03", start: 9, end: 12 }]);
     expect(h.provenance.recipes.map((r) => r.recipe_id)).toEqual(["crossfade", "end-card-cta", "loudness-normalise", "pan-reframe", "slow-push-in"]);
@@ -137,8 +137,8 @@ describe("Director handoff", () => {
     const duration = structuredClone(h); duration.constraints.target_duration_s = 60;
     expect(checkHandoff(rehash(duration), t.ctx)).toContain("constraints do not match the project");
     const claims = structuredClone(h); claims.claims = []; claims.qa.grounded_claim_ids = [];
-    // Dropping the claim also drops its approved fact, which the evidence hash catches first.
-    expect(checkHandoff(rehash(claims), t.ctx)).toEqual(["the assets or facts in the handoff are not the ones that were approved (evidence hash mismatch)"]);
+    // The audit still carries the fact, so the evidence matches; the grounded-claims list no longer matches the storyboard.
+    expect(checkHandoff(rehash(claims), t.ctx)).toEqual(["claims do not match the claims the approved storyboard uses"]);
     const relinked = structuredClone(h); relinked.claims[0]!.scene_ids = ["S01"];
     expect(checkHandoff(rehash(relinked), t.ctx)).toContain("claims do not match the claims the approved storyboard uses");
     const assets = structuredClone(h); assets.assets = assets.assets.slice(1);
@@ -196,7 +196,9 @@ describe("Director handoff", () => {
     const h = buildHandoff(t.done, t.ctx);
     const rehash = (x: DirectorHandoff): DirectorHandoff => { const c = handoffContentHash(x); return { ...x, content_hash: c, handoff_id: `ho_${c.slice(0, 16)}` }; };
     const fact = structuredClone(h); fact.claims[0]!.fact.text = "Roasted by award-winning experts";
-    expect(checkHandoff(rehash(fact), t.ctx)).toEqual(["the assets or facts in the handoff are not the ones that were approved (evidence hash mismatch)"]);
+    expect(checkHandoff(rehash(fact), t.ctx)).toEqual(["claims do not match the claims the approved storyboard uses"]); // differs from the fact in the audit
+    const auditFact = structuredClone(h); auditFact.claims_audit[0] = { ...auditFact.claims_audit[0]!, fact: { ...auditFact.claims_audit[0]!.fact!, text: "Roasted by award-winning experts" } };
+    expect(checkHandoff(rehash(auditFact), t.ctx)).toEqual(expect.arrayContaining(["the assets or facts in the handoff are not the ones that were approved (evidence hash mismatch)"]));
     const asset = structuredClone(h); asset.assets[0]!.duration = 60;
     expect(checkHandoff(rehash(asset), t.ctx)).toContain("the assets or facts in the handoff are not the ones that were approved (evidence hash mismatch)");
     const uri = structuredClone(h); uri.assets[0]!.uri = "other.mp4";
@@ -207,7 +209,7 @@ describe("Director handoff", () => {
     const legacy = structuredClone(h); delete (legacy.approvals.storyboard as { evidence_hash?: string }).evidence_hash;
     expect(checkHandoff(rehash(legacy), t.ctx)).toContain("the storyboard approval carries no evidence hash, so its assets and facts cannot be verified");
     // Editing the evidence hash inside the handoff as well is caught when the Director's own records are supplied.
-    const both = structuredClone(fact);
+    const both = structuredClone(auditFact); both.claims[0]!.fact.text = "Roasted by award-winning experts"; // the claim, the audit and the evidence hash all agree on the forged fact
     const forged = currentEvidenceHash({ ...t.done, facts: [{ ...t.done.facts[0]!, text: "Roasted by award-winning experts" }] })!;
     both.approvals.storyboard.evidence_hash = forged; both.approvals.edit_plan.evidence_hash = forged;
     expect(checkHandoff(rehash(both), t.ctx)).toEqual([]); // internally consistent: a hash is not a signature
@@ -232,7 +234,7 @@ function operationsFor(h: DirectorHandoff, recipes: ReturnType<typeof deps>["rec
     const scene = h.storyboard.scenes.find((s) => s.scene_id === u.scene_id)!;
     const recipe = recipes.get(u.recipe_id)!;
     return {
-      operation_id: `E${String(i + 1).padStart(2, "0")}`, target_scene_id: u.scene_id, operation_type: recipe.type === "sound_cue" ? "mix_audio" : recipe.type === "animation" ? "render_graphics_scene" : "trim_clip",
+      operation_id: `E${String(i + 1).padStart(2, "0")}`, target_scene_id: u.scene_id, operation_type: recipe.operation_type,
       parameters: resolveParams(recipe, u.params), preconditions: [], expected_result: u.rationale, validation_status: "valid",
       source_use_id: u.use_id, recipe_id: u.recipe_id, recipe_version: recipe.version, asset_ids: scene.asset_ids,
       timing: { start_s: scene.start_time, duration_s: scene.duration_seconds }, caption: null, audio_cues: scene.audio_cues,

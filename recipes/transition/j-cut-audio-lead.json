@@ -16,6 +16,7 @@
   "status": "draft",
   "recipe_id": "j-cut-audio-lead",
   "type": "transition",
+  "operation_type": "mix_audio",
   "title": "J-cut audio lead",
   "purpose": "The next scene's audio begins before its picture, pulling the viewer forward.",
   "intents": [

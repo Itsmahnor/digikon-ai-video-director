@@ -14,7 +14,7 @@ Defines the one flow every Editor job follows and the line between work the Edit
 At the start of every Editor job, before any other Editor skill. Re-read it before returning a result.
 
 ## Inputs and outputs
-- In: `EditorInput` = a `DirectorHandoff` (schema 1.1.0), `retrieval_scope: "editor"`, the skill list (`packages/contracts/src/editor.ts`).
+- In: `EditorInput` = a `DirectorHandoff` (schema 1.2.0), `retrieval_scope: "editor"`, the skill list (`packages/contracts/src/editor.ts`).
 - Out: one `EditorOutput`: `status` (`ready` | `needs_director_revision` | `blocked`), `operations`, `validation`, `conflicts`, `revision_requests`, `provenance`.
 
 ## Guardrails (shared by all Editor skills)
@@ -36,7 +36,7 @@ At the start of every Editor job, before any other Editor skill. Re-read it befo
 ## Implementation problem or reapproval?
 | Editor decides alone (no reapproval) | Needs `RevisionRequest` with `requires_reapproval: true` |
 |---|---|
-| `operation_type`, operation ids and order inside a scene | Any recipe, parameter value, or use added, removed or swapped |
+| Operation ids and order inside a scene (`operation_type` is fixed by the recipe) | Any recipe, parameter value, or use added, removed or swapped |
 | Timing of an operation inside its scene | Scene start, duration or order; `source_in_seconds` |
 | Which of the scene's approved assets an operation uses | A different or extra asset for a scene |
 | Filling recipe defaults | Overlay or caption wording, claims, brand facts |
@@ -66,4 +66,4 @@ Invalid handoff: no output. Everything else maps to the status table above.
 `packages/contracts/src/{handoff,editor}.ts`; `packages/director/src/{handoff,store,approvals}.ts`; `packages/rag/src/scopes.ts`; `docs/DIRECTOR_HANDOFF.md`.
 
 ## Sources and status of claims
-All statements here are documented project facts (the code above), except the table of what counts as an Editor decision, which is a project recommendation derived from what `checkEditorOutput` enforces. No recipe-type to `operation_type` table exists in code; see `README.md` gap G1.
+All statements here are documented project facts (the code above), except the table of what counts as an Editor decision, which is a project recommendation derived from what `checkEditorOutput` enforces. Each recipe declares its `operation_type` (`RECIPE_OPERATIONS` in `packages/contracts/src/recipe.ts` lists what each recipe type may become), and `checkEditorOutput` enforces it. The handoff also carries `required_operations`, `claims_audit`, `asset_feasibility` and `readiness`; read `readiness` before promising anything about production.

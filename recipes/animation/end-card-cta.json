@@ -19,6 +19,7 @@
   "status": "draft",
   "recipe_id": "end-card-cta",
   "type": "animation",
+  "operation_type": "render_graphics_scene",
   "title": "End card with call to action",
   "purpose": "Closing card holding the call to action and brand line long enough to read.",
   "intents": [

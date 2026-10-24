@@ -14,7 +14,7 @@ export type DirectorStatus =
   | "running" | "needs_clarification" | "awaiting_approval" | "approved" | "escalated";
 
 /** Identifies the graph's shape (nodes, gates, state). A saved checkpoint from any other version is refused, never adapted. */
-export const DIRECTOR_GRAPH_VERSION = "director-graph/2";
+export const DIRECTOR_GRAPH_VERSION = "director-graph/3"; // 3: scenes carry production fields, claims carry a kind; the evidence hash covers every fact-backed claim
 
 /** How many change requests one gate accepts. The next one escalates. */
 export const MAX_REVISIONS = MAX_REVISIONS_PER_GATE;

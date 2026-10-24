@@ -16,6 +16,7 @@
   "status": "draft",
   "recipe_id": "crossfade",
   "type": "transition",
+  "operation_type": "concat",
   "title": "Crossfade",
   "purpose": "Soft blend into the next scene for calm, flowing moments.",
   "intents": [

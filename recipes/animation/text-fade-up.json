@@ -20,6 +20,7 @@
   "status": "draft",
   "recipe_id": "text-fade-up",
   "type": "animation",
+  "operation_type": "overlay_text",
   "title": "Text fade up",
   "purpose": "On-screen line fades in while rising slightly. Clear, safe default for headlines and captions.",
   "intents": [

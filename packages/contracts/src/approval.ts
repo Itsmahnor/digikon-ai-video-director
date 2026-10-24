@@ -101,14 +101,13 @@ export interface EvidenceInput {
 /**
  * The evidence an approval covers, in a fixed order: every asset a scene uses (the whole Asset record: id, uri, media type,
  * duration, size in pixels, audio tracks, transcript ref and probe metadata such as bytes), the analysis notes for those assets,
- * and every fact behind a claim a scene shows (id, text and source). Assets, notes or facts the plan does not use are left
- * out, so unrelated uploads do not invalidate an approval. A fact a scene's claim points to but which is missing is listed by id
- * with null text, so its absence changes the hash too.
+ * and every fact any claim in the treatment points to (id, text and source), whether or not a scene shows it. Assets and notes
+ * the storyboard does not use, and facts no claim points to, are left out, so unrelated uploads do not invalidate an approval.
+ * A fact a claim points to but which is missing is listed by id with null text, so its absence changes the hash too.
  */
 export function approvedEvidence(e: EvidenceInput) {
   const used = new Set(e.scenePlan.scenes.flatMap((s) => s.asset_ids));
-  const claimIds = new Set(e.scenePlan.scenes.flatMap((s) => s.claim_ids));
-  const factIds = new Set(e.treatment.claims.filter((c) => claimIds.has(c.claim_id) && c.brand_fact_id).map((c) => c.brand_fact_id!));
+  const factIds = new Set(e.treatment.claims.filter((c) => c.brand_fact_id).map((c) => c.brand_fact_id!));
   const byId = <T,>(key: (x: T) => string) => (a: T, b: T) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
   return {
     assets: e.assets.filter((a) => used.has(a.asset_id)).sort(byId((a) => a.asset_id)),

@@ -1,7 +1,16 @@
 import { z } from "zod";
-import { AspectRatio } from "./schemas.js";
+import { AspectRatio, OperationType } from "./schemas.js";
 
 export const RecipeType = z.enum(["shot", "camera_move", "transition", "animation", "sound_cue"]);
+
+/** Which edit operation each recipe type may become. A recipe declares one of these in `operation_type`. */
+export const RECIPE_OPERATIONS: Record<z.infer<typeof RecipeType>, readonly z.infer<typeof OperationType>[]> = {
+  shot: ["trim_clip"],
+  camera_move: ["trim_clip"],
+  transition: ["concat", "mix_audio"], // an audio lead (J-cut) is an audio operation
+  animation: ["overlay_text", "render_graphics_scene"],
+  sound_cue: ["mix_audio"],
+};
 export const Renderer = z.enum(["remotion", "ffmpeg"]);
 export const RecipeStatus = z.enum(["draft", "reviewed"]);
 export const Energy = z.enum(["low", "medium", "high"]);
@@ -55,6 +64,8 @@ export const Recipe = z
     recipe_id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
     version: z.string().regex(/^\d+\.\d+\.\d+$/),
     type: RecipeType,
+    /** The edit operation this recipe becomes. Must be one RECIPE_OPERATIONS allows for its type. */
+    operation_type: OperationType,
     title: z.string().min(1),
     purpose: z.string().min(1),
     /** Short phrases an editor would use to look for this recipe; embedded together with purpose. */
@@ -81,8 +92,20 @@ export const Recipe = z
       license: z.string().min(1),
     }),
     status: RecipeStatus,
+    /** Who reviewed the recipe, when, and the evidence (for example a test render). `reviewed` is not accepted without it. */
+    review: z.object({ reviewed_by: z.string().min(1), reviewed_at: z.string().datetime(), evidence: z.string().min(1) }).nullable().default(null),
   })
   .superRefine((r, ctx) => {
+    if (!RECIPE_OPERATIONS[r.type].includes(r.operation_type)) {
+      ctx.addIssue({ code: "custom", path: ["operation_type"], message: `a ${r.type} recipe cannot become a ${r.operation_type} operation (allowed: ${RECIPE_OPERATIONS[r.type].join(", ")})` });
+    }
+    const renderer = r.implementation_ref.split("/")[0];
+    if (!(r.compatibility.renderers as string[]).includes(renderer ?? "")) {
+      ctx.addIssue({ code: "custom", path: ["implementation_ref"], message: `implementation_ref ${r.implementation_ref} names a renderer that compatibility.renderers does not list` });
+    }
+    if (r.status === "reviewed" && !r.review) {
+      ctx.addIssue({ code: "custom", path: ["review"], message: "a reviewed recipe needs a review record (reviewer, date and evidence)" });
+    }
     const names = new Set<string>();
     for (const p of r.parameters) {
       if (names.has(p.name)) ctx.addIssue({ code: "custom", message: `duplicate parameter ${p.name}` });

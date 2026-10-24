@@ -14,6 +14,7 @@
   "status": "draft",
   "recipe_id": "sfx-hit-on-cut",
   "type": "sound_cue",
+  "operation_type": "mix_audio",
   "title": "Sound effect on cut",
   "purpose": "Places a short licensed sound effect on or near a cut to add weight. Needs a licensed audio asset.",
   "intents": [

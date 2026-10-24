@@ -16,6 +16,7 @@
   "status": "draft",
   "recipe_id": "punch-in-emphasis",
   "type": "camera_move",
+  "operation_type": "trim_clip",
   "title": "Punch-in emphasis",
   "purpose": "Fast zoom that lands on a key moment, number or feature. Use sparingly: it loses impact when repeated.",
   "intents": [

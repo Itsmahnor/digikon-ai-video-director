@@ -1,5 +1,5 @@
 import {
-  ApprovalRecord, editPlanHash, evidenceHash, storyboardHash,
+  ApprovalRecord, assetFeasibility, editPlanHash, evidenceHash, storyboardHash,
   type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type EditPlan, type Project, type ScenePlan, type Treatment,
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
@@ -106,6 +106,8 @@ export function checkRenderable(s: ApprovalState, ctx: { recipes: RecipeLibrary 
   if (s.treatmentDoc && s.scenePlan) {
     for (const i of planIssues(s.scenePlan, s.assets, s.project, s.notes ?? [], s.treatmentDoc, s.facts ?? [])) reasons.push(`storyboard is not valid: ${i}`);
     if (s.editPlan) for (const i of editIssues(s.editPlan, s.scenePlan, ctx, s.project, s.assets)) reasons.push(`edit plan is not valid: ${i}`);
+    // Material the plan needs but nobody has supplied blocks production, however well the plans were approved.
+    for (const b of assetFeasibility(s.scenePlan, s.assets).blockers) reasons.push(`production is blocked: ${b}`);
   }
 
   return reasons.length || !sb || !ep ? { ok: false, reasons } : { ok: true, storyboard: sb, edit_plan: ep };

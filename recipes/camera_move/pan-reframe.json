@@ -9,6 +9,7 @@
   "status": "draft",
   "recipe_id": "pan-reframe",
   "type": "camera_move",
+  "operation_type": "trim_clip",
   "title": "Pan reframe",
   "purpose": "Slide the frame sideways or vertically across a larger source to follow or reveal.",
   "intents": [

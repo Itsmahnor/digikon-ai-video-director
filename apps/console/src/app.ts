@@ -10,7 +10,7 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { ApprovalSubmission, BrandFact, Turn, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
+import { ApprovalSubmission, BrandFact, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
   Command, HandoffRefusedError, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, verifyHandoffWithStore,
@@ -473,7 +473,12 @@ function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipe
   const d = state as unknown as DirectorStateType;
   const sb = currentStoryboard(d), ep = currentEditPlan(d);
   const check = checkRenderable(d, ctx); // the same guard a future render must pass; shown so the console never implies more than is true
+  const scenes = d.scenePlan?.scenes ?? [];
+  const total = Math.round(scenes.reduce((a, x) => a + x.duration_seconds, 0) * 1000) / 1000;
   return {
+    timing: { total_s: total, target_s: d.project.target_duration, scenes: scenes.length, matches_target: Math.abs(total - d.project.target_duration) <= RUNTIME_TOLERANCE_S },
+    claimsAudit: d.treatmentDoc ? auditClaims(d.treatmentDoc.claims, scenes, d.facts ?? []) : [],
+    assetFeasibility: d.scenePlan ? assetFeasibility(d.scenePlan, d.assets) : null,
     status: s["status"], intake: s["intakeResult"] ?? null, treatment: s["treatmentDoc"] ?? null,
     scenePlan: s["scenePlan"] ?? null, editPlan: s["editPlan"] ?? null, escalation: s["escalation"] ?? null,
     gate: s["gate"] ?? null,

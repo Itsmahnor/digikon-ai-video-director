@@ -36,11 +36,46 @@ export const Asset = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
+/** How a scene will be made: from generated graphics, from supplied material, or both. Assigned by code from the scene's assets. */
+export const ProductionMethod = z.enum(["graphics", "supplied_footage", "mixed"]);
+export const AssetKind = z.enum(["footage", "image", "logo", "ui_screenshot", "audio", "graphics"]);
+/**
+ * supplied: the user gave it (asset_id names the file).
+ * generate_graphics: the graphics workflow (animated text, shapes, end cards, UI-style graphics) can build it.
+ * needs_external: live footage or real material that was not supplied; blocks production until it is.
+ * missing_blocking: needed, not supplied, and nothing can stand in for it.
+ */
+export const AssetAvailability = z.enum(["supplied", "generate_graphics", "needs_external", "missing_blocking"]);
+export const RequiredAsset = z.object({
+  need: z.string().min(1).max(200),
+  kind: AssetKind,
+  availability: AssetAvailability,
+  /** The supplied file, when availability is "supplied". */
+  asset_id: z.string().nullable().default(null),
+  /** A graphics-only stand-in for something the user has not supplied (a logo, a product screen). Shown to the user for approval. */
+  placeholder: z.boolean().default(false),
+  /** What could be done instead, keeping the creative intent. */
+  fallback: z.string().max(300).nullable().default(null),
+});
+export const UnresolvedItem = z.object({
+  kind: z.enum(["placeholder", "missing_input", "creative_decision"]),
+  note: z.string().min(1).max(300),
+});
+
 export const Scene = z.object({
   scene_id: z.string().regex(/^S\d{2,}$/),
   purpose: z.string().min(1),
   start_time: z.number().nonnegative(),
+  /** start_time + duration_seconds, written by code. When present it must agree with them. */
+  end_time: z.number().positive().nullable().default(null),
   duration_seconds: z.number().positive().max(60),
+  /** Exact words spoken over the scene, if any. Music and sound effects stay in audio_cues. */
+  voiceover: z.string().max(400).nullable().default(null),
+  production_method: ProductionMethod.nullable().default(null),
+  /** What the scene needs and whether it is supplied, buildable as graphics, or missing. */
+  required_assets: z.array(RequiredAsset).max(12).default([]),
+  /** Placeholders, missing inputs and open creative decisions the user must see. */
+  unresolved: z.array(UnresolvedItem).max(12).default([]),
   asset_ids: z.array(z.string()).default([]),
   /** Offset into the source video where this scene starts, in seconds. */
   source_in_seconds: z.number().nonnegative().default(0),
@@ -95,6 +130,8 @@ export const ScenePlan = z.object({
 export type Project = z.infer<typeof Project>;
 export type Asset = z.infer<typeof Asset>;
 export type Scene = z.infer<typeof Scene>;
+export type RequiredAsset = z.infer<typeof RequiredAsset>;
+export type ProductionMethod = z.infer<typeof ProductionMethod>;
 export type ScenePlan = z.infer<typeof ScenePlan>;
 export type EditOperation = z.infer<typeof EditOperation>;
 export type QAFinding = z.infer<typeof QAFinding>;

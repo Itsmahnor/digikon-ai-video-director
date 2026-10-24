@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { Recipe, type RecipeParam } from "@digikon/contracts";
-
 export type RecipeStatusFloor = "draft" | "reviewed";
 
 /** Reads every recipes/<type>/<id>.json, parses it and checks id and folder consistency. Throws on the first bad file. */
@@ -54,6 +53,21 @@ export class RecipeLibrary {
   available(): Recipe[] {
     return [...this.byId.values()].filter((r) => this.isAvailable(r));
   }
+}
+
+export interface RecipeReadiness {
+  /** True only for a reviewed recipe with a review record. No recipe is production-ready on its own say-so. */
+  production_ready: boolean;
+  evidence: "none" | "review_record";
+  reason: string;
+}
+
+/** Whether a recipe has evidence behind it. A draft recipe, or a reviewed one with no record, is never production-ready. */
+export function recipeReadiness(r: Recipe): RecipeReadiness {
+  if (r.status === "reviewed" && r.review) {
+    return { production_ready: true, evidence: "review_record", reason: `reviewed by ${r.review.reviewed_by} on ${r.review.reviewed_at.slice(0, 10)}: ${r.review.evidence}` };
+  }
+  return { production_ready: false, evidence: "none", reason: `${r.recipe_id} is ${r.status}: no review evidence` };
 }
 
 /** Fills defaults for parameters the model left out. Does not validate; use validateEditPlan for that. */

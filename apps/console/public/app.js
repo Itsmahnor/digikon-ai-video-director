@@ -465,19 +465,23 @@ function results(res) {
     scenes: () => {
       const total = sp.scenes.reduce((a, s) => a + s.duration_seconds, 0);
       return `<div class="timeline">${sp.scenes.map((s, i) => `<div class="tl" style="flex:${s.duration_seconds};--h:${(i * 57 + 255) % 360}"><b>${s.scene_id}</b><span>${fmtDur(s.duration_seconds)}</span></div>`).join("")}</div>
-        <p class="hint" style="margin:8px 0 6px">${sp.scenes.length} scenes, ${fmtDur(total)} total</p>
+        <p class="hint" style="margin:8px 0 6px">${sp.scenes.length} scenes, ${fmtDur(total)} total${res.timing ? (res.timing.matches_target ? `, matches the ${fmtDur(res.timing.target_s)} target` : `, does NOT match the ${fmtDur(res.timing.target_s)} target`) : ""}</p>
+        ${feasibilityHtml(res.assetFeasibility)}
         ${sp.scenes.map((s) => `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.start_time)} to ${fmtDur(s.start_time + s.duration_seconds)}</span></div>
           <div class="sub">${esc(s.shot.shot_size.replaceAll("_", " "))}, ${esc(s.shot.camera_motion.replaceAll("_", " "))}: ${esc(s.shot.visual_action)}</div>
           ${s.overlay ? `<div class="overlay-txt">${esc(s.overlay.text)}</div>` : ""}
+          ${s.voiceover ? `<div class="sub">Voiceover: "${esc(s.voiceover)}"</div>` : ""}
+          ${(s.required_assets ?? []).length ? `<div class="chips">${s.production_method ? `<span class="chip">${esc(s.production_method.replaceAll("_", " "))}</span>` : ""}${s.required_assets.map((r) => `<span class="chip ${{ supplied: "ok", generate_graphics: r.placeholder ? "warn" : "ok", needs_external: "bad", missing_blocking: "bad" }[r.availability]}" title="${esc(r.fallback ?? "")}">${esc(r.need)}: ${esc(r.placeholder ? "placeholder graphic" : r.availability.replaceAll("_", " "))}</span>`).join("")}</div>` : ""}
+          ${(s.unresolved ?? []).map((u) => `<div class="notice info" style="margin:6px 0 0">${esc(u.kind.replace("_", " "))}: ${esc(u.note)}</div>`).join("")}
           <div class="chips">${s.asset_ids.length ? s.asset_ids.map((a) => `<span class="chip">${esc(assetName(a))}${s.source_in_seconds ? ` @${fmtDur(s.source_in_seconds)}` : ""}</span>`).join("") : '<span class="chip warn">graphics only</span>'}${s.claim_ids.map((c) => `<span class="chip ok">claim ${esc(c)}</span>`).join("")}<span class="chip">then ${esc(s.transition_out.replaceAll("_", " "))}</span></div></div>`).join("")}`;
     },
     edits: () => `<div class="notice info" style="margin-bottom:12px">Built on storyboard version ${res.versions.storyboard} <span class="mono">(${esc(String(res.hashes.storyboard).slice(0, 12))})</span>, which you approved. Edit plan version ${res.versions.edit_plan}.</div>` + sp.scenes.map((s) => {
       const uses = ep.uses.filter((u) => u.scene_id === s.scene_id);
       return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}</div>`;
     }).join(""),
-    claims: () => `<table><thead><tr><th>Claim</th><th>Text</th><th>Support</th><th>Used in</th></tr></thead><tbody>${t.claims.map((c) => {
-      const used = sp.scenes.filter((s) => s.claim_ids.includes(c.claim_id)).map((s) => s.scene_id);
-      return `<tr><td class="mono">${esc(c.claim_id)}</td><td>${esc(c.text)}</td><td>${c.brand_fact_id ? `<span class="chip ok">backed by ${esc(c.brand_fact_id)}</span>` : '<span class="chip bad">unsupported, blocked</span>'}</td><td>${used.join(", ") || "-"}</td></tr>`;
+    claims: () => `<table><thead><tr><th>Claim</th><th>Text</th><th>Status</th><th>Used in</th></tr></thead><tbody>${(res.claimsAudit ?? []).map((c) => {
+      const chip = c.status === "supported" ? `<span class="chip ok">supported by ${esc(c.fact?.fact_id ?? "")}</span>` : c.status === "illustrative" ? '<span class="chip warn">illustrative concept, not a verified fact</span>' : '<span class="chip bad">unsupported factual claim, blocked</span>';
+      return `<tr><td class="mono">${esc(c.claim_id)}</td><td>${esc(c.text)}<div class="hint">${esc(c.explanation)}${c.safe_alternative ? ` Safe alternative: ${esc(c.safe_alternative)}` : ""}</div></td><td>${chip}</td><td>${c.scene_ids.join(", ") || "-"}</td></tr>`;
     }).join("") || '<tr><td colspan="4" class="hint">No claims in this plan.</td></tr>'}</tbody></table>`,
     audit: () => `<h3 style="margin-bottom:8px">Skills applied</h3><div class="chips">${res.skillsUsed.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
       <h3 style="margin:16px 0 8px">Skill reference files shown to the model</h3><div class="chips">${(res.referencesUsed ?? []).map((s) => `<span class="chip">${esc(s)}</span>`).join("") || '<span class="hint">none</span>'}</div>
@@ -500,6 +504,13 @@ function results(res) {
   return `${header}<div class="card"><div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? "on" : ""}" role="tab" data-action="tab" data-tab="${k}">${l}</button>`).join("")}</div><div style="padding-top:16px">${body[tab]()}</div></div>
     ${bar}
     ${finished}`;
+}
+
+/** What the scenes need: blockers stop production, warnings (placeholders, open decisions) need the user's eye. */
+function feasibilityHtml(f) {
+  if (!f || (!f.blockers.length && !f.warnings.length)) return "";
+  return `${f.blockers.length ? `<div class="notice bad" style="margin-bottom:8px"><b>Blocks production</b>${f.blockers.map((b) => `<div>${esc(b)}</div>`).join("")}</div>` : ""}
+    ${f.warnings.length ? `<div class="notice info" style="margin-bottom:8px"><b>Please review before approving</b>${f.warnings.map((w) => `<div>${esc(w)}</div>`).join("")}</div>` : ""}`;
 }
 
 function approvalsHtml(res) {

@@ -16,6 +16,7 @@
   "status": "draft",
   "recipe_id": "directional-wipe",
   "type": "transition",
+  "operation_type": "concat",
   "title": "Directional wipe",
   "purpose": "A clean wipe that reads as energetic and graphic. Suits UI and product reveals.",
   "intents": [

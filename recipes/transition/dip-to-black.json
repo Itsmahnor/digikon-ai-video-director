@@ -16,6 +16,7 @@
   "status": "draft",
   "recipe_id": "dip-to-black",
   "type": "transition",
+  "operation_type": "concat",
   "title": "Dip to black",
   "purpose": "Fade out to black and back in to mark a chapter break or the end.",
   "intents": [

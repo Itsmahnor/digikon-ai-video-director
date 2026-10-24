@@ -9,6 +9,7 @@
   "status": "draft",
   "recipe_id": "hard-cut",
   "type": "transition",
+  "operation_type": "concat",
   "title": "Hard cut",
   "purpose": "Instant change between scenes. The default; keeps pace tight.",
   "intents": [

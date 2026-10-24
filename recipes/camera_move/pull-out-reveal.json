@@ -9,6 +9,7 @@
   "status": "draft",
   "recipe_id": "pull-out-reveal",
   "type": "camera_move",
+  "operation_type": "trim_clip",
   "title": "Pull-out reveal",
   "purpose": "Start tight on a detail and ease back to reveal the whole product or setting.",
   "intents": [

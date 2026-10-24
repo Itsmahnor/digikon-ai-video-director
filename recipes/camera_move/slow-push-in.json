@@ -9,6 +9,7 @@
   "status": "draft",
   "recipe_id": "slow-push-in",
   "type": "camera_move",
+  "operation_type": "trim_clip",
   "title": "Slow push-in",
   "purpose": "Gradual zoom toward the subject to build focus and quiet tension.",
   "intents": [

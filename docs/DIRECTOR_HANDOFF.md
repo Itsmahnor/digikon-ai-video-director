@@ -49,6 +49,18 @@ Not duplicated on purpose: timing, audio cues and transitions stay in `storyboar
 
 A content hash that ignores `created_at` means the same approved plans always produce the same hash. Changing any plan after the handoff fails the content hash; re-hashing a tampered handoff still fails, because the plans no longer match their approval hashes.
 
+## Production readiness (handoff 1.2.0)
+
+Added after a real run showed scenes written off as "not realisable" in free text, claims that could not be told from invented facts, and no link between recipes and edit operations. Older (1.0.0, 1.1.0) handoffs and graph checkpoints (`director-graph/2`) are refused, not converted; nothing durable of that age existed.
+
+- **Scene** gains `end_time` and `production_method` (both set by code: `graphics`, `supplied_footage` or `mixed`), `voiceover` (exact words; music and effects stay in `audio_cues`), `required_assets` and `unresolved`. Animation is carried by the edit plan's recipe uses, not by a scene field.
+- **Timing contract** (`validatePlan`): scenes are listed in play order, run back to back from 0 without gap or overlap, have positive durations and consistent end times, and add up to the requested runtime within 0.05 s. The 30 s, 16:9 explainer has six scenes of 4, 5, 4, 6, 6 and 5 seconds.
+- **Asset feasibility** (`assetFeasibility`): each requirement is `supplied` (a project file of the right media type), `generate_graphics` (the graphics workflow can build it; a logo, product screen or image that was not supplied is allowed only as a labelled `placeholder`, and live footage or audio never is), `needs_external` (blocks until supplied) or `missing_blocking`. Graphics-led scenes without footage are not blocked. Blockers also stop `assertRenderable` and the handoff.
+- **Claims audit** (`auditClaims`): every treatment claim is `supported` (an approved fact), `illustrative` (a proposed feature or concept, shown as a concept and never as a verified fact) or `unsupported` (factual, no evidence). The model proposes `kind`, but wording with figures, prices, rankings or guarantees cannot be illustrative. Unsupported claims stay in the audit with an explanation and a safe alternative; scenes may not show them. The approvals' evidence hash covers every fact any claim points to.
+- **Recipes** declare an `operation_type`, limited by `RECIPE_OPERATIONS` (shot and camera_move: `trim_clip`; transition: `concat` or `mix_audio`; animation: `overlay_text` or `render_graphics_scene`; sound_cue: `mix_audio`) and must name a renderer they list. `reviewed` needs a `review` record (reviewer, date, evidence); all 19 shipped recipes are `draft`. `checkEditorOutput` enforces the operation type.
+- **Handoff** adds `claims_audit`, `asset_feasibility`, `required_operations` (each use as an operation with its recipe version, status, type, implementation and evidence) and `readiness` (`production_ready`, `blockers`, `warnings`). `checkHandoff` recomputes all four. Draft recipes always appear as blockers, so a plan is never called production-ready without review evidence.
+- **Privacy**: the project record in a handoff has no `owner_id`; a handoff containing something that looks like an API key, a private key or the configured key is refused without repeating it. Asset paths and original file names are still included, because the Editor needs the files.
+
 ## Editor boundary (schema_version 1.0.0)
 
 The Editor's skills are written but not yet loaded by any agent: see [skills/editor/README.md](../skills/editor/README.md).

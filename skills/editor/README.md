@@ -11,7 +11,7 @@ These are separate from the Director's own skills in `skills/` (`editing-directo
 `core-contract` first and last; `safe-assets-and-tools` throughout; in between `footage-review`, `continuity-pacing`, `transitions-scene-assembly`, `captions-typography`, `audio-voiceover-mixing`, `motion-graphics-product-ui`, `final-video-qa`. `remotion-implementation` is documentation for the future renderer.
 
 ## Gaps found against the actual contracts
-- **G1.** No table maps a recipe type to an `operation_type` (`trim_clip`, `render_graphics_scene`, `overlay_text`, `concat`, `mix_audio`), and `checkEditorOutput` does not check it. Recommendation until one exists: `shot` and `camera_move` to `trim_clip`; `transition` to `concat`; `sound_cue` to `mix_audio`; text animations to `overlay_text`; `logo-reveal` and `end-card-cta` to `render_graphics_scene`.
+- **G1 (closed in handoff 1.2.0).** Each recipe now declares its `operation_type`, restricted by `RECIPE_OPERATIONS`, and `checkEditorOutput` enforces it.
 - **G2.** No dialogue or accessibility captions: `caption.text` must equal the scene overlay, and the handoff holds neither word timings nor full transcripts.
 - **G3.** No voiceover or TTS, per-track audio controls, or licence field on assets. `loudness-normalise` default (-16 LUFS) is a placeholder; no verified platform loudness target exists.
 - **G4.** No vision pass: nothing can see what a clip shows.
@@ -22,7 +22,7 @@ These are separate from the Director's own skills in `skills/` (`editing-directo
 - **G9.** The Remotion licence tier for the owner is undecided (see REFERENCES.md row 5).
 
 ## Schema versions
-Handoff `1.1.0`, Editor `1.0.0`, as in `packages/contracts/src/{handoff,editor}.ts`. The documentation previously said `1.0.0` for the handoff heading; the code was not changed.
+Handoff `1.2.0`, Editor `1.0.0`, as in `packages/contracts/src/{handoff,editor}.ts`.
 
 ## Not verified
 Live Claude behaviour. No model has run any of these skills.

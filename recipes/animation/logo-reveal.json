@@ -14,6 +14,7 @@
   "status": "draft",
   "recipe_id": "logo-reveal",
   "type": "animation",
+  "operation_type": "render_graphics_scene",
   "title": "Logo reveal",
   "purpose": "Brand mark scales in softly. Needs a supplied logo image.",
   "intents": [

@@ -20,6 +20,7 @@
   "status": "draft",
   "recipe_id": "lower-third-slide",
   "type": "animation",
+  "operation_type": "overlay_text",
   "title": "Lower-third slide",
   "purpose": "A name, feature or label slides in near the bottom of the safe area and leaves again.",
   "intents": [

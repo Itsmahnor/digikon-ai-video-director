@@ -36,11 +36,18 @@ export const BrandFact = z.object({
   source: z.string().min(1),
 });
 
-/** brand_fact_id === null means "unsupported". The model proposes claims; code decides. */
+/**
+ * brand_fact_id === null means no fact supports it. The model proposes claims; code decides what each one is
+ * (see auditClaims): supported by a fact, an illustrative concept, or an unsupported factual claim.
+ */
 export const Claim = z.object({
   claim_id: z.string().regex(/^C\d{2,}$/),
   text: z.string().min(1),
   brand_fact_id: z.string().nullable(),
+  /** "illustrative": a proposed feature or concept from the brief, shown as a concept. Anything stating a result, number, price or ranking is "factual". */
+  kind: z.enum(["factual", "illustrative"]).default("factual"),
+  /** Wording or a visual treatment that does not assert the claim as fact. */
+  safe_alternative: z.string().max(300).nullable().default(null),
 });
 
 export const Treatment = z.object({

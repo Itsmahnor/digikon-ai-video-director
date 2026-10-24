@@ -1,13 +1,18 @@
 import { z } from "zod";
-import { ApprovalRecord, editPlanHash, evidenceHash, hashCanonical, storyboardHash } from "./approval.js";
+import { ApprovalRecord, canonicalJson, editPlanHash, evidenceHash, hashCanonical, storyboardHash } from "./approval.js";
+import { AssetFeasibility, ClaimAuditEntry, assetFeasibility, auditClaims } from "./audit.js";
 import { AssetNotes, BrandFact, Claim, EditPlan, Treatment } from "./director.js";
-import { Asset, Project, ScenePlan } from "./schemas.js";
+import { Renderer } from "./recipe.js";
+import { Asset, OperationType, Project, ScenePlan } from "./schemas.js";
 
 /**
  * Version of the handoff shape. A consumer refuses any other value instead of guessing. Bump the major part when a field
  * is removed or changes meaning, the minor part when an optional field is added.
  */
-export const HANDOFF_SCHEMA_VERSION = "1.1.0" as const; // 1.1.0: approval records carry evidence_hash, and it is checked
+export const HANDOFF_SCHEMA_VERSION = "1.2.0" as const;
+// 1.1.0: approval records carry evidence_hash, and it is checked.
+// 1.2.0: scenes carry voiceover, production method and required assets; adds claims_audit, asset_feasibility,
+//        required_operations and readiness; the project no longer carries owner_id. Older handoffs are refused, not converted.
 
 const Sha256 = z.string().regex(/^[a-f0-9]{64}$/, "must be a lowercase SHA-256 hex digest");
 const PlanRef = z.object({ version: z.number().int().positive(), hash: Sha256 });
@@ -25,6 +30,29 @@ export type ProvenanceEntry = z.infer<typeof ProvenanceEntry>;
 /** A claim that a scene states, together with the approved fact that supports it. Unsupported claims never reach the handoff. */
 export const GroundedClaim = z.object({ claim: Claim, fact: BrandFact, scene_ids: z.array(z.string()).min(1) });
 export type GroundedClaim = z.infer<typeof GroundedClaim>;
+
+/** One recipe use the Editor must carry out, with what is known about the recipe behind it. */
+export const RequiredOperation = z.object({
+  use_id: z.string(),
+  scene_id: z.string(),
+  recipe_id: z.string(),
+  recipe_version: z.string(),
+  recipe_status: z.enum(["draft", "reviewed"]),
+  operation_type: OperationType,
+  implementation_ref: z.string(),
+  renderers: z.array(Renderer),
+  /** "review_record" only when the recipe carries a review record. Nothing else counts as evidence. */
+  evidence: z.enum(["none", "review_record"]),
+});
+export type RequiredOperation = z.infer<typeof RequiredOperation>;
+
+/** Whether the plan could go to production today, and exactly what stops it. Recomputed by checkHandoff, never trusted. */
+export const Readiness = z.object({
+  production_ready: z.boolean(),
+  blockers: z.array(z.string()),
+  warnings: z.array(z.string()),
+});
+export type Readiness = z.infer<typeof Readiness>;
 
 /** What output QA will check the finished video against. Only what the approved plan actually fixes; anything not yet decided is null. */
 export const HandoffQa = z.object({
@@ -62,8 +90,8 @@ export const DirectorHandoff = z.object({
     model: z.string().min(1),
     recipe_library_mode: z.enum(["draft", "reviewed"]),
   }),
-  /** Brief, objective, audience, platform, aspect ratio, duration and brand id, as the user gave them. */
-  project: Project,
+  /** Brief, objective, audience, platform, aspect ratio, duration and brand id, as the user gave them. The owner id stays out. */
+  project: Project.omit({ owner_id: true }),
   treatment: Treatment,
   storyboard: ScenePlan,
   edit_plan: EditPlan,
@@ -74,6 +102,13 @@ export const DirectorHandoff = z.object({
   assets: z.array(Asset),
   asset_notes: z.array(AssetNotes),
   claims: z.array(GroundedClaim),
+  /** Every claim in the treatment, classified: supported, illustrative concept, or unsupported factual claim. Nothing is dropped. */
+  claims_audit: z.array(ClaimAuditEntry),
+  /** What each scene needs and whether it is supplied, buildable as graphics, external or missing. */
+  asset_feasibility: AssetFeasibility,
+  /** Every recipe use as an operation, with its type, renderer candidates and evidence status. */
+  required_operations: z.array(RequiredOperation),
+  readiness: Readiness,
   constraints: z.object({
     platform: z.string().min(1),
     aspect_ratio: Project.shape.aspect_ratio,
@@ -129,7 +164,13 @@ export function verifyHandoffIntegrity(raw: unknown): string[] {
 
   // The assets, notes and facts the handoff carries must be exactly the evidence both approvals were given. Re-hashing the
   // handoff cannot change this, because the evidence hash lives in the approval records.
-  const ev = evidenceHash({ treatment: h.treatment, scenePlan: h.storyboard, assets: h.assets, facts: h.claims.map((c) => c.fact), notes: h.asset_notes });
+  const factsById = new Map<string, z.infer<typeof BrandFact>>();
+  for (const f of [...h.claims.map((c) => c.fact), ...h.claims_audit.flatMap((e) => (e.fact ? [e.fact] : []))]) factsById.set(f.fact_id, f);
+  const facts = [...factsById.values()];
+  const ev = evidenceHash({ treatment: h.treatment, scenePlan: h.storyboard, assets: h.assets, facts, notes: h.asset_notes });
+  // The audit and the feasibility report are functions of the approved plans and facts: recompute them and compare.
+  if (canonicalJson(auditClaims(h.treatment.claims, h.storyboard.scenes, facts)) !== canonicalJson(h.claims_audit)) problems.push("claims_audit does not match the treatment, storyboard and approved facts");
+  if (canonicalJson(assetFeasibility(h.storyboard, h.assets)) !== canonicalJson(h.asset_feasibility)) problems.push("asset_feasibility does not match the storyboard and its assets");
   const missing = ([["storyboard", sbRec], ["edit plan", epRec]] as const).filter(([, r]) => !r.evidence_hash);
   for (const [label] of missing) problems.push(`the ${label} approval carries no evidence hash, so its assets and facts cannot be verified`);
   if ([sbRec, epRec].some((r) => r.evidence_hash && r.evidence_hash !== ev)) problems.push("the assets or facts in the handoff are not the ones that were approved (evidence hash mismatch)");

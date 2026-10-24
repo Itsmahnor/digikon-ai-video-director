@@ -1,12 +1,12 @@
 import {
-  ApprovalRecord, DirectorHandoff, EditorOutput, HANDOFF_SCHEMA_VERSION, canonicalJson, handoffContentHash, verifyHandoffIntegrity,
-  type ApprovalStage, type Asset, type ProvenanceEntry,
+  ApprovalRecord, DirectorHandoff, EditorOutput, HANDOFF_SCHEMA_VERSION, assetFeasibility, auditClaims, canonicalJson, handoffContentHash, verifyHandoffIntegrity,
+  type ApprovalStage, type Asset, type AssetFeasibility, type BrandFact, type ClaimAuditEntry, type EditPlan, type ProvenanceEntry, type Project, type Readiness, type RequiredOperation,
 } from "@digikon/contracts";
 import { createHash } from "node:crypto";
 import { closeSync, openSync, readSync, statSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { AGENT_SCOPES, type Doc } from "@digikon/rag";
-import { resolveParams, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
+import { recipeReadiness, resolveParams, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
 import { checkRenderable, type ApprovalState } from "./approvals.js";
 import { editIssues, planIssues } from "./nodes.js";
 import type { SkillLibrary } from "./skills.js";
@@ -117,11 +117,13 @@ export function buildHandoff(s: HandoffState, ctx: HandoffContext): DirectorHand
   if (reasons.length || !check.ok || !sbRec || !epRec) throw new HandoffRefusedError(reasons.length ? reasons : ["approval records are missing"]);
 
   const treatment = s.treatmentDoc!, storyboard = s.scenePlan!, editPlan = s.editPlan!, facts = s.facts ?? [];
-  const claims = treatment.claims.flatMap((claim) => {
-    const scene_ids = storyboard.scenes.filter((sc) => sc.claim_ids.includes(claim.claim_id)).map((sc) => sc.scene_id);
-    const fact = facts.find((f) => f.fact_id === claim.brand_fact_id);
-    return scene_ids.length && fact ? [{ claim, fact, scene_ids }] : []; // validation above guarantees every claim in a scene has its fact
-  });
+  const claims_audit = auditClaims(treatment.claims, storyboard.scenes, facts);
+  // Only supported claims that a scene shows are grounded claims; illustrative and unsupported ones stay visible in claims_audit.
+  const claims = claims_audit.flatMap((e) => (e.status === "supported" && e.scene_ids.length ? [{ claim: treatment.claims.find((c) => c.claim_id === e.claim_id)!, fact: e.fact!, scene_ids: e.scene_ids }] : []));
+  const asset_feasibility = assetFeasibility(storyboard, assets);
+  const required_operations = requiredOperations(editPlan, ctx.recipes);
+  const readiness = readinessOf({ operations: required_operations, feasibility: asset_feasibility, audit: claims_audit, recipe_library_mode: ctx.recipes.minStatus });
+  const { owner_id: _owner, ...project } = s.project;
 
   const knowledge = new Map((ctx.knowledge ?? []).map((d) => [d.id, d]));
   const retrieved: ProvenanceEntry[] = (s.citations ?? []).map((id) => {
@@ -137,11 +139,11 @@ export function buildHandoff(s: HandoffState, ctx: HandoffContext): DirectorHand
   const content = {
     schema_version: HANDOFF_SCHEMA_VERSION,
     run: { run_id: ctx.run_id, model: ctx.model, recipe_library_mode: ctx.recipes.minStatus },
-    project: s.project, treatment, storyboard, edit_plan: editPlan,
+    project, treatment, storyboard, edit_plan: editPlan,
     approvals: { storyboard: sbRec, edit_plan: epRec },
     approved: { storyboard: check.storyboard, edit_plan: check.edit_plan },
     assets, asset_notes: (s.notes ?? []).filter((n) => used.has(n.asset_id)),
-    claims,
+    claims, claims_audit, asset_feasibility, required_operations, readiness,
     constraints: {
       platform: s.project.platform, aspect_ratio: s.project.aspect_ratio, target_duration_s: s.project.target_duration, brand_id: s.project.brand_id,
       platform_spec_ids: retrieved.filter((r) => knowledge.get(r.id)?.collection === "platform_specs").map((r) => r.id),
@@ -162,9 +164,66 @@ export function buildHandoff(s: HandoffState, ctx: HandoffContext): DirectorHand
   const parsed = DirectorHandoff.omit({ content_hash: true, handoff_id: true, created_at: true }).parse(content);
   const content_hash = handoffContentHash(parsed);
   const handoff = DirectorHandoff.parse({ ...parsed, content_hash, handoff_id: `ho_${content_hash.slice(0, 16)}`, created_at: (ctx.now?.() ?? new Date()).toISOString() });
-  const problems = verifyHandoffIntegrity(handoff);
+  const problems = [...verifyHandoffIntegrity(handoff), ...secretFindings(JSON.stringify(handoff))];
   if (problems.length) throw new HandoffRefusedError(problems);
   return handoff;
+}
+
+// ---------- operations, readiness, secrets ----------
+
+/** Every recipe use as an operation, with what is known about its recipe. Recomputed by checkHandoff. */
+export function requiredOperations(editPlan: EditPlan, recipes: RecipeLibrary): RequiredOperation[] {
+  return editPlan.uses.map((u) => {
+    const r = recipes.get(u.recipe_id)!;
+    return {
+      use_id: u.use_id, scene_id: u.scene_id, recipe_id: r.recipe_id, recipe_version: r.version, recipe_status: r.status,
+      operation_type: r.operation_type, implementation_ref: r.implementation_ref, renderers: r.compatibility.renderers, evidence: recipeReadiness(r).evidence,
+    };
+  });
+}
+
+/**
+ * Whether the plan could go to production today. A recipe without review evidence blocks it, as does any material that is
+ * needed but not supplied. Placeholders, illustrative claims and a draft library are warnings the user should see.
+ */
+export function readinessOf(i: { operations: readonly RequiredOperation[]; feasibility: AssetFeasibility; audit: readonly ClaimAuditEntry[]; recipe_library_mode: "draft" | "reviewed" }): Readiness {
+  const blockers = [...i.feasibility.blockers];
+  const untested = new Map<string, string>();
+  for (const o of i.operations) if (o.evidence === "none") untested.set(o.recipe_id, o.recipe_status);
+  for (const [id, status] of [...untested].sort(([a], [b]) => a.localeCompare(b))) blockers.push(`recipe ${id} is ${status}: no review evidence`);
+  const warnings = [...i.feasibility.warnings];
+  for (const e of i.audit) {
+    if (e.status === "illustrative" && e.scene_ids.length) warnings.push(`${e.scene_ids.join(", ")} show claim ${e.claim_id} ("${e.text}") as an illustrative concept, not a verified product fact`);
+    if (e.status === "unsupported") warnings.push(`claim ${e.claim_id} is an unsupported factual claim${e.scene_ids.length ? ` shown in ${e.scene_ids.join(", ")}` : " and is not used in any scene"}. Safe alternative: ${e.safe_alternative}`);
+  }
+  if (i.recipe_library_mode === "draft") warnings.push("the recipe library is in draft mode (development only)");
+  return { production_ready: blockers.length === 0, blockers, warnings };
+}
+
+const SECRET_PATTERNS: readonly [RegExp, string][] = [
+  [/sk-ant-[A-Za-z0-9_-]{8,}/, "an Anthropic API key"],
+  [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, "a private key"],
+  [/\bANTHROPIC_API_KEY\s*[=:]/, "an API key setting"],
+  [/\b(?:api[_-]?key|secret|password|token)["']?\s*[:=]\s*["']?[A-Za-z0-9_-]{16,}/i, "a credential assignment"],
+];
+
+/** Reasons a text must not leave the Director, without ever repeating the secret itself. */
+export function secretFindings(text: string): string[] {
+  const out: string[] = [];
+  for (const [re, what] of SECRET_PATTERNS) if (re.test(text)) out.push(`the handoff contains what looks like ${what} (not shown); remove it from the brief, facts or file names`);
+  const key = process.env["ANTHROPIC_API_KEY"];
+  if (key && key.length >= 8 && text.includes(key)) out.push("the handoff contains the configured API key (not shown)");
+  return out;
+}
+
+/** The Director's project record restored for the validators. A handoff does not carry the owner id. */
+const projectOf = (p: DirectorHandoff["project"]): Project => ({ ...p, owner_id: "handoff" });
+
+/** Every approved fact the handoff carries: the facts behind grounded claims and behind supported claims in the audit. */
+function factsOf(h: DirectorHandoff): BrandFact[] {
+  const byId = new Map<string, BrandFact>();
+  for (const f of [...h.claims.map((c) => c.fact), ...h.claims_audit.flatMap((e) => (e.fact ? [e.fact] : []))]) byId.set(f.fact_id, f);
+  return [...byId.values()];
 }
 
 /**
@@ -185,11 +244,11 @@ function derivedSectionProblems(h: DirectorHandoff): string[] {
   if (canonicalJson([...used].sort()) !== canonicalJson(h.assets.map((a) => a.asset_id).sort())) out.push("assets are not exactly the assets the approved storyboard uses");
   if (h.asset_notes.some((n) => !used.has(n.asset_id))) out.push("asset notes include an asset the storyboard does not use");
 
-  const expected = h.treatment.claims.flatMap((claim) => {
-    const scene_ids = scenes.filter((s) => s.claim_ids.includes(claim.claim_id)).map((s) => s.scene_id);
-    return scene_ids.length ? [{ claim, scene_ids }] : [];
-  });
-  const actual = h.claims.map((g) => ({ claim: g.claim, scene_ids: g.scene_ids }));
+  // Grounded claims are the supported claims some scene shows; illustrative and unsupported ones are only in claims_audit.
+  const expected = auditClaims(h.treatment.claims, scenes, factsOf(h))
+    .filter((e) => e.status === "supported" && e.scene_ids.length)
+    .map((e) => ({ claim: h.treatment.claims.find((c) => c.claim_id === e.claim_id)!, fact: e.fact, scene_ids: e.scene_ids }));
+  const actual = h.claims.map((g) => ({ claim: g.claim, fact: g.fact, scene_ids: g.scene_ids }));
   const factsMatch = h.claims.every((g) => g.fact.fact_id === g.claim.brand_fact_id);
   if (!factsMatch || canonicalJson(expected) !== canonicalJson(actual)) out.push("claims do not match the claims the approved storyboard uses");
   if (canonicalJson(h.qa.grounded_claim_ids) !== canonicalJson(h.claims.map((g) => g.claim.claim_id))) out.push("qa.grounded_claim_ids does not match the claims");
@@ -217,8 +276,16 @@ export function checkHandoff(
   const integrity = verifyHandoffIntegrity(raw);
   if (integrity.length) return integrity;
   const h = raw as DirectorHandoff;
-  const facts = h.claims.map((c) => c.fact);
-  const reasons: string[] = [...derivedSectionProblems(h), ...assetFileProblems(h.assets, ctx.files, ctx.storageRoot, ctx.requireContentHash)];
+  const facts = factsOf(h);
+  const project = projectOf(h.project);
+  const reasons: string[] = [...secretFindings(JSON.stringify(h)), ...derivedSectionProblems(h), ...assetFileProblems(h.assets, ctx.files, ctx.storageRoot, ctx.requireContentHash)];
+  // What the plan needs from the recipe library and what stops it going to production are recomputed, never trusted.
+  if (h.edit_plan.uses.every((u) => ctx.recipes.get(u.recipe_id))) {
+    const ops = requiredOperations(h.edit_plan, ctx.recipes);
+    if (canonicalJson(ops) !== canonicalJson(h.required_operations)) reasons.push("required_operations do not match the recipe library (a recipe's status, operation type or implementation changed)");
+    const ready = readinessOf({ operations: ops, feasibility: assetFeasibility(h.storyboard, h.assets), audit: h.claims_audit, recipe_library_mode: h.run.recipe_library_mode });
+    if (canonicalJson(ready) !== canonicalJson(h.readiness)) reasons.push("readiness does not match what the plans, assets, claims and recipes show");
+  }
   if (ctx.approvals) {
     const sb = latestApproved(ctx.approvals, "storyboard"), ep = latestApproved(ctx.approvals, "edit_plan");
     if (!sb || !ep || canonicalJson(sb) !== canonicalJson(h.approvals.storyboard) || canonicalJson(ep) !== canonicalJson(h.approvals.edit_plan)) {
@@ -226,8 +293,8 @@ export function checkHandoff(
     }
   }
   reasons.push(
-    ...planIssues(h.storyboard, h.assets, h.project, h.asset_notes, h.treatment, facts).map((i) => `storyboard is not valid: ${i}`),
-    ...editIssues(h.edit_plan, h.storyboard, ctx, h.project, h.assets).map((i) => `edit plan is not valid: ${i}`),
+    ...planIssues(h.storyboard, h.assets, project, h.asset_notes, h.treatment, facts).map((i) => `storyboard is not valid: ${i}`),
+    ...editIssues(h.edit_plan, h.storyboard, ctx, project, h.assets).map((i) => `edit plan is not valid: ${i}`),
   );
   for (const r of h.provenance.recipes) {
     const now = ctx.recipes.get(r.recipe_id);
@@ -287,6 +354,7 @@ export function checkEditorOutput(raw: unknown, handoff: DirectorHandoff, ctx: {
     const recipe = ctx.recipes.get(op.recipe_id);
     if (!recipe) issues.push(`${at}: recipe ${op.recipe_id} does not exist`);
     else {
+      if (op.operation_type !== recipe.operation_type) issues.push(`${at}: operation_type ${op.operation_type} does not match recipe ${recipe.recipe_id}, which becomes a ${recipe.operation_type} operation`);
       if (recipe.version !== op.recipe_version) issues.push(`${at}: recipe ${op.recipe_id} is version ${recipe.version}, not ${op.recipe_version}`);
       if (canonicalJson(op.parameters) !== canonicalJson(resolveParams(recipe, use.params))) {
         drift = true;
@@ -305,7 +373,7 @@ export function checkEditorOutput(raw: unknown, handoff: DirectorHandoff, ctx: {
 
   // Parameter ranges and recipe rules still hold, checked with the same validator the Director used.
   const asPlan = { ...handoff.edit_plan, uses: o.operations.map((op) => ({ use_id: op.operation_id, scene_id: op.target_scene_id, recipe_id: op.recipe_id, params: op.parameters as Record<string, number | string | boolean>, rationale: op.expected_result })) };
-  for (const i of validateEditPlan(asPlan, handoff.storyboard, ctx.recipes, handoff.project, handoff.assets)) {
+  for (const i of validateEditPlan(asPlan, handoff.storyboard, ctx.recipes, projectOf(handoff.project), handoff.assets)) {
     if (i.code !== "max_uses" && i.code !== "duplicate_use") issues.push(`operation ${i.use_id}: ${i.code} - ${i.message}`);
   }
   if (o.validation.ok && issues.length) issues.push("the result says it is valid, but these checks failed");

@@ -52,7 +52,7 @@ describe("timeline length", () => {
 
 describe("Recipe schema", () => {
   const base = {
-    recipe_id: "x-y", version: "0.1.0", type: "transition", title: "t", purpose: "p", intents: ["i"],
+    recipe_id: "x-y", version: "0.1.0", type: "transition", operation_type: "concat", title: "t", purpose: "p", intents: ["i"],
     parameters: [{ kind: "number", name: "d", unit: "s", min: 0, max: 1, default: 0.5 }],
     constraints: { min_duration_s: 1, max_duration_s: 5, max_uses_per_film: null, energy: "low" },
     compatibility: { renderers: ["ffmpeg"], aspect_ratios: ["9:16"], media_types: ["video"] },

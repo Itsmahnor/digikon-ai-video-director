@@ -52,7 +52,7 @@ export class DemoClient implements LlmClient {
     const facts = [...user.matchAll(/\[(F\d+)\] ([^\n]+)/g)].map((m) => ({ id: m[1]!, text: m[2]! }));
     const claims = [
       ...facts.slice(0, 2).map((f, i) => ({ claim_id: `C0${i + 1}`, text: f.text, brand_fact_id: f.id })),
-      { claim_id: "C09", text: "The best you can buy", brand_fact_id: null },
+      { claim_id: "C09", text: "The best you can buy", brand_fact_id: null, kind: "factual", safe_alternative: "Let the product shots speak; no ranking claim." },
     ];
     const a = Math.round(total * 0.35 * 2) / 2, c = Math.max(2, Math.min(4, Math.round(total * 0.2 * 2) / 2));
     return {
@@ -99,11 +99,19 @@ export class DemoClient implements LlmClient {
     const shot = (size: string, motion: string, action: string) => ({ shot_size: size, camera_motion: motion, visual_action: action });
     const hasClaim = /"claim_id": "C01"/.test(user);
     const sizes = ["medium", "close_up", "wide"];
+    /** What the scene needs: the supplied clip it uses, or graphics the workflow can build. */
+    const needs = (v: { asset_ids: string[] }, graphics: string) => v.asset_ids.length
+      ? [{ need: "Supplied footage", kind: "footage", availability: "supplied", asset_id: v.asset_ids[0] }]
+      : [{ need: graphics, kind: "graphics", availability: "generate_graphics" }];
+    const hookVideo = withVideo(hook);
     return {
       scenes: [
-        { scene_id: "S01", purpose: "Hook", duration_seconds: hook, ...withVideo(hook), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
-        ...middleScenes.map((d, i) => ({ scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof", duration_seconds: d, ...withVideo(d), shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"), claim_ids: i === 0 && hasClaim ? ["C01"] : [], overlay: null, transition_out: "cut" })),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", duration_seconds: ctaDur, asset_ids: [], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: "S01", purpose: "Hook", duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
+        ...middleScenes.map((d, i) => {
+          const v = withVideo(d);
+          return { scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof", duration_seconds: d, ...v, required_assets: needs(v, "Animated detail graphics"), shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"), claim_ids: i === 0 && hasClaim ? ["C01"] : [], overlay: null, transition_out: "cut" };
+        }),
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
       ],
     };
   }

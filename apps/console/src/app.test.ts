@@ -187,7 +187,7 @@ describe("routing and the Director run", () => {
     const res = await app.request(`/api/sessions/${id}/handoff`);
     expect(res.status).toBe(200);
     const h = await decided(res);
-    expect(h).toMatchObject({ schema_version: "1.1.0", run: { model: "demo", recipe_library_mode: "draft" }, approved: { storyboard: { version: 1 }, edit_plan: { version: 1 } } });
+    expect(h).toMatchObject({ schema_version: "1.2.0", run: { model: "demo", recipe_library_mode: "draft" }, approved: { storyboard: { version: 1 }, edit_plan: { version: 1 } } });
     expect(h.handoff_id).toBe(`ho_${h.content_hash.slice(0, 16)}`);
     expect(h.claims.map((c: any) => c.claim.claim_id)).not.toContain("C09"); // the unsupported claim stays out
     expect((await app.request(`/api/sessions/nosuchsession/handoff`)).status).toBe(404);

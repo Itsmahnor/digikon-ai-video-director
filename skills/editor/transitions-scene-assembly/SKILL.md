@@ -35,7 +35,7 @@ After `continuity-pacing`. Also whenever a scene's `transition_out` or a transit
 ## Defaults and limits
 - Plain cuts are the default: when no transition is approved for a boundary, the boundary is a cut and needs no operation unless the plan lists `hard-cut`.
 - There is **no overlapping-shot model**: scenes are contiguous and cannot overlap, and operation timing must stay inside one scene. Transitions that need both clips to overlap are expressed only through the recipe's own implementation, not through new timing fields.
-- The operation type for a transition is not fixed by code. Recommendation: `concat` (see README gap G1).
+- The operation type comes from the recipe's `operation_type` (`concat` for the visual transitions, `mix_audio` for `j-cut-audio-lead`) and is checked by `checkEditorOutput`.
 
 ## Never
 - Add, swap or remove a transition, or change its duration, without a revision request.
