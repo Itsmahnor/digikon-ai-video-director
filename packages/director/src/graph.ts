@@ -3,7 +3,7 @@ import {
   ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE,
   type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type EditPlan, type Escalation, type Project, type ReviewDecision, type ScenePlan, type Treatment,
 } from "@digikon/contracts";
-import { currentEditPlan, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
+import { currentEditPlan, currentEvidenceHash, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
 import {
   analyseAssets, editPlanNode, escalationFor, intakeNode, storyboardNode, treatmentNode,
   type Deps, type IntakeOut,
@@ -12,6 +12,9 @@ import {
 /** `awaiting_approval` covers both human gates; `gate` in the state says which one. `approved` means both gates passed, not that rendering is allowed: only `assertRenderable` decides that. */
 export type DirectorStatus =
   | "running" | "needs_clarification" | "awaiting_approval" | "approved" | "escalated";
+
+/** Identifies the graph's shape (nodes, gates, state). A saved checkpoint from any other version is refused, never adapted. */
+export const DIRECTOR_GRAPH_VERSION = "director-graph/2";
 
 /** How many change requests one gate accepts. The next one escalates. */
 export const MAX_REVISIONS = MAX_REVISIONS_PER_GATE;
@@ -115,9 +118,12 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       if (parsed.success && !refused) { sub = parsed.data; break; }
     }
     const record = ApprovalRecord.parse({
-      stage, plan_version: cur.version, storyboard_version: s.scenePlan!.version, plan_hash: cur.hash,
+      stage, plan_version: cur.version, storyboard_version: s.scenePlan!.version, plan_hash: cur.hash, evidence_hash: currentEvidenceHash(s)!,
       decision: sub.decision, notes: sub.notes.trim(), decided_at: new Date().toISOString(),
     });
+    // Written before the decision takes effect. If the write fails this node throws, the graph stays paused at the gate,
+    // and nothing is recorded in state either.
+    deps.approvalLog?.append(record);
     if (sub.decision === "approved") {
       return { approvals: [record], gate: null, pendingRevision: null, status: stage === "edit_plan" ? ("approved" as const) : ("running" as const), trace: [`${stage}_gate: approved version ${cur.version}`] };
     }

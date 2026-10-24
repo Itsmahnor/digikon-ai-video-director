@@ -21,6 +21,8 @@ export function tokenize(text: string): string[] {
 export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
   const m = d.metadata;
   if (f.topics?.length && !(m.topics ?? []).some((x) => f.topics!.includes(x))) return false;
+  if (d.collection !== "shot_recipes" && m.status === "draft" && !f.include_draft) return false;
+  if (f.min_grade && (!m.grade || m.grade > f.min_grade)) return false;
   switch (d.collection) {
     case "platform_specs":
       return m.verified === true;

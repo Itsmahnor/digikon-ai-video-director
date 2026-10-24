@@ -31,6 +31,7 @@ export function loadKnowledge(dir: string): Doc[] {
         if (!meta[key]) throw new Error(`${path}: frontmatter needs "${key}"`);
       }
       if (!["A", "B", "C"].includes(meta.grade!)) throw new Error(`${path}: grade must be A, B or C`);
+      if (meta.status !== undefined && !["draft", "reviewed"].includes(meta.status)) throw new Error(`${path}: status must be draft or reviewed`);
       if (ids.has(meta.id!)) throw new Error(`duplicate knowledge id ${meta.id}`);
       ids.add(meta.id!);
       docs.push({
@@ -43,6 +44,7 @@ export function loadKnowledge(dir: string): Doc[] {
           grade: meta.grade as "A" | "B" | "C",
           verified: meta.verified === "true",
           topics: meta.topics ? meta.topics.split(",").map((s) => s.trim()) : [],
+          ...(meta.status ? { status: meta.status as "draft" | "reviewed" } : {}),
         },
       });
     }

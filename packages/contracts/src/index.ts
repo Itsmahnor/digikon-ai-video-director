@@ -5,3 +5,5 @@ export * from "./speech.js";
 export * from "./router.js";
 export * from "./validate.js";
 export * from "./approval.js";
+export * from "./handoff.js";
+export * from "./editor.js";

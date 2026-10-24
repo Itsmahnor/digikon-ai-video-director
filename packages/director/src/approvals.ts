@@ -1,5 +1,5 @@
 import {
-  ApprovalRecord, editPlanHash, storyboardHash,
+  ApprovalRecord, editPlanHash, evidenceHash, storyboardHash,
   type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type EditPlan, type Project, type ScenePlan, type Treatment,
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
@@ -31,6 +31,10 @@ export function currentStoryboard(s: ApprovalState): { version: number; hash: st
 export function currentEditPlan(s: ApprovalState): { version: number; hash: string } | null {
   const sb = currentStoryboard(s);
   return sb && s.editPlan ? { version: s.editPlan.version, hash: editPlanHash(sb, s.editPlan) } : null;
+}
+/** Hash of the assets, notes and facts the current storyboard rests on, or null before there is a storyboard. */
+export function currentEvidenceHash(s: ApprovalState): string | null {
+  return s.treatmentDoc && s.scenePlan ? evidenceHash({ treatment: s.treatmentDoc, scenePlan: s.scenePlan, assets: s.assets, facts: s.facts ?? [], notes: s.notes ?? [] }) : null;
 }
 export function pendingGate(s: ApprovalState): { stage: ApprovalStage; plan_version: number; plan_hash: string } | null {
   if (!s.gate) return null;
@@ -89,6 +93,14 @@ export function checkRenderable(s: ApprovalState, ctx: { recipes: RecipeLibrary 
   }
 
   if (sbRec && epRec && records.lastIndexOf(epRec) < records.lastIndexOf(sbRec)) reasons.push("the edit plan was approved before the storyboard");
+
+  // The evidence both approvals rest on: the assets and their analysis, and the facts behind the claims shown.
+  const ev = currentEvidenceHash(s);
+  for (const [label, rec] of [["storyboard", sbRec], ["edit plan", epRec]] as const) {
+    if (!rec || rec.decision !== "approved" || !ev) continue;
+    if (!rec.evidence_hash) reasons.push(`the ${label} approval carries no evidence hash, so its assets and facts cannot be verified`);
+    else if (rec.evidence_hash !== ev) reasons.push(`the assets or approved facts changed after the ${label} was approved (evidence hash mismatch)`);
+  }
 
   // Current validity, using the same validators that built the plans.
   if (s.treatmentDoc && s.scenePlan) {

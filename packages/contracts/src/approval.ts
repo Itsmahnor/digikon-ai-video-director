@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import type { EditPlan, Treatment } from "./director.js";
-import type { ScenePlan } from "./schemas.js";
+import type { AssetNotes, BrandFact, EditPlan, Treatment } from "./director.js";
+import type { Asset, ScenePlan } from "./schemas.js";
 
 /** The two human checkpoints, in order. */
 export const ApprovalStage = z.enum(["storyboard", "edit_plan"]);
@@ -40,6 +40,12 @@ export const ApprovalRecord = z
     /** The storyboard version this decision sits on. Equal to plan_version at the storyboard gate. */
     storyboard_version: z.number().int().positive(),
     plan_hash: Sha256,
+    /**
+     * Hash of the evidence the plan rests on: the assets the storyboard uses (identity and measured metadata, including file
+     * size), their analysis notes, and the approved facts behind the claims it shows. Optional so older records still parse,
+     * but a record without it cannot authorise a render or a handoff.
+     */
+    evidence_hash: Sha256.optional(),
     decision: ReviewDecision,
     notes: Notes,
     decided_at: z.string().datetime(),
@@ -83,6 +89,34 @@ export const hashCanonical = (value: unknown): string => sha256Hex(canonicalJson
  */
 export const storyboardHash = (treatment: Treatment, scenePlan: ScenePlan): string =>
   hashCanonical({ stage: "storyboard", treatment, scene_plan: scenePlan });
+
+export interface EvidenceInput {
+  treatment: Treatment;
+  scenePlan: ScenePlan;
+  assets: readonly Asset[];
+  facts: readonly BrandFact[];
+  notes: readonly AssetNotes[];
+}
+
+/**
+ * The evidence an approval covers, in a fixed order: every asset a scene uses (the whole Asset record: id, uri, media type,
+ * duration, size in pixels, audio tracks, transcript ref and probe metadata such as bytes), the analysis notes for those assets,
+ * and every fact behind a claim a scene shows (id, text and source). Assets, notes or facts the plan does not use are left
+ * out, so unrelated uploads do not invalidate an approval. A fact a scene's claim points to but which is missing is listed by id
+ * with null text, so its absence changes the hash too.
+ */
+export function approvedEvidence(e: EvidenceInput) {
+  const used = new Set(e.scenePlan.scenes.flatMap((s) => s.asset_ids));
+  const claimIds = new Set(e.scenePlan.scenes.flatMap((s) => s.claim_ids));
+  const factIds = new Set(e.treatment.claims.filter((c) => claimIds.has(c.claim_id) && c.brand_fact_id).map((c) => c.brand_fact_id!));
+  const byId = <T,>(key: (x: T) => string) => (a: T, b: T) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
+  return {
+    assets: e.assets.filter((a) => used.has(a.asset_id)).sort(byId((a) => a.asset_id)),
+    notes: e.notes.filter((n) => used.has(n.asset_id)).sort(byId((n) => n.asset_id)),
+    facts: [...factIds].sort().map((id) => e.facts.find((f) => f.fact_id === id) ?? { fact_id: id, text: null, source: null }),
+  };
+}
+export const evidenceHash = (e: EvidenceInput): string => hashCanonical({ stage: "evidence", ...approvedEvidence(e) });
 
 /** The edit plan is hashed together with the storyboard it was built on, so approving it binds it to that exact storyboard. */
 export const editPlanHash = (storyboard: { version: number; hash: string }, editPlan: EditPlan): string =>

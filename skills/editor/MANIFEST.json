@@ -1,0 +1,92 @@
+{
+  "manifest_version": 1,
+  "library": "digikon-editor-skills",
+  "version": "0.1.0",
+  "status": "authored_not_loaded",
+  "note": "No Editor agent exists yet; nothing loads these skills at run time. SkillLibrary can read this folder as-is.",
+  "target_category": "saas_product_explainer",
+  "handoff_schema_version": "1.1.0",
+  "editor_schema_version": "1.0.0",
+  "skills": [
+    {
+      "name": "core-contract",
+      "version": "0.1.0",
+      "path": "core-contract/SKILL.md",
+      "purpose": "The Editor decision flow and the line between Editor decisions and changes that need Director reapproval.",
+      "invoke_when": ["start of every Editor job", "before returning any EditorOutput"],
+      "order": 1
+    },
+    {
+      "name": "footage-review",
+      "version": "0.1.0",
+      "path": "footage-review/SKILL.md",
+      "purpose": "Verify approved footage against measured evidence; report missing, unusable or ambiguous media without claiming visual understanding.",
+      "invoke_when": ["an operation touches a video, image or audio asset"],
+      "order": 2
+    },
+    {
+      "name": "continuity-pacing",
+      "version": "0.1.0",
+      "path": "continuity-pacing/SKILL.md",
+      "purpose": "Check narrative and action continuity, variety and rhythm inside the approved scene timing.",
+      "invoke_when": ["after footage review", "before assembling transitions"],
+      "order": 3
+    },
+    {
+      "name": "transitions-scene-assembly",
+      "version": "0.1.0",
+      "path": "transitions-scene-assembly/SKILL.md",
+      "purpose": "Turn approved transitions and scene order into typed operations; cuts by default.",
+      "invoke_when": ["a scene has transition_out", "the plan has a transition recipe"],
+      "order": 4
+    },
+    {
+      "name": "captions-typography",
+      "version": "0.1.0",
+      "path": "captions-typography/SKILL.md",
+      "purpose": "Place approved on-screen text exactly and legibly; report unsupported caption types.",
+      "invoke_when": ["a scene has an overlay", "the plan uses a text animation recipe", "the brief mentions captions"],
+      "order": 5
+    },
+    {
+      "name": "audio-voiceover-mixing",
+      "version": "0.1.0",
+      "path": "audio-voiceover-mixing/SKILL.md",
+      "purpose": "Place approved audio cues, ducking and loudness steps from measured evidence; report unsupported audio capabilities.",
+      "invoke_when": ["a scene has audio_cues or source audio", "the plan uses a sound_cue recipe"],
+      "order": 6
+    },
+    {
+      "name": "motion-graphics-product-ui",
+      "version": "0.1.0",
+      "path": "motion-graphics-product-ui/SKILL.md",
+      "purpose": "Apply approved graphics and camera recipes with restraint; show product UI only as supplied assets.",
+      "invoke_when": ["the plan uses an animation, camera_move or shot recipe", "a scene uses screenshots or screen recordings"],
+      "order": 7
+    },
+    {
+      "name": "remotion-implementation",
+      "version": "0.1.0",
+      "path": "remotion-implementation/SKILL.md",
+      "purpose": "Rules and verified facts for handing validated operations to reviewed Remotion templates later. Documentation only.",
+      "invoke_when": ["an operation has a remotion/ implementation_ref", "designing the renderer boundary"],
+      "order": 8
+    },
+    {
+      "name": "final-video-qa",
+      "version": "0.1.0",
+      "path": "final-video-qa/SKILL.md",
+      "purpose": "Separate pre-render plan checks (implemented) from post-render media checks (not implemented).",
+      "invoke_when": ["before returning an EditorOutput", "after every render, once a renderer exists"],
+      "order": 9
+    },
+    {
+      "name": "safe-assets-and-tools",
+      "version": "0.1.0",
+      "path": "safe-assets-and-tools/SKILL.md",
+      "purpose": "Untrusted-input, path, integrity and no-execution rules for every Editor job.",
+      "invoke_when": ["every Editor job", "a path, URL, command, package or external skill appears"],
+      "order": 10
+    }
+  ]
+}

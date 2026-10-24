@@ -1,9 +1,10 @@
 import { createReadStream } from "node:fs";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
 import { extname, join } from "node:path";
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
@@ -11,11 +12,12 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
 import { ApprovalSubmission, BrandFact, Turn, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
-  Command, MAX_REVISIONS, StaleApprovalError, buildDirectorGraph, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
+  Command, HandoffRefusedError, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
+  checkpointOf, restoreRun, verifyHandoffWithStore,
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, probeFile } from "@digikon/media";
-import type { Retriever } from "@digikon/rag";
+import type { Doc, Retriever } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { routeRequest } from "@digikon/router";
 import { languageName, transcribeFile, type SpeechEngine } from "@digikon/speech";
@@ -30,6 +32,8 @@ export interface AppContext {
   whisper: () => WhisperStatus;
   skills: SkillLibrary;
   retriever: Retriever;
+  /** The knowledge notes behind the retriever. Used only to name the sources in the Editor handoff; optional. */
+  knowledge?: readonly Doc[];
   recipes: RecipeLibrary;
   ffmpegOk: boolean;
   storageDir: string;
@@ -91,6 +95,20 @@ export function createApp(ctx: AppContext) {
     if (!ctx.llm) throw new HttpError(503, "no_api_key", "No API key is set. Add ANTHROPIC_API_KEY to .env and restart, or start the console in demo mode.");
     return ctx.llm;
   };
+  /**
+   * Saves where the run stopped, so it can resume after a restart. Reports honestly: `saved: false` when the write failed,
+   * in which case the progress exists only in memory until the next successful save.
+   */
+  const saveCheckpoint = (s: Session, state: DirectorStateType): { saved: boolean; error?: string } => {
+    if (!s.threadId || !["awaiting_approval", "approved", "escalated"].includes(state.status)) return { saved: false, error: "This state is not saved: only a run waiting at a gate, approved or escalated can be resumed." };
+    try {
+      new RunStore(s.dir).saveCheckpoint(checkpointOf(state, { session_id: s.id, run_id: s.threadId }));
+      return { saved: true };
+    } catch (e) {
+      console.error(e instanceof Error ? e.message : e);
+      return { saved: false, error: "Progress could not be saved to disk. It will be lost if the server restarts." };
+    }
+  };
   const guardSize = (req: Request) => {
     const len = Number(req.headers.get("content-length") ?? 0);
     if (len > MAX_REQUEST_BYTES) throw new HttpError(413, "too_large", `Upload is larger than ${MAX_REQUEST_BYTES / 1048576} MB for this console.`);
@@ -99,6 +117,11 @@ export function createApp(ctx: AppContext) {
   app.onError((err, c) => {
     if (err instanceof HttpError) return c.json({ error: err.code, message: err.message }, err.status);
     if (err instanceof StaleApprovalError) return c.json({ error: "stale_approval", message: err.message }, 409);
+    if (err instanceof HandoffRefusedError) return c.json({ error: "handoff_refused", message: err.message, reasons: err.reasons }, 409);
+    if (err instanceof PersistenceError) {
+      console.error(err.message);
+      return c.json({ error: "not_saved", message: "The decision could not be saved to disk, so it was not applied. Check free disk space and try again." }, 503);
+    }
     const llmErr = classifyLlmError(err, ctx.llm?.model);
     if (llmErr) {
       noteLlm(llmErr);
@@ -204,9 +227,12 @@ export function createApp(ctx: AppContext) {
       }
       const assetId = `asset_${randomUUID().slice(0, 8)}`;
       const path = join(s.dir, "uploads", `${assetId}${ext}`);
-      await pipeline(Readable.fromWeb(file.stream() as never), createWriteStream(path));
+      // Hash while writing, so the content hash costs no extra read. It is checked again before any handoff.
+      const hash = createHash("sha256");
+      const tee = new Transform({ transform(chunk: Buffer, _enc, done) { hash.update(chunk); done(null, chunk); } });
+      await pipeline(Readable.fromWeb(file.stream() as never), tee, createWriteStream(path));
       const probed = await probeFile(path, { assetId, originalName: name });
-      if (probed.ok) added.push(probed.asset);
+      if (probed.ok) added.push({ ...probed.asset, metadata: { ...probed.asset.metadata, sha256: hash.digest("hex") } });
       else { await rm(path, { force: true }); rejected.push({ name, issues: probed.issues }); }
     }
     s.assets.push(...added);
@@ -311,8 +337,9 @@ export function createApp(ctx: AppContext) {
     if (request.mode === "edit_existing" || !request.project) throw new HttpError(409, "edit_mode", "This is an edit request. The editing agent is the next milestone, so there is no plan to build yet.");
 
     s.facts = body.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "entered in the console" }));
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: ctx.retriever, recipes: ctx.recipes });
     s.threadId = `${s.id}-${Date.now()}`;
+    // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: ctx.retriever, recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     const project = request.project;
@@ -334,7 +361,7 @@ export function createApp(ctx: AppContext) {
         }
         const state = (await graph.getState(config)).values;
         llmProblem = null;
-        await send("state", summarise(state, ctx));
+        await send("state", { ...summarise(state, ctx), run_id: s.threadId, checkpoint: saveCheckpoint(s, state as DirectorStateType) });
       } catch (e) {
         const llmErr = classifyLlmError(e, llm.model);
         noteLlm(llmErr);
@@ -369,10 +396,70 @@ export function createApp(ctx: AppContext) {
       const state = await s.graph.invoke(new Command({ resume: sub }), config);
       llmProblem = null;
       const record = buildRunRecord(state, { model: llm.model, skills: ctx.skills, library: ctx.recipes });
-      return c.json({ state: summarise(state, ctx), record });
+      return c.json({ state: summarise(state, ctx), record, checkpoint: saveCheckpoint(s, state) });
     } finally {
       s.deciding = false;
     }
+  });
+
+  /**
+   * The frozen, validated package the Editor agent will consume. Only exists once both approvals match the current plans;
+   * otherwise 409 with every reason. Nothing is rendered or sent anywhere.
+   */
+  app.get("/api/sessions/:id/handoff", async (c) => {
+    const s = session(c.req.param("id"));
+    if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no Director run yet.");
+    const state = (await s.graph.getState({ configurable: { thread_id: s.threadId } })).values as DirectorStateType;
+    const model = ctx.demo ? "demo" : ctx.llm?.model ?? "unknown";
+    const checks = { recipes: ctx.recipes, storageRoot: s.dir, requireContentHash: true };
+    const handoff = buildHandoff(state, { ...checks, skills: ctx.skills, knowledge: ctx.knowledge, run_id: s.threadId, model });
+    const store = new RunStore(s.dir);
+    // The approvals on disk are the reference. A handoff that does not match them is never saved or served.
+    const problems = verifyHandoffWithStore(handoff, store, checks);
+    if (problems.length) throw new HandoffRefusedError(problems);
+    store.saveHandoff(handoff);
+    return c.json(handoff);
+  });
+
+  /**
+   * Brings a stopped run back after a restart: it pauses at the same gate with the same plan, or shows the approved or
+   * escalated result. Every stored approval, plan, fact and file is checked first; any problem is 409 with the reasons and
+   * nothing is started. The ids in the URL only say where to look. Resuming approves nothing.
+   */
+  app.post("/api/sessions/:id/runs/:runId/resume", async (c) => {
+    const id = c.req.param("id"), runId = c.req.param("runId");
+    const dir = join(ctx.storageDir, "sessions", id);
+    if (!ID.test(id) || !new RegExp(`^${id}-\\d+$`).test(runId) || !existsSync(dir)) throw new HttpError(404, "no_run", "That run does not exist.");
+    const existing = sessions.get(id);
+    if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
+    const llm = needLlm();
+    const store = new RunStore(dir);
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: ctx.retriever, recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
+    if (!r.ok) {
+      if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);
+      return c.json({ error: "cannot_resume", message: "This run cannot be resumed safely. Start a new run from the same files.", reasons: r.reasons }, 409);
+    }
+    const st = r.state;
+    const analysis = new Map(st.notes.map((n) => [n.asset_id, { status: "done" as const, notes: n, transcript: null, note: null }]));
+    sessions.set(id, { id, dir, assets: st.assets, turns: [], route: null, facts: st.facts, analysis, pending: new Map(), graph, threadId: runId });
+    return c.json({ state: { ...summarise(st, ctx), run_id: runId }, resumed: true });
+  });
+
+  /**
+   * A handoff saved earlier, verified again now against the stored approvals and the files on disk. Works after a restart,
+   * when the in-memory session is gone. 200 with the handoff when it verifies, 409 with every reason when it does not.
+   */
+  app.get("/api/sessions/:id/runs/:runId/handoff", (c) => {
+    const id = c.req.param("id"), runId = c.req.param("runId");
+    const dir = join(ctx.storageDir, "sessions", id);
+    if (!ID.test(id) || !new RegExp(`^${id}-\\d+$`).test(runId) || !existsSync(dir)) throw new HttpError(404, "no_run", "That run does not exist.");
+    const store = new RunStore(dir);
+    const { handoff, problems } = store.loadHandoff(runId);
+    if (problems.length) return c.json({ error: "handoff_unreadable", message: "The stored handoff cannot be trusted.", verification: { ok: false, reasons: problems } }, 409);
+    if (!handoff) throw new HttpError(404, "no_handoff", "No handoff was saved for that run.");
+    const reasons = verifyHandoffWithStore(handoff, store, { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true });
+    return c.json({ handoff, verification: { ok: reasons.length === 0, reasons } }, reasons.length ? 409 : 200);
   });
 
   app.use("/*", serveStatic({ root: ctx.publicDir }));

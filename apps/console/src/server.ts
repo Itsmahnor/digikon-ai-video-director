@@ -22,7 +22,8 @@ if (!ffmpegOk) console.warn("FFmpeg/ffprobe not found on PATH: uploads and trans
 const recipes = loadRecipes(join(repoRoot, "recipes"));
 // Development default: draft recipes are allowed until templates are test-rendered and reviewed.
 const library = new RecipeLibrary(recipes, process.env.RECIPES_MODE === "reviewed" ? "reviewed" : "draft");
-const retriever = new KeywordRetriever([...recipeDocs(recipes), ...loadKnowledge(join(repoRoot, "knowledge"))]);
+const knowledge = loadKnowledge(join(repoRoot, "knowledge"));
+const retriever = new KeywordRetriever([...recipeDocs(recipes), ...knowledge]);
 const skills = new SkillLibrary(join(repoRoot, "skills"));
 
 const speech = new WhisperEngine({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") });
@@ -33,7 +34,7 @@ const llm = demo ? new DemoClient() : process.env.ANTHROPIC_API_KEY ? new Anthro
 if (!llm) console.warn("No ANTHROPIC_API_KEY: the console runs, but routing and planning need a key (or --demo).");
 
 const app = createApp({
-  llm, demo, speech, whisper: () => whisper, skills, retriever, recipes: library, ffmpegOk,
+  llm, demo, speech, whisper: () => whisper, skills, retriever, knowledge, recipes: library, ffmpegOk,
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),
 });
 

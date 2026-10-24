@@ -14,8 +14,8 @@ export const project = Project.parse({
   objective: "Drive first orders", audience: "Home coffee drinkers", platform: "instagram", aspect_ratio: "9:16", target_duration: 12,
 });
 export const assets = [
-  Asset.parse({ asset_id: "asset_beans", uri: "beans.mp4", media_type: "video", duration: 20, width: 1080, height: 1920 }),
-  Asset.parse({ asset_id: "asset_logo", uri: "logo.png", media_type: "image", duration: null, width: 800, height: 800 }),
+  Asset.parse({ asset_id: "asset_beans", uri: "beans.mp4", media_type: "video", duration: 20, width: 1080, height: 1920, metadata: { bytes: 4_000_000 } }),
+  Asset.parse({ asset_id: "asset_logo", uri: "logo.png", media_type: "image", duration: null, width: 800, height: 800, metadata: { bytes: 50_000 } }),
 ];
 export const facts: BrandFact[] = [{ fact_id: "F01", text: "Beans are roasted weekly in small batches", source: "brand sheet" }];
 

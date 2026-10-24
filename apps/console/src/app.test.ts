@@ -1,11 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Transcript } from "@digikon/contracts";
-import { DemoClient, SkillLibrary } from "@digikon/director";
+import { DemoClient, RunStore, SkillLibrary } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import type { SpeechEngine } from "@digikon/speech";
@@ -173,6 +173,26 @@ describe("routing and the Director run", () => {
     expect((await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" })).status).toBe(409); // cannot approve twice
   });
 
+  it("serves the Editor handoff only after both approvals, and 409 with reasons before", async () => {
+    const { app, id } = await atGate1();
+    const early = await app.request(`/api/sessions/${id}/handoff`);
+    expect(early.status).toBe(409);
+    const body = await decided(early);
+    expect(body.error).toBe("handoff_refused");
+    expect(body.reasons).toContain("the storyboard has not been approved");
+
+    await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" });
+    expect((await app.request(`/api/sessions/${id}/handoff`)).status).toBe(409); // edit plan not approved yet
+    await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" });
+    const res = await app.request(`/api/sessions/${id}/handoff`);
+    expect(res.status).toBe(200);
+    const h = await decided(res);
+    expect(h).toMatchObject({ schema_version: "1.1.0", run: { model: "demo", recipe_library_mode: "draft" }, approved: { storyboard: { version: 1 }, edit_plan: { version: 1 } } });
+    expect(h.handoff_id).toBe(`ho_${h.content_hash.slice(0, 16)}`);
+    expect(h.claims.map((c: any) => c.claim.claim_id)).not.toContain("C09"); // the unsupported claim stays out
+    expect((await app.request(`/api/sessions/nosuchsession/handoff`)).status).toBe(404);
+  });
+
   it("requires the stage and plan version, and answers 409 for a stale stage or version without changing anything", async () => {
     const { app, id } = await atGate1();
     expect((await decide(app, id, { decision: "approved" })).status).toBe(400); // the old body shape is not enough
@@ -233,6 +253,136 @@ describe("routing and the Director run", () => {
     const state = events.find((e) => e.event === "state")!.data;
     expect(state.status).toBe("awaiting_approval");
     expect(state.scenePlan.scenes[0].asset_ids).toHaveLength(1);
+  });
+
+  it("checks the uploaded files on disk before handing off, and refuses when one has gone", async () => {
+    const app = build(); const id = await newSession(app);
+    await app.request(`/api/sessions/${id}/assets`, file("reel.mp4"));
+    await app.request(`/api/sessions/${id}/route`, json({ text: "Make an ad from my footage for TikTok, 15 seconds. Goal: more orders." }));
+    const state = (await readSse(await app.request(`/api/sessions/${id}/direct`, json({})))).find((e) => e.event === "state")!.data;
+    const g2 = (await (await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: state.versions.storyboard, decision: "approved" }))).json()) as any;
+    await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: g2.state.versions.edit_plan, decision: "approved" }));
+    const ok = await app.request(`/api/sessions/${id}/handoff`);
+    expect(ok.status).toBe(200);
+    const h = (await ok.json()) as any;
+    expect(h.approvals.storyboard.evidence_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(h.assets[0].metadata.bytes).toBeGreaterThan(0);
+
+    rmSync(h.assets[0].uri); // the file disappears after approval
+    const gone = await app.request(`/api/sessions/${id}/handoff`);
+    expect(gone.status).toBe(409);
+    expect(((await gone.json()) as any).reasons).toEqual([`asset ${h.assets[0].asset_id} is missing at handoff time (${h.assets[0].uri})`]);
+  });
+
+  /** Upload, route, plan and approve both gates in the demo console. Returns the app, session id and handoff. */
+  async function approvedWithUpload(app: ReturnType<typeof build>) {
+    const id = await newSession(app);
+    await app.request(`/api/sessions/${id}/assets`, file("reel.mp4"));
+    await app.request(`/api/sessions/${id}/route`, json({ text: "Make an ad from my footage for TikTok, 15 seconds. Goal: more orders." }));
+    const state = (await readSse(await app.request(`/api/sessions/${id}/direct`, json({})))).find((e) => e.event === "state")!.data;
+    const g2 = (await (await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: state.versions.storyboard, decision: "approved" }))).json()) as any;
+    await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: g2.state.versions.edit_plan, decision: "approved" }));
+    const res = await app.request(`/api/sessions/${id}/handoff`);
+    return { id, res, handoff: (await res.json()) as any };
+  }
+
+  it("records a content hash at upload and recovers the approved handoff after a restart", async () => {
+    const { id, res, handoff } = await approvedWithUpload(build());
+    expect(res.status).toBe(200);
+    expect(handoff.assets[0].metadata.sha256).toMatch(/^[a-f0-9]{64}$/);
+    const runId = handoff.run.run_id;
+
+    const restarted = build(); // same storage folder, empty memory
+    expect((await restarted.request(`/api/sessions/${id}/handoff`)).status).toBe(404); // the in-memory session is gone
+    const back = await restarted.request(`/api/sessions/${id}/runs/${runId}/handoff`);
+    expect(back.status).toBe(200);
+    const body = (await back.json()) as any;
+    expect(body.verification).toEqual({ ok: true, reasons: [] });
+    expect(body.handoff.content_hash).toBe(handoff.content_hash);
+    expect((await restarted.request(`/api/sessions/${id}/runs/${id}-1/handoff`)).status).toBe(404);
+    expect((await restarted.request(`/api/sessions/${id}/runs/..%2F..%2Fescape/handoff`)).status).toBe(404);
+  });
+
+  it("refuses a same-size replacement of an approved upload, and a missing stored approval, after a restart", async () => {
+    const { id, handoff } = await approvedWithUpload(build());
+    const runId = handoff.run.run_id;
+    const bytes = readFileSync(handoff.assets[0].uri);
+    bytes[bytes.length - 1] = bytes[bytes.length - 1]! ^ 0xff; // same size, different content
+    writeFileSync(handoff.assets[0].uri, bytes);
+    const changed = await build().request(`/api/sessions/${id}/runs/${runId}/handoff`);
+    expect(changed.status).toBe(409);
+    expect(((await changed.json()) as any).verification.reasons).toEqual([`asset ${handoff.assets[0].asset_id} content changed: its SHA-256 is not the one recorded at upload`]);
+
+    rmSync(join(dir, "sessions", id, "runs", runId, "approvals", "000001.json"));
+    const missing = await build().request(`/api/sessions/${id}/runs/${runId}/handoff`);
+    expect(missing.status).toBe(409);
+    expect(((await missing.json()) as any).verification.reasons).toEqual(["stored approvals cannot be trusted: approval 000001.json is missing (the sequence has a gap)"]);
+  });
+
+  /** Upload, route and plan up to gate 1. Returns the session, run id and gate-1 state. */
+  async function atGate1WithUpload(app: ReturnType<typeof build>) {
+    const id = await newSession(app);
+    await app.request(`/api/sessions/${id}/assets`, file("reel.mp4"));
+    await app.request(`/api/sessions/${id}/route`, json({ text: "Make an ad from my footage for TikTok, 15 seconds. Goal: more orders." }));
+    const state = (await readSse(await app.request(`/api/sessions/${id}/direct`, json({})))).find((e) => e.event === "state")!.data;
+    return { id, runId: state.run_id as string, state };
+  }
+  const resume = (app: ReturnType<typeof build>, id: string, runId: string) => app.request(`/api/sessions/${id}/runs/${runId}/resume`, { method: "POST" });
+
+  it("resumes a run waiting at gate 1 after a restart, at the same gate, and continues through both gates", async () => {
+    const { id, runId, state } = await atGate1WithUpload(build());
+    expect(state.checkpoint).toEqual({ saved: true });
+
+    const app = build(); // restart
+    const res = await resume(app, id, runId);
+    expect(res.status).toBe(200);
+    const back = (await res.json()) as any;
+    expect(back.state).toMatchObject({ status: "awaiting_approval", gate: "storyboard", versions: { storyboard: 1, edit_plan: null } });
+    expect(back.state.hashes.storyboard).toBe(state.hashes.storyboard);
+    expect(back.state.approvals).toEqual([]);
+    expect((await resume(app, id, runId)).status).toBe(409); // already open
+
+    const g2 = (await (await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: 1, decision: "approved" }))).json()) as any;
+    expect(g2.state.gate).toBe("edit_plan");
+    expect(g2.checkpoint).toEqual({ saved: true });
+    const done = (await (await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: 1, decision: "approved" }))).json()) as any;
+    expect(done.state.status).toBe("approved");
+    expect((await app.request(`/api/sessions/${id}/handoff`)).status).toBe(200);
+  });
+
+  it("resumes a run waiting at gate 2 after a restart, keeping the storyboard approval and refusing a repeat of gate 1", async () => {
+    const first = build();
+    const { id, runId } = await atGate1WithUpload(first);
+    const g2 = (await (await first.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: 1, decision: "approved" }))).json()) as any;
+
+    const app = build(); // restart
+    const back = (await (await resume(app, id, runId)).json()) as any;
+    expect(back.state).toMatchObject({ status: "awaiting_approval", gate: "edit_plan" });
+    expect(back.state.hashes).toEqual(g2.state.hashes);
+    expect(back.state.approvals).toEqual(g2.state.approvals);
+    expect((await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: 1, decision: "approved" }))).status).toBe(409);
+    expect(new RunStore(join(dir, "sessions", id)).loadApprovals(runId).records).toHaveLength(1);
+  });
+
+  it("refuses to resume from a corrupt checkpoint or a changed upload, and answers 404 for an unknown run", async () => {
+    const { id, runId } = await atGate1WithUpload(build());
+    const cp = join(dir, "sessions", id, "runs", runId, "checkpoint.json");
+    const good = readFileSync(cp, "utf8");
+    writeFileSync(cp, good.slice(0, 40));
+    const bad = await resume(build(), id, runId);
+    expect(bad.status).toBe(409);
+    expect(((await bad.json()) as any).reasons).toEqual(["checkpoint.json is not valid JSON (it may be an interrupted write)"]);
+
+    writeFileSync(cp, good);
+    const env = JSON.parse(good);
+    const upload = env.state.assets[0].uri as string;
+    const bytes = readFileSync(upload); bytes[bytes.length - 1] = bytes[bytes.length - 1]! ^ 0xff; writeFileSync(upload, bytes);
+    const changed = await resume(build(), id, runId);
+    expect(changed.status).toBe(409);
+    expect(((await changed.json()) as any).reasons).toEqual([`asset ${env.state.assets[0].asset_id} content changed: its SHA-256 is not the one recorded at upload`]);
+
+    expect((await resume(build(), id, `${id}-1`)).status).toBe(404);
+    expect((await resume(build(), "000000000000", "000000000000-1")).status).toBe(404);
   });
 
   it("C: an edit request routes to the editing agent and cannot start a plan", async () => {

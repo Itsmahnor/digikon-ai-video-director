@@ -4,4 +4,7 @@ export * from "./nodes.js";
 export * from "./graph.js";
 export * from "./approvals.js";
 export * from "./record.js";
+export * from "./handoff.js";
+export * from "./store.js";
+export * from "./resume.js";
 export * from "./demo-client.js";

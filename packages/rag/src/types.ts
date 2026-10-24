@@ -33,6 +33,8 @@ export interface Doc {
     recipe_energy?: Energy;
     topics?: string[];
     grade?: "A" | "B" | "C";
+    /** Knowledge notes only. A `draft` note is never retrieved unless `include_draft` is set. Notes without a status keep today's behaviour. */
+    status?: "draft" | "reviewed";
   };
 }
 
@@ -48,6 +50,8 @@ export interface RetrieveFilter {
   include_draft?: boolean;
   /** Knowledge notes only: keep notes tagged with at least one of these topics. Notes with no topics are excluded when this is set. */
   topics?: string[];
+  /** Knowledge notes only: drop notes graded below this (A is best). Notes with no grade are dropped when this is set. */
+  min_grade?: "A" | "B" | "C";
 }
 
 export interface RetrieveQuery {

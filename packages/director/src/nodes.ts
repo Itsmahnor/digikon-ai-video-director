@@ -6,6 +6,7 @@ import {
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
 import { KeywordRetriever, brandFactDocs, type Collection, type Hit, type Retriever } from "@digikon/rag";
 import type { LlmClient } from "./llm.js";
+import type { ApprovalLog } from "./store.js";
 import type { SkillLibrary, Step } from "./skills.js";
 
 export interface Deps {
@@ -13,6 +14,8 @@ export interface Deps {
   skills: SkillLibrary;
   retriever: Retriever;
   recipes: RecipeLibrary;
+  /** Durable record of every gate decision. When set, a decision only takes effect once it has been written. */
+  approvalLog?: ApprovalLog;
 }
 
 export const IntakeOut = z.object({

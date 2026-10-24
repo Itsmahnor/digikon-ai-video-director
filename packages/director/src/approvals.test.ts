@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ApprovalRecord, editPlanHash, storyboardHash } from "@digikon/contracts";
 import {
-  MAX_REVISIONS, RenderRefusedError, ScriptedClient, StaleApprovalError, approveCurrent, assertRenderable, buildDirectorGraph, checkRenderable,
+  MAX_REVISIONS, RenderRefusedError, ScriptedClient, StaleApprovalError, approveCurrent, assertRenderable, buildDirectorGraph, checkRenderable, currentEvidenceHash,
   gateDecision, requireStoryboardApproval, type DirectorStateType,
 } from "./index.js";
 import { cfg, deps, goodEdit, goodStoryboard, input, treatment, use } from "./fixtures.js";
@@ -40,9 +40,10 @@ const reasonsOf = (s: DirectorStateType, ctx: { recipes: never }) => { const r =
 const forge = (s: DirectorStateType): ApprovalRecord[] => {
   const sb = { version: s.scenePlan!.version, hash: storyboardHash(s.treatmentDoc!, s.scenePlan!) };
   const now = new Date().toISOString();
+  const evidence_hash = currentEvidenceHash(s)!;
   return [
-    ApprovalRecord.parse({ stage: "storyboard", plan_version: sb.version, storyboard_version: sb.version, plan_hash: sb.hash, decision: "approved", notes: "", decided_at: now }),
-    ApprovalRecord.parse({ stage: "edit_plan", plan_version: s.editPlan!.version, storyboard_version: sb.version, plan_hash: editPlanHash(sb, s.editPlan!), decision: "approved", notes: "", decided_at: now }),
+    ApprovalRecord.parse({ stage: "storyboard", plan_version: sb.version, storyboard_version: sb.version, plan_hash: sb.hash, evidence_hash, decision: "approved", notes: "", decided_at: now }),
+    ApprovalRecord.parse({ stage: "edit_plan", plan_version: s.editPlan!.version, storyboard_version: sb.version, plan_hash: editPlanHash(sb, s.editPlan!), evidence_hash, decision: "approved", notes: "", decided_at: now }),
   ];
 };
 

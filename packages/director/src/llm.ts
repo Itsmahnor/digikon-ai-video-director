@@ -2,6 +2,39 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ZodType, ZodTypeDef } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
+/**
+ * Extracts loggable diagnostic fields from an Anthropic SDK error object.
+ * Returns only metadata (status, error type, sanitised message, request-id).
+ * Never touches request headers, the API key, prompts, or user content.
+ * Returns null when the value is not a recognisable API error.
+ */
+export function extractApiDiagnostics(err: unknown): {
+  status: number;
+  errorType: string | null;
+  errorMessage: string | null;
+  requestId: string | null;
+} | null {
+  if (!err || typeof err !== "object") return null;
+  const e = err as {
+    status?: unknown;
+    type?: unknown;
+    error?: { type?: unknown; message?: unknown };
+    requestID?: unknown;
+    message?: unknown;
+  };
+  const status = typeof e.status === "number" ? e.status : null;
+  if (status === null) return null;
+  // error.type comes from Anthropic's JSON body, e.g. "invalid_request_error"
+  const errorType = typeof e.error?.type === "string" ? e.error.type
+    : typeof e.type === "string" ? e.type
+    : null;
+  // error.message is Anthropic's description of what was wrong
+  const errorMessage = typeof e.error?.message === "string" ? e.error.message : null;
+  // requestID helps Anthropic support trace the exact call
+  const requestId = typeof e.requestID === "string" ? e.requestID : null;
+  return { status, errorType, errorMessage, requestId };
+}
+
 export interface GenerateRequest<T> {
   /** Used as the tool name that forces structured output, e.g. "treatment". */
   name: string;
@@ -76,7 +109,19 @@ export class AnthropicClient implements LlmClient {
         messages,
         tools: [{ name: req.name, description: `Return the ${req.name} as structured data.`, input_schema: inputSchema as Anthropic.Tool.InputSchema }],
         tool_choice: { type: "tool", name: req.name },
-      }).catch((e: unknown) => { throw classifyLlmError(e, this.model) ?? e; });
+      }).catch((e: unknown) => {
+        // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
+        // Only status, error type, message, and request-id are logged — never headers or secrets.
+        const diag = extractApiDiagnostics(e);
+        if (diag) {
+          const parts = [`[llm] HTTP ${diag.status}`];
+          if (diag.errorType) parts.push(`type=${diag.errorType}`);
+          if (diag.errorMessage) parts.push(`message="${diag.errorMessage}"`);
+          if (diag.requestId) parts.push(`request-id=${diag.requestId}`);
+          console.error(parts.join(" "));
+        }
+        throw classifyLlmError(e, this.model) ?? e;
+      });
       const block = res.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
       if (!block) { lastError = "no structured output returned"; continue; }
       const parsed = req.schema.safeParse(block.input);
