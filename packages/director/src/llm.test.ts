@@ -46,10 +46,17 @@ describe("extractApiDiagnostics", () => {
     expect(extractApiDiagnostics({ name: "APIConnectionError" })).toBeNull();
   });
 
-  it("extracts status, errorType and errorMessage from a full SDK-style error", () => {
+  it("extracts errorType from e.type (SDK-extracted) and errorMessage from e.error.error.message", () => {
+    // This mirrors the real Anthropic SDK shape:
+    //   e.type  = error.error.type  (SDK extracts this for convenience)
+    //   e.error = full response body: { type: "error", error: { type: "...", message: "..." } }
     const err = {
       status: 400,
-      error: { type: "invalid_request_error", message: "max_tokens: field required" },
+      type: "invalid_request_error",           // SDK-extracted inner type
+      error: {
+        type: "error",                          // outer envelope — should NOT be used
+        error: { type: "invalid_request_error", message: "max_tokens: field required" },
+      },
       requestID: "req_01XYZ",
     };
     expect(extractApiDiagnostics(err)).toEqual({
@@ -60,7 +67,29 @@ describe("extractApiDiagnostics", () => {
     });
   });
 
-  it("falls back to top-level type when error.type is absent", () => {
+  it("does not use the outer envelope type (e.error.type === 'error')", () => {
+    // Before the fix, e.error.type was checked first and produced type="error" in the log.
+    const err = {
+      status: 400,
+      type: "invalid_request_error",
+      error: { type: "error", error: { type: "invalid_request_error", message: "some detail" } },
+    };
+    const d = extractApiDiagnostics(err)!;
+    expect(d.errorType).toBe("invalid_request_error");
+    expect(d.errorType).not.toBe("error");
+  });
+
+  it("falls back to e.error.error.type when top-level type is absent", () => {
+    const err = {
+      status: 400,
+      error: { type: "error", error: { type: "invalid_request_error", message: "bad param" } },
+    };
+    const d = extractApiDiagnostics(err)!;
+    expect(d.errorType).toBe("invalid_request_error");
+    expect(d.errorMessage).toBe("bad param");
+  });
+
+  it("uses e.type alone when error body is missing (non-400 errors)", () => {
     const err = { status: 429, type: "rate_limit_error" };
     const d = extractApiDiagnostics(err)!;
     expect(d.errorType).toBe("rate_limit_error");
@@ -81,7 +110,8 @@ describe("extractApiDiagnostics", () => {
     // extractApiDiagnostics must never read or return header content.
     const err = {
       status: 401,
-      error: { type: "authentication_error", message: "invalid api key" },
+      type: "authentication_error",
+      error: { type: "error", error: { type: "authentication_error", message: "invalid api key" } },
       headers: new Map([["x-api-key", "sk-ant-SECRET"]]),
       requestID: "req_02ABC",
     };

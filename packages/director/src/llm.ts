@@ -17,19 +17,22 @@ export function extractApiDiagnostics(err: unknown): {
   if (!err || typeof err !== "object") return null;
   const e = err as {
     status?: unknown;
+    // SDK sets this to error.error.type (the inner Anthropic error type, e.g. "invalid_request_error")
     type?: unknown;
-    error?: { type?: unknown; message?: unknown };
+    // SDK sets this to the full response body: { type: "error", error: { type: "...", message: "..." } }
+    error?: { type?: unknown; error?: { type?: unknown; message?: unknown } };
     requestID?: unknown;
     message?: unknown;
   };
   const status = typeof e.status === "number" ? e.status : null;
   if (status === null) return null;
-  // error.type comes from Anthropic's JSON body, e.g. "invalid_request_error"
-  const errorType = typeof e.error?.type === "string" ? e.error.type
-    : typeof e.type === "string" ? e.type
+  // e.type is the SDK-extracted inner type (error.error.type), e.g. "invalid_request_error".
+  // Prefer it; fall back to the inner body field for any other error shape.
+  const errorType = typeof e.type === "string" ? e.type
+    : typeof e.error?.error?.type === "string" ? e.error.error.type
     : null;
-  // error.message is Anthropic's description of what was wrong
-  const errorMessage = typeof e.error?.message === "string" ? e.error.message : null;
+  // The actual error description lives at error.error.message, not error.message.
+  const errorMessage = typeof e.error?.error?.message === "string" ? e.error.error.message : null;
   // requestID helps Anthropic support trace the exact call
   const requestId = typeof e.requestID === "string" ? e.requestID : null;
   return { status, errorType, errorMessage, requestId };
@@ -108,7 +111,7 @@ export class AnthropicClient implements LlmClient {
         system: req.system,
         messages,
         tools: [{ name: req.name, description: `Return the ${req.name} as structured data.`, input_schema: inputSchema as Anthropic.Tool.InputSchema }],
-        tool_choice: { type: "tool", name: req.name },
+        tool_choice: { type: "auto" },
       }).catch((e: unknown) => {
         // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
         // Only status, error type, message, and request-id are logged — never headers or secrets.
