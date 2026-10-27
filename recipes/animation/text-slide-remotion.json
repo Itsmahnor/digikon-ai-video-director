@@ -1,0 +1,81 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+                             {
+                                 "kind":  "requires_overlay_text",
+                                 "message":  "needs overlay text on the scene"
+                             },
+                             {
+                                 "kind":  "param_lte_scene_duration",
+                                 "param":  "fade_in_s",
+                                 "message":  "the fade-in cannot be longer than the scene"
+                             }
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "text-slide-remotion",
+    "type":  "animation",
+    "operation_type":  "render_graphics_scene",
+    "title":  "Text slide-up (Remotion)",
+    "purpose":  "A graphics scene made in Remotion: the approved overlay text slides up a short way while it fades in, over a solid colour with an accent bar. No footage, no audio.",
+    "intents":  [
+                    "text slide",
+                    "animated title",
+                    "statement slide up",
+                    "text scene"
+                ],
+    "parameters":  [
+                       {
+                           "kind":  "number",
+                           "name":  "fade_in_s",
+                           "unit":  "s",
+                           "min":  0.2,
+                           "max":  2,
+                           "default":  0.5
+                       },
+                       {
+                           "kind":  "enum",
+                           "name":  "background",
+                           "options":  [
+                                           "navy",
+                                           "charcoal",
+                                           "forest"
+                                       ],
+                           "default":  "navy"
+                       },
+                       {
+                           "kind":  "enum",
+                           "name":  "accent",
+                           "options":  [
+                                           "amber",
+                                           "teal",
+                                           "coral"
+                                       ],
+                           "default":  "amber"
+                       }
+                   ],
+    "constraints":  {
+                        "min_duration_s":  1,
+                        "max_duration_s":  10,
+                        "max_uses_per_film":  null,
+                        "energy":  "low"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "remotion"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "none"
+                                          ]
+                      },
+    "implementation_ref":  "remotion/text-slide"
+}

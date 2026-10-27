@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    { "kind": "requires_asset", "message": "clip-play-caption needs a supplied video clip on the scene" },
+    { "kind": "requires_overlay_text", "message": "clip-play-caption needs overlay text (the caption) on the scene" },
+    { "kind": "param_lte_scene_duration", "param": "fade_in_s", "message": "the caption fade-in cannot be longer than the scene" }
+  ],
+  "source": { "origin": "original", "url": null, "license": "Digikon original" },
+  "status": "draft",
+  "recipe_id": "clip-play-caption",
+  "type": "shot",
+  "operation_type": "trim_clip",
+  "title": "Play a supplied clip with a caption",
+  "purpose": "Plays the supplied video clip unchanged (approved source start point, normal speed, the scene's duration) with the scene's overlay text shown exactly as approved as a caption near the bottom. No audio is produced; a clip with sound is rendered only when the plan explicitly says to drop it (source_audio drop).",
+  "intents": ["footage with caption", "clip with text", "captioned clip", "video with a line of text", "text over footage"],
+  "parameters": [
+    { "kind": "enum", "name": "fit", "options": ["contain", "cover"], "default": "contain" },
+    { "kind": "enum", "name": "background", "options": ["navy", "charcoal", "forest"], "default": "charcoal" },
+    { "kind": "enum", "name": "source_audio", "options": ["keep", "drop"], "default": "keep" },
+    { "kind": "number", "name": "fade_in_s", "unit": "s", "min": 0.2, "max": 2, "default": 0.5 }
+  ],
+  "constraints": { "min_duration_s": 1, "max_duration_s": 8, "max_uses_per_film": null, "energy": "medium" },
+  "compatibility": { "renderers": ["ffmpeg"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["video"] },
+  "implementation_ref": "ffmpeg/clip-play"
+}

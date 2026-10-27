@@ -19,8 +19,8 @@ let fixtures: string;
 const speech: SpeechEngine = {
   model: "stub",
   transcribe: async () => Transcript.parse({
-    text: "ایک اشتہار بنائیں", language: "ur", language_confidence: 0.97, model: "stub", duration_s: 3,
-    words: [{ text: " ایک", start: 0, end: 0.5 }], segments: [{ text: "ایک اشتہار بنائیں", start: 0, end: 3 }],
+    text: "Ø§ÛŒÚ© Ø§Ø´ØªÛØ§Ø± Ø¨Ù†Ø§Ø¦ÛŒÚº", language: "ur", language_confidence: 0.97, model: "stub", duration_s: 3,
+    words: [{ text: " Ø§ÛŒÚ©", start: 0, end: 0.5 }], segments: [{ text: "Ø§ÛŒÚ© Ø§Ø´ØªÛØ§Ø± Ø¨Ù†Ø§Ø¦ÛŒÚº", start: 0, end: 3 }],
   }),
 };
 const llm = Object.assign(new DemoClient(), {});
@@ -61,7 +61,7 @@ async function readSse(res: Response) {
 describe("status and sessions", () => {
   it("reports model, speech, ffmpeg and recipe status", async () => {
     const h = (await (await build().request("/api/health")).json()) as any;
-    expect(h).toMatchObject({ llm: { available: true, demo: true }, whisper: { state: "ready" }, ffmpeg: true, recipes: { available: 19, mode: "draft" } });
+    expect(h).toMatchObject({ llm: { available: true, demo: true }, whisper: { state: "ready" }, ffmpeg: true, recipes: { available: recipes.length, mode: "draft" } });
   });
   it("answers 404 for unknown or malformed session ids", async () => {
     const app = build();
@@ -253,7 +253,7 @@ describe("routing and the Director run", () => {
     const state = events.find((e) => e.event === "state")!.data;
     expect(state.status).toBe("awaiting_approval");
     expect(state.scenePlan.scenes[0].asset_ids).toHaveLength(1);
-  });
+  }, 30_000); // measuring the upload is real ffmpeg work, which can pass 5s when the whole suite runs in parallel
 
   it("checks the uploaded files on disk before handing off, and refuses when one has gone", async () => {
     const app = build(); const id = await newSession(app);
@@ -272,7 +272,7 @@ describe("routing and the Director run", () => {
     const gone = await app.request(`/api/sessions/${id}/handoff`);
     expect(gone.status).toBe(409);
     expect(((await gone.json()) as any).reasons).toEqual([`asset ${h.assets[0].asset_id} is missing at handoff time (${h.assets[0].uri})`]);
-  });
+  }, 30_000); // uploading and measuring the file is real ffmpeg work: with the default 5 s it failed once when the whole suite ran in parallel (it passes alone in about 2 s)
 
   /** Upload, route, plan and approve both gates in the demo console. Returns the app, session id and handoff. */
   async function approvedWithUpload(app: ReturnType<typeof build>) {

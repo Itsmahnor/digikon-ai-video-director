@@ -8,3 +8,4 @@ export * from "./audit.js";
 export * from "./approval.js";
 export * from "./handoff.js";
 export * from "./editor.js";
+export * from "./render.js";

@@ -61,9 +61,26 @@ Added after a real run showed scenes written off as "not realisable" in free tex
 - **Handoff** adds `claims_audit`, `asset_feasibility`, `required_operations` (each use as an operation with its recipe version, status, type, implementation and evidence) and `readiness` (`production_ready`, `blockers`, `warnings`). `checkHandoff` recomputes all four. Draft recipes always appear as blockers, so a plan is never called production-ready without review evidence.
 - **Privacy**: the project record in a handoff has no `owner_id`; a handoff containing something that looks like an API key, a private key or the configured key is refused without repeating it. Asset paths and original file names are still included, because the Editor needs the files.
 
-## Editor boundary (schema_version 1.0.0)
+## The Editor agent (handoff 1.3.0, Editor schema 1.1.0)
 
-The Editor's skills are written but not yet loaded by any agent: see [skills/editor/README.md](../skills/editor/README.md).
+`runEditor(handoff, deps)` in `packages/director/src/editor-agent.ts`. It does not render and does not call a renderer.
+
+1. **Accepts only a verified handoff.** The input must parse as a `DirectorHandoff` and pass `checkHandoff` (or `verifyHandoffWithStore` when a `RunStore` is given): hashes, approvals, evidence, plan validity, recipe versions, asset files. Otherwise it returns `{ ok: false, stage, reasons }` with no output, and the model is never called.
+2. **Plans deterministically.** One `EditorOperation` per approved recipe use: `operation_type` from the recipe, parameters resolved from the approved use, assets and timing inside the approved scene (transitions at the tail of the outgoing scene, everything else across the scene), caption only from the approved overlay text and only on recipes that render text. It cannot add, drop or alter an operation relative to the plan.
+3. **Reports instead of inventing.** Conflicts: voiceover (`unsupported_operation`), audio cues with no sound recipe or audio asset, audio assets with no recorded licence, product screens not declared genuine, asset blockers, missing Editor knowledge. Revision requests (`requires_reapproval: true`): approved overlay text that no recipe displays. Resolution, frame rate and a verified platform spec go to `execution.missing_inputs`.
+4. **Retrieves through the Editor scope only** (`ScopedRetriever`), recording every query.
+5. **Optional model review** (`editor_review`): the Editor skills and the Editor's knowledge go in as data; it may add conflicts and revision requests tied to real scenes or uses, nothing else. Without a model the output is identical apart from that.
+6. **Checks its own output** with `editorOutputIssues`, the same checks as `checkEditorOutput`, before stating `validation`.
+
+Four states stay apart: valid structured output (`EditorOutput` parses); contract-valid (`validation.ok`); executable (`execution.executable`: every operation has a template in the injected `RendererRegistry` for a renderer its recipe supports; the registry is empty today); production-executable (`execution.production_executable`: also every recipe has review evidence); rendered (`execution.rendered`, always `false`). Draft recipes can be executable in a test registry but never production-executable.
+
+`status`: `ready` (no conflicts, no revision requests, valid), `needs_director_revision` (a change the Director must make and a human must approve), `blocked` (conflicts, or failed validation).
+
+Asset declarations (handoff 1.3.0): `Asset.license` (`user_owned`, `licensed`, `unknown`, plus a note) and `Asset.genuine_product_ui` are optional and null unless the user records them; nothing infers them. The console does not offer controls for them yet.
+
+## Editor boundary (schema_version 1.1.0)
+
+The Editor's skills are loaded by `runEditor`: see [skills/editor/README.md](../skills/editor/README.md).
 
 - `EditorInput`: the handoff, the Editor's skills, and `retrieval_scope: "editor"`.
 - `EditorOutput`: bound to `handoff_id`, `content_hash` and approved versions; `status` (`ready`, `needs_director_revision`, `blocked`); `operations` (the existing `EditOperation` plus `source_use_id`, `recipe_id`, `recipe_version`, `asset_ids`, `timing`, `caption`, `audio_cues`); `validation`; `conflicts` (missing information, unsupported operation, infeasible, conflicts with approved plan, knowledge missing, knowledge conflict); `revision_requests` (always `requires_reapproval: true`); `provenance` with retrieval records.

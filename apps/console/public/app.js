@@ -500,7 +500,7 @@ function results(res) {
   const bar = gate ? `<div class="approve-bar gate"><div><b>Approve this ${what}?</b><div class="hint">Version ${res.versions[gate]}. ${gate === "storyboard" ? "Approving lets the Director make the edit plan." : "Approving records your second approval."} Nothing is rendered. ${used >= max ? "This is the last change request: another one needs a human decision." : ""}</div></div>
       <textarea id="gate-notes" rows="2" aria-label="What should change?" placeholder="To request changes, say what should change in this ${what}">${esc(state.gateNotes)}</textarea>
       <div class="row"><button class="ghost" data-action="revise" ${state.busy ? "disabled" : ""}>Request changes</button><button class="primary sm" data-action="approve" ${state.busy ? "disabled" : ""}>Approve ${what}</button></div></div>` : "";
-  const finished = done ? `<div class="notice info">Both approvals are recorded (storyboard version ${res.versions.storyboard}, edit plan version ${res.versions.edit_plan}). Nothing is rendered: rendering is not built yet, and a future render must pass the approval check first. ${res.renderable.ok ? "The check passes for these exact versions." : `The check does not pass: ${esc(res.renderable.reasons.join("; "))}`}</div>` : "";
+  const finished = done ? `<div class="notice info">Both approvals are recorded (storyboard version ${res.versions.storyboard}, edit plan version ${res.versions.edit_plan}). Nothing has been rendered. ${res.renderable.ok ? "The approval check passes for these exact versions." : `The approval check does not pass: ${esc(res.renderable.reasons.join("; "))}`}</div>${renderPanel()}` : "";
   return `${header}<div class="card"><div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? "on" : ""}" role="tab" data-action="tab" data-tab="${k}">${l}</button>`).join("")}</div><div style="padding-top:16px">${body[tab]()}</div></div>
     ${bar}
     ${finished}`;
@@ -534,10 +534,90 @@ function renderAll() {
   $("#prompt").placeholder = state.route?.status === "needs_input" ? "Answer the question here, or in the box beside it" : PLACEHOLDER;
 }
 
+// ---------- editor and preview render ----------
+// The Editor and the renderer are opt-in steps after both approvals. Nothing here approves, advances a gate or renders by itself.
+const rstate = () => (state.run.render ??= { editor: null, view: null, result: null, busy: false, error: null, settings: { width: "", height: "", fps: "" } });
+async function rawPost(path, body) {
+  let res;
+  try { res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body ?? {}) }); } catch { throw offlineError(); }
+  return { status: res.status, data: await res.json().catch(() => ({})) };
+}
+const renderSettings = (r) => {
+  const v = r.view, s = r.settings; if (!v) return undefined;
+  const num = (x) => (String(x).trim() === "" ? undefined : Number(x)); // blank stays blank: nothing is filled in on the user's behalf
+  return { aspect_ratio: v.needs.aspect_ratio, duration_s: v.needs.duration_s, ...v.needs.supported_output, width: num(s.width), height: num(s.height), fps: num(s.fps) };
+};
+const problem = (d) => `${d.message ?? "Request failed."}${d.reasons?.length ? ` ${d.reasons.join("; ")}` : ""}`;
+async function refreshPlan(r) {
+  const base = `/api/sessions/${state.sid}/render`;
+  const typed = r.settings.width || r.settings.height || r.settings.fps;
+  const { status, data } = typed ? await rawPost(`${base}/plan`, { settings: renderSettings(r) }) : { status: 200, data: await fetch(base).then((x) => x.json()).catch(() => ({ message: OFFLINE })) };
+  if (data.plan) { r.view = data; r.error = null; } else r.error = problem(data);
+  return status;
+}
+async function renderStep(kind) {
+  const r = rstate(); r.busy = true; r.error = null; renderStage();
+  try {
+    if (kind === "editor") {
+      const { status, data } = await rawPost(`/api/sessions/${state.sid}/editor`);
+      if (status === 200) { r.editor = data; r.result = null; await refreshPlan(r); } else r.error = problem(data);
+    } else if (kind === "plan") await refreshPlan(r);
+    else if (kind === "render") {
+      const { data } = await rawPost(`/api/sessions/${state.sid}/render`, { settings: renderSettings(r) });
+      if (data.plan) r.view = data;
+      if (data.record) { r.result = data; if (data.record.state === "rendered") toast("Preview rendered and validated.", "ok"); else r.error = "The render failed. Nothing is offered for playback."; }
+      else r.error = problem(data);
+    }
+  } catch (e) { fail(e); }
+  r.busy = false; renderStage();
+}
+const kb = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+function renderPanel() {
+  const r = rstate(), v = r.view, b = r.busy ? "disabled" : "";
+  const intro = `<div class="notice info" style="margin-bottom:12px">Both approvals are recorded. The next steps are optional and separate: the Editor turns the approved plans into concrete operations (no model is called), then a <b>preview</b> can be rendered if every approved scene can be shown. A preview is never production-ready.</div>`;
+  const err = r.error ? `<div class="notice bad" style="margin:10px 0">${esc(r.error)}</div>` : "";
+  if (!r.editor && !v) return `<div class="card"><h3>Editor and preview render</h3>${intro}${err}<button class="primary sm" data-action="editor-run" ${b}>${r.busy ? "Running..." : "Run the Editor"}</button></div>`;
+  const editorHtml = v ? `<div class="row" style="margin-bottom:10px"><b>Editor</b><span class="chip ${v.editor.status === "ready" ? "ok" : "bad"}">${esc(v.editor.status.replaceAll("_", " "))}</span><span class="chip ${v.editor.validation.ok ? "ok" : "bad"}">${v.editor.validation.ok ? "contract valid" : "not valid"}</span><span class="chip">${v.editor.operations} operations</span><span class="chip warn">not rendered</span><button class="ghost" data-action="editor-run" ${b}>Run again</button></div>
+    ${v.editor.conflicts.map((c) => `<div class="notice bad" style="margin-bottom:6px"><b>${esc(c.kind.replaceAll("_", " "))}</b> ${esc(c.description)}</div>`).join("")}
+    ${v.editor.revision_requests.map((q) => `<div class="notice warn" style="margin-bottom:6px">Needs a new approval: ${esc(q.reason)}</div>`).join("")}` : "";
+  const ops = v ? `<table><thead><tr><th>Operation</th><th>Scene</th><th>Recipe</th><th>Template</th><th>Renderer</th></tr></thead><tbody>${v.plan.operations.map((o) => `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td>${esc(o.recipe_id)}</td><td class="mono">${esc(o.template)}</td><td>${o.supported ? `<span class="chip ok">${esc(o.renderer)}: supported</span>` : '<span class="chip bad">not supported</span>'}</td></tr>`).join("")}</tbody></table>
+    <p class="hint" style="margin:6px 0 10px">${v.plan.supported} supported, ${v.plan.unsupported} not supported. Renderer for this plan: <b>${v.renderer.selected ? esc(v.renderer.selected) : "none selected"}</b>${v.renderer.composition_required ? " (the plan needs more than one renderer, and combining renderers is not built)" : ""}. Available here: ${v.renderer.registered.length ? v.renderer.registered.map(esc).join(", ") : "none"}. The renderer comes from the recipes in your approved edit plan; nothing is swapped.</p>
+    <div class="chips" style="margin-bottom:10px">${v.coverage.scenes.map((s) => `<span class="chip ${s.represented ? "ok" : "bad"}" title="${esc(s.missing.join("; "))}">${esc(s.scene_id)} ${s.represented ? "fully shown" : "not fully shown"}</span>`).join("")}</div>
+    ${v.blockers.length ? `<div class="notice bad" style="margin-bottom:10px"><b>Why a preview cannot be made yet</b>${v.blockers.map((x) => `<div>${esc(x)}</div>`).join("")}</div>` : ""}
+    <div class="notice ${v.production.ready ? "info" : "warn"}" style="margin-bottom:12px"><b>Production readiness: ${v.production.ready ? "ready" : "not ready"}.</b> ${v.production.blockers.slice(0, 4).map(esc).join("; ")}${v.production.blockers.length > 4 ? "; ..." : ""}</div>` : "";
+  const field = (id, label, key) => `<label class="hint" style="display:block">${label}<input id="rs-${id}" inputmode="numeric" value="${esc(r.settings[key])}" style="display:block;width:110px;margin-top:4px" aria-label="${label}"></label>`;
+  const form = v ? `<h3 style="margin:14px 0 8px">Output settings</h3>
+    <p class="hint" style="margin-bottom:8px">Fixed by your approved plan: ${esc(v.needs.aspect_ratio)}, ${fmtDur(v.needs.duration_s)}. The only output the renderers write: ${esc(v.needs.supported_output.container)}, ${esc(v.needs.supported_output.video_codec)}, no audio. Size and frame rate are yours to choose; none are assumed.</p>
+    <div class="row" style="align-items:flex-end">${field("width", "Width (px)", "width")}${field("height", "Height (px)", "height")}${field("fps", "Frames per second", "fps")}
+      <button class="ghost" data-action="fill-test" ${b}>Fill test values (640 x 360, 30 fps)</button></div>
+    <div class="row" style="margin-top:12px"><button class="ghost" data-action="render-plan" ${b}>Check the plan</button><button class="primary sm" data-action="render-go" ${b || (v.eligible ? "" : "disabled")}>${r.busy ? "Working..." : "Render preview"}</button></div>
+    <p class="hint" style="margin-top:6px">${esc(v.label)}</p>` : "";
+  return `<div class="card"><h3>Editor and preview render</h3>${editorHtml}${err}${ops}${form}${resultHtml(r)}</div>`;
+}
+function resultHtml(r) {
+  const x = r.result; if (!x?.record) return "";
+  const rec = x.record, o = rec.output;
+  if (rec.state !== "rendered") return `<div class="notice bad" style="margin-top:14px"><b>Render failed. No video was produced.</b>${rec.errors.map((er) => `<div>${esc(er.stage.replaceAll("_", " "))}: ${esc(er.message)}</div>`).join("")}</div>`;
+  const qa = x.qa;
+  return `<h3 style="margin:16px 0 8px">Preview <span class="chip warn">preview only, not production-ready</span></h3>
+    <video controls preload="metadata" src="${esc(o.video_url)}" style="width:100%;max-width:640px;border-radius:12px;background:#000" aria-label="Rendered preview"></video>
+    <dl class="kv" style="margin-top:10px"><dt>Duration</dt><dd>${fmtDur(o.duration_s)} (measured)</dd><dt>Size</dt><dd>${o.width} x ${o.height}</dd><dt>Frame rate</dt><dd>${o.fps} fps</dd><dt>Codec</dt><dd>${esc(o.video_codec)}, ${o.audio_codec ? esc(o.audio_codec) : "no audio"} in ${esc(o.container)}</dd><dt>File</dt><dd>${kb(o.bytes)} <span class="mono hint">sha256 ${esc(o.sha256.slice(0, 12))}</span></dd><dt>Checks</dt><dd>${o.checks.map((c) => `<div class="mono">${esc(c)}</div>`).join("")}</dd></dl>
+    <h3 style="margin:12px 0 6px">QA</h3>${qa ? `${qa.passed.map((p) => `<div><span class="chip ok">passed</span> ${esc(p.check.replaceAll("_", " "))} <span class="mono hint">${esc(p.evidence)}</span></div>`).join("")}${qa.findings.map((f) => `<div class="notice ${f.severity === "info" ? "info" : "warn"}" style="margin-top:6px">${esc(f.severity)}: ${esc(f.description)}</div>`).join("")}` : '<div class="hint">QA could not run for this file.</div>'}
+    <p class="hint" style="margin-top:8px">The recipes used are still drafts. This render is evidence for a later human review, not a review.</p>`;
+}
+
 // ---------- events ----------
+document.addEventListener("input", (e) => {
+  const m = /^rs-(width|height|fps)$/.exec(e.target.id ?? "");
+  if (m && state.run) rstate().settings[m[1]] = e.target.value;
+});
 document.addEventListener("click", async (e) => {
   const el = e.target.closest("[data-action]"); if (!el) return;
   const a = el.dataset.action;
+  if (a === "editor-run") return renderStep("editor");
+  if (a === "render-plan") return renderStep("plan");
+  if (a === "render-go") return renderStep("render");
+  if (a === "fill-test") { Object.assign(rstate().settings, { width: "640", height: "360", fps: "30" }); return renderStep("plan"); }
   if (a === "remove-asset") {
     try { const r = await api(`/api/sessions/${state.sid}/assets/${el.dataset.id}`, { method: "DELETE" }); state.assets = r.assets; state.route = null; state.run = null; delete state.transcripts[el.dataset.id]; delete state.analysis[el.dataset.id]; renderAll(); } catch (er) { fail(er); }
   } else if (a === "view-transcript") {

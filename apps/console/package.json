@@ -13,6 +13,7 @@
     "@digikon/media": "*",
     "@digikon/rag": "*",
     "@digikon/recipes": "*",
+    "@digikon/render": "*",
     "@digikon/router": "*",
     "@digikon/speech": "*",
     "@hono/node-server": "^2.1.5",

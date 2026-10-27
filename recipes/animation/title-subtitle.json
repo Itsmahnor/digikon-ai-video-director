@@ -1,0 +1,23 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    { "kind": "requires_overlay_text", "message": "title-subtitle needs overlay text on the scene" },
+    { "kind": "param_lte_scene_duration", "param": "fade_in_s", "message": "the fade-in cannot be longer than the scene" }
+  ],
+  "source": { "origin": "original", "url": null, "license": "Digikon original" },
+  "status": "draft",
+  "recipe_id": "title-subtitle",
+  "type": "animation",
+  "operation_type": "render_graphics_scene",
+  "title": "Title with optional subtitle",
+  "purpose": "A graphics scene with a large title and an optional smaller subtitle that fade in over a solid colour. Write the scene's overlay text as 'Title | Subtitle' (the subtitle part is optional); the words are shown exactly as approved.",
+  "intents": ["title card", "opening title", "headline", "title and subtitle", "section heading"],
+  "parameters": [
+    { "kind": "number", "name": "fade_in_s", "unit": "s", "min": 0.2, "max": 2, "default": 0.5 },
+    { "kind": "enum", "name": "background", "options": ["navy", "charcoal", "forest"], "default": "navy" },
+    { "kind": "enum", "name": "accent", "options": ["amber", "teal", "coral"], "default": "amber" }
+  ],
+  "constraints": { "min_duration_s": 1.5, "max_duration_s": 10, "max_uses_per_film": null, "energy": "low" },
+  "compatibility": { "renderers": ["ffmpeg"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["none"] },
+  "implementation_ref": "ffmpeg/title-subtitle"
+}

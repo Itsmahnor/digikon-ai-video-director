@@ -1,3 +1,4 @@
+import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { RECIPE_OPERATIONS, Recipe } from "@digikon/contracts";
@@ -13,7 +14,9 @@ const message = (over: Record<string, unknown>) => {
 
 describe("recipe and edit-operation compatibility", () => {
   it("gives every shipped recipe an operation its recipe type allows", () => {
-    expect(recipes).toHaveLength(19);
+    // every recipe file loads (none is dropped by the loader), and ids are unique, whatever the number of recipes
+    expect(recipes).toHaveLength(readdirSync(fileURLToPath(new URL("../../../recipes", import.meta.url)), { recursive: true }).filter((f) => String(f).endsWith(".json")).length);
+    expect(new Set(recipes.map((r) => r.recipe_id)).size).toBe(recipes.length);
     for (const r of recipes) expect(RECIPE_OPERATIONS[r.type], r.recipe_id).toContain(r.operation_type);
   });
 

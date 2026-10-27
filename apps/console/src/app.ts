@@ -1,8 +1,9 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, readdirSync, writeFileSync } from "node:fs";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -10,12 +11,17 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { ApprovalSubmission, BrandFact, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type RouteResult, type Transcript } from "@digikon/contracts";
+import { ApprovalSubmission, BrandFact, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
   Command, HandoffRefusedError, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
-  checkpointOf, restoreRun, verifyHandoffWithStore,
+  checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
+import {
+  AdapterRegistry, FFMPEG_TEMPLATES, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  type PlanResult, type RenderAdapter,
+} from "@digikon/render";
+import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
 import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, probeFile } from "@digikon/media";
 import type { Doc, Retriever } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
@@ -38,6 +44,10 @@ export interface AppContext {
   ffmpegOk: boolean;
   storageDir: string;
   publicDir: string;
+  /** Reads skills/editor. Without it the Editor route answers 503. */
+  editorSkills?: SkillLibrary;
+  /** The font the FFmpeg scene adapter draws with. Null or missing: no renderer is available, and the console says so. */
+  renderFont?: string | null;
 }
 
 type Graph = ReturnType<typeof buildDirectorGraph>;
@@ -62,7 +72,12 @@ interface Session {
   threadId?: string;
   /** True while a decision is being applied, so two submissions cannot both act on the same gate. */
   deciding?: boolean;
+  /** True while a preview render runs, so two requests cannot render the same run at once. */
+  rendering?: boolean;
 }
+
+const SettingsBody = z.object({ settings: z.record(z.unknown()).optional() });
+const RENDER_ID = /^rn_[a-f0-9]{16}$/;
 
 const ID = /^[a-f0-9]{12}$/;
 const ASSET_ID = /^asset_[a-f0-9]{8}$/;
@@ -139,6 +154,7 @@ export function createApp(ctx: AppContext) {
     whisper: { model: ctx.speech.model, ...ctx.whisper() },
     ffmpeg: ctx.ffmpegOk,
     recipes: { available: ctx.recipes.available().length, mode: ctx.recipes.minStatus },
+    render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), note: "Preview renders only. Nothing is production-ready." },
     limits: { maxVoicePromptSeconds: MEDIA_LIMITS.maxVoicePromptSeconds, maxAssets: MEDIA_LIMITS.maxAssetsPerProject, maxRequestMb: MAX_REQUEST_BYTES / 1048576, extensions: ALL_EXTENSIONS },
   }));
 
@@ -460,6 +476,170 @@ export function createApp(ctx: AppContext) {
     if (!handoff) throw new HttpError(404, "no_handoff", "No handoff was saved for that run.");
     const reasons = verifyHandoffWithStore(handoff, store, { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true });
     return c.json({ handoff, verification: { ok: reasons.length === 0, reasons } }, reasons.length ? 409 : 200);
+  });
+
+  // ---------- editor and preview render ----------
+  const runIdOf = (s: Session) => {
+    if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no Director run yet.");
+    return s.threadId;
+  };
+  /**
+   * The handoff for the run as it stands now, verified against the approvals on disk and the files. It is rebuilt on every call,
+   * so a plan or approval that changed since earlier is caught here instead of being trusted from memory.
+   */
+  const currentHandoff = async (s: Session): Promise<DirectorHandoff> => {
+    const runId = runIdOf(s);
+    const state = (await s.graph!.getState({ configurable: { thread_id: runId } })).values as DirectorStateType;
+    const checks = { recipes: ctx.recipes, storageRoot: s.dir, requireContentHash: true };
+    const handoff = buildHandoff(state, { ...checks, skills: ctx.skills, knowledge: ctx.knowledge, run_id: runId, model: ctx.demo ? "demo" : ctx.llm?.model ?? "unknown" });
+    const problems = verifyHandoffWithStore(handoff, new RunStore(s.dir), checks);
+    if (problems.length) throw new HandoffRefusedError(problems);
+    return handoff;
+  };
+  const scrubRoots = (s: Session) => [s.dir, ctx.storageDir];
+  const registryFor = (out: string): { registry: AdapterRegistry; available: boolean } => {
+    if (!ctx.ffmpegOk || !ctx.renderFont) return { registry: NO_ADAPTERS, available: false };
+    // Every renderer that can run on this machine is registered; one that cannot (for example no browser) is simply absent, and a plan that needs it is blocked.
+    const adapters: RenderAdapter[] = [];
+    for (const make of [createFfmpegAdapter, createRemotionAdapter, createHyperframesAdapter]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
+    return adapters.length ? { registry: new AdapterRegistry(adapters), available: true } : { registry: NO_ADAPTERS, available: false };
+  };
+  const availableRenderers = () => (ctx.ffmpegOk && ctx.renderFont ? registryFor(tmpdir()).registry.renderers() : []);
+
+  /** Everything a render decision rests on, recomputed from the stored approvals, the stored Editor result and the settings given. */
+  const prepare = async (s: Session, settingsIn: Record<string, unknown> | undefined) => {
+    const runId = runIdOf(s);
+    const handoff = await currentHandoff(s);
+    const dirs = renderDirs(s.dir, runId);
+    const stored = loadEditorOutput(dirs.editor, runId);
+    if (stored.problems.length) throw new HttpError(409, "editor_output_unreadable", stored.problems.join("; "));
+    if (!stored.output) throw new HttpError(409, "no_editor_output", "The Editor has not run for this run yet. Run it first.");
+    if (stored.output.handoff_content_hash !== handoff.content_hash) throw new HttpError(409, "stale_editor_output", "The Editor result was made from an earlier version of the approved plans. Run the Editor again.");
+    await mkdir(dirs.out, { recursive: true });
+    const { registry, available } = registryFor(dirs.out);
+    const settings = settingsIn ? { ...settingsIn, source: { kind: "user_approved", reference: `entered in the console form (session ${s.id}, run ${runId})` } } : undefined;
+    const base = { recipes: ctx.recipes, adapters: registry, outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true };
+    const planned = planRender({ editor_output: stored.output, handoff, settings, purpose: "preview" }, base);
+    if (!planned.ok) throw new HandoffRefusedError(planned.reasons.map((r) => scrub(r, scrubRoots(s))));
+    const production = planRender({ editor_output: stored.output, handoff, settings, purpose: "production" }, base);
+    const selection = selectRenderer(planned.record);
+    const coverage = previewCoverage(handoff, stored.output, planned.record, selection.capabilities);
+    const eligible = planned.record.state === "executable" && coverage.complete && !!planned.plan;
+    return { runId, handoff, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available };
+  };
+
+  const planView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
+    const sceneOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.target_scene_id]));
+    const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, supported: o.renderer !== null }));
+    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s)));
+    return {
+      run_id: p.runId,
+      renderer_available: p.available,
+      editor: { status: p.editor.status, validation: p.editor.validation, conflicts: p.editor.conflicts, revision_requests: p.editor.revision_requests, operations: p.editor.operations.length, rendered: p.editor.execution.rendered },
+      renderer: { selected: p.selection.selected, needed: p.selection.needed, composition_required: p.selection.composition_required, registered: p.registered },
+      plan: { state: p.planned.record.state, purpose: "preview" as const, operations: ops, supported: ops.filter((o) => o.supported).length, unsupported: ops.filter((o) => !o.supported).length, notes: p.planned.record.notes },
+      coverage: p.coverage,
+      eligible: p.eligible,
+      blockers,
+      /** A separate question from the preview: could this go to production? Never true while any recipe is a draft. */
+      production: { ready: p.production.ok && p.production.record.state === "executable", blockers: p.production.ok ? p.production.record.blockers.map((b) => scrub(b, scrubRoots(s))) : [] },
+      needs: { aspect_ratio: p.handoff.constraints.aspect_ratio, duration_s: timelineEnd(p.handoff), supported_output: { container: "mp4", video_codec: "h264", audio_codec: null }, you_provide: ["width", "height", "fps"] },
+      label: p.eligible ? "Preview only: every approved scene rendered with the templates of the selected renderer. It is not production-ready." : "No preview can be made yet. Nothing here is rendered, and no partial video is offered.",
+    };
+  };
+
+  /** Runs the Editor on the verified handoff. Deterministic checks only: no model is called. */
+  app.post("/api/sessions/:id/editor", async (c) => {
+    const s = session(c.req.param("id"));
+    if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
+    const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: ctx.retriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true });
+    if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
+    saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
+    return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });
+  });
+
+  app.get("/api/sessions/:id/render", async (c) => {
+    const s = session(c.req.param("id"));
+    return c.json(planView(s, await prepare(s, undefined)));
+  });
+  app.post("/api/sessions/:id/render/plan", async (c) => {
+    const s = session(c.req.param("id"));
+    const body = SettingsBody.parse(await c.req.json().catch(() => ({})));
+    return c.json(planView(s, await prepare(s, body.settings)));
+  });
+
+  /**
+   * Renders the preview, but only when the render plan is executable and the approved plan is fully shown by it. Otherwise 409
+   * with every reason and nothing is started. A record is written before the renderer starts and again when it ends.
+   */
+  app.post("/api/sessions/:id/render", async (c) => {
+    const s = session(c.req.param("id"));
+    const body = SettingsBody.parse(await c.req.json().catch(() => ({})));
+    if (s.rendering) throw new HttpError(409, "busy", "A preview is already being rendered for this session.");
+    s.rendering = true;
+    try {
+      const p = await prepare(s, body.settings);
+      const view = planView(s, p);
+      if (!p.eligible || !p.planned.plan) return c.json({ error: "not_renderable", message: "A preview cannot be rendered yet.", ...view }, 409);
+      const save = (r: RenderRecord) => { try { saveRenderRecord(p.dirs.records, r); } catch { throw new HttpError(503, "not_saved", "The render record could not be saved, so nothing was rendered. Check free disk space."); } };
+      const record = await executeRender(p.planned.plan, { storageRoot: s.dir, requireContentHash: true, onUpdate: save });
+      if (record.state === "rendered") {
+        try { save(record); } catch (e) { await rm(record.output!.path, { force: true }); throw e; } // no record, no file
+        let qa;
+        try {
+          qa = await runRenderQa(record, p.handoff);
+          writeFileSync(join(p.dirs.records, `${record.render_id}.qa.json`), JSON.stringify(qa, null, 2));
+          for (const id of new Set(record.operations.map((o) => o.recipe_id))) saveRenderEvidence(p.dirs.evidence, buildRenderEvidence(record, ctx.recipes.get(id)!, qa));
+        } catch (e) {
+          console.error(e instanceof Error ? e.message : e); // the video is validated; a QA or evidence problem is reported as missing QA, not as a failed render
+        }
+        return c.json({ record: publicRecord(record, s.id, p.dirs.root, scrubRoots(s)), qa: qa ? { findings: qa.findings, passed: qa.passed, measurements: qa.measurements } : null, ...view });
+      }
+      save(record);
+      return c.json({ record: publicRecord(record, s.id, p.dirs.root, scrubRoots(s)), qa: null, ...view }, 502);
+    } finally {
+      s.rendering = false;
+    }
+  });
+
+  app.get("/api/sessions/:id/renders", (c) => {
+    const s = session(c.req.param("id"));
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const ids = existsSync(dirs.records) ? readdirSync(dirs.records).filter((f) => /^rn_[a-f0-9]{16}\.json$/.test(f)).map((f) => f.slice(0, -5)) : [];
+    const records = ids.map((id) => loadRenderRecord(dirs.records, id)).flatMap((r) => (r.record ? [publicRecord(r.record, s.id, dirs.root, scrubRoots(s))] : []));
+    return c.json({ records });
+  });
+
+  /** Plays a rendered preview. Served only for a record that says rendered, whose file is inside this run's output folder and still matches its recorded size and SHA-256. */
+  const verified = new Map<string, true>();
+  app.get("/api/sessions/:id/renders/:renderId/video", async (c) => {
+    const s = session(c.req.param("id"));
+    const renderId = c.req.param("renderId");
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const rec = RENDER_ID.test(renderId) ? loadRenderRecord(dirs.records, renderId).record : null;
+    if (!rec || rec.state !== "rendered" || !rec.output) throw new HttpError(404, "no_video", "There is no validated video for that render.");
+    const path = rec.output.path;
+    if (!isInside(dirs.out, path)) throw new HttpError(404, "no_video", "There is no validated video for that render.");
+    const st = await stat(path).catch(() => null);
+    if (!st?.isFile() || st.size !== rec.output.bytes) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
+    const key = `${path}:${st.size}:${st.mtimeMs}:${rec.output.sha256}`;
+    if (!verified.has(key)) {
+      const hash = createHash("sha256");
+      for await (const chunk of createReadStream(path)) hash.update(chunk as Buffer);
+      if (hash.digest("hex") !== rec.output.sha256) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
+      verified.set(key, true);
+    }
+    const size = st.size;
+    const headers: Record<string, string> = { "Content-Type": "video/mp4", "Accept-Ranges": "bytes", "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
+    const range = /^bytes=(\d*)-(\d*)$/.exec(c.req.header("range") ?? "");
+    if (range) {
+      const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+      const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+      if (start > end || start >= size) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${size}` } });
+      return new Response(Readable.toWeb(createReadStream(path, { start, end })) as never, { status: 206, headers: { ...headers, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": String(end - start + 1) } });
+    }
+    return new Response(Readable.toWeb(createReadStream(path)) as never, { headers: { ...headers, "Content-Length": String(size) } });
   });
 
   app.use("/*", serveStatic({ root: ctx.publicDir }));

@@ -11,7 +11,7 @@ export const RECIPE_OPERATIONS: Record<z.infer<typeof RecipeType>, readonly z.in
   animation: ["overlay_text", "render_graphics_scene"],
   sound_cue: ["mix_audio"],
 };
-export const Renderer = z.enum(["remotion", "ffmpeg"]);
+export const Renderer = z.enum(["remotion", "ffmpeg", "hyperframes"]);
 export const RecipeStatus = z.enum(["draft", "reviewed"]);
 export const Energy = z.enum(["low", "medium", "high"]);
 

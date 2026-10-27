@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
@@ -33,8 +34,13 @@ speech.warmUp().then(() => { whisper = { state: "ready" }; console.log(`Whisper 
 const llm = demo ? new DemoClient() : process.env.ANTHROPIC_API_KEY ? new AnthropicClient() : null;
 if (!llm) console.warn("No ANTHROPIC_API_KEY: the console runs, but routing and planning need a key (or --demo).");
 
+// The preview renderer draws text with one font file. RENDER_FONT_FILE names it; otherwise a common system font is used if present.
+const renderFont = [process.env.RENDER_FONT_FILE ? resolve(repoRoot, process.env.RENDER_FONT_FILE) : "", "C:\\Windows\\Fonts\\arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"].find((f) => f && existsSync(f)) ?? null;
+if (!renderFont) console.warn("No font file found for preview renders. Set RENDER_FONT_FILE to a .ttf file to enable them.");
+
 const app = createApp({
   llm, demo, speech, whisper: () => whisper, skills, retriever, knowledge, recipes: library, ffmpegOk,
+  editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont,
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),
 });
 

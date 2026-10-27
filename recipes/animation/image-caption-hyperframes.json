@@ -1,0 +1,91 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+                             {
+                                 "kind":  "requires_asset",
+                                 "message":  "needs a supplied image on the scene"
+                             },
+                             {
+                                 "kind":  "requires_overlay_text",
+                                 "message":  "needs overlay text on the scene"
+                             },
+                             {
+                                 "kind":  "param_lte_scene_duration",
+                                 "param":  "fade_in_s",
+                                 "message":  "the fade-in cannot be longer than the scene"
+                             }
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "image-caption-hyperframes",
+    "type":  "animation",
+    "operation_type":  "render_graphics_scene",
+    "title":  "Supplied image with a caption (HyperFrames)",
+    "purpose":  "A HyperFrames scene that shows one image the user supplied with the scene\u0027s overlay text as its caption. Only a supplied image is shown; nothing is generated or replaced. A product screen that was not declared a genuine capture is labelled as a concept.",
+    "intents":  [
+                    "photo scene hyperframes",
+                    "html image with caption"
+                ],
+    "parameters":  [
+                       {
+                           "kind":  "number",
+                           "name":  "fade_in_s",
+                           "unit":  "s",
+                           "min":  0.2,
+                           "max":  2,
+                           "default":  0.5
+                       },
+                       {
+                           "kind":  "enum",
+                           "name":  "background",
+                           "options":  [
+                                           "navy",
+                                           "charcoal",
+                                           "forest"
+                                       ],
+                           "default":  "charcoal"
+                       },
+                       {
+                           "kind":  "enum",
+                           "name":  "fit",
+                           "options":  [
+                                           "contain",
+                                           "cover"
+                                       ],
+                           "default":  "contain"
+                       },
+                       {
+                           "kind":  "enum",
+                           "name":  "motion",
+                           "options":  [
+                                           "none",
+                                           "slow_zoom"
+                                       ],
+                           "default":  "none"
+                       }
+                   ],
+    "constraints":  {
+                        "min_duration_s":  2,
+                        "max_duration_s":  12,
+                        "max_uses_per_film":  null,
+                        "energy":  "low"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "hyperframes"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "image"
+                                          ]
+                      },
+    "implementation_ref":  "hyperframes/image-caption"
+}

@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    { "kind": "requires_asset", "message": "clip-play needs a supplied video clip on the scene" }
+  ],
+  "source": { "origin": "original", "url": null, "license": "Digikon original" },
+  "status": "draft",
+  "recipe_id": "clip-play",
+  "type": "shot",
+  "operation_type": "trim_clip",
+  "title": "Play a supplied clip",
+  "purpose": "Plays the supplied video clip unchanged: from the scene's approved source start point, at normal speed, for exactly the scene's duration, filling the frame as chosen. No text is added and no audio is produced; a clip with sound is rendered only when the plan explicitly says to drop it (source_audio drop).",
+  "intents": ["play the clip", "show the footage", "supplied footage", "video clip", "b-roll", "shot from the footage"],
+  "parameters": [
+    { "kind": "enum", "name": "fit", "options": ["contain", "cover"], "default": "contain" },
+    { "kind": "enum", "name": "background", "options": ["navy", "charcoal", "forest"], "default": "charcoal" },
+    { "kind": "enum", "name": "source_audio", "options": ["keep", "drop"], "default": "keep" }
+  ],
+  "constraints": { "min_duration_s": 1, "max_duration_s": 8, "max_uses_per_film": null, "energy": "medium" },
+  "compatibility": { "renderers": ["ffmpeg"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["video"] },
+  "implementation_ref": "ffmpeg/clip-play"
+}

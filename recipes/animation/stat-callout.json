@@ -1,0 +1,23 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    { "kind": "requires_overlay_text", "message": "stat-callout needs overlay text on the scene" },
+    { "kind": "param_lte_scene_duration", "param": "fade_in_s", "message": "the fade-in cannot be longer than the scene" }
+  ],
+  "source": { "origin": "original", "url": null, "license": "Digikon original" },
+  "status": "draft",
+  "recipe_id": "stat-callout",
+  "type": "animation",
+  "operation_type": "render_graphics_scene",
+  "title": "Large figure with a label",
+  "purpose": "A graphics scene that shows one large figure with a label and an optional line of context. Write the scene's overlay text as 'Figure | Label | Context' (context is optional); the words are shown exactly as approved, and any figure must be backed by an approved fact.",
+  "intents": ["statistic", "key number", "big number", "figure", "result", "milestone"],
+  "parameters": [
+    { "kind": "number", "name": "fade_in_s", "unit": "s", "min": 0.2, "max": 2, "default": 0.5 },
+    { "kind": "enum", "name": "background", "options": ["navy", "charcoal", "forest"], "default": "forest" },
+    { "kind": "enum", "name": "accent", "options": ["amber", "teal", "coral"], "default": "teal" }
+  ],
+  "constraints": { "min_duration_s": 2, "max_duration_s": 10, "max_uses_per_film": null, "energy": "medium" },
+  "compatibility": { "renderers": ["ffmpeg"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["none"] },
+  "implementation_ref": "ffmpeg/stat-callout"
+}
