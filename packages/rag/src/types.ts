@@ -31,6 +31,8 @@ export interface Doc {
     recipe_min_duration_s?: number;
     recipe_max_duration_s?: number;
     recipe_energy?: Energy;
+    /** shot_recipes only. True when the recipe has a working, validated template (built in, or learned and validated). Absent means unknown. */
+    recipe_implemented?: boolean;
     topics?: string[];
     grade?: "A" | "B" | "C";
     /** Knowledge notes only. A `draft` note is never retrieved unless `include_draft` is set. Notes without a status keep today's behaviour. */
@@ -48,6 +50,8 @@ export interface RetrieveFilter {
   media?: string[];
   /** Include draft recipes. Development only. */
   include_draft?: boolean;
+  /** Recipes only: keep only those with a working, validated template. Recipes whose state is unknown are dropped when this is set. */
+  implemented_only?: boolean;
   /** Knowledge notes only: keep notes tagged with at least one of these topics. Notes with no topics are excluded when this is set. */
   topics?: string[];
   /** Knowledge notes only: drop notes graded below this (A is best). Notes with no grade are dropped when this is set. */

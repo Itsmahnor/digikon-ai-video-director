@@ -30,6 +30,7 @@ export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
       return !!f.project_id && m.project_id === f.project_id;
     case "shot_recipes": {
       if (m.recipe_status !== "reviewed" && !f.include_draft) return false;
+      if (f.implemented_only && m.recipe_implemented !== true) return false;
       if (f.recipe_type && m.recipe_type !== f.recipe_type) return false;
       if (f.aspect_ratio && m.recipe_aspect_ratios && !m.recipe_aspect_ratios.includes(f.aspect_ratio)) return false;
       if (f.energy && m.recipe_energy !== f.energy) return false;
@@ -49,6 +50,7 @@ export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
 }
 
 const approxTokens = (s: string) => Math.ceil(s.length / 4);
+const IMPLEMENTED_BOOST = 1.15;
 
 /** BM25 over title and text. This is the baseline the Qdrant retriever must beat to be adopted. */
 export class KeywordRetriever implements Retriever {
@@ -91,6 +93,10 @@ export class KeywordRetriever implements Retriever {
         const idf = Math.log(1 + (n - (this.df.get(t) ?? 0) + 0.5) / ((this.df.get(t) ?? 0) + 0.5));
         score += idf * ((f * (this.k1 + 1)) / (f + this.k1 * (1 - this.b + (this.b * dl) / (this.avgLen || 1))));
       }
+      // A recipe that is known to have a working template ranks a little above an equally good match that has none, so a capability that was
+      // learned in one project is the one picked in the next. A recipe whose state is unknown is not penalised.
+      if (doc.metadata.recipe_implemented === true) score *= IMPLEMENTED_BOOST;
+      else if (doc.metadata.recipe_implemented === false) score *= 1 / IMPLEMENTED_BOOST;
       if (score > 0) scored.push({ doc, score });
     }
     scored.sort((a, b) => b.score - a.score || a.doc.id.localeCompare(b.doc.id));

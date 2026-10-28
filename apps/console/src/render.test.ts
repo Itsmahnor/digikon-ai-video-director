@@ -236,11 +236,19 @@ describe.skipIf(skipReal(!!font))("unsupported content never becomes a misleadin
     expect(view.coverage.complete).toBe(false);
     expect(view.coverage.scenes.find((s: any) => s.scene_id === "S02").missing.join(" ")).toContain("a logo");
     expect(view.blockers.join(" ")).toContain("S02: it needs a logo");
+    // nothing is shown as the approved video: the other scenes are rendered and S02, which cannot be shown, is a labelled placeholder in an INCOMPLETE preview
     const res = await renderNow(app, id);
-    expect(res.status).toBe(409);
-    expect((await body(res)).error).toBe("not_renderable");
-    expect(outFiles(id, runId)).toEqual([]);
-    expect(existsSync(renderDirs(sessionDir(id), runId).records)).toBe(false);
+    const out = await body(res);
+    expect(res.status, JSON.stringify(out.errors ?? out.message)).toBe(200);
+    expect(out.kind).toBe("partial");
+    expect(out.record).toBeNull(); // not a "rendered" record
+    expect(out.delivery).toMatchObject({ kind: "partial", status: "incomplete_preview", states: { final_delivery_ready: false } });
+    expect(out.delivery.label).toContain("INCOMPLETE PREVIEW");
+    expect(out.delivery.scenes.map((s: any) => [s.scene_id, s.status])).toEqual([["S01", "rendered_unverified"], ["S02", "placeholder"], ["S03", "rendered_unverified"]]);
+    expect(out.delivery.scenes[1].omitted_reason).toContain("a logo");
+    expect(outFiles(id, runId)).toEqual([`${out.delivery.output.path.split("/").at(-1)}`]);
+    expect(existsSync(renderDirs(sessionDir(id), runId).records)).toBe(true); // only the delivery report: no render record
+    expect(readdirSync(renderDirs(sessionDir(id), runId).records).filter((f) => f.startsWith("rn_"))).toEqual([]);
   });
 
   it("refuses the Director's ordinary demo plan (footage, transitions, audio), listing every blocker", async () => {
@@ -396,9 +404,15 @@ describe.skipIf(skipReal(!!font))("several scene templates and a crossfade, thro
     const v = await body(await planNow(app, id));
     expect(v).toMatchObject({ eligible: false, plan: { state: "planning" } });
     expect(v.blockers.join(" ")).toContain("operation E01: the item 1");
+    // the scene that cannot be drawn keeps its own reason in an INCOMPLETE preview; nothing is drawn differently from what was approved
     const res = await renderNow(app, id);
-    expect(res.status).toBe(409);
-    expect(outFiles(id, runId)).toEqual([]);
+    const out = await body(res);
+    expect(res.status, JSON.stringify(out.errors ?? out.message)).toBe(200);
+    expect(out.kind).toBe("partial");
+    expect(out.delivery.scenes.map((s: any) => [s.scene_id, s.status])).toEqual([["S01", "placeholder"], ["S02", "rendered_unverified"], ["S03", "rendered_unverified"]]);
+    expect(out.delivery.scenes[0].omitted_reason).toContain("the item 1");
+    expect(out.delivery.final_delivery_blockers.join(" ")).toContain("incomplete");
+    expect(outFiles(id, runId)).toEqual([`${out.delivery.output.path.split("/").at(-1)}`]);
   });
 });
 describe.skipIf(skipReal(!!font))("supplied footage, through the console", () => {

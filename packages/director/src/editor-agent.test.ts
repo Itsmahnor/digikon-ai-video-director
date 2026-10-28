@@ -289,7 +289,7 @@ describe("what the Editor reports instead of inventing", () => {
     expect((await planEditorWork(t.handoff, t.editor)).conflicts).toEqual([]);
   });
 
-  it("reports unrecorded audio licences, undeclared product screens and unmet asset blockers", async () => {
+  it("reports unrecorded audio licences and unmet asset blockers, and notes (but does not block on) an undeclared product screen", async () => {
     const t = await approved("e-meta");
     const h = structuredClone(t.handoff) as DirectorHandoff;
     h.assets.push(Asset.parse({ asset_id: "asset_music", uri: "music.mp3", media_type: "audio", duration: 30, width: null, height: null }));
@@ -301,13 +301,40 @@ describe("what the Editor reports instead of inventing", () => {
     ];
     h.asset_feasibility = { ...h.asset_feasibility, blockers: ["S05 needs footage \"x\" that is not supplied."] };
     const f = await planEditorWork(h, t.editor);
-    expect(f.conflicts.map((c) => c.conflict_id)).toEqual(["K-license-asset_music", "K-provenance-S04-asset_ui", "K-asset-1"]);
+    expect(f.conflicts.map((c) => c.conflict_id)).toEqual(["K-license-asset_music", "K-asset-1"]); // no conflict for the undeclared screenshot
+    expect(f.notes.join(" ")).toContain("S04 uses the uploaded screenshot asset_ui; it was not declared a genuine capture of the product, so it is shown as an uploaded image, not as confirmed product interface");
+    expect(f.notes.join(" ")).not.toContain("asset_ui2"); // declared not genuine: nothing to note
     expect(f.conflicts[0]!.description).toContain("no recorded right-to-use declaration (licence not recorded)");
     const licensed = Asset.parse({ asset_id: "asset_music", uri: "music.mp3", media_type: "audio", duration: 30, width: null, height: null, license: { status: "licensed", note: "stock licence 123" } });
     h.assets = h.assets.map((a) => (a.asset_id === "asset_music" ? licensed : a));
     expect((await planEditorWork(h, t.editor)).conflicts.map((c) => c.conflict_id)).not.toContain("K-license-asset_music");
   });
-});
+
+  it("regression: an undeclared uploaded screenshot proceeds through Editor validation when everything else is satisfied", async () => {
+    const t = await approved("e-undeclared");
+    const h = structuredClone(t.handoff) as DirectorHandoff;
+    // genuine_product_ui is left at its default (null = never declared), in every scene that shows it
+    h.assets.push(Asset.parse({ asset_id: "asset_shot", uri: "shot.png", media_type: "image", duration: null, width: 1680, height: 919 }));
+    expect(h.assets.at(-1)!.genuine_product_ui).toBeNull();
+    for (const i of [0, 3]) h.storyboard.scenes[i]!.required_assets = [{ need: "Product screen", kind: "ui_screenshot", availability: "supplied", asset_id: "asset_shot", placeholder: false, fallback: null }];
+    const f = await planEditorWork(h, t.editor);
+    expect(f.conflicts).toEqual([]);
+    expect(f.revision_requests).toEqual([]);
+    expect(f.notes.filter((n) => n.includes("asset_shot")).length).toBe(2); // one note per scene that uses it, never a claim of authenticity
+    for (const n of f.notes.filter((x) => x.includes("asset_shot"))) expect(n).toMatch(/not declared a genuine capture/);
+  });
+
+  it("an explicit declaration is still respected: genuine true or false adds no note either way", async () => {
+    const t = await approved("e-declared");
+    for (const declared of [true, false]) {
+      const h = structuredClone(t.handoff) as DirectorHandoff;
+      h.assets.push(Asset.parse({ asset_id: "asset_shot", uri: "shot.png", media_type: "image", duration: null, width: 800, height: 600, genuine_product_ui: declared }));
+      h.storyboard.scenes[3]!.required_assets = [{ need: "Product screen", kind: "ui_screenshot", availability: "supplied", asset_id: "asset_shot", placeholder: false, fallback: null }];
+      const f = await planEditorWork(h, t.editor);
+      expect(f.conflicts).toEqual([]);
+      expect(f.notes.join(" ")).not.toContain("asset_shot");
+    }
+  });});
 
 describe("the optional model review", () => {
   it("reads the Editor skills and Editor knowledge as data, and can only add conflicts and revision requests", async () => {

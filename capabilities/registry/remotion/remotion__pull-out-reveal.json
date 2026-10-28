@@ -1,0 +1,101 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:pull-out-reveal",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/pull-out-reveal",
+  "recipe_id": "pull-out-reveal",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "zoom_out"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:08:51.913Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "5a7bcba3d2472951246774b7a5e9fb03b608e399fd1c26fee3d3d6c6e31e3d4d",
+        "bytes": 44573,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the picture shrinks by 0.77x (approved 0.77x): the stripe is 130px wide at the start and 100px at the end"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-a5476512",
+      "at": "2026-10-28T08:13:32.355Z",
+      "outcome": "validated",
+      "input_hash": "40a3b92d65e37b971ed29bd715f01673e9a866a6c12a115889cfe499f7d20fa2",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-f67f9849",
+      "at": "2026-10-28T09:24:21.576Z",
+      "outcome": "validated",
+      "input_hash": "720f756e856c989c5f0f1874d23887af8a0afe8499ebd4b64466cedaf8510a62",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-f6fb00a9",
+      "at": "2026-10-28T09:42:57.944Z",
+      "outcome": "validated",
+      "input_hash": "5464a14d312f4a49c6fdae0df89002e762bf6a3b531c2e8e8af84590d04e0b57",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-932d5d77",
+      "at": "2026-10-28T12:08:51.913Z",
+      "outcome": "validated",
+      "input_hash": "da52d13090d3cef35a309b80b6acde8a5492d21de69fa36f00b7a17b4f27b28d",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "bc8a0b2aed4e506dca5bc3a5037b0d9cc7d0748f1f6e1a8b51fea21aee4ddebb"
+}

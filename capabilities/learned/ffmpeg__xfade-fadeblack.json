@@ -1,0 +1,37 @@
+{
+  "format": "digikon.learned-capability",
+  "format_version": 1,
+  "template": "ffmpeg/xfade-fadeblack",
+  "family": "xfade_transition",
+  "recipe_id": "dip-to-black",
+  "storyboard_transition": "dip_to_black",
+  "xfade": "fadeblack",
+  "direction_map": null,
+  "validated": {
+    "at": "2026-10-28T07:10:32.622Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [
+      "fadeblack"
+    ],
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "3e0459a670dbd7762b138fbee56dc11fab987c20b589eb916ab2c1a2dd980cfd",
+        "bytes": 6589,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      }
+    ],
+    "checks": [
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the transition is dark (luma 2.9 against 33.0 and 50.1)",
+      "the picture dips and comes back",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio"
+    ]
+  },
+  "spec_hash": "ab51b04e7704781f1ab4d90c3570390d4d6c80aa42b2c0b13df3b89cf23d6685"
+}

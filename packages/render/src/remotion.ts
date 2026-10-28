@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import type { RenderAdapter } from "./adapter.js";
 import { inspectBrowser, selectRemotionBrowser, selectRemotionBrowserFrom } from "./browser.js";
 import { verifySceneFidelity } from "./verify.js";
+import { composedCapabilities, planComposedScenes, type ComposedTemplate } from "./web-composed.js";
+import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, planWebScenes, type WebTemplate } from "./web-scenes.js";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
@@ -16,6 +18,14 @@ export const REMOTION_TEMPLATES: Readonly<Record<string, WebTemplate>> = {
 
 /** What this adapter can show beyond plain graphics, in the form the coverage check takes. No transitions, clips or audio are built. */
 export const REMOTION_CAPABILITIES = { image_templates: ["remotion/image-caption"], video_templates: [], transition_templates: {} } as const;
+
+/**
+ * What this adapter can show, including the learned templates it was given: camera moves (by the storyboard motion they carry out), the
+ * templates that show their own image, and the templates that start text at the approved delay.
+ */
+export function remotionCapabilities(learned: readonly ComposedTemplate[] = []) {
+  return { image_templates: REMOTION_CAPABILITIES.image_templates, video_templates: REMOTION_CAPABILITIES.video_templates, transition_templates: REMOTION_CAPABILITIES.transition_templates, ...composedCapabilities(learned) };
+}
 
 export interface RemotionAdapterOptions {
   /** A TrueType/OpenType font file. Required: text is never drawn with a font the adapter has not been given. */
@@ -31,7 +41,11 @@ export interface RemotionAdapterOptions {
    * content check that must still catch such a render can be tested. Never set in the console.
    */
   unsafeAllowIncompatibleBrowser?: boolean;
+  /** Diagnostics only. Keeps the rendered file even when its content check fails, so a failure can be inspected frame by frame. Never set in the console. */
+  keepOnContentFailure?: boolean;
   workRoot?: string;
+  /** Validated learned templates from the capability registry (engine remotion). Each is one reviewed template this adapter may run; none is registered without validation. */
+  learned?: readonly ComposedTemplate[];
 }
 
 const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-project", "index.jsx");
@@ -51,18 +65,31 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
     const seen = "inspected" in choice ? choice.inspected.map((i) => `${i.path}: ${i.reason}`).join("; ") : "";
     throw new Error(`no compatible browser is installed for Remotion (nothing is downloaded)${seen ? `. Looked at: ${seen}` : ""}`);
   }
+  for (const l of opts.learned ?? []) if (!l.template.startsWith("remotion/")) throw new Error(`${l.template} is not a Remotion template, so the Remotion adapter will not run it`);
   const planOpts = { renderer: "remotion" as const, templates: REMOTION_TEMPLATES, outputRoot: opts.outputRoot };
+  const composedTemplates = Object.fromEntries((opts.learned ?? []).map((l) => [l.template, l]));
+  /** A film that uses any learned template is planned as composed scenes; otherwise as the plain text and image scenes. The two are not mixed in one film yet. */
+  const plan = (job: Parameters<RenderAdapter["render"]>[0] | Omit<Parameters<RenderAdapter["render"]>[0], "signal">) => {
+    const composed = job.operations.some((o) => composedTemplates[job.templates[o.operation_id] ?? ""]);
+    if (!composed) { const p = planWebScenes(job, planOpts); return p.ok ? { kind: "base" as const, plan: p } : { kind: "issues" as const, issues: p.issues }; }
+    const mixed = job.operations.filter((o) => !composedTemplates[job.templates[o.operation_id] ?? ""]);
+    if (mixed.length) return { kind: "issues" as const, issues: mixed.map((o) => `operation ${o.operation_id}: ${job.templates[o.operation_id] ?? "(none)"} is not a composed-scene template, and plain scenes cannot be combined with composed scenes in one film yet`) };
+    const p = planComposedScenes(job, { renderer: "remotion", templates: composedTemplates, outputRoot: opts.outputRoot });
+    return p.ok ? { kind: "composed" as const, plan: p } : { kind: "issues" as const, issues: p.issues };
+  };
 
   return {
     renderer: "remotion",
-    templates: Object.fromEntries(Object.entries(REMOTION_TEMPLATES).map(([ref, t]) => [ref, [t.type]])),
+    templates: { ...Object.fromEntries(Object.entries(REMOTION_TEMPLATES).map(([ref, t]) => [ref, [t.type]])), ...Object.fromEntries((opts.learned ?? []).map((l) => [l.template, [l.type]])) },
+    capabilities: remotionCapabilities(opts.learned),
     check(job) {
-      const p = planWebScenes(job, planOpts);
-      return p.ok ? [] : p.issues;
+      const p = plan(job);
+      return p.kind === "issues" ? p.issues : [];
     },
     async render(job) {
-      const plan = planWebScenes(job, planOpts);
-      if (!plan.ok) throw new Error(`rejected before remotion ran: ${plan.issues.join("; ")}`);
+      const planned = plan(job);
+      if (planned.kind === "issues") throw new Error(`rejected before remotion ran: ${planned.issues.join("; ")}`);
+      const plan2 = planned.plan;
       const { width, height, fps } = job.settings;
       const notes: string[] = [];
       const dir = await mkdtemp(join(opts.workRoot ?? tmpdir(), "remotion-render-"));
@@ -70,20 +97,20 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         const publicDir = join(dir, "public");
         await mkdir(publicDir);
         await copyFile(opts.fontFile, join(publicDir, "font.ttf"));
-        const scenes = await Promise.all(plan.scenes.map(async (sc, i) => {
-          if (!sc.image) return sc;
-          const file = `img${i}${sc.image.ext}`;
-          await copyFile(sc.image.uri, join(publicDir, file));
-          return { ...sc, image: { ...sc.image, uri: undefined, file } };
+        const scenes = await Promise.all((plan2.scenes as { image: null | { ext: string; uri: string }; logo?: null | { ext: string; uri: string } }[]).map(async (sc, i) => {
+          let out: Record<string, unknown> = sc;
+          if (sc.image) { const file = `img${i}${sc.image.ext}`; await copyFile(sc.image.uri, join(publicDir, file)); out = { ...out, image: { ...sc.image, uri: undefined, file } }; }
+          if (sc.logo) { const file = `logo${i}${sc.logo.ext}`; await copyFile(sc.logo.uri, join(publicDir, file)); out = { ...out, logo: { ...sc.logo, uri: undefined, file } }; }
+          return out;
         }));
         const { bundle } = await import("@remotion/bundler");
         const { renderMedia, selectComposition, makeCancelSignal } = await import("@remotion/renderer");
         const serveUrl = await bundle({ entryPoint: ENTRY, outDir: join(dir, "bundle"), publicDir });
-        const inputProps = { width, height, fps, total_frames: plan.total_frames, font: "font.ttf", badge: CONCEPT_BADGE, scenes };
+        const inputProps = { width, height, fps, total_frames: plan2.total_frames, font: "font.ttf", badge: CONCEPT_BADGE, scenes };
         // "chrome-for-testing" is Remotion's mode for a full browser (headless=new); its default mode targets chrome-headless-shell, which is not installed
         const common = { browserExecutable: chrome, chromeMode: "chrome-for-testing" as const, logLevel: "error" as const, chromiumOptions: { gl: "angle" as const } };
         const composition = await selectComposition({ serveUrl, id: "Scenes", inputProps, ...common });
-        if (composition.width !== width || composition.height !== height || composition.fps !== fps || composition.durationInFrames !== plan.total_frames) {
+        if (composition.width !== width || composition.height !== height || composition.fps !== fps || composition.durationInFrames !== plan2.total_frames) {
           throw new Error(`remotion measured the composition as ${composition.width}x${composition.height} at ${composition.fps} fps for ${composition.durationInFrames} frames, not what was approved`);
         }
         const { cancelSignal, cancel } = makeCancelSignal();
@@ -94,11 +121,16 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         } finally {
           job.signal.removeEventListener("abort", onAbort);
         }
-        const checked = await verifySceneFidelity(resolve(job.output_path), plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot });
-        if (checked.problems.length) throw new Error(`the output is missing approved content: ${checked.problems.join("; ")}`);
+        const checked = planned.kind === "composed"
+          ? await verifyComposedScenes(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot })
+          : await verifySceneFidelity(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot });
+        if (checked.problems.length) {
+          if (opts.keepOnContentFailure) { notes.push(`kept ${resolve(job.output_path)} for inspection`); throw Object.assign(new Error(`the output is missing approved content: ${checked.problems.join("; ")}`), { keep: true }); }
+          throw new Error(`the output is missing approved content: ${checked.problems.join("; ")}`);
+        }
         notes.push(`remotion rendered in ${basename(chrome)} (${choice.bits})`, ...checked.limitations);
       } catch (e) {
-        await rm(job.output_path, { force: true });
+        if (!(opts.keepOnContentFailure && (e as { keep?: boolean }).keep)) await rm(job.output_path, { force: true });
         if (job.signal.aborted) throw new Error("remotion was stopped");
         throw new Error(`remotion failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 500)}`);
       } finally {

@@ -34,7 +34,7 @@ const codes = (e: ReturnType<typeof edit>) => validateEditPlan(e, scenes, lib, p
 describe("starter recipe library", () => {
   it("loads 15 to 20 valid recipes covering every type", () => {
     expect(recipes.length).toBeGreaterThanOrEqual(15);
-    expect(recipes.length).toBeLessThanOrEqual(30); // was 20 before the FFmpeg scene templates added five draft recipes; the library is still small enough to review by hand
+    expect(recipes.length).toBeLessThanOrEqual(40); // was 20 before the FFmpeg scene templates added five draft recipes, then 30 before six sibling draft recipes gave the HyperFrames implementations of the camera and text capabilities a recipe of their own; the library is still small enough to review by hand
     expect(new Set(recipes.map((r) => r.type))).toEqual(new Set(["shot", "camera_move", "transition", "animation", "sound_cue"]));
   });
   it("is empty in production mode until recipes are reviewed", () => {

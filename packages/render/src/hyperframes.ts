@@ -5,7 +5,10 @@ import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import type { RenderAdapter } from "./adapter.js";
 import { QUIET_ENV, findChrome, runProcess } from "./browser.js";
+import { buildComposedComposition } from "./hyperframes-composed.js";
 import { verifySceneFidelity } from "./verify.js";
+import { composedCapabilities, planComposedScenes, type ComposedTemplate } from "./web-composed.js";
+import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, WEB_FONT_FAMILY, planWebScenes, type WebScene, type WebTemplate } from "./web-scenes.js";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
@@ -25,6 +28,8 @@ export interface HyperframesAdapterOptions {
   /** A Chrome that is already installed. Defaults to the usual install locations; nothing is downloaded. */
   chromePath?: string | null;
   workRoot?: string;
+  /** Validated learned templates from the capability registry (engine hyperframes). Each is one reviewed template this adapter may run; none is registered without validation. */
+  learned?: readonly ComposedTemplate[];
 }
 
 const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -88,29 +93,44 @@ export function createHyperframesAdapter(opts: HyperframesAdapterOptions): Rende
   const chrome = findChrome(opts.chromePath);
   if (!chrome) throw new Error("no Chrome is installed, and HyperFrames needs one (nothing is downloaded)");
   const bin = hyperframesBin();
+  for (const l of opts.learned ?? []) if (!l.template.startsWith("hyperframes/")) throw new Error(`${l.template} is not a HyperFrames template, so the HyperFrames adapter will not run it`);
   const planOpts = { renderer: "hyperframes" as const, templates: HYPERFRAMES_TEMPLATES, outputRoot: opts.outputRoot };
+  const composedTemplates = Object.fromEntries((opts.learned ?? []).map((l) => [l.template, l]));
+  /** A film that uses any learned template is planned as composed scenes; otherwise as the plain text and image scenes. The two are not mixed in one film yet. */
+  const plan = (job: Parameters<RenderAdapter["render"]>[0] | Omit<Parameters<RenderAdapter["render"]>[0], "signal">) => {
+    const composed = job.operations.some((o) => composedTemplates[job.templates[o.operation_id] ?? ""]);
+    if (!composed) { const p = planWebScenes(job, planOpts); return p.ok ? { kind: "base" as const, plan: p } : { kind: "issues" as const, issues: p.issues }; }
+    const mixed = job.operations.filter((o) => !composedTemplates[job.templates[o.operation_id] ?? ""]);
+    if (mixed.length) return { kind: "issues" as const, issues: mixed.map((o) => `operation ${o.operation_id}: ${job.templates[o.operation_id] ?? "(none)"} is not a composed-scene template, and plain scenes cannot be combined with composed scenes in one film yet`) };
+    const p = planComposedScenes(job, { renderer: "hyperframes", templates: composedTemplates, outputRoot: opts.outputRoot });
+    return p.ok ? { kind: "composed" as const, plan: p } : { kind: "issues" as const, issues: p.issues };
+  };
 
   return {
     renderer: "hyperframes",
-    templates: Object.fromEntries(Object.entries(HYPERFRAMES_TEMPLATES).map(([ref, t]) => [ref, [t.type]])),
+    templates: { ...Object.fromEntries(Object.entries(HYPERFRAMES_TEMPLATES).map(([ref, t]) => [ref, [t.type]])), ...Object.fromEntries((opts.learned ?? []).map((l) => [l.template, [l.type]])) },
+    capabilities: { ...HYPERFRAMES_CAPABILITIES, ...composedCapabilities(opts.learned ?? []) },
     check(job) {
-      const p = planWebScenes(job, planOpts);
-      return p.ok ? [] : p.issues;
+      const p = plan(job);
+      return p.kind === "issues" ? p.issues : [];
     },
     async render(job) {
-      const plan = planWebScenes(job, planOpts);
-      if (!plan.ok) throw new Error(`rejected before hyperframes ran: ${plan.issues.join("; ")}`);
+      const planned = plan(job);
+      if (planned.kind === "issues") throw new Error(`rejected before hyperframes ran: ${planned.issues.join("; ")}`);
+      const plan2 = planned.plan;
       const { width, height, fps } = job.settings;
       const notes: string[] = [];
       const dir = await mkdtemp(join(opts.workRoot ?? tmpdir(), "hyperframes-render-"));
       try {
         await copyFile(opts.fontFile, join(dir, "font.ttf"));
-        await Promise.all(plan.scenes.flatMap((sc, i) => (sc.image ? [copyFile(sc.image.uri, join(dir, `img${i}${sc.image.ext}`))] : [])));
-        await writeFile(join(dir, "index.html"), buildComposition(plan.scenes, width, height, fps, plan.total_frames), "utf8");
+        await Promise.all((plan2.scenes as { image: null | { uri: string; ext: string } }[]).flatMap((sc, i) => (sc.image ? [copyFile(sc.image.uri, join(dir, `img${i}${sc.image.ext}`))] : [])));
+        await writeFile(join(dir, "index.html"), planned.kind === "composed" ? buildComposedComposition(planned.plan.scenes, width, height, fps, planned.plan.total_frames) : buildComposition(planned.plan.scenes, width, height, fps, planned.plan.total_frames), "utf8");
         const args = [bin, "render", dir, "--output", resolve(job.output_path), "--format", "mp4", "--fps", String(fps), "--workers", "1", "--strict"];
         const r = await runProcess(process.execPath, args, { cwd: dir, env: { ...process.env, ...QUIET_ENV, HYPERFRAMES_BROWSER_PATH: chrome }, signal: job.signal });
         if (r.code !== 0) throw new Error(`hyperframes exited with code ${r.code}: ${r.output.trim().slice(-500)}`);
-        const checked = await verifySceneFidelity(resolve(job.output_path), plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot });
+        const checked = planned.kind === "composed"
+          ? await verifyComposedScenes(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot })
+          : await verifySceneFidelity(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot });
         if (checked.problems.length) throw new Error(`hyperframes output is missing approved content: ${checked.problems.join("; ")}`);
         notes.push(`hyperframes rendered in ${basename(chrome)}`, ...checked.limitations);
       } catch (e) {

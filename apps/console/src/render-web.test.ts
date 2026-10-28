@@ -127,7 +127,7 @@ describe.skipIf(skipReal(can))("the console renders through the renderer the app
     });
   });
 
-  it("a plan that mixes two renderers is refused with the exact reason, and nothing is rendered or substituted", async () => {
+  it("a plan that mixes renderers is not a single-renderer render: it is assembled scene by scene, each by the renderer the approved plan names, and nothing is substituted", async () => {
     const app = build({ uses: [use(1, "S01", "text-card-fade"), use(2, "S02", "text-slide-remotion"), use(3, "S03", "text-fade-hyperframes")] });
     const { id, runId } = await approvedRun(app);
     const view = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS })));
@@ -136,9 +136,12 @@ describe.skipIf(skipReal(can))("the console renders through the renderer the app
     expect(view.eligible).toBe(false);
     expect(view.blockers.join(" ")).toContain("the operations need more than one renderer");
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
-    expect(res.status).toBe(409);
-    expect((await body(res)).error).toBe("not_renderable");
-    expect(outFiles(id, runId)).toEqual([]);
+    const out = await body(res);
+    expect(res.status, JSON.stringify(out.errors ?? out.message)).toBe(200);
+    expect(out.kind).toBe("complete");
+    expect(out.delivery.scenes.map((s: any) => [s.scene_id, s.engine])).toEqual([["S01", "ffmpeg"], ["S02", "remotion"], ["S03", "hyperframes"]]); // exactly the renderers in the approved plan
+    expect(out.delivery.states).toMatchObject({ scenes_rendered: 3, final_video_validated: true, final_delivery_ready: false }); // a preview of draft recipes, never final
+    expect(outFiles(id, runId)).toEqual([`${out.record.render_id}.mp4`]);
   });
 
   it("an FFmpeg plan still renders through FFmpeg, unchanged", async () => {

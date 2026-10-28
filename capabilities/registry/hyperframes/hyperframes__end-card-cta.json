@@ -1,0 +1,115 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "hyperframes:end-card-cta-hyperframes",
+  "capability_version": "1.0.0",
+  "engine": "hyperframes",
+  "template": "hyperframes/end-card-cta",
+  "recipe_id": "end-card-cta-hyperframes",
+  "recipe_version": "0.1.0",
+  "family": "end_card",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "card"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "render_graphics_scene",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "approved text on a brand, dark or light card"
+    ],
+    "not_validated": [
+      "an end card with a camera move or another text animation",
+      "a logo or button graphic",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "hyperframes"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:16:04.555Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "chrome.exe; hyperframes 0.8.207; scenes 93f7a19330386b0c",
+    "renders": [
+      {
+        "variant": "brand",
+        "sha256": "2298a6105eb920f7d8fa5042a5ddb40d8a5dfd68fdcdf905d8870eab5bea4197",
+        "bytes": 14893,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "dark",
+        "sha256": "24dae7ededa525dc948f7158368aa12a2da98805e31e19dc0e658c0c7ed3d54d",
+        "bytes": 12862,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "light",
+        "sha256": "b1c2c90ad48c7ba5203be90e2169d1cd3621ea1df9d0df4d3abeb099577094ed",
+        "bytes": 17166,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the brand card has its own background (luma 32)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the dark card has its own background (luma 16)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the light card has its own background (luma 237)"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "shows the approved text and an accent bar only",
+    "no logo is drawn",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-735a00da",
+      "at": "2026-10-28T09:32:05.289Z",
+      "outcome": "validated",
+      "input_hash": "571d39dedf58a157f316c7dbb718915e89dd5f070378dfe1cead4e4baa68cff3",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-8dc430b1",
+      "at": "2026-10-28T09:48:42.639Z",
+      "outcome": "validated",
+      "input_hash": "79a9ccae38f394789f5a228bfcef70f6f5e1234de54ee269670b8ab7326eaded",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-f51d4107",
+      "at": "2026-10-28T12:16:04.555Z",
+      "outcome": "validated",
+      "input_hash": "272fb3ac5210f254e22a70e376d67c63284bbc9e7e2e2c0d1cab5382bb7ecfa2",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "be85a590302f5d0b6c60f9637c031a377623673a600650cbd43919d51bd4769a"
+}

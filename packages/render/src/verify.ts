@@ -8,12 +8,12 @@ import type { WebScene } from "./web-scenes.js";
 const run = promisify(execFile);
 
 /** Decodes one frame of a finished video to raw RGB. Arguments as an array, no shell. */
-async function rawFrame(video: string, n: number, width: number, height: number, ffmpegPath: string): Promise<Buffer> {
+export async function rawFrame(video: string, n: number, width: number, height: number, ffmpegPath: string): Promise<Buffer> {
   const { stdout } = await run(ffmpegPath, ["-v", "error", "-i", video, "-vf", `select=eq(n\\,${n}),format=rgb24`, "-frames:v", "1", "-fps_mode", "passthrough", "-f", "rawvideo", "-"], { encoding: "buffer", maxBuffer: width * height * 3 + 4096, timeout: 60_000, windowsHide: true });
   return stdout as unknown as Buffer;
 }
 
-const rgb = (hex: string): [number, number, number] => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+export const rgb = (hex: string): [number, number, number] => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 
 /**
  * The first, cheapest layer. A finished file can have the right size, length and codec and still be blank. This looks at the last frame of
@@ -60,10 +60,10 @@ export interface FidelityOptions {
 const coverage = (r: number, g: number, b: number) => Math.max(0, Math.min(1, (Math.min(r, g, b) - 70) / 185));
 const dist = (a: readonly number[], b: readonly number[]) => Math.abs(a[0]! - b[0]!) + Math.abs(a[1]! - b[1]!) + Math.abs(a[2]! - b[2]!);
 
-interface Ink { count: number; x0: number; x1: number; y0: number; y1: number; cols: number[]; cy: number }
+export interface Ink { count: number; x0: number; x1: number; y0: number; y1: number; cols: number[]; cy: number }
 
 /** Text coverage inside a band of rows (the whole width), from raw RGB: its total, outline across the columns and bounding box. */
-function inkIn(buf: Buffer, width: number, height: number, y0: number, y1: number): Ink {
+export function inkIn(buf: Buffer, width: number, height: number, y0: number, y1: number): Ink {
   const lo = Math.max(0, Math.floor(y0)), hi = Math.min(height - 1, Math.ceil(y1));
   const cols = new Array<number>(width).fill(0);
   let count = 0, x0 = width, x1 = -1, ya = height, yb = -1, ysum = 0;
@@ -89,7 +89,7 @@ function profileCorrelation(a: number[], b: number[]): number {
 }
 
 /** A reference of the approved text drawn by FFmpeg with the same font, white on black, centred where the scene places it. */
-async function referenceText(dir: string, sc: WebScene, width: number, height: number, ffmpegPath: string): Promise<Buffer> {
+export async function referenceText(dir: string, sc: WebScene, width: number, height: number, ffmpegPath: string): Promise<Buffer> {
   await writeFile(join(dir, "ref.txt"), sc.lines.join("\n"), "utf8");
   const cy = Math.round(sc.text_y * height);
   const vf = `drawtext=fontfile=font.ttf:textfile=ref.txt:expansion=none:fontcolor=white:fontsize=${sc.font_px}:x=(w-text_w)/2:y=${cy}-text_h/2:text_align=center,format=rgb24`;
@@ -112,7 +112,7 @@ async function referenceImage(dir: string, sc: WebScene, ffmpegPath: string): Pr
 /** Below this size a browser and FFmpeg rasterise the same glyphs too differently for an outline match to mean anything (measured: 0.48 to 0.83 on correct 15 px text). */
 const OUTLINE_MIN_PX = 28;
 
-function checkText(sc: WebScene, actual: Buffer, ref: Buffer, width: number, height: number, problems: string[]): void {
+export function checkText(sc: WebScene, actual: Buffer, ref: Buffer, width: number, height: number, problems: string[]): void {
   const at = `${sc.operation_id}`;
   const half = (sc.lines.length * sc.font_px * 1.3) / 2 + sc.font_px * 0.6, cy = sc.text_y * height;
   const a = inkIn(actual, width, height, cy - half, cy + half);

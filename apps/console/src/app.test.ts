@@ -88,7 +88,7 @@ describe("uploads", () => {
     expect(part.headers.get("content-range")).toMatch(/^bytes 0-99\//);
     expect((await part.arrayBuffer()).byteLength).toBe(100);
     expect((await app.request(`/api/sessions/${id}/files/${assetId}`, { headers: { range: "bytes=999999999-" } })).status).toBe(416);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
   it("refuses path-like asset ids and empty uploads", async () => {
     const app = build(); const id = await newSession(app);
     expect((await app.request(`/api/sessions/${id}/files/..%2f..%2fpackage.json`)).status).toBe(404);
@@ -101,7 +101,7 @@ describe("uploads", () => {
     const a = ((await (await app.request(`/api/sessions/${id}/assets`, file("reel.mp4"))).json()) as any).added[0].asset_id;
     const res = (await (await app.request(`/api/sessions/${id}/assets/${a}`, { method: "DELETE" })).json()) as any;
     expect(res.assets).toEqual([]);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 });
 
 describe("speech", () => {
@@ -301,7 +301,7 @@ describe("routing and the Director run", () => {
     expect(body.handoff.content_hash).toBe(handoff.content_hash);
     expect((await restarted.request(`/api/sessions/${id}/runs/${id}-1/handoff`)).status).toBe(404);
     expect((await restarted.request(`/api/sessions/${id}/runs/..%2F..%2Fescape/handoff`)).status).toBe(404);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   it("refuses a same-size replacement of an approved upload, and a missing stored approval, after a restart", async () => {
     const { id, handoff } = await approvedWithUpload(build());
@@ -317,7 +317,7 @@ describe("routing and the Director run", () => {
     const missing = await build().request(`/api/sessions/${id}/runs/${runId}/handoff`);
     expect(missing.status).toBe(409);
     expect(((await missing.json()) as any).verification.reasons).toEqual(["stored approvals cannot be trusted: approval 000001.json is missing (the sequence has a gap)"]);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   /** Upload, route and plan up to gate 1. Returns the session, run id and gate-1 state. */
   async function atGate1WithUpload(app: ReturnType<typeof build>) {
@@ -348,7 +348,7 @@ describe("routing and the Director run", () => {
     const done = (await (await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: 1, decision: "approved" }))).json()) as any;
     expect(done.state.status).toBe("approved");
     expect((await app.request(`/api/sessions/${id}/handoff`)).status).toBe(200);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   it("resumes a run waiting at gate 2 after a restart, keeping the storyboard approval and refusing a repeat of gate 1", async () => {
     const first = build();
@@ -362,7 +362,7 @@ describe("routing and the Director run", () => {
     expect(back.state.approvals).toEqual(g2.state.approvals);
     expect((await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: 1, decision: "approved" }))).status).toBe(409);
     expect(new RunStore(join(dir, "sessions", id)).loadApprovals(runId).records).toHaveLength(1);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   it("refuses to resume from a corrupt checkpoint or a changed upload, and answers 404 for an unknown run", async () => {
     const { id, runId } = await atGate1WithUpload(build());
@@ -383,7 +383,7 @@ describe("routing and the Director run", () => {
 
     expect((await resume(build(), id, `${id}-1`)).status).toBe(404);
     expect((await resume(build(), "000000000000", "000000000000-1")).status).toBe(404);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   it("C: an edit request routes to the editing agent and cannot start a plan", async () => {
     const app = build(); const id = await newSession(app);
@@ -393,7 +393,7 @@ describe("routing and the Director run", () => {
     expect(r.result.request.edit.source_asset_ids).toHaveLength(1);
     const res = await app.request(`/api/sessions/${id}/direct`, json({}));
     expect(res.status).toBe(409);
-  });
+  }, 30_000); // real ffmpeg upload analysis: the 5 s default failed under full-suite load
 
   it("validates input and fails clearly without a key", async () => {
     const app = build(); const id = await newSession(app);

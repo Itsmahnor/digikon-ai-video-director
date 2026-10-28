@@ -1,0 +1,72 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [
+    {
+      "kind": "requires_overlay_text",
+      "message": "end-card-cta needs overlay text on the scene"
+    },
+    {
+      "kind": "param_lte_scene_duration",
+      "param": "hold_s",
+      "message": "hold cannot be longer than the scene"
+    }
+  ],
+  "source": {
+    "origin": "original",
+    "url": null,
+    "license": "Digikon original"
+  },
+  "status": "draft",
+  "recipe_id": "end-card-cta-hyperframes",
+  "type": "animation",
+  "operation_type": "render_graphics_scene",
+  "title": "End card with call to action (HyperFrames)",
+  "purpose": "Closing card holding the call to action and brand line long enough to read. Drawn by the HyperFrames renderer: a separate implementation of the same approved behaviour, with its own validation evidence.",
+  "intents": [
+    "call to action hyperframes",
+    "closing card hyperframes",
+    "end screen hyperframes",
+    "final message hyperframes"
+  ],
+  "parameters": [
+    {
+      "kind": "number",
+      "name": "hold_s",
+      "unit": "s",
+      "min": 1.5,
+      "max": 4,
+      "default": 2
+    },
+    {
+      "kind": "enum",
+      "name": "background",
+      "options": [
+        "brand",
+        "dark",
+        "light"
+      ],
+      "default": "brand"
+    }
+  ],
+  "constraints": {
+    "min_duration_s": 2,
+    "max_duration_s": 6,
+    "max_uses_per_film": 1,
+    "energy": "low"
+  },
+  "compatibility": {
+    "renderers": [
+      "hyperframes"
+    ],
+    "aspect_ratios": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "media_types": [
+      "image",
+      "none"
+    ]
+  },
+  "implementation_ref": "hyperframes/end-card-cta"
+}

@@ -1,0 +1,86 @@
+{
+  "format": "digikon.learned-capability",
+  "format_version": 1,
+  "template": "ffmpeg/xfade-wipe",
+  "family": "xfade_transition",
+  "recipe_id": "directional-wipe",
+  "storyboard_transition": "wipe",
+  "xfade": null,
+  "direction_map": {
+    "left": "wipeleft",
+    "right": "wiperight",
+    "up": "wipeup",
+    "down": "wipedown"
+  },
+  "validated": {
+    "at": "2026-10-28T07:10:36.182Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [
+      "wipeleft",
+      "wiperight",
+      "wipeup",
+      "wipedown"
+    ],
+    "renders": [
+      {
+        "variant": "left",
+        "sha256": "54ca3882336336f1a5d28351fa927f12bdbdb9c967bad53de2c17912b83914d7",
+        "bytes": 6435,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      },
+      {
+        "variant": "right",
+        "sha256": "6172f7766f4bbc76bc0eae65f1a6a3798d3cbb6f889add344e25460f5babd1b8",
+        "bytes": 6283,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      },
+      {
+        "variant": "up",
+        "sha256": "7b21a241f8fba2872dd7de87b150c9731f9f57f4314e162766dbe5347a7bdc3c",
+        "bytes": 6487,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      },
+      {
+        "variant": "down",
+        "sha256": "4f5a8efc764c11f45b5fce5a065c28ee6efd8c3014ecafa9e2cb2a74326ab834",
+        "bytes": 6334,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      }
+    ],
+    "checks": [
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the left wipe shows both scenes split left and right",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio",
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the right wipe shows both scenes split left and right",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio",
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the up wipe shows both scenes split top and bottom",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio",
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the down wipe shows both scenes split top and bottom",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio"
+    ]
+  },
+  "spec_hash": "f2b1cef17ff4638052e1a230c4acfb24d57693e305f3ff8210b100ba24de8c9d"
+}

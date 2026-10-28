@@ -15,6 +15,7 @@
     "director": "tsx packages/director/src/cli.ts",
     "console": "tsx apps/console/src/server.ts",
     "eval": "tsx packages/evals/src/cli.ts",
+    "capabilities": "tsx packages/render/src/learn-cli.ts",
     "eval:live": "tsx packages/evals/src/cli.ts --live",
     "console:demo": "tsx apps/console/src/server.ts --demo",
     "build": "npm run build --workspaces --if-present",

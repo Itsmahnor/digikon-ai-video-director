@@ -11,6 +11,7 @@ import {
 } from "@digikon/director";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { AdapterRegistry, type RenderAdapter, type RenderJob } from "./adapter.js";
+import { alternativeImplementation, diagnoseOperations, loadCapabilityRegistry, type LoadedRegistry, type OperationDiagnosis } from "./capabilities.js";
 import { previewCoverage } from "./coverage.js";
 import { selectRenderer } from "./select.js";
 import { validateOutput } from "./output.js";
@@ -26,6 +27,8 @@ export interface RenderDeps {
   storageRoot?: string;
   requireContentHash?: boolean;
   now?: () => Date;
+  /** The shared capability registry. When a recipe's own template cannot run, an engine the recipe lists may run it through a validated record. */
+  capabilities?: LoadedRegistry;
 }
 
 export interface RenderInput {
@@ -52,7 +55,7 @@ export interface ExecutablePlan {
 
 export type PlanResult =
   | { ok: false; stage: "input" | "handoff" | "editor_output"; reasons: string[] }
-  | { ok: true; record: RenderRecord; plan: ExecutablePlan | null };
+  | { ok: true; record: RenderRecord; plan: ExecutablePlan | null; /** Per operation: which engines could run it, why, which was selected and its status. */ diagnosis: OperationDiagnosis[] };
 
 const iso = (d: Date) => d.toISOString();
 
@@ -86,9 +89,22 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
 
   // ----- what can run, recomputed from the adapters that exist (the Editor's own report may have used none) -----
   const blockers: string[] = [], notes: string[] = [];
-  const report = executionReport(out.operations, deps.recipes, deps.adapters, { conflicts: 0, missing_inputs: [], notes: [] });
+  // Engine selection. A recipe runs through its own template when a registered adapter has it. Otherwise another engine may run it, but only one the
+  // approved recipe lists in `compatibility.renderers`, through a validated registry record. The recipe itself is never changed; the choice is recorded.
+  const registry = deps.capabilities ?? loadCapabilityRegistry(null);
+  const chosen = new Map<string, { template: string; engine: string }>();
+  for (const op of out.operations) {
+    const r = deps.recipes.get(op.recipe_id);
+    if (!r || chosen.has(r.recipe_id) || deps.adapters.supports(r.implementation_ref, op.operation_type)) continue;
+    const alt = alternativeImplementation(r, registry, (t) => deps.adapters.supports(t, op.operation_type));
+    if (alt) chosen.set(r.recipe_id, { template: alt.template, engine: alt.engine });
+  }
+  const effective = Object.create(deps.recipes) as typeof deps.recipes;
+  effective.get = (id: string) => { const r = deps.recipes.get(id); const c = r && chosen.get(r.recipe_id); return r && c ? { ...r, implementation_ref: c.template } : r; };
+  for (const [id, c] of chosen) notes.push(`${id} runs on ${c.engine} through ${c.template}: its own template has no working implementation here, the approved recipe lists ${c.engine}, and that capability is validated in the registry`);
+  const report = executionReport(out.operations, effective, deps.adapters, { conflicts: 0, missing_inputs: [], notes: [] });
   const operations = out.operations.map((op, i) => {
-    const recipe = deps.recipes.get(op.recipe_id)!;
+    const recipe = effective.get(op.recipe_id)!;
     const ex = report.operations[i]!;
     let renderer: Renderer | null = ex.renderer;
     if (renderer && !deps.adapters.supports(recipe.implementation_ref, op.operation_type)) {
@@ -109,7 +125,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   // ----- coverage: every approved requirement must be carried out by the selected renderer, or it is a blocker naming the scene -----
   // This is the same check the console shows. It runs here so no caller can render a plan that leaves out an approved transition, camera move,
   // voiceover, audio, footage, logo or caption timing. Details a renderer neither changes nor checks become notes, never silence.
-  const selection = selectRenderer({ operations, blockers });
+  const selection = selectRenderer({ operations, blockers }, deps.adapters);
   const coverage = previewCoverage(h, out, { operations }, selection.capabilities);
   for (const sc of coverage.scenes) {
     for (const m of sc.missing) { const b = `${sc.scene_id}: ${m}`; if (!blockers.includes(b)) blockers.push(b); }
@@ -169,8 +185,12 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
     state: executable ? "executable" : "planning", settings, operations, assets, audio_required: audioRequired,
     blockers, errors: [], output: null, notes, created_at: iso(now()), started_at: null, finished_at: null,
   });
-  if (!executable) return { ok: true, record, plan: null };
-  return { ok: true, record, plan: { record, adapter: adapter!, assets: h.assets, job: job!, handoff: h, editor_output: out } };
+  const diagnosis = diagnoseOperations({
+    operations: out.operations, recipes: deps.recipes, registry,
+    supports: (t, type) => deps.adapters.supports(t, type as never), engineOf: (t) => (deps.adapters.template(t)?.renderer as never) ?? null,
+  });
+  if (!executable) return { ok: true, record, plan: null, diagnosis };
+  return { ok: true, record, plan: { record, adapter: adapter!, assets: h.assets, job: job!, handoff: h, editor_output: out }, diagnosis };
 }
 
 /**
@@ -188,7 +208,7 @@ export function planProblems(plan: ExecutablePlan): string[] {
   }
   if (plan.job.operations.length !== plan.record.operations.length) problems.push("the job and the record list different operations");
   problems.push(...(plan.adapter.check?.(plan.job) ?? []).map((x) => `${plan.adapter.renderer}: ${x}`));
-  const cov = previewCoverage(plan.handoff, plan.editor_output, plan.record, selectRenderer(plan.record).capabilities);
+  const cov = previewCoverage(plan.handoff, plan.editor_output, plan.record, selectRenderer(plan.record, { adapterFor: () => plan.adapter }).capabilities);
   for (const s of cov.scenes) for (const m of s.missing) problems.push(`${s.scene_id}: ${m}`);
   return [...new Set(problems)];
 }

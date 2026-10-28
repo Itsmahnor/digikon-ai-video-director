@@ -1,0 +1,93 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "ffmpeg:dip-to-black",
+  "capability_version": "1.0.0",
+  "engine": "ffmpeg",
+  "template": "ffmpeg/xfade-fadeblack",
+  "recipe_id": "dip-to-black",
+  "recipe_version": "0.1.0",
+  "family": "xfade_transition",
+  "storyboard_transition": "dip_to_black",
+  "spec": {
+    "xfade": "fadeblack",
+    "direction_map": null
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "concat",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "text-card scenes on either side of the transition",
+      "the film's whole length kept"
+    ],
+    "not_validated": [
+      "a transition between scenes with supplied images or clips",
+      "a transition between clips rendered by different engines",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "ffmpeg"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T09:24:02.040Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "3e0459a670dbd7762b138fbee56dc11fab987c20b589eb916ab2c1a2dd980cfd",
+        "bytes": 6589,
+        "width": 320,
+        "height": 180,
+        "fps": 30,
+        "duration_s": 4
+      }
+    ],
+    "checks": [
+      "scene one on screen before the transition (0.8 s)",
+      "scene two on screen after the transition (3.3 s)",
+      "scene two starts on the frame the transition ends (frame 60)",
+      "the middle of the transition is dark (luma 2.9 against 33.0 and 50.1)",
+      "the picture dips and comes back",
+      "validateOutput passed: 320x180 at 30 fps, 4s, h264, no audio"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic two-scene text film only",
+    "no audio",
+    "needs the local FFmpeg xfade transition named in the spec"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "migrated-ab51b04e7704",
+      "at": "2026-10-28T07:10:32.622Z",
+      "outcome": "validated",
+      "input_hash": "migrated-from-v1",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-d5be5059",
+      "at": "2026-10-28T08:13:28.202Z",
+      "outcome": "validated",
+      "input_hash": "ffdaccc79c4f31b3e3740100190cc0a62e78118fd4076b4ee7ffeca9f67425f3",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-2f1fc2a2",
+      "at": "2026-10-28T09:24:02.040Z",
+      "outcome": "validated",
+      "input_hash": "4702f2fa6816e9e430fb8c7d98c11eedbd36bf4eb9dd646f5fb85779e045a025",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "f0c26ada95c29cdcbea1b41fc4ca633db1d5c04d83391efa4e0d0020940e40e5"
+}

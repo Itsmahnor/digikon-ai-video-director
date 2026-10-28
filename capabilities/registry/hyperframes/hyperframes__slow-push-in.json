@@ -1,0 +1,94 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "hyperframes:slow-push-in-hyperframes",
+  "capability_version": "1.0.0",
+  "engine": "hyperframes",
+  "template": "hyperframes/slow-push-in",
+  "recipe_id": "slow-push-in-hyperframes",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "zoom_in"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "hyperframes"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:12:42.619Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "chrome.exe; hyperframes 0.8.207; scenes 93f7a19330386b0c",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "a0087f7e164b4df89afcf699d1b7eb525e72c495e67ef4a680095e8cfae7e937",
+        "bytes": 42649,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the picture grows by 1.20x (approved 1.2x): the stripe is 100px wide at the start and 120px at the end"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-d2650dad",
+      "at": "2026-10-28T09:28:41.716Z",
+      "outcome": "validated",
+      "input_hash": "4ed63175debd00a0f01c7cc74970f546030a79afe3d9e663a25f27ff6d4478dc",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-8091e57f",
+      "at": "2026-10-28T09:45:32.450Z",
+      "outcome": "validated",
+      "input_hash": "99cf097ba56d4471068cc91a698ecb9ba1796ed7d4597cfdba5408d671cfe056",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-1dcfacde",
+      "at": "2026-10-28T12:12:42.619Z",
+      "outcome": "validated",
+      "input_hash": "953b5d68cc03c0daea977a68c7bf7f08c3d692cb51b871728b441aeb8e3a0aac",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "85442cbbdc029f6ccbb4b1bc5cb43b5ad7033f63a57e549a948fc90cc388539f"
+}

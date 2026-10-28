@@ -29,7 +29,7 @@ export interface RendererSelection {
  * belongs to one renderer, and only an adapter that is registered for it counts. Nothing is swapped for another renderer's look-alike.
  * A plan whose operations need different renderers is reported, not silently split or simplified.
  */
-export function selectRenderer(record: Pick<RenderRecord, "operations" | "blockers">): RendererSelection {
+export function selectRenderer(record: Pick<RenderRecord, "operations" | "blockers">, adapters?: { adapterFor(ref: string): { capabilities?: RenderCapabilities } | null }): RendererSelection {
   const supported = record.operations.filter((o) => o.renderer !== null);
   const needed = [...new Set(supported.map((o) => o.renderer!))];
   const unsupported = record.operations.filter((o) => o.renderer === null).map((o) => ({
@@ -38,5 +38,8 @@ export function selectRenderer(record: Pick<RenderRecord, "operations" | "blocke
     reasons: record.blockers.filter((b) => b.startsWith(`${o.operation_id}:`)).map((b) => b.slice(o.operation_id.length + 1).trim()),
   }));
   const selected = unsupported.length === 0 && needed.length === 1 ? needed[0]! : null;
-  return { selected, needed, composition_required: needed.length > 1, unsupported, capabilities: RENDERER_CAPABILITIES[selected ?? needed[0] ?? "ffmpeg"] };
+  // An adapter that knows more than the built-in table (because it was given learned capabilities) says so itself.
+  const first = supported.find((o) => o.renderer === (selected ?? needed[0]));
+  const own = first && adapters ? adapters.adapterFor(first.implementation_ref)?.capabilities : undefined;
+  return { selected, needed, composition_required: needed.length > 1, unsupported, capabilities: own ?? RENDERER_CAPABILITIES[selected ?? needed[0] ?? "ffmpeg"] };
 }

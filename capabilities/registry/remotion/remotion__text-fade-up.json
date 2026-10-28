@@ -1,0 +1,163 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:text-fade-up",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/text-fade-up",
+  "recipe_id": "text-fade-up",
+  "recipe_version": "0.1.0",
+  "family": "text_motion",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "fade_up"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "overlay_text",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "approved text on a plain card",
+      "approved text over a camera-moved image"
+    ],
+    "not_validated": [
+      "two text animations in one scene",
+      "an end card in the same scene",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:10:00.003Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "5a6a4a5619c4b8d1e82a80d70562dc2eb706c2f83761f1ae161dbd094b92a1c6",
+        "bytes": 21545,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "over_image",
+        "sha256": "566f7578b6bb7ccc9e91b124b23e9ca641d8fbe7a052be233c964ebef9ddef77",
+        "bytes": 78515,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "nothing is on screen before the approved delay (0.5s): 0 ink units against 2282 at the end",
+      "the text has started 9 frames after the approved delay",
+      "the text is complete once the approved entrance has finished",
+      "the text rises into place: 16.1px lower early in the entrance",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "nothing is on screen before the approved delay (0.5s): 0 ink units against 1139 at the end",
+      "the text has started 9 frames after the approved delay",
+      "the text is complete once the approved entrance has finished",
+      "the text rises into place: 16.0px lower early in the entrance",
+      "the text animation works over a camera-moved supplied image"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on synthetic text with the project font only",
+    "text is matched by pixel comparison, not OCR",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-725edd9c",
+      "at": "2026-10-28T08:14:26.787Z",
+      "outcome": "failed",
+      "input_hash": "4b2b1fa492b54e1811891b8a851a6d5db2194ea1cb97497e529400a0e94dbcc0",
+      "reasons": [
+        "remotion/text-fade-up: the render failed: remotion failed: the output is missing approved content: S01: the text has 5857 pixels of ink where the approved text \"Approved headline\" needs about 1132; scene S01: the text is already on screen before its approved delay of 15 frames; scene S01: the text does not rise into place (it should enter 40px lower)"
+      ]
+    },
+    {
+      "attempt_id": "a-58d3b7f5",
+      "at": "2026-10-28T08:23:56.199Z",
+      "outcome": "failed",
+      "input_hash": "829fcee0f3904f7ff50806412656edc29fc371c4a4e32fa23090443eb8887d4e",
+      "reasons": [
+        "remotion/text-fade-up: the render failed: remotion failed: the output is missing approved content: S01: the text has 5845 pixels of ink where the approved text \"Approved headline\" needs about 1132; scene S01: the text is already on screen before its approved delay of 15 frames; scene S01: the text does not rise into place (it should enter 40px lower)"
+      ]
+    },
+    {
+      "attempt_id": "a-2c3a8723",
+      "at": "2026-10-28T08:28:47.275Z",
+      "outcome": "failed",
+      "input_hash": "f3187c2725946bfdc0478d07be21693fcbd279397eb65c17ee6e936d993b165e",
+      "reasons": [
+        "remotion/text-fade-up: the render failed: remotion failed: the output is missing approved content: S01: the text has 3875 pixels of ink where the approved text \"Approved headline\" needs about 1132; scene S01: the text is already on screen before its approved delay of 15 frames; scene S01: the text does not rise into place (it should enter 40px lower)"
+      ]
+    },
+    {
+      "attempt_id": "a-9628dc97",
+      "at": "2026-10-28T08:32:28.722Z",
+      "outcome": "failed",
+      "input_hash": "320642fbe78c642cf6d33d8a4cd964c4d55daa8835463568d4ff33fa3605372f",
+      "reasons": [
+        "remotion/text-fade-up: the render failed: remotion failed: the output is missing approved content: scene S01: the text does not rise into place (it should enter 40px lower)"
+      ]
+    },
+    {
+      "attempt_id": "a-144b4fe5",
+      "at": "2026-10-28T08:35:05.875Z",
+      "outcome": "failed",
+      "input_hash": "de7e3ce09855d89a4af8fd3dc2dd71bb7deba06783b2888da535c9ec9d1b97c4",
+      "reasons": [
+        "remotion/text-fade-up: the render failed: remotion failed: the output is missing approved content: scene S01: the text does not rise into place (it should enter 40px lower)"
+      ]
+    },
+    {
+      "attempt_id": "a-d83411b6",
+      "at": "2026-10-28T08:37:18.173Z",
+      "outcome": "validated",
+      "input_hash": "c33bf0a9f32c8a43d2cc4ac68b688f201dee57d8a0ab290c93ec9981446dc4b9",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-48900113",
+      "at": "2026-10-28T09:25:29.994Z",
+      "outcome": "validated",
+      "input_hash": "b9f39e5ab78e334b628b224c085958d869c486623c3b3fbb63b45d9f2878cd78",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-71f75eae",
+      "at": "2026-10-28T09:44:03.031Z",
+      "outcome": "validated",
+      "input_hash": "26b85ef39236f7c7da7de6e9257457474ccffb23164e124a947be4fb240dd6cd",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-0206a999",
+      "at": "2026-10-28T12:10:00.003Z",
+      "outcome": "validated",
+      "input_hash": "6c31e073a6fea3d37c876ad500950f81ea2209ddbb170f894c832180d48cd11b",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "980280a4620175b3693b45ef790045bde8bbcd80ba2845c4c21435757c24709a"
+}

@@ -53,12 +53,12 @@ export function loadKnowledge(dir: string): Doc[] {
 }
 
 /** One recipe is one chunk. The parameter table is shown after selection, so the indexed text is intent-focused. */
-export function recipeDocs(recipes: Recipe[]): Doc[] {
+export function recipeDocs(recipes: Recipe[], opts: { implemented?: ReadonlySet<string> } = {}): Doc[] {
   return recipes.map((r) => ({
     id: r.recipe_id,
     collection: "shot_recipes" as const,
     title: r.title,
-    text: `${r.purpose} Used for: ${r.intents.join("; ")}. Type: ${r.type}. Energy: ${r.constraints.energy}.`,
+    text: `${r.purpose} Used for: ${r.intents.join("; ")}. Type: ${r.type}. Energy: ${r.constraints.energy}.${opts.implemented ? (opts.implemented.has(r.recipe_id) ? " Working template: yes, validated by a real render." : " Working template: not yet, it cannot be rendered today.") : ""}`,
     source: `recipe ${r.recipe_id}@${r.version} (${r.source.origin}, ${r.source.license})`,
     metadata: {
       recipe_type: r.type,
@@ -68,6 +68,7 @@ export function recipeDocs(recipes: Recipe[]): Doc[] {
       recipe_min_duration_s: r.constraints.min_duration_s,
       recipe_max_duration_s: r.constraints.max_duration_s,
       recipe_energy: r.constraints.energy,
+      ...(opts.implemented ? { recipe_implemented: opts.implemented.has(r.recipe_id) } : {}),
     },
   }));
 }

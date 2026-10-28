@@ -2,7 +2,8 @@ import { execFile } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import type { Asset, AssetNotes } from "@digikon/contracts";
+import type { Asset, AssetNotes, ImageMeasure } from "@digikon/contracts";
+import { describeMeasure } from "./image.js";
 
 const run = promisify(execFile);
 
@@ -185,6 +186,7 @@ export function buildAssetNotes(
   asset: Asset,
   a: MediaAnalysis | null,
   speech: { language: string; text: string; word_count: number } | null = null,
+  image: ImageMeasure | null = null,
 ): AssetNotes {
   const duration = asset.duration ?? 0;
   const lowRes = asset.width !== null && asset.height !== null && Math.min(asset.width, asset.height) < 720;
@@ -197,7 +199,9 @@ export function buildAssetNotes(
   }
   if (lowRes && duration > 0) flags.push({ flag: "low_resolution", start: 0, end: duration });
 
-  const uncertain = ["Content has not been looked at by a vision pass: the summary is empty. Do not assume what the footage shows."];
+  const uncertain = image
+    ? ["Nobody has reviewed what this picture shows. Do not assume it shows people, a product, a place or any particular content; only its kind was measured."]
+    : ["Content has not been looked at by a vision pass: the summary is empty. Do not assume what the footage shows."];
   if (!a && asset.media_type !== "image") uncertain.push("Measurements were not available: usable segments assume the whole file is usable.");
   for (const w of a?.warnings ?? []) uncertain.push(w);
 
@@ -205,12 +209,14 @@ export function buildAssetNotes(
     asset_id: asset.asset_id,
     usable_segments: asset.media_type === "image" || duration <= 0 ? [] : subtractSpans(duration, unusable),
     quality_flags: flags,
-    content_summary: "",
+    content_summary: image ? describeMeasure(image) : "",
     uncertain,
     transcript_ref: speech ? `transcript:${asset.asset_id}` : asset.transcript_ref,
     shots: a?.shots ?? [],
     loudness_lufs: a?.loudness?.integrated_lufs ?? null,
     speech,
     keyframe_refs: a?.keyframes.map((k) => k.path) ?? [],
+    image_measure: image,
+    visual_review: null,
   };
 }

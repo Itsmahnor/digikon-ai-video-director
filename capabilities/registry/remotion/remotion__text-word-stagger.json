@@ -1,0 +1,157 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:text-word-stagger",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/text-word-stagger",
+  "recipe_id": "text-word-stagger",
+  "recipe_version": "0.1.0",
+  "family": "text_motion",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "stagger"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "overlay_text",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "approved text on a plain card",
+      "approved text over a camera-moved image"
+    ],
+    "not_validated": [
+      "two text animations in one scene",
+      "an end card in the same scene",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:10:27.840Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "e7e357f8d71dc4338946bd1bd8eef6b7e85f6369f1efa087bf6756d8408c3000",
+        "bytes": 22676,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "over_image",
+        "sha256": "79332aaa75c55ec7b7637a8efe99408d56187ab2c67fdf1c8a0851f008f1ceec",
+        "bytes": 67962,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "only part of the text is visible early (11% at 0.17 s)",
+      "more words appear as time passes and the first word is on screen before the last",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "only part of the text is visible early (10% at 0.17 s)",
+      "more words appear as time passes and the first word is on screen before the last",
+      "the text animation works over a camera-moved supplied image"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on synthetic text with the project font only",
+    "text is matched by pixel comparison, not OCR",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-fe5510b0",
+      "at": "2026-10-28T08:14:53.743Z",
+      "outcome": "failed",
+      "input_hash": "c18c0a588f42fd4e2498d8d9786fc44308357d5ad560eb5a5958786baac58259",
+      "reasons": [
+        "remotion/text-word-stagger: the words do not appear in order"
+      ]
+    },
+    {
+      "attempt_id": "a-5b12c5df",
+      "at": "2026-10-28T08:24:24.359Z",
+      "outcome": "failed",
+      "input_hash": "3bf9b68b1221d97646d12e0bf29828ccdf1bf61afd25f357eb68626fd15d525b",
+      "reasons": [
+        "remotion/text-word-stagger: the words do not appear in order"
+      ]
+    },
+    {
+      "attempt_id": "a-2ec6b689",
+      "at": "2026-10-28T08:29:17.228Z",
+      "outcome": "failed",
+      "input_hash": "ba834e9b5035dba2e2b69563534dbd61bb99b3400722ea360f546b238da602e8",
+      "reasons": [
+        "remotion/text-word-stagger: the words do not appear in order"
+      ]
+    },
+    {
+      "attempt_id": "a-cfd7c36d",
+      "at": "2026-10-28T08:33:00.443Z",
+      "outcome": "failed",
+      "input_hash": "ad9d87471e0ccc9ddf649db7a176d6b3d1f795aa2148b419d311c8752fd7dbd4",
+      "reasons": [
+        "remotion/text-word-stagger: the words do not appear in order"
+      ]
+    },
+    {
+      "attempt_id": "a-b243cd6b",
+      "at": "2026-10-28T08:35:35.770Z",
+      "outcome": "validated",
+      "input_hash": "d701bc37c16ffda2b3bbfb8f9edbe7d6dfbb3cca158021de1baf0b0aa18f4b63",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-8f7273b7",
+      "at": "2026-10-28T08:37:47.884Z",
+      "outcome": "validated",
+      "input_hash": "d9d6740b7b31d211e4cead3f27e26e46abb69633e06f5a6b0716ceb5ea675881",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-a1b8252a",
+      "at": "2026-10-28T09:25:57.636Z",
+      "outcome": "validated",
+      "input_hash": "de3efe40f891aad02e086bd2c433ce3dc3489e6825f5ec1d908a9434479a00e1",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-e3d08582",
+      "at": "2026-10-28T09:44:30.773Z",
+      "outcome": "validated",
+      "input_hash": "d7c09e41746d5024d1800fe794b085326e5dabebd7e7ce47d67c3aee2f80c7d9",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-ced1318e",
+      "at": "2026-10-28T12:10:27.840Z",
+      "outcome": "validated",
+      "input_hash": "382b9d6ec09ac936ad8259f4956181ece068c20016493a5f60b6055bb6ca1c5b",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "dbfebd4cdbe912530f61f611ae48fb01f01d3dbd1df7daaa2feedc31365f33b3"
+}

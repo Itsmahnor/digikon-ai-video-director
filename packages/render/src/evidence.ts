@@ -11,9 +11,11 @@ import { runTechnicalChecks, type TechnicalReport } from "@digikon/qa";
 export async function runRenderQa(record: RenderRecord, handoff: DirectorHandoff): Promise<TechnicalReport> {
   if (record.state !== "rendered" || !record.output || !record.settings) throw new Error("QA needs a rendered record");
   const spans = handoff.qa.scene_spans.map((s) => ({ scene_id: s.scene_id, start: s.start, end: s.end }));
+  // Black is expected only where the approved storyboard asks for a dip to black: the end of that scene (a dip lasts at most 1.5 s, the recipe's limit).
+  const allowed_black = handoff.storyboard.scenes.filter((s) => s.transition_out === "dip_to_black").map((s) => ({ start: Math.max(0, s.start_time + s.duration_seconds - 1.5), end: s.start_time + s.duration_seconds + 0.1 }));
   return runTechnicalChecks(record.output.path, {
     duration_s: record.settings.duration_s, width: record.settings.width, height: record.settings.height, fps: record.settings.fps,
-    expect_audio: record.audio_required, scenes: spans, allowed_freeze: [{ start: 0, end: record.settings.duration_s }],
+    expect_audio: record.audio_required, scenes: spans, allowed_freeze: [{ start: 0, end: record.settings.duration_s }], ...(allowed_black.length ? { allowed_black } : {}),
   });
 }
 

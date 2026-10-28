@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import type { RenderAdapter, RenderJob } from "./adapter.js";
+import type { LearnedTransition } from "./learned-types.js";
 
 const run = promisify(execFile);
 
@@ -26,7 +27,7 @@ export const FFMPEG_TEMPLATES: Readonly<Record<string, { kind: Kind; type: OpTyp
   "ffmpeg/clip-play": { kind: "clip", type: "trim_clip" },
 };
 
-/** What this adapter can show beyond plain graphics, in the form the coverage check takes. */
+/** What this adapter can show beyond plain graphics, in the form the coverage check takes. A learned capability adds to it, see `ffmpegCapabilities`. */
 export const FFMPEG_CAPABILITIES = { image_templates: ["ffmpeg/image-scene"], video_templates: ["ffmpeg/clip-play"], transition_templates: { crossfade: ["ffmpeg/xfade-fade"] } } as const;
 
 /** Fixed colours, chosen by name. Parameter text never reaches an FFmpeg argument. */
@@ -46,6 +47,18 @@ const PARAMS: Record<Kind, readonly string[]> = {
   clip: ["fade_in_s", "background", "fit", "source_audio"],
   crossfade: ["duration_s"],
 };
+/** The built-in templates plus the learned transitions this adapter was given. A learned template is data for the crossfade engine, never code. */
+function templatesWith(learned: readonly LearnedTransition[] = []): Record<string, { kind: Kind; type: OpType; learned?: LearnedTransition }> {
+  return { ...FFMPEG_TEMPLATES, ...Object.fromEntries(learned.map((l) => [l.template, { kind: "crossfade" as const, type: "concat" as const, learned: l }])) };
+}
+
+/** What this adapter can show, including the transitions it has learned, by the storyboard's transition name. */
+export function ffmpegCapabilities(learned: readonly LearnedTransition[] = []) {
+  const transitions: Record<string, string[]> = { crossfade: [...FFMPEG_CAPABILITIES.transition_templates.crossfade] };
+  for (const l of learned) (transitions[l.storyboard_transition] ??= []).push(l.template);
+  return { image_templates: FFMPEG_CAPABILITIES.image_templates, video_templates: FFMPEG_CAPABILITIES.video_templates, transition_templates: transitions };
+}
+
 const VIDEO_EXT = new Set([".mp4", ".m4v", ".mov", ".webm", ".mkv"]);
 const MAX_FPS = 240;
 const MAX_SCENES = 60, MAX_TEXT = 120, MAX_IMAGE_BYTES = 50 * 1024 * 1024;
@@ -62,6 +75,8 @@ export interface FfmpegAdapterOptions {
   ffmpegPath?: string;
   /** Used to measure supplied clips again just before they are rendered. Defaults to ffprobe on the PATH. */
   ffprobePath?: string;
+  /** Validated learned transitions (see `capabilities.ts`). Each adds one template that the crossfade engine runs with its own xfade name. */
+  learned?: readonly LearnedTransition[];
   /** Where the temporary text, font and image files go. Defaults to the system temp folder. */
   workRoot?: string;
 }
@@ -86,6 +101,8 @@ export interface TextCardScene {
   clip: null | { asset_id: string; path: string; source_in_s: number; duration_s: number; fit: "contain" | "cover" };
   /** Frames of crossfade into the next scene, 0 for none. */
   crossfade_frames: number;
+  /** The xfade transition used for that blend. Absent means the plain fade. */
+  xfade?: string;
 }
 
 /** What ffprobe says about a supplied clip. */
@@ -202,7 +219,8 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
  * parameters, text that is unsafe or does not fit, a timeline with gaps or overlaps, scene lengths that are not whole frames,
  * transitions that do not fit, other containers or codecs, an output path outside the output folder.
  */
-export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdapterOptions, "outputRoot"> & Pick<Partial<FfmpegAdapterOptions>, "ffprobePath">): CardPlan {
+export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdapterOptions, "outputRoot"> & Pick<Partial<FfmpegAdapterOptions>, "ffprobePath" | "learned">): CardPlan {
+  const TEMPLATES = templatesWith(opts.learned);
   const issues: string[] = [];
   const s = job.settings;
   if (s.container !== "mp4" || s.video_codec !== "h264") issues.push(`this adapter writes mp4 with h264, not ${s.container} with ${s.video_codec}`);
@@ -217,13 +235,13 @@ export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdap
   const assets = new Map(job.assets.map((a) => [a.asset_id, a]));
   const usedAssets = new Set<string>();
 
-  const template = (opId: string) => FFMPEG_TEMPLATES[job.templates[opId] ?? ""];
+  const template = (opId: string) => TEMPLATES[job.templates[opId] ?? ""];
   const sceneOps = [...job.operations].filter((o) => o.operation_type !== "concat").sort((a, b) => a.timing.start_s - b.timing.start_s);
   const transitions = job.operations.filter((o) => o.operation_type === "concat");
   for (const op of job.operations) {
     const at = `operation ${op.operation_id}`;
     if (op.operation_type !== "render_graphics_scene" && op.operation_type !== "concat" && op.operation_type !== "trim_clip") issues.push(`${at}: ${op.operation_type} is not supported (only render_graphics_scene, trim_clip and concat)`);
-    else if (!template(op.operation_id)) issues.push(`${at}: template ${job.templates[op.operation_id] ?? "(none)"} is not supported by this renderer (supported: ${Object.keys(FFMPEG_TEMPLATES).join(", ")})`);
+    else if (!template(op.operation_id)) issues.push(`${at}: template ${job.templates[op.operation_id] ?? "(none)"} is not supported by this renderer (supported: ${Object.keys(TEMPLATES).join(", ")})`);
     else if (template(op.operation_id)!.type !== op.operation_type) issues.push(`${at}: template ${job.templates[op.operation_id]} implements ${template(op.operation_id)!.type} operations, not ${op.operation_type}`);
     if (op.audio_cues.length) issues.push(`${at}: audio cues cannot be produced and are not dropped silently`);
   }
@@ -342,14 +360,23 @@ export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdap
     if (seen.has(op.target_scene_id)) issues.push(`${at}: ${op.target_scene_id} already has a transition`);
     seen.add(op.target_scene_id);
     if (op.caption) issues.push(`${at}: a transition carries no text`); // the Editor lists its scene's assets on it; they are shown by the scene itself
-    for (const k of Object.keys(op.parameters)) if (!PARAMS.crossfade.includes(k)) issues.push(`${at}: unknown parameter ${k}`);
+    const learnedT = TEMPLATES[job.templates[op.operation_id] ?? ""]?.learned;
+    const allowed = learnedT?.direction_map ? [...PARAMS.crossfade, "direction"] : PARAMS.crossfade;
+    for (const k of Object.keys(op.parameters)) if (!allowed.includes(k)) issues.push(`${at}: unknown parameter ${k}`);
+    let xfade = learnedT ? (learnedT.xfade ?? "") : "fade";
+    if (learnedT?.direction_map) {
+      const dir = op.parameters["direction"];
+      const mapped = typeof dir === "string" && Object.hasOwn(learnedT.direction_map, dir) ? learnedT.direction_map[dir] : undefined;
+      if (!mapped) { issues.push(`${at}: direction must be one of ${Object.keys(learnedT.direction_map).join(", ")}`); continue; }
+      xfade = mapped;
+    }
     const d = num(op.parameters["duration_s"]);
     if (d === null || d < RANGES.duration_s[0] || d > RANGES.duration_s[1]) { issues.push(`${at}: duration_s must be a number from ${RANGES.duration_s[0]} to ${RANGES.duration_s[1]}`); continue; }
     const frames = Math.round(d * s.fps);
     const next = scenes[target.index + 1];
     if (frames < 1 || Math.abs(frames / s.fps - d) > 1e-6) issues.push(`${at}: ${d}s is not a whole number of frames at ${s.fps} fps`);
     else if (frames > Math.floor(sc.frames / 2) || (next && frames > next.frames)) issues.push(`${at}: a ${d}s crossfade is longer than half of ${op.target_scene_id} or longer than the next scene`);
-    else sc.crossfade_frames = frames;
+    else { sc.crossfade_frames = frames; sc.xfade = xfade; }
     if (Math.abs(op.timing.duration_s - d) > half || Math.abs(op.timing.start_s - (target.end - d)) > half) issues.push(`${at}: it is not placed at the end of ${op.target_scene_id} (${target.end - d}s to ${target.end}s)`);
   }
 
@@ -409,7 +436,7 @@ export function buildFilterGraph(scenes: readonly TextCardScene[], width: number
     if (sc.crossfade_frames > 0 && i + 1 < scenes.length) {
       const cf = sc.crossfade_frames;
       chains.push(`[h${i + 1}]trim=end_frame=1,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop=${cf - 1},fps=${fps}[hd${i + 1}]`);
-      chains.push(`[${main}][hd${i + 1}]xfade=transition=fade:duration=${(cf / fps).toFixed(6)}:offset=${((sc.frames - cf) / fps).toFixed(6)},trim=end_frame=${sc.frames},setpts=PTS-STARTPTS,format=yuv420p,fps=${fps}[x${i}]`);
+      chains.push(`[${main}][hd${i + 1}]xfade=transition=${sc.xfade ?? "fade"}:duration=${(cf / fps).toFixed(6)}:offset=${((sc.frames - cf) / fps).toFixed(6)},trim=end_frame=${sc.frames},setpts=PTS-STARTPTS,format=yuv420p,fps=${fps}[x${i}]`);
       finals.push(`[x${i}]`);
     } else finals.push(`[${main}]`);
   });
@@ -424,13 +451,15 @@ export function buildFilterGraph(scenes: readonly TextCardScene[], width: number
  * failed run leaves no output behind.
  */
 export function createFfmpegAdapter(opts: FfmpegAdapterOptions): RenderAdapter {
+  for (const l of opts.learned ?? []) if (!l.template.startsWith("ffmpeg/")) throw new Error(`${l.template} is not an FFmpeg template, so the FFmpeg adapter will not run it`);
   const ext = extname(opts.fontFile).toLowerCase();
   if (ext !== ".ttf" && ext !== ".otf") throw new Error("fontFile must be a .ttf or .otf file");
   if (!statSync(opts.fontFile, { throwIfNoEntry: false })?.isFile()) throw new Error(`font file not found: ${opts.fontFile}`);
 
   return {
     renderer: "ffmpeg",
-    templates: Object.fromEntries(Object.entries(FFMPEG_TEMPLATES).map(([ref, t]) => [ref, [t.type]])),
+    templates: Object.fromEntries(Object.entries(templatesWith(opts.learned)).map(([ref, t]) => [ref, [t.type]])),
+    capabilities: ffmpegCapabilities(opts.learned),
     check(job) {
       const p = planScenes(job, opts);
       return p.ok ? [] : p.issues;

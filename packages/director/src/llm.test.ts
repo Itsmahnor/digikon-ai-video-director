@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LlmError, classifyLlmError, extractApiDiagnostics } from "./index.js";
+import { AnthropicClient, LlmError, classifyLlmError, extractApiDiagnostics } from "./index.js";
 
 const cases: [string, unknown, string | null][] = [
   ["billing (400 with credit text)", { status: 400, message: '400 {"error":{"message":"Your credit balance is too low to access the Anthropic API."}}' }, "llm_billing"],
@@ -119,5 +119,22 @@ describe("extractApiDiagnostics", () => {
     expect(JSON.stringify(d)).not.toContain("SECRET");
     expect(JSON.stringify(d)).not.toContain("sk-ant");
     expect(JSON.stringify(d)).not.toContain("x-api-key");
+  });
+});
+
+describe("AnthropicClient retry after a schema error", () => {
+  it("answers every tool_use block of the reply with a tool_result, so the API accepts the retry", async () => {
+    const { z } = await import("zod");
+    const client = new AnthropicClient({ apiKey: "test-key" });
+    const seen: unknown[][] = [];
+    const replies = [
+      { content: [{ type: "tool_use", id: "toolu_a", name: "thing", input: { n: "bad" } }, { type: "tool_use", id: "toolu_b", name: "thing", input: { n: 2 } }] },
+      { content: [{ type: "tool_use", id: "toolu_c", name: "thing", input: { n: 3 } }] },
+    ];
+    (client as unknown as { client: unknown }).client = { messages: { create: async (r: { messages: unknown[] }) => { seen.push(structuredClone(r.messages)); return replies.shift(); } } };
+    const out = await client.generate({ name: "thing", system: "s", user: "u", schema: z.object({ n: z.number() }) });
+    expect(out).toEqual({ n: 3 });
+    const results = (seen[1]!.at(-1) as { content: { tool_use_id: string; type: string }[] }).content;
+    expect(results.map((r) => [r.type, r.tool_use_id])).toEqual([["tool_result", "toolu_a"], ["tool_result", "toolu_b"]]);
   });
 });

@@ -1,0 +1,146 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:pan-reframe",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/pan-reframe",
+  "recipe_id": "pan-reframe",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "pan"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:09:05.854Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "right",
+        "sha256": "f8b6efff3b7e2c07f2ac457c9f2cdc23acc4ff4126b4057024ae7e5db518ee5c",
+        "bytes": 32469,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "left",
+        "sha256": "2d115ce6550e837f27f076792dba96a5cb8eb8488aa8f6af1472c30bde535c0d",
+        "bytes": 32276,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "up",
+        "sha256": "d04f2cec3b7a89bf800ecb364e10fe95c042f9da37c8cc01f1d021accc315011",
+        "bytes": 25146,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "down",
+        "sha256": "b4c9a00b788df45939fc6e441414c5dabbab20870abd5825856dc1637b4f8780",
+        "bytes": 26210,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the pan right moves the picture -64px (approved -64px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the pan left moves the picture 64px (approved 64px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the up pan moves the picture 36px (approved 36px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the down pan moves the picture -36px (approved -36px)"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-04da1fdc",
+      "at": "2026-10-28T08:13:47.500Z",
+      "outcome": "failed",
+      "input_hash": "cc6e9c96df52854f797605f2e67af48a98b9c8c46edf6ec90844018000ad84b7",
+      "reasons": [
+        "remotion/pan-reframe: the render failed: remotion failed: the output is missing approved content: scene S01: the camera move is not visible (the first and last frames differ by 0.0 of 255)"
+      ]
+    },
+    {
+      "attempt_id": "a-269974f1",
+      "at": "2026-10-28T08:23:00.133Z",
+      "outcome": "validated",
+      "input_hash": "5535a202a3dcfd879150e3b7c9e477b8c488ffe921395f4fa5b51c8509177a1a",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-e0989d70",
+      "at": "2026-10-28T09:24:35.825Z",
+      "outcome": "validated",
+      "input_hash": "2f6ec872ff6f8dda6df4825d2c40703117cb384391a807d6346ffe66abdfe03a",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-a6a20b44",
+      "at": "2026-10-28T09:43:10.703Z",
+      "outcome": "validated",
+      "input_hash": "4fc4ab10f4ab9dd68bdca11c101f7a4c27b5c7d2412072770de1a5702ccb1402",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-fdef9012",
+      "at": "2026-10-28T12:09:05.854Z",
+      "outcome": "validated",
+      "input_hash": "8df94fc68cabb53f528862f05d470777b21d61437ea121f50226e6a26b20ddb1",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "bbaaebbc3a142444313b8ddd84211e41f4ec100bb384842b3b5904823e926305"
+}

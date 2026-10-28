@@ -1,0 +1,107 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "hyperframes:text-word-stagger-hyperframes",
+  "capability_version": "1.0.0",
+  "engine": "hyperframes",
+  "template": "hyperframes/text-word-stagger",
+  "recipe_id": "text-word-stagger-hyperframes",
+  "recipe_version": "0.1.0",
+  "family": "text_motion",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "stagger"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "overlay_text",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "approved text on a plain card",
+      "approved text over a camera-moved image"
+    ],
+    "not_validated": [
+      "two text animations in one scene",
+      "an end card in the same scene",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "hyperframes"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:15:24.945Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "chrome.exe; hyperframes 0.8.207; scenes 93f7a19330386b0c",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "e5a8eac4d98e34f7e16affb09b0694da9f70c0d38ceedeb764dc864c521d4276",
+        "bytes": 19907,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "over_image",
+        "sha256": "c6e504748fbfa2fbb09dd9a4fb21b9a35882de8ff04c083f1d1c8596c8f49a64",
+        "bytes": 55233,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "only part of the text is visible early (10% at 0.17 s)",
+      "more words appear as time passes and the first word is on screen before the last",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "only part of the text is visible early (9% at 0.17 s)",
+      "more words appear as time passes and the first word is on screen before the last",
+      "the text animation works over a camera-moved supplied image"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on synthetic text with the project font only",
+    "text is matched by pixel comparison, not OCR",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-bff3e01e",
+      "at": "2026-10-28T09:31:27.076Z",
+      "outcome": "validated",
+      "input_hash": "b5176b1f1bcca8257943712c1649b9a485245cdb6eb90c9015a9241db90fa4cb",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-b774fdd3",
+      "at": "2026-10-28T09:48:06.416Z",
+      "outcome": "validated",
+      "input_hash": "c658801bb2a3dae60aa277eb99004828ef00c6ad191b7b39ffd5a64119f8a25e",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-603e87a1",
+      "at": "2026-10-28T12:15:24.945Z",
+      "outcome": "validated",
+      "input_hash": "d30ca21fe7488297bed6ee8fdc2a4c0bd797d81f994e49951c78633280a0e6e8",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "18a1940eba5a021847f6428a9b212493894f7a8b969d111cfe073d2c97e27a7f"
+}

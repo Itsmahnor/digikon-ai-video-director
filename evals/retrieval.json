@@ -5,6 +5,7 @@
   { "query": "slide the frame across the product", "collection": "shot_recipes", "expect": ["pan-reframe"] },
   { "query": "dissolve softly into the next scene", "collection": "shot_recipes", "expect": ["crossfade"] },
   { "query": "fade to black before the final scene", "collection": "shot_recipes", "expect": ["dip-to-black"] },
+  { "query": "graphic wipe to the next scene", "collection": "shot_recipes", "expect": ["directional-wipe"] },
   { "query": "sound from the next scene starts before we see it", "collection": "shot_recipes", "expect": ["j-cut-audio-lead"] },
   { "query": "headline fades in with a small rise", "collection": "shot_recipes", "expect": ["text-fade-up"] },
   { "query": "words appear one at a time for rhythm", "collection": "shot_recipes", "expect": ["text-word-stagger"] },

@@ -565,7 +565,9 @@ async function renderStep(kind) {
     else if (kind === "render") {
       const { data } = await rawPost(`/api/sessions/${state.sid}/render`, { settings: renderSettings(r) });
       if (data.plan) r.view = data;
-      if (data.record) { r.result = data; if (data.record.state === "rendered") toast("Preview rendered and validated.", "ok"); else r.error = "The render failed. Nothing is offered for playback."; }
+      if (data.delivery) { r.result = data; toast(data.kind === "complete" ? "Complete preview rendered and validated." : "Incomplete preview rendered. It is not the approved video.", data.kind === "complete" ? "ok" : "warn"); }
+      else if (data.kind === "failed") { r.result = null; r.error = `The render failed. No video is offered. ${(data.errors ?? []).join("; ")}`; }
+      else if (data.record) { r.result = data; if (data.record.state === "rendered") toast("Preview rendered and validated.", "ok"); else r.error = "The render failed. Nothing is offered for playback."; }
       else r.error = problem(data);
     }
   } catch (e) { fail(e); }
@@ -580,8 +582,8 @@ function renderPanel() {
   const editorHtml = v ? `<div class="row" style="margin-bottom:10px"><b>Editor</b><span class="chip ${v.editor.status === "ready" ? "ok" : "bad"}">${esc(v.editor.status.replaceAll("_", " "))}</span><span class="chip ${v.editor.validation.ok ? "ok" : "bad"}">${v.editor.validation.ok ? "contract valid" : "not valid"}</span><span class="chip">${v.editor.operations} operations</span><span class="chip warn">not rendered</span><button class="ghost" data-action="editor-run" ${b}>Run again</button></div>
     ${v.editor.conflicts.map((c) => `<div class="notice bad" style="margin-bottom:6px"><b>${esc(c.kind.replaceAll("_", " "))}</b> ${esc(c.description)}</div>`).join("")}
     ${v.editor.revision_requests.map((q) => `<div class="notice warn" style="margin-bottom:6px">Needs a new approval: ${esc(q.reason)}</div>`).join("")}` : "";
-  const ops = v ? `<table><thead><tr><th>Operation</th><th>Scene</th><th>Recipe</th><th>Template</th><th>Renderer</th></tr></thead><tbody>${v.plan.operations.map((o) => `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td>${esc(o.recipe_id)}</td><td class="mono">${esc(o.template)}</td><td>${o.supported ? `<span class="chip ok">${esc(o.renderer)}: supported</span>` : '<span class="chip bad">not supported</span>'}</td></tr>`).join("")}</tbody></table>
-    <p class="hint" style="margin:6px 0 10px">${v.plan.supported} supported, ${v.plan.unsupported} not supported. Renderer for this plan: <b>${v.renderer.selected ? esc(v.renderer.selected) : "none selected"}</b>${v.renderer.composition_required ? " (the plan needs more than one renderer, and combining renderers is not built)" : ""}. Available here: ${v.renderer.registered.length ? v.renderer.registered.map(esc).join(", ") : "none"}. The renderer comes from the recipes in your approved edit plan; nothing is swapped.</p>
+  const ops = v ? `<table><thead><tr><th>Operation</th><th>Scene</th><th>Recipe</th><th>Template</th><th>Renderer</th></tr></thead><tbody>${v.plan.operations.map((o) => `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td>${esc(o.recipe_id)}</td><td class="mono">${esc(o.template)}</td><td>${o.supported ? `<span class="chip ok">${esc(o.renderer)}: supported</span>` : `<span class="chip bad" title="${esc(o.note ?? "")}">not supported${o.note ? ": audio, not built" : ""}</span>`}</td></tr>`).join("")}</tbody></table>
+    <p class="hint" style="margin:6px 0 10px">${v.plan.supported} supported, ${v.plan.unsupported} not supported. Renderer for this plan: <b>${v.renderer.selected ? esc(v.renderer.selected) : "none selected"}</b>${v.renderer.composition_required ? " (the plan needs more than one renderer: each scene is rendered by its own renderer and FFmpeg assembles them; anything that cannot be rendered is listed and the preview is labelled incomplete)" : ""}. Available here: ${v.renderer.registered.length ? v.renderer.registered.map(esc).join(", ") : "none"}. The renderer comes from the recipes in your approved edit plan; nothing is swapped.</p>
     <div class="chips" style="margin-bottom:10px">${v.coverage.scenes.map((s) => `<span class="chip ${s.represented ? "ok" : "bad"}" title="${esc(s.missing.join("; "))}">${esc(s.scene_id)} ${s.represented ? "fully shown" : "not fully shown"}</span>`).join("")}</div>
     ${v.blockers.length ? `<div class="notice bad" style="margin-bottom:10px"><b>Why a preview cannot be made yet</b>${v.blockers.map((x) => `<div>${esc(x)}</div>`).join("")}</div>` : ""}
     <div class="notice ${v.production.ready ? "info" : "warn"}" style="margin-bottom:12px"><b>Production readiness: ${v.production.ready ? "ready" : "not ready"}.</b> ${v.production.blockers.slice(0, 4).map(esc).join("; ")}${v.production.blockers.length > 4 ? "; ..." : ""}</div>` : "";
@@ -590,12 +592,25 @@ function renderPanel() {
     <p class="hint" style="margin-bottom:8px">Fixed by your approved plan: ${esc(v.needs.aspect_ratio)}, ${fmtDur(v.needs.duration_s)}. The only output the renderers write: ${esc(v.needs.supported_output.container)}, ${esc(v.needs.supported_output.video_codec)}, no audio. Size and frame rate are yours to choose; none are assumed.</p>
     <div class="row" style="align-items:flex-end">${field("width", "Width (px)", "width")}${field("height", "Height (px)", "height")}${field("fps", "Frames per second", "fps")}
       <button class="ghost" data-action="fill-test" ${b}>Fill test values (640 x 360, 30 fps)</button></div>
-    <div class="row" style="margin-top:12px"><button class="ghost" data-action="render-plan" ${b}>Check the plan</button><button class="primary sm" data-action="render-go" ${b || (v.eligible ? "" : "disabled")}>${r.busy ? "Working..." : "Render preview"}</button></div>
+    <div class="row" style="margin-top:12px"><button class="ghost" data-action="render-plan" ${b}>Check the plan</button><button class="primary sm" data-action="render-go" ${b || ((v.can_render ?? v.eligible) ? "" : "disabled")}>${r.busy ? "Working..." : v.eligible ? "Render preview" : "Render preview (labelled incomplete if scenes are missing)"}</button></div>
     <p class="hint" style="margin-top:6px">${esc(v.label)}</p>` : "";
   return `<div class="card"><h3>Editor and preview render</h3>${editorHtml}${err}${ops}${form}${resultHtml(r)}</div>`;
 }
+function deliveryHtml(x) {
+  const d = x.delivery, o = d.output, st = d.states, bad = d.kind !== "complete";
+  const stages = [["Plan created", st.plan_created], ["Plan approved", st.plan_approved], [`Scenes rendered ${st.scenes_rendered}/${st.scenes_total}`, st.scenes_rendered === st.scenes_total], [`Scenes content-checked ${st.scenes_content_validated}/${st.scenes_total}`, st.scenes_content_validated === st.scenes_total], ["Final video validated", st.final_video_validated], ["Final delivery ready", st.final_delivery_ready]];
+  return `<h3 style="margin:16px 0 8px">${bad ? "Incomplete preview" : "Complete preview"} <span class="chip ${bad ? "bad" : "warn"}">${bad ? "NOT the approved video" : "preview only"}</span> <span class="chip ${st.final_delivery_ready ? "ok" : "warn"}">${st.final_delivery_ready ? "final delivery ready" : "not production-ready"}</span></h3>
+    <div class="notice ${bad ? "bad" : "info"}" style="margin-bottom:10px">${esc(d.label)}</div>
+    ${o ? `<video controls preload="metadata" src="${esc(o.video_url)}" style="width:100%;max-width:640px;border-radius:12px;background:#000" aria-label="${bad ? "Incomplete preview" : "Complete preview"}"></video>` : ""}
+    <div class="chips" style="margin:10px 0">${stages.map(([l, ok]) => `<span class="chip ${ok ? "ok" : "warn"}">${esc(l)}</span>`).join("")}</div>
+    <table><thead><tr><th>Scene</th><th>Engine</th><th>Status</th><th>Missing or unmet</th></tr></thead><tbody>${d.scenes.map((s) => `<tr><td>${esc(s.scene_id)}</td><td>${s.engine ? esc(s.engine) : "-"}</td><td>${s.status === "placeholder" ? '<span class="chip bad">placeholder, not rendered</span>' : s.status === "rendered_and_verified" ? '<span class="chip ok">rendered, content checked</span>' : '<span class="chip warn">rendered, non-blank only</span>'}</td><td>${[s.omitted_reason, ...s.unmet].filter(Boolean).map((m) => `<div>${esc(m)}</div>`).join("") || "-"}</td></tr>`).join("")}</tbody></table>
+    ${d.omitted_operations.length ? `<div class="notice bad" style="margin-top:10px"><b>Operations not shown</b>${d.omitted_operations.map((m) => `<div>${esc(m.scene_id)} ${esc(m.recipe_id)} (${esc(m.status)}): ${esc(m.reason)}</div>`).join("")}</div>` : ""}
+    <div class="notice warn" style="margin-top:10px"><b>Final delivery blocked</b>${d.final_delivery_blockers.map((b) => `<div>${esc(b)}</div>`).join("")}</div>
+    ${o ? `<dl class="kv" style="margin-top:10px"><dt>Duration</dt><dd>${fmtDur(o.duration_s)} (measured, ${o.frames} frames)</dd><dt>Size</dt><dd>${o.width} x ${o.height} at ${o.fps} fps</dd><dt>File</dt><dd>${kb(o.bytes)} <span class="mono hint">sha256 ${esc(o.sha256.slice(0, 12))}</span> <span class="mono hint">${esc(o.path)}</span></dd><dt>Engines</dt><dd>${d.engines_used.map(esc).join(", ")}</dd></dl>` : ""}`;
+}
 function resultHtml(r) {
-  const x = r.result; if (!x?.record) return "";
+  const x = r.result; if (x?.delivery) return deliveryHtml(x);
+  if (!x?.record) return ""
   const rec = x.record, o = rec.output;
   if (rec.state !== "rendered") return `<div class="notice bad" style="margin-top:14px"><b>Render failed. No video was produced.</b>${rec.errors.map((er) => `<div>${esc(er.stage.replaceAll("_", " "))}: ${esc(er.message)}</div>`).join("")}</div>`;
   const qa = x.qa;

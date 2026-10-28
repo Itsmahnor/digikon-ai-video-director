@@ -1,0 +1,130 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "hyperframes:pan-reframe-hyperframes",
+  "capability_version": "1.0.0",
+  "engine": "hyperframes",
+  "template": "hyperframes/pan-reframe",
+  "recipe_id": "pan-reframe-hyperframes",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "pan"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "hyperframes"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:13:23.511Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "chrome.exe; hyperframes 0.8.207; scenes 93f7a19330386b0c",
+    "renders": [
+      {
+        "variant": "right",
+        "sha256": "cd389b8937e0374963e0990a7a9835f0fc085290751baa608286fac556200091",
+        "bytes": 25518,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "left",
+        "sha256": "73b877f193915def6b3aabaf035d72957be50b243ad16a3e70b1cebbfc5ce695",
+        "bytes": 25671,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "up",
+        "sha256": "89b3c45aee49ab60655c8fa6e8493e5a85ef1efc6ade8299df05c9139c27e3f6",
+        "bytes": 19871,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      },
+      {
+        "variant": "down",
+        "sha256": "69b0d9dab5841cc91c9f809653b5f1fb8f134cebaa2825d69acc4930f85cd8fb",
+        "bytes": 19601,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the pan right moves the picture -64px (approved -64px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the pan left moves the picture 64px (approved 64px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the up pan moves the picture 36px (approved 36px)",
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the down pan moves the picture -36px (approved -36px)"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-5dd450c2",
+      "at": "2026-10-28T09:29:32.670Z",
+      "outcome": "validated",
+      "input_hash": "2175865898ccf299b6ee7253969ab6cbb541d34553f064ec6b6f9fb6e008ed9f",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-66ee22e0",
+      "at": "2026-10-28T09:46:10.338Z",
+      "outcome": "validated",
+      "input_hash": "65f38967f5ea02ad2ce7d4f809d3c90f68e1168da8d34c4ca2ea47cc9f6c182c",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-e955052e",
+      "at": "2026-10-28T12:13:23.511Z",
+      "outcome": "validated",
+      "input_hash": "302d66321358ea8af118add8137ba22f01091f22b2ea17ea86226a4dbecea8a9",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "c527ff1aeba4111ffb2d8eacdf3e91949ee1dec3a5bfac186b75a78960fb0f85"
+}

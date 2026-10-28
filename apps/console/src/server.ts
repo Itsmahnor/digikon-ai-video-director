@@ -6,6 +6,7 @@ import { serve } from "@hono/node-server";
 import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
+import { FFMPEG_TEMPLATES, HYPERFRAMES_TEMPLATES, REMOTION_TEMPLATES, implementedRecipeIds, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
 import { WhisperEngine } from "@digikon/speech";
 import { createApp, type WhisperStatus } from "./app.js";
 
@@ -24,7 +25,16 @@ const recipes = loadRecipes(join(repoRoot, "recipes"));
 // Development default: draft recipes are allowed until templates are test-rendered and reviewed.
 const library = new RecipeLibrary(recipes, process.env.RECIPES_MODE === "reviewed" ? "reviewed" : "draft");
 const knowledge = loadKnowledge(join(repoRoot, "knowledge"));
-const retriever = new KeywordRetriever([...recipeDocs(recipes), ...knowledge]);
+// Validated learned capabilities live here. They are loaded by the render registry and marked on the recipes, so retrieval knows which recipes have a working template.
+const capabilitiesDir = join(repoRoot, "capabilities");
+const migration = migrateLegacyStore(capabilitiesDir); // version 1 files become registry records, evidence unchanged; the old files are left in place
+if (migration.migrated.length) console.log(`Migrated learned capabilities to the registry: ${migration.migrated.join(", ")}`);
+for (const problem of migration.problems) console.warn(`Not migrated: ${problem}`);
+const learned = loadCapabilityRegistry(capabilitiesDir, { recipes: library });
+for (const problem of learned.problems) console.warn(`Ignored capability record: ${problem}`);
+for (const u of learned.unusable.filter((x) => x.record.status === "validated")) console.warn(`Capability ${u.record.capability_id} is not usable here: ${u.reason}`);
+const implemented = implementedRecipeIds(recipes, [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES), ...learned.usable.map((r) => r.template)]);
+const retriever = new KeywordRetriever([...recipeDocs(recipes, { implemented }), ...knowledge]);
 const skills = new SkillLibrary(join(repoRoot, "skills"));
 
 const speech = new WhisperEngine({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") });
@@ -40,7 +50,7 @@ if (!renderFont) console.warn("No font file found for preview renders. Set RENDE
 
 const app = createApp({
   llm, demo, speech, whisper: () => whisper, skills, retriever, knowledge, recipes: library, ffmpegOk,
-  editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont,
+  editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir,
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),
 });
 

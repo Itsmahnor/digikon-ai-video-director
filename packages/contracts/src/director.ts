@@ -6,6 +6,30 @@ const Range = z
   .object({ start: z.number().nonnegative(), end: z.number().positive() })
   .refine((r) => r.end > r.start, "end must be after start");
 
+/** Measured by code from the pixels of a picture. It says what KIND of picture it is, never what it shows. */
+export const ImageMeasure = z.object({
+  kind: z.enum(["screen_capture_or_graphic", "photographic", "unclear"]),
+  flat_colour_share: z.number().min(0).max(1),
+  distinct_colours: z.number().int().nonnegative(),
+  skin_tone_share: z.number().min(0).max(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+export type ImageMeasure = z.infer<typeof ImageMeasure>;
+
+/** What a reviewer says a picture shows. Absent until someone has looked at the file; never filled in by guessing. */
+export const VisualReview = z.object({
+  reviewed_by: z.enum(["user", "assistant"]),
+  reviewed_at: z.string().datetime(),
+  /** How it was reviewed, for example "looked at the file in the console" or "viewed by an assistant in a development session, not an automated vision model". */
+  method: z.string().min(1).max(300),
+  summary: z.string().min(1).max(600),
+  subjects: z.array(z.string().min(1).max(80)).max(20),
+  has_people: z.boolean(),
+  shows_product_ui: z.boolean(),
+});
+export type VisualReview = z.infer<typeof VisualReview>;
+
 export const AssetNotes = z.object({
   asset_id: z.string().min(1),
   usable_segments: z.array(Range),
@@ -29,6 +53,10 @@ export const AssetNotes = z.object({
   speech: z.object({ language: z.string(), text: z.string(), word_count: z.number().int().nonnegative() }).nullable().default(null),
   /** Paths of sampled frames saved for the vision pass. Never shown to the model as text. */
   keyframe_refs: z.array(z.string()).default([]),
+  /** For a picture: what kind it is, measured from its pixels. */
+  image_measure: ImageMeasure.nullable().default(null),
+  /** For a picture: what a reviewer says it shows. */
+  visual_review: VisualReview.nullable().default(null),
 });
 export const BrandFact = z.object({
   fact_id: z.string().min(1),

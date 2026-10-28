@@ -202,6 +202,21 @@ describe.skipIf(skipReal(!!font))("two different graphics-led films render, vali
     }
   });
 
+  it("an undeclared uploaded screenshot is a normal asset: nothing blocks it, and it is labelled as a concept, never presented as the real product", async () => {
+    const shot = await probeFile(dashPath, { assetId: "asset_5a6b7c8d" });
+    if (!shot.ok) throw new Error("test image rejected");
+    expect(shot.asset.genuine_product_ui).toBeNull(); // never declared
+    const U = await directed("ex-undeclared", project("exu", "10 second preview of an app dashboard.", "16:9", 10, "YouTube"), [4, 6], [
+      scene({ id: "S01", dur: 4, text: "Dashboard preview | Concept only" }),
+      scene({ id: "S02", dur: 6, text: "Your clients in one place", assets: ["asset_5a6b7c8d"], required: [{ need: "Dashboard screen", kind: "ui_screenshot", availability: "supplied", asset_id: "asset_5a6b7c8d" }] }),
+    ], [use(1, "S01", "title-subtitle"), use(2, "S02", "image-scene")], [shot.asset]);
+    expect(U.output.status).toBe("ready"); // the Editor raises no missing_information conflict for the undeclared screenshot
+    expect(U.output.conflicts).toEqual([]);
+    const p = planFor(U, C_SETTINGS);
+    expect(p.record.state, p.record.blockers.join("; ")).toBe("executable");
+    expect(p.plan!.job.concept_asset_ids).toEqual(["asset_5a6b7c8d"]); // shown with the "Concept illustration" label
+    expect(coverageOf(U, p).scenes[1]!.labelled.join(" ")).toContain("shown as a concept, not as the real product");
+  });
   it("a concept-labelled product screen renders with its label, and the coverage says it is labelled", async () => {
     const p = planFor(C, C_SETTINGS);
     expect(p.record.state, p.record.blockers.join("; ")).toBe("executable");

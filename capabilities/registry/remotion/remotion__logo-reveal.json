@@ -1,0 +1,87 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:logo-reveal",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/logo-reveal",
+  "recipe_id": "logo-reveal",
+  "recipe_version": "0.1.0",
+  "family": "logo_reveal",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "reveal"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "render_graphics_scene",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied logo image alone on a plain background"
+    ],
+    "not_validated": [
+      "a logo with text or a camera move in the same scene",
+      "a video as the logo",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:12:28.723Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "aa38d7234da1c9add0c2bc8976eedb36fb450132234fddcbf16382fdccbb5d82",
+        "bytes": 52774,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the supplied logo is on screen at the end (brightness spread 66)",
+      "nothing of the logo is visible at the first frame: it is revealed",
+      "the logo is part-way revealed at 0.2 s",
+      "the logo sits on the plain background, with nothing else drawn"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic logo at one frame size",
+    "the logo is fitted inside the middle half of the frame and never cropped or recoloured",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-6ba1d6bc",
+      "at": "2026-10-28T11:47:06.519Z",
+      "outcome": "validated",
+      "input_hash": "84aaa898bcc827565021b155d97c3d93bfdc0d8179cf6550626ee7f138f68ee1",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-1b72b947",
+      "at": "2026-10-28T12:12:28.723Z",
+      "outcome": "validated",
+      "input_hash": "0eccf2078887e2ea202b182c0bf517b815173962fa4d4a9c5035a284e1c39b20",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "d2420f720050a85462a57dd14b82b6f8c6808f7281463c46220a1a6d525d55b2"
+}

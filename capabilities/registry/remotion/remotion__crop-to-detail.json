@@ -1,0 +1,98 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:crop-to-detail",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/crop-to-detail",
+  "recipe_id": "crop-to-detail",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "crop"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:11:47.163Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "d0c99c95600ea18e0ff92f510c4af4830011f577126795f78c98c0d6d2cdf41c",
+        "bytes": 5341,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the crop magnifies by 2x: the stripe is 200px wide (expected 200px)",
+      "the crop is centred on the approved detail: the stripe is at 192px (expected 192px)",
+      "the crop does not move during the scene"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-b28d18e8",
+      "at": "2026-10-28T11:46:39.911Z",
+      "outcome": "failed",
+      "input_hash": "cc152f74ffd0467d9de37ebc78c6cecc4fbf5f5f080842b2ffe43245e9d56c0b",
+      "reasons": [
+        "remotion/crop-to-detail: the render failed: remotion failed: the output is missing approved content: scene S01: the camera move is not visible (the first and last frames differ by 0.0 of 255)"
+      ]
+    },
+    {
+      "attempt_id": "a-78bc1e84",
+      "at": "2026-10-28T11:47:52.561Z",
+      "outcome": "validated",
+      "input_hash": "6d6cc493302ce4de9b41a931e549aaf7b4c6d3dc1034278c2ada8f12dd10762c",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-ead21073",
+      "at": "2026-10-28T12:11:47.163Z",
+      "outcome": "validated",
+      "input_hash": "0016e1d1ca77c96db8f477042767ede6ab3674a7b9f3f91bbfa2f2ab2ced488f",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "e43fef5ab2e33f1da78cfdbdbf27d31d25960c95366ee187b28816bdee9bbe9e"
+}

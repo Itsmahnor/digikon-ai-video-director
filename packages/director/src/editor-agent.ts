@@ -170,8 +170,11 @@ export async function planEditorWork(h: DirectorHandoff, deps: Pick<EditorDeps, 
   }
   for (const s of h.storyboard.scenes) {
     for (const r of s.required_assets) {
+      // A supplied screenshot is a normal visual asset. Whether it shows the real product is not asked of the user, so an undeclared one is not a
+      // conflict: it is used as an uploaded image, and the plan may not claim it is the genuine interface (the renderer labels it as a concept,
+      // and nothing about its interface elements is taken as a confirmed product feature). An explicit declaration still changes how it is treated.
       if (r.availability === "supplied" && r.kind === "ui_screenshot" && r.asset_id && assets.get(r.asset_id)?.genuine_product_ui === null) {
-        conflict({ conflict_id: `K-provenance-${s.scene_id}-${r.asset_id}`, kind: "missing_information", scene_id: s.scene_id, description: `${s.scene_id} shows ${r.asset_id} as a product screen, but nobody declared whether it is a genuine capture of the product, so it cannot be presented as the real interface.`, evidence: [`asset.${r.asset_id}.genuine_product_ui`] });
+        notes.push(`${s.scene_id} uses the uploaded screenshot ${r.asset_id}; it was not declared a genuine capture of the product, so it is shown as an uploaded image, not as confirmed product interface, and nothing visible in it is treated as a verified product feature.`);
       }
     }
   }

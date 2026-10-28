@@ -133,7 +133,8 @@ export class AnthropicClient implements LlmClient {
       messages.push({ role: "assistant", content: res.content });
       messages.push({
         role: "user",
-        content: [{ type: "tool_result", tool_use_id: block.id, is_error: true, content: `Schema errors: ${lastError}. Return a corrected ${req.name}.` }],
+        // Every tool_use block in the reply needs its own tool_result, or the API refuses the next request (HTTP 400). The model may return more than one.
+        content: res.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use").map((b) => ({ type: "tool_result" as const, tool_use_id: b.id, is_error: true, content: b.id === block.id ? `Schema errors: ${lastError}. Return a corrected ${req.name}.` : `Not used: return exactly one ${req.name} call.` })),
       });
     }
     throw new Error(`Model output failed schema validation for ${req.name}: ${lastError}`);

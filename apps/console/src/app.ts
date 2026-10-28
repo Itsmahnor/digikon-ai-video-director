@@ -1,28 +1,28 @@
-import { createReadStream, readdirSync, writeFileSync } from "node:fs";
+import { createReadStream, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { extname, join } from "node:path";
+import { extname, join, relative } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { ApprovalSubmission, BrandFact, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
+import { ApprovalSubmission, BrandFact, VisualReview, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
-  Command, HandoffRefusedError, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
+  Command, HandoffRefusedError, matchAssetsToScenes, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, FFMPEG_TEMPLATES, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, DeliveryReport, FFMPEG_TEMPLATES, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
-import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, probeFile } from "@digikon/media";
+import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, measureImage, probeFile } from "@digikon/media";
 import type { Doc, Retriever } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { routeRequest } from "@digikon/router";
@@ -48,6 +48,8 @@ export interface AppContext {
   editorSkills?: SkillLibrary;
   /** The font the FFmpeg scene adapter draws with. Null or missing: no renderer is available, and the console says so. */
   renderFont?: string | null;
+  /** The capability registry root (for example `capabilities`; records live under `registry/<engine>`). Absent: none are loaded. */
+  capabilitiesDir?: string | null;
 }
 
 type Graph = ReturnType<typeof buildDirectorGraph>;
@@ -87,6 +89,14 @@ const RouteBody = z.object({
   text: z.string().trim().min(1).max(4000),
   from_voice: z.boolean().default(false),
   language: z.string().max(20).nullable().default(null),
+});
+const ReviewBody = z.object({
+  summary: z.string().trim().min(1).max(600),
+  subjects: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
+  has_people: z.boolean(),
+  shows_product_ui: z.boolean(),
+  reviewed_by: z.enum(["user", "assistant"]),
+  method: z.string().trim().min(1).max(300),
 });
 const DirectBody = z.object({ facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]) });
 
@@ -154,7 +164,7 @@ export function createApp(ctx: AppContext) {
     whisper: { model: ctx.speech.model, ...ctx.whisper() },
     ffmpeg: ctx.ffmpegOk,
     recipes: { available: ctx.recipes.available().length, mode: ctx.recipes.minStatus },
-    render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), note: "Preview renders only. Nothing is production-ready." },
+    render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }).usable.map((x) => x.capability_id), note: "Preview renders only. Nothing is production-ready." },
     limits: { maxVoicePromptSeconds: MEDIA_LIMITS.maxVoicePromptSeconds, maxAssets: MEDIA_LIMITS.maxAssetsPerProject, maxRequestMb: MAX_REQUEST_BYTES / 1048576, extensions: ALL_EXTENSIONS },
   }));
 
@@ -166,10 +176,41 @@ export function createApp(ctx: AppContext) {
     return c.json({ id });
   });
 
+  const reviewFile = (s: Session, assetId: string) => join(s.dir, "reviews", `${assetId}.json`);
+  /** The same review keyed by the picture's SHA-256: another project that uploads the same bytes finds it, and a different picture never does. */
+  const sharedReviewFile = (sha256: string) => join(ctx.storageDir, "reviews", `${sha256}.json`);
+  const shaOf = (s: Session, assetId: string): string | null => { const v = s.assets.find((x) => x.asset_id === assetId)?.metadata?.["sha256"]; return typeof v === "string" && /^[a-f0-9]{64}$/.test(v) ? v : null; };
+  /** A stored review of a picture, read from disk. Anything that does not parse is ignored, never trusted. */
+  const loadReview = (s: Session, assetId: string): VisualReview | null => {
+    const sha = shaOf(s, assetId);
+    for (const f of [reviewFile(s, assetId), ...(sha ? [sharedReviewFile(sha)] : [])]) {
+      try { const p = VisualReview.safeParse(JSON.parse(readFileSync(f, "utf8"))); if (p.success) return p.data; } catch { /* try the next place */ }
+    }
+    return null;
+  };
+  /** Notes with the stored review of that picture added, so a review survives a restart and a new run. */
+  const withReview = (s: Session, n: AssetNotes): AssetNotes => {
+    const rv = loadReview(s, n.asset_id);
+    return rv ? { ...n, visual_review: rv, content_summary: `${n.content_summary} Reviewed (${rv.reviewed_by}): ${rv.summary}`.trim(), uncertain: n.uncertain.filter((u) => !/Nobody has reviewed/.test(u)) } : n;
+  };
+
   /** Measures a file and transcribes its speech without blocking the upload. The Director waits for this before planning. */
   const analyseAsset = (s: Session, asset: Asset): void => {
     if (asset.media_type === "image") {
-      s.analysis.set(asset.asset_id, { status: "done", notes: buildAssetNotes(asset, null), transcript: null, note: null });
+      // What kind of picture it is is measured from its pixels with the local FFmpeg. What it SHOWS is not guessed: that needs a review (see the review route).
+      s.analysis.set(asset.asset_id, { status: "running", notes: null, transcript: null, note: null });
+      const still = () => s.assets.some((x) => x.asset_id === asset.asset_id);
+      const imgJob = (async () => {
+        try {
+          const m = asset.width && asset.height ? await measureImage(asset.uri, { width: asset.width, height: asset.height }) : null;
+          if (still()) s.analysis.set(asset.asset_id, { status: "done", notes: withReview(s, buildAssetNotes(asset, null, null, m)), transcript: null, note: m ? null : "The picture could not be measured." });
+        } catch (e) {
+          console.error(e);
+          if (still()) s.analysis.set(asset.asset_id, { status: "failed", notes: withReview(s, buildAssetNotes(asset, null)), transcript: null, note: "The picture could not be measured, so only its size is known." });
+        }
+      })();
+      s.pending.set(asset.asset_id, imgJob);
+      void imgJob.finally(() => s.pending.delete(asset.asset_id));
       return;
     }
     s.analysis.set(asset.asset_id, { status: "running", notes: null, transcript: null, note: null });
@@ -211,6 +252,7 @@ export function createApp(ctx: AppContext) {
       shots: n ? n.shots.length + 1 : null, silences: flags("silence"), black: flags("black_frames"), frozen: flags("frozen"),
       loudness_lufs: n?.loudness_lufs ?? null, speech: n?.speech ? { language: n.speech.language, word_count: n.speech.word_count } : null,
       usable_s: n ? Math.round(n.usable_segments.reduce((acc, u) => acc + u.end - u.start, 0) * 10) / 10 : null,
+      image_kind: n?.image_measure?.kind ?? null, reviewed: !!n?.visual_review,
     };
   };
 
@@ -337,6 +379,50 @@ export function createApp(ctx: AppContext) {
     return c.json({ result, turns: s.turns });
   });
 
+  // ---------- what the pictures are, and where they could go ----------
+  /**
+   * Records what a reviewer says a supplied picture shows. The reviewer is named (the user, or an assistant that looked at the file) and says how, and
+   * nothing is stored for a file that is not a picture of this project. It changes no plan and no approval: only a later Director run reads it.
+   */
+  app.post("/api/sessions/:id/assets/:assetId/review", async (c) => {
+    const s = session(c.req.param("id"));
+    const assetId = c.req.param("assetId");
+    const a = ASSET_ID.test(assetId) ? s.assets.find((x) => x.asset_id === assetId) : undefined;
+    if (!a) throw new HttpError(404, "no_asset", "That file is not in this project.");
+    if (a.media_type !== "image") throw new HttpError(409, "not_an_image", "Only pictures can be reviewed this way.");
+    const body = ReviewBody.parse(await c.req.json().catch(() => ({})));
+    const review = VisualReview.parse({ ...body, reviewed_at: new Date().toISOString() });
+    await mkdir(join(s.dir, "reviews"), { recursive: true });
+    const file = reviewFile(s, assetId);
+    writeFileSync(`${file}.tmp`, JSON.stringify(review, null, 2), "utf8");
+    renameSync(`${file}.tmp`, file);
+    const sha = shaOf(s, assetId);
+    if (sha) { await mkdir(join(ctx.storageDir, "reviews"), { recursive: true }); const sf = sharedReviewFile(sha); writeFileSync(`${sf}.tmp`, JSON.stringify(review, null, 2), "utf8"); renameSync(`${sf}.tmp`, sf); }
+    const cur = s.analysis.get(assetId);
+    const base = cur?.notes ?? buildAssetNotes(a, null);
+    s.analysis.set(assetId, { status: cur?.status ?? "done", notes: withReview(s, base), transcript: null, note: cur?.note ?? null });
+    return c.json({ asset_id: assetId, review, summary: summary(s, assetId) });
+  });
+
+  /**
+   * Every uploaded picture as the project actually holds it (registered, on disk, size and hash checked, measured, reviewed), and which scene needs each
+   * could fill. Suggestions only; the plan is not touched.
+   */
+  app.get("/api/sessions/:id/asset-matches", async (c) => {
+    const s = session(c.req.param("id"));
+    const runId = runIdOf(s);
+    const state = (await s.graph!.getState({ configurable: { thread_id: runId } })).values as DirectorStateType;
+    await Promise.allSettled([...s.pending.values()]);
+    const notes = s.assets.map((a) => s.analysis.get(a.asset_id)?.notes).filter((n): n is AssetNotes => !!n);
+    const files = await Promise.all(s.assets.map(async (a) => {
+      const st = await stat(a.uri).catch(() => null);
+      const bytes = typeof a.metadata?.["bytes"] === "number" ? (a.metadata["bytes"] as number) : null;
+      return { asset_id: a.asset_id, original_name: String(a.metadata?.["original_name"] ?? ""), media_type: a.media_type, width: a.width, height: a.height, on_disk: !!st?.isFile(), size_matches: !!st && (bytes === null || st.size === bytes), kind: s.analysis.get(a.asset_id)?.notes?.image_measure?.kind ?? null, reviewed: !!s.analysis.get(a.asset_id)?.notes?.visual_review };
+    }));
+    const matches = matchAssetsToScenes((state.scenePlan?.scenes ?? []).map((x) => ({ scene_id: x.scene_id, required_assets: x.required_assets })), notes, s.assets);
+    return c.json({ run_id: runId, assets: files, matches });
+  });
+
   app.post("/api/sessions/:id/reset", (c) => {
     const s = session(c.req.param("id"));
     s.turns = []; s.route = null; s.graph = undefined; s.threadId = undefined;
@@ -458,7 +544,15 @@ export function createApp(ctx: AppContext) {
     }
     const st = r.state;
     const analysis = new Map(st.notes.map((n) => [n.asset_id, { status: "done" as const, notes: n, transcript: null, note: null }]));
-    sessions.set(id, { id, dir, assets: st.assets, turns: [], route: null, facts: st.facts, analysis, pending: new Map(), graph, threadId: runId });
+    const restored: Session = { id, dir, assets: st.assets, turns: [], route: null, facts: st.facts, analysis, pending: new Map(), graph, threadId: runId };
+    sessions.set(id, restored);
+    // Pictures saved before they were measured get measured now, and any stored review is attached again. Nothing is invented: a picture with no review stays unreviewed.
+    for (const a of restored.assets.filter((x) => x.media_type === "image")) {
+      const n = analysis.get(a.asset_id)?.notes ?? buildAssetNotes(a, null);
+      let measured = n;
+      if (!n.image_measure && a.width && a.height) { try { measured = buildAssetNotes(a, null, null, await measureImage(a.uri, { width: a.width, height: a.height })); } catch { /* stays unmeasured */ } }
+      analysis.set(a.asset_id, { status: "done", notes: withReview(restored, measured), transcript: null, note: null });
+    }
     return c.json({ state: { ...summarise(st, ctx), run_id: runId }, resumed: true });
   });
 
@@ -501,7 +595,10 @@ export function createApp(ctx: AppContext) {
     if (!ctx.ffmpegOk || !ctx.renderFont) return { registry: NO_ADAPTERS, available: false };
     // Every renderer that can run on this machine is registered; one that cannot (for example no browser) is simply absent, and a plan that needs it is blocked.
     const adapters: RenderAdapter[] = [];
-    for (const make of [createFfmpegAdapter, createRemotionAdapter, createHyperframesAdapter]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
+    // Learned capabilities (validated, hash-checked files in the store) are given to FFmpeg every time, so a capability learned in one project is available in the next.
+    const reg = loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes });
+    const learned = reg.transitions("ffmpeg"), remotionLearned = reg.composed("remotion"), hyperframesLearned = reg.composed("hyperframes");
+    for (const make of [(o: { fontFile: string; outputRoot: string }) => createFfmpegAdapter({ ...o, learned }), (o: { fontFile: string; outputRoot: string }) => createRemotionAdapter({ ...o, learned: remotionLearned }), (o: { fontFile: string; outputRoot: string }) => createHyperframesAdapter({ ...o, learned: hyperframesLearned })]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
     return adapters.length ? { registry: new AdapterRegistry(adapters), available: true } : { registry: NO_ADAPTERS, available: false };
   };
   const availableRenderers = () => (ctx.ffmpegOk && ctx.renderFont ? registryFor(tmpdir()).registry.renderers() : []);
@@ -518,20 +615,47 @@ export function createApp(ctx: AppContext) {
     await mkdir(dirs.out, { recursive: true });
     const { registry, available } = registryFor(dirs.out);
     const settings = settingsIn ? { ...settingsIn, source: { kind: "user_approved", reference: `entered in the console form (session ${s.id}, run ${runId})` } } : undefined;
-    const base = { recipes: ctx.recipes, adapters: registry, outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true };
+    const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true };
     const planned = planRender({ editor_output: stored.output, handoff, settings, purpose: "preview" }, base);
     if (!planned.ok) throw new HandoffRefusedError(planned.reasons.map((r) => scrub(r, scrubRoots(s))));
     const production = planRender({ editor_output: stored.output, handoff, settings, purpose: "production" }, base);
-    const selection = selectRenderer(planned.record);
+    const selection = selectRenderer(planned.record, registry);
     const coverage = previewCoverage(handoff, stored.output, planned.record, selection.capabilities);
     const eligible = planned.record.state === "executable" && coverage.complete && !!planned.plan;
-    return { runId, handoff, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available };
+    // The multi-engine path: scene by scene, each by its own engine, assembled by FFmpeg. Planned from the same approvals; it changes nothing approved.
+    const assembleDeps: AssembleDeps | null = available && ctx.renderFont ? { ...base, fontFile: ctx.renderFont } : null;
+    let assembly: AssemblePlanResult | null = null;
+    try { assembly = assembleDeps ? planAssembly({ editor_output: stored.output, handoff, settings, purpose: "preview" }, assembleDeps) : null; } catch (e) { console.error(e instanceof Error ? e.message : e); }
+    return { runId, handoff, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps };
   };
+
+  const assemblyView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
+    if (!p.assembly) return null;
+    if (!p.assembly.ok) return { ok: false as const, reasons: p.assembly.reasons.map((r) => scrub(r, scrubRoots(s))) };
+    const a = p.assembly.plan;
+    return {
+      ok: true as const, complete: a.complete,
+      scenes: a.scenes.map((x) => ({ scene_id: x.scene_id, engine: x.engine, renderable: x.renderable, reason: x.reason ? scrub(x.reason, scrubRoots(s)) : null, unmet: x.unmet.map((u) => scrub(u, scrubRoots(s))) })),
+      transitions: a.transitions.map((t) => ({ after_scene: t.after_scene, template: t.template, applied: t.applied, reason: scrub(t.reason, scrubRoots(s)) })),
+      omitted: a.omitted.map((o) => ({ ...o, reason: scrub(o.reason, scrubRoots(s)) })),
+      label: a.complete ? "A complete preview can be assembled from the scene clips." : "Only an INCOMPLETE preview can be made: scenes or operations that nothing can render are listed and shown as labelled placeholders.",
+    };
+  };
+  /** A delivery report as the browser sees it: no absolute paths, a playback address only for a video that exists, and the stage flags kept apart. */
+  const publicDelivery = (s: Session, r: DeliveryReport, runRoot: string) => ({
+    ...r,
+    status: r.states.final_delivery_ready ? "final_delivery_ready" : r.kind === "complete" ? "complete_preview" : "incomplete_preview",
+    final_delivery_blockers: r.final_delivery_blockers.map((b) => scrub(b, scrubRoots(s))),
+    scenes: r.scenes.map((x) => ({ ...x, omitted_reason: x.omitted_reason ? scrub(x.omitted_reason, scrubRoots(s)) : null, operations: x.operations.map((o) => ({ ...o, reason: scrub(o.reason, scrubRoots(s)) })) })),
+    omitted_operations: r.omitted_operations.map((o) => ({ ...o, reason: scrub(o.reason, scrubRoots(s)) })),
+    output: r.output ? { ...r.output, path: relative(runRoot, r.output.path).replaceAll("\\", "/"), video_url: `/api/sessions/${s.id}/deliveries/${r.delivery_id}/video` } : null,
+  });
 
   const planView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
     const sceneOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.target_scene_id]));
-    const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, supported: o.renderer !== null }));
-    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s)));
+    const typeOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.operation_type]));
+    const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, note: typeOf.get(o.operation_id) === "mix_audio" ? "audio is not part of this phase: it is reported as unresolved and keeps the film from being complete or final" : null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer ?? (o.implementation_ref === "ffmpeg/concat-cut" ? "ffmpeg" : null), supported: o.renderer !== null || o.implementation_ref === "ffmpeg/concat-cut" /* a hard cut is the assembler's default join */ }));
+    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].filter((b) => !/concat-cut|\(hard-cut\)/.test(b)).map((b) => scrub(b, scrubRoots(s)));
     return {
       run_id: p.runId,
       renderer_available: p.available,
@@ -539,7 +663,13 @@ export function createApp(ctx: AppContext) {
       renderer: { selected: p.selection.selected, needed: p.selection.needed, composition_required: p.selection.composition_required, registered: p.registered },
       plan: { state: p.planned.record.state, purpose: "preview" as const, operations: ops, supported: ops.filter((o) => o.supported).length, unsupported: ops.filter((o) => !o.supported).length, notes: p.planned.record.notes },
       coverage: p.coverage,
+      /** Per operation: status, every engine considered and why it was or was not usable, and the engine selected. */
+      capability: p.planned.diagnosis.map((d) => ({ operation_id: d.operation_id, scene_id: d.scene_id, recipe_id: d.recipe_id, status: d.status, selected_engine: d.selected_engine, selected_template: d.selected_template, reason: scrub(d.reason, scrubRoots(s)), engines: d.engines.map((e) => ({ engine: e.engine, verdict: e.verdict, reason: scrub(e.reason, scrubRoots(s)) })) })),
       eligible: p.eligible,
+      /** What the multi-engine assembler would do: per scene, the engine or the reason it cannot be shown. */
+      assembly: assemblyView(s, p),
+      /** A render can start: a complete single-renderer preview, or an assembly where at least one scene can be drawn (anything missing is then listed and labelled). */
+      can_render: p.eligible || (p.assembly?.ok === true && p.assembly.plan.scenes.some((x) => x.renderable)),
       blockers,
       /** A separate question from the preview: could this go to production? Never true while any recipe is a draft. */
       production: { ready: p.production.ok && p.production.record.state === "executable", blockers: p.production.ok ? p.production.record.blockers.map((b) => scrub(b, scrubRoots(s))) : [] },
@@ -579,9 +709,43 @@ export function createApp(ctx: AppContext) {
     if (s.rendering) throw new HttpError(409, "busy", "A preview is already being rendered for this session.");
     s.rendering = true;
     try {
-      const p = await prepare(s, body.settings);
+      let p = await prepare(s, body.settings);
+      let learning: { attempted: unknown[]; not_learnable: unknown[] } | null = null;
+      // Generation first: a capability nothing can run yet is learned (a real render that passes its checks), not treated as a reason to stop.
+      if (!p.eligible && ctx.capabilitiesDir && ctx.renderFont && ctx.ffmpegOk) {
+        const all = findCapabilityGaps(p.planned.record, undefined, p.editor.operations).filter((g) => g.template !== "ffmpeg/concat-cut"); // a hard cut is the assembler's own join, not a gap
+        const gaps = all.filter((g) => g.learnable);
+        if (all.length) {
+          const results = gaps.length ? await learnGaps(gaps, { root: ctx.capabilitiesDir, fontFile: ctx.renderFont, recipes: ctx.recipes }) : [];
+          // what was found missing, what was tried, and what came of it: kept with the response, and in the registry as attempt history
+          learning = {
+            attempted: results.map((r) => (r.status === "learned" ? { template: r.template, status: "learned", reused: r.reused, checks: r.record.validated!.checks.length } : { template: r.template, status: "not_learned", ...(r.retry_skipped ? { retry_skipped: true } : {}), reasons: r.reasons.map((x) => scrub(x, scrubRoots(s))) })),
+            not_learnable: all.filter((g) => !g.learnable).map((g) => ({ operation_id: g.operation_id, template: g.template, reason: "no reviewed implementation of this template exists in this project, and none is generated" })),
+          };
+          if (gaps.length) p = await prepare(s, body.settings);
+        }
+      }
       const view = planView(s, p);
-      if (!p.eligible || !p.planned.plan) return c.json({ error: "not_renderable", message: "A preview cannot be rendered yet.", ...view }, 409);
+      if (!p.eligible || !p.planned.plan) {
+        const a = p.assembly;
+        if (!a?.ok || !p.assembleDeps || !a.plan.scenes.some((x) => x.renderable)) return c.json({ error: "not_renderable", message: "A preview cannot be rendered yet. No scene can be shown with the renderers and capabilities that exist.", learning, ...view }, 409);
+        // Multi-engine, or incomplete: every scene by its own engine, assembled by FFmpeg, with anything missing listed and labelled.
+        const result = await renderAssembly(a.plan, p.assembleDeps);
+        if (result.kind === "failed") return c.json({ kind: "failed", error: "render_failed", message: "The render failed. No video is offered.", errors: result.errors.map((e) => scrub(e, scrubRoots(s))), learning, ...view }, 502);
+        const delivery = publicDelivery(s, result.report, p.dirs.root);
+        try { saveDeliveryReport(p.dirs.records, result.report); } catch { await rm(result.report.output!.path, { force: true }); throw new HttpError(503, "not_saved", "The delivery report could not be saved, so the video was removed. Check free disk space."); }
+        if (result.kind === "complete") {
+          try { saveRenderRecord(p.dirs.records, result.record); } catch (e) { await rm(result.record.output!.path, { force: true }); throw e; }
+          let qa;
+          try {
+            qa = await runRenderQa(result.record, p.handoff);
+            writeFileSync(join(p.dirs.records, `${result.record.render_id}.qa.json`), JSON.stringify(qa, null, 2));
+            for (const id of new Set(result.record.operations.map((o) => o.recipe_id))) saveRenderEvidence(p.dirs.evidence, buildRenderEvidence(result.record, ctx.recipes.get(id)!, qa));
+          } catch (e) { console.error(e instanceof Error ? e.message : e); }
+          return c.json({ kind: "complete", learning, delivery, record: publicRecord(result.record, s.id, p.dirs.root, scrubRoots(s)), qa: qa ? { findings: qa.findings, passed: qa.passed, measurements: qa.measurements } : null, ...view });
+        }
+        return c.json({ kind: "partial", learning, delivery, record: null, qa: null, ...view });
+      }
       const save = (r: RenderRecord) => { try { saveRenderRecord(p.dirs.records, r); } catch { throw new HttpError(503, "not_saved", "The render record could not be saved, so nothing was rendered. Check free disk space."); } };
       const record = await executeRender(p.planned.plan, { storageRoot: s.dir, requireContentHash: true, onUpdate: save });
       if (record.state === "rendered") {
@@ -603,6 +767,26 @@ export function createApp(ctx: AppContext) {
     }
   });
 
+  /**
+   * Tries to close the capability gaps of the current render plan: each operation whose template nothing can run, when a reviewed engine
+   * could. A capability is stored only after a real render passes its checks; otherwise it stays unsupported and the reasons are returned.
+   * This renders no video for the project, changes no plan or approval and re-runs nothing: the approved recipes and templates stay as approved.
+   */
+  app.post("/api/sessions/:id/render/learn", async (c) => {
+    const s = session(c.req.param("id"));
+    if (!ctx.capabilitiesDir || !ctx.renderFont || !ctx.ffmpegOk) throw new HttpError(503, "no_capability_store", "Capability learning needs FFmpeg, a font file and a capability folder, and one of them is not configured.");
+    const body = SettingsBody.parse(await c.req.json().catch(() => ({})));
+    const before = await prepare(s, body.settings);
+    const gaps = findCapabilityGaps(before.planned.record, undefined, before.editor.operations);
+    const results = await learnGaps(gaps.filter((g) => g.learnable), { root: ctx.capabilitiesDir, fontFile: ctx.renderFont, recipes: ctx.recipes });
+    const after = await prepare(s, body.settings); // the registry is rebuilt, so what was just learned counts
+    return c.json({
+      gaps: gaps.map((g) => ({ operation_id: g.operation_id, recipe_id: g.recipe_id, template: g.template, learnable: g.learnable })),
+      results: results.map((r) => (r.status === "learned" ? { template: r.template, status: r.status, reused: r.reused, checks: r.record.validated!.checks.length } : { template: r.template, status: r.status, ...(r.retry_skipped ? { retry_skipped: true } : {}), ...(r.in_progress ? { in_progress: true } : {}), reasons: r.reasons.map((x) => scrub(x, scrubRoots(s))) })),
+      not_learnable: gaps.filter((g) => !g.learnable).map((g) => ({ operation_id: g.operation_id, template: g.template, reason: "no engine in this project implements it; it stays unsupported" })),
+      view: planView(s, after),
+    });
+  });
   app.get("/api/sessions/:id/renders", (c) => {
     const s = session(c.req.param("id"));
     const dirs = renderDirs(s.dir, runIdOf(s));
@@ -619,19 +803,44 @@ export function createApp(ctx: AppContext) {
     const dirs = renderDirs(s.dir, runIdOf(s));
     const rec = RENDER_ID.test(renderId) ? loadRenderRecord(dirs.records, renderId).record : null;
     if (!rec || rec.state !== "rendered" || !rec.output) throw new HttpError(404, "no_video", "There is no validated video for that render.");
-    const path = rec.output.path;
-    if (!isInside(dirs.out, path)) throw new HttpError(404, "no_video", "There is no validated video for that render.");
+    return serveVideo(c, dirs.out, rec.output.path, rec.output.bytes, rec.output.sha256);
+  });
+  app.get("/api/sessions/:id/deliveries", (c) => {
+    const s = session(c.req.param("id"));
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const files = existsSync(dirs.records) ? readdirSync(dirs.records).filter((f) => /^dl_[a-f0-9]{16}\.delivery\.json$/.test(f)) : [];
+    return c.json({ deliveries: files.flatMap((f) => { const r = loadDeliveryReport(join(dirs.records, f)); return r ? [publicDelivery(s, r, dirs.root)] : []; }) });
+  });
+  app.get("/api/sessions/:id/deliveries/:deliveryId", (c) => {
+    const s = session(c.req.param("id"));
+    const id = c.req.param("deliveryId");
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const r = /^dl_[a-f0-9]{16}$/.test(id) ? loadDeliveryReport(join(dirs.records, `${id}.delivery.json`)) : null;
+    if (!r) throw new HttpError(404, "no_delivery", "There is no such delivery report.");
+    return c.json(publicDelivery(s, r, dirs.root));
+  });
+  /** Plays the video of a delivery report, complete or incomplete. Served only for a file inside the run output folder that matches the report size and SHA-256. */
+  app.get("/api/sessions/:id/deliveries/:deliveryId/video", async (c) => {
+    const s = session(c.req.param("id"));
+    const id = c.req.param("deliveryId");
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const r = /^dl_[a-f0-9]{16}$/.test(id) ? loadDeliveryReport(join(dirs.records, `${id}.delivery.json`)) : null;
+    if (!r?.output) throw new HttpError(404, "no_video", "There is no validated video for that delivery.");
+    return serveVideo(c, dirs.out, r.output.path, r.output.bytes, r.output.sha256, r.kind === "complete" ? "complete" : "incomplete");
+  });
+  async function serveVideo(c: Context, outDir: string, path: string, bytes: number, sha256: string, label?: string) {
+    if (!isInside(outDir, path)) throw new HttpError(404, "no_video", "There is no validated video for that render.");
     const st = await stat(path).catch(() => null);
-    if (!st?.isFile() || st.size !== rec.output.bytes) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
-    const key = `${path}:${st.size}:${st.mtimeMs}:${rec.output.sha256}`;
+    if (!st?.isFile() || st.size !== bytes) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
+    const key = `${path}:${st.size}:${st.mtimeMs}:${sha256}`;
     if (!verified.has(key)) {
       const hash = createHash("sha256");
       for await (const chunk of createReadStream(path)) hash.update(chunk as Buffer);
-      if (hash.digest("hex") !== rec.output.sha256) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
+      if (hash.digest("hex") !== sha256) throw new HttpError(409, "output_changed", "The video file is missing or no longer matches its record, so it is not served.");
       verified.set(key, true);
     }
     const size = st.size;
-    const headers: Record<string, string> = { "Content-Type": "video/mp4", "Accept-Ranges": "bytes", "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
+    const headers: Record<string, string> = { "Content-Type": "video/mp4", "Accept-Ranges": "bytes", "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", ...(label ? { "X-Digikon-Preview": label } : {}) };
     const range = /^bytes=(\d*)-(\d*)$/.exec(c.req.header("range") ?? "");
     if (range) {
       const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
@@ -640,7 +849,7 @@ export function createApp(ctx: AppContext) {
       return new Response(Readable.toWeb(createReadStream(path, { start, end })) as never, { status: 206, headers: { ...headers, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": String(end - start + 1) } });
     }
     return new Response(Readable.toWeb(createReadStream(path)) as never, { headers: { ...headers, "Content-Length": String(size) } });
-  });
+  }
 
   app.use("/*", serveStatic({ root: ctx.publicDir }));
   return app;

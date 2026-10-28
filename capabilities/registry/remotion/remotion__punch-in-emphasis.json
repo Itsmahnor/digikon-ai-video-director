@@ -1,0 +1,89 @@
+{
+  "format": "digikon.capability-record",
+  "format_version": 2,
+  "capability_id": "remotion:punch-in-emphasis",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/punch-in-emphasis",
+  "recipe_id": "punch-in-emphasis",
+  "recipe_version": "0.1.0",
+  "family": "camera_move",
+  "storyboard_transition": "none",
+  "spec": {
+    "xfade": null,
+    "direction_map": null,
+    "motion": "punch"
+  },
+  "status": "validated",
+  "inputs": {
+    "operation_type": "trim_clip",
+    "parameters": []
+  },
+  "combinations": {
+    "validated_with": [
+      "a supplied image filling the frame"
+    ],
+    "not_validated": [
+      "an animated text entrance over the image (that combination is validated with the text capability)",
+      "a video clip as the moving picture",
+      "an end card in the same scene",
+      "a transition into or out of a scene rendered by another engine",
+      "audio"
+    ]
+  },
+  "compatibility": {
+    "recipe_renderers": [
+      "remotion"
+    ],
+    "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
+  },
+  "validated": {
+    "at": "2026-10-28T12:11:33.109Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "xfade_names": [],
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "renders": [
+      {
+        "variant": "fixed",
+        "sha256": "37f9370e96384e8d203df95308ce1a57c445f16c1b27a9e0ce75befdbe744a67",
+        "bytes": 12865,
+        "width": 640,
+        "height": 360,
+        "fps": 30,
+        "duration_s": 3
+      }
+    ],
+    "checks": [
+      "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
+      "the adapter's own content check passed on the rendered scene",
+      "the picture grows by 1.30x (approved 1.3x): the stripe is 100px wide at the start and 130px at the end",
+      "the punch-in lands within its approved 0.4 s: 1.30x at 0.47 s",
+      "the zoom is under way at 0.13 s (1.20x) and still short of its end state"
+    ]
+  },
+  "previous_validated": null,
+  "known_limitations": [
+    "validated on a synthetic striped image at one frame size",
+    "moves a supplied image only, never video",
+    "the easing curve is not measured frame by frame",
+    "needs a compatible 64-bit browser for Remotion"
+  ],
+  "attempts": [
+    {
+      "attempt_id": "a-1771823c",
+      "at": "2026-10-28T11:46:24.183Z",
+      "outcome": "validated",
+      "input_hash": "0de2959c37dd0092b6cd5b70a6867a0944fde0dd7c94b36c039ee6a99a28e137",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-79ba39ca",
+      "at": "2026-10-28T12:11:33.109Z",
+      "outcome": "validated",
+      "input_hash": "7e3d000ea4a6849d0783e024e8d18c223c812fb4500c5de4f24d4b646ca6a372",
+      "reasons": []
+    }
+  ],
+  "migrated_from": null,
+  "record_hash": "46d5c61809e74375ad7623b9549f6780f71c3f114a3dec185567eca24e9d33fc"
+}

@@ -32,6 +32,8 @@ export interface RenderAdapter {
   templates: Readonly<Record<string, readonly OperationType[]>>;
   /** Writes the file. It may return notes, for example what its own content check could and could not establish; they are kept on the render record. */
   render(job: RenderJob): Promise<void | { notes: string[] }>;
+  /** What this adapter can show beyond plain graphics, when that depends on what it was given (learned capabilities). Coverage prefers it over the built-in table. */
+  capabilities?: import("./coverage.js").RenderCapabilities;
   /**
    * Everything this adapter would refuse about a job, found without running anything. The planner turns each into a blocker,
    * so an unsupported scene is reported while planning instead of failing at render time.

@@ -27,6 +27,12 @@ export interface RenderCapabilities {
   video_templates?: readonly string[];
   /** Templates that implement each approved transition, by the storyboard's transition name. */
   transition_templates: Readonly<Record<string, readonly string[]>>;
+  /** Templates that carry out each approved camera motion, by the storyboard's name. `param` narrows a template to one parameter value (a pan's direction). */
+  camera_templates?: Readonly<Record<string, readonly { template: string; param?: { name: string; value: string } }[]>>;
+  /** Templates that show the supplied image of their own operation (a camera move on an image): that image counts as shown. */
+  image_via_templates?: readonly string[];
+  /** Templates that start their text at the approved `delay_s` themselves, so a delayed caption is carried out and not merely tolerated. */
+  caption_timing_templates?: readonly string[];
 }
 
 /**
@@ -51,7 +57,9 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     for (const o of shown) {
       if (!o.caption) continue;
       const end = s.start_time + s.duration_seconds;
-      if (Math.abs(o.caption.start_s - s.start_time) > CAPTION_TOLERANCE_S || Math.abs(o.caption.end_s - end) > CAPTION_TOLERANCE_S) {
+      const ref = supported.get(o.operation_id)!.implementation_ref;
+      const delay = (caps.caption_timing_templates ?? []).includes(ref) && typeof o.parameters["delay_s"] === "number" ? (o.parameters["delay_s"] as number) : 0;
+      if (Math.abs(o.caption.start_s - (s.start_time + delay)) > CAPTION_TOLERANCE_S || Math.abs(o.caption.end_s - end) > CAPTION_TOLERANCE_S) {
         missing.push(`${o.operation_id}: its text is timed ${o.caption.start_s}s to ${o.caption.end_s}s, but the renderer shows text for the whole scene (${s.start_time}s to ${end}s) and has no caption timing`);
       }
     }
@@ -59,7 +67,7 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     if (s.overlay) labelled.push(`text is centred and kept inside the middle 84% of the frame width; the approved ${s.overlay.safe_area === "platform_safe" ? "platform safe area" : "full-frame"} setting is not checked against any platform specification (none is verified in this project)`);
     labelled.push(`the approved shot size (${s.shot.shot_size.replaceAll("_", " ")}) and visual action ("${s.shot.visual_action.length > 60 ? `${s.shot.visual_action.slice(0, 59)}…` : s.shot.visual_action}") describe the content; the renderer does not change or check them`);
 
-    const shownImages = new Set(shown.filter((o) => caps.image_templates.includes(supported.get(o.operation_id)!.implementation_ref)).flatMap((o) => o.asset_ids));
+    const shownImages = new Set(shown.filter((o) => caps.image_templates.includes(supported.get(o.operation_id)!.implementation_ref) || (caps.image_via_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref)).flatMap((o) => o.asset_ids));
     const videoOps = new Map(shown.filter((o) => (caps.video_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref)).flatMap((o) => o.asset_ids.map((id) => [id, o] as const)));
     for (const id of s.asset_ids) {
       const a = assets.get(id);
@@ -70,7 +78,9 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
       else if (!shownImages.has(id)) missing.push(`its supplied image (${id}) is not shown by any operation`);
     }
     // Supplied media is played or shown unchanged. A camera move in the approved shot is not carried out, so it is not silently dropped.
-    if (s.shot.camera_motion !== "static") missing.push(`the approved shot calls for camera motion (${s.shot.camera_motion.replaceAll("_", " ")}), but no renderer here has a camera-move template, so ${s.asset_ids.length ? "supplied media is shown unchanged" : "the scene would be shown static"}`);
+    const motion = s.shot.camera_motion;
+    const moved = motion !== "static" && (caps.camera_templates?.[motion] ?? []).some((c) => shown.some((o) => supported.get(o.operation_id)!.implementation_ref === c.template && (!c.param || o.parameters[c.param.name] === c.param.value)));
+    if (motion !== "static" && !moved) missing.push(`the approved shot calls for camera motion (${s.shot.camera_motion.replaceAll("_", " ")}), but no renderer here has a camera-move template, so ${s.asset_ids.length ? "supplied media is shown unchanged" : "the scene would be shown static"}`);
     for (const r of s.required_assets) {
       if (r.kind === "graphics") continue;
       const label = r.kind === "ui_screenshot" ? "a product screen" : r.kind === "logo" ? "a logo" : r.kind === "footage" ? "footage" : r.kind === "audio" ? "audio" : "an image";
