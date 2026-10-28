@@ -81,9 +81,12 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const check = checkEditorOutput(out, h, { recipes: deps.recipes });
   const reasons = [...check.issues];
   if (check.requires_reapproval) reasons.push("the result asks for a change to an approved plan, which needs the Director and a new human approval");
-  if (out.status !== "ready") reasons.push(`the Editor's status is ${out.status}, not ready`);
+  // The one conflict that does not stop a PREVIEW: approved audio cues nobody can produce (no sound recipe, no audio asset). Audio is not built, so the film is incomplete and never final,
+  // and each such scene is reported with its audio as unresolved; nothing is dropped silently. Any other conflict, and every revision request, still refuses.
+  const audioOnly = out.conflicts.length > 0 && out.revision_requests.length === 0 && out.conflicts.every((x) => x.kind === "missing_information" && /lists audio cues/.test(x.description));
+  if (out.status !== "ready" && !(audioOnly && out.status === "blocked")) reasons.push(`the Editor's status is ${out.status}, not ready`);
   if (!out.validation.ok) reasons.push("the Editor's result did not pass its own validation");
-  if (out.conflicts.length || out.revision_requests.length) reasons.push("the Editor's result has open conflicts or revision requests");
+  if ((out.conflicts.length && !audioOnly) || out.revision_requests.length) reasons.push("the Editor's result has open conflicts or revision requests");
   if (!out.operations.length) reasons.push("the Editor's result has no operations to render");
   if (reasons.length) return { ok: false, stage: "editor_output", reasons };
 
@@ -139,7 +142,8 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const soundSources = h.assets.filter((a) => a.audio_tracks > 0 || a.media_type === "audio");
   const allSoundDropped = soundSources.length > 0 && soundSources.every((a) => a.media_type === "video" && droppedSounds(a.asset_id));
   if (allSoundDropped) notes.push(`the sound of ${soundSources.map((a) => a.asset_id).join(", ")} is left out because the approved edit plan says so (source_audio drop); no audio is produced`);
-  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped);
+  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped) || audioOnly;
+  if (audioOnly) notes.push(`approved audio cues cannot be produced (${out.conflicts.length} scene(s)): the film is an incomplete preview and cannot be final`);
   let settings: RenderSettings | null = null;
   if (input.settings === undefined || input.settings === null) {
     blockers.push("no output settings were supplied: aspect ratio, size, frame rate, duration, container and codecs are required and none are assumed");

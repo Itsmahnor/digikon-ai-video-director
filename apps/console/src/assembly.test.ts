@@ -52,14 +52,15 @@ const body = async (r: Response) => (await r.json()) as any;
 const SETTINGS = { aspect_ratio: "16:9", width: 640, height: 360, fps: 30, duration_s: 12, container: "mp4", video_codec: "h264", audio_codec: null };
 async function sse(res: Response) { const t = await res.text(); if (process.env.DEBUG_SSE) console.log(t.slice(-1500)); }
 const approve = (app: App, id: string, stage: "storyboard" | "edit_plan") => app.request(`/api/sessions/${id}/approve`, json({ stage, plan_version: 1, decision: "approved", ...(stage === "edit_plan" ? { storyboard_version: 1 } : {}) }));
-async function approvedRun(app: App, f: Film) {
+async function approvedRun(app: App, f: Film, editorReady = true) {
   film = f;
   const id = (await body(await app.request("/api/sessions", { method: "POST" }))).id as string;
   await app.request(`/api/sessions/${id}/route`, json({ text: "A 12 second YouTube explainer for my online course." }));
   await sse(await app.request(`/api/sessions/${id}/direct`, json({})));
   const a1 = await approve(app, id, "storyboard"); const j1 = await a1.clone().json(); expect(a1.status).toBe(200); if (process.env.DEBUG_SSE) console.log("ESC", Object.keys(j1).join(","), JSON.stringify({ e: j1.state.escalation, g: j1.state.gate, ep: j1.state.editPlan ? "plan" : null, v: j1.state.editPlanValidation ?? j1.state.problems }));
   const ap = await approve(app, id, "edit_plan"); expect(ap.status, JSON.stringify(await ap.clone().json())).toBe(200);
-  expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status).toBe(200);
+  expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status, "the Editor runs").toBe(200);
+  void editorReady;
   return id;
 }
 
@@ -206,6 +207,23 @@ describe.skipIf(skipReal(can && !!remotionBrowser))("automatic capability learni
     expect([attemptsOf("ffmpeg", "ffmpeg__xfade-fadeblack.json"), attemptsOf("remotion", "remotion__text-fade-up.json")]).toEqual(before);
   });
 
+  it("approved audio cues with no sound recipe make the Editor 'blocked', but that no longer refuses the whole project: a labelled incomplete preview is rendered and the audio is listed as unresolved", async () => {
+    const app = buildWith(capDir);
+    const cued: Film = { scenes: PLAN.scenes.map((s, i) => ({ ...s, audio_cues: i === 0 ? ["Soft, calm music starts"] : [] })), uses: PLAN.uses };
+    const id = await approvedRun(app, cued, false);
+    const ed = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS_E2E })));
+    expect(ed.editor.status).toBe("blocked");
+    expect(ed.editor.conflicts.map((x: any) => x.kind)).toEqual(["missing_information"]);
+    const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS_E2E }));
+    const out = await body(res);
+    expect(res.status, JSON.stringify(out.errors ?? out.message ?? out.reasons)).toBe(200);
+    expect(out.kind).toBe("partial");
+    expect(out.delivery.label).toContain("INCOMPLETE PREVIEW");
+    expect(out.delivery.scenes[0].unmet.join(" ")).toContain("audio cues");
+    expect(out.delivery.states.final_delivery_ready).toBe(false);
+    expect(out.delivery.final_delivery_blockers.join(" ")).toMatch(/requires audio|incomplete/);
+    // any other open conflict still refuses
+  });
   it("a capability nothing can implement is recorded, not retried forever, and does not stop the rest: the audio operation stays unresolved and final delivery stays blocked", async () => {
     const app = buildWith(capDir);
     const withAudio: Film = { scenes: PLAN.scenes, uses: [...PLAN.uses, use(6, "S03", "loudness-normalise")] };

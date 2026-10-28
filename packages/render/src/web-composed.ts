@@ -203,12 +203,12 @@ export function planComposedScenes(job: Omit<RenderJob, "signal">, opts: Compose
     // the picture: exactly one supplied image, shown by the camera move (or, for a logo reveal, the logo)
     let image: ComposedScene["image"] = null;
     let logo: ComposedScene["logo"] = null;
-    const pick = (o: (typeof ops)[number]) => {
+    const pick = (o: (typeof ops)[number], what: string, verb: string) => {
       const id = o.asset_ids[0];
       const a = id ? assets.get(id) : undefined;
-      if (o.asset_ids.length !== 1) issues.push(`operation ${o.operation_id}: it works on exactly one supplied image`);
+      if (o.asset_ids.length !== 1) issues.push(`operation ${o.operation_id}: ${what} works on exactly one supplied image`);
       else if (!a) issues.push(`operation ${o.operation_id}: asset ${id} was not supplied to the renderer`);
-      else if (a.media_type !== "image") issues.push(`operation ${o.operation_id}: asset ${id} is ${a.media_type}; only an image can be shown here, and nothing is substituted for it`);
+      else if (a.media_type !== "image") issues.push(`operation ${o.operation_id}: asset ${id} is ${a.media_type}; only an image can be ${verb} here, and nothing is substituted for it`);
       else if (!isAbsolute(a.uri) || !IMAGE_EXT.has(extname(a.uri).toLowerCase())) issues.push(`operation ${o.operation_id}: the file for asset ${id} must be an absolute path to a .png, .jpg, .jpeg or .webp file`);
       else {
         const st = statSync(a.uri, { throwIfNoEntry: false });
@@ -222,7 +222,7 @@ export function planComposedScenes(job: Omit<RenderJob, "signal">, opts: Compose
       const t = tpl(o.operation_id)!;
       // The Editor lists the scene's assets on every operation of the scene. Only a camera move or a logo reveal shows one; an asset that none of them shows is reported as unused below.
       if (t.family !== "camera_move" && t.family !== "logo_reveal") continue;
-      const a = pick(o);
+      const a = t.family === "logo_reveal" ? pick(o, "a logo reveal", "shown") : pick(o, "a camera move", "moved");
       if (!a) continue;
       const p = params.get(o.operation_id)!;
       const concept = job.concept_asset_ids.includes(a.asset_id), ext = extname(a.uri).toLowerCase();

@@ -14,7 +14,7 @@
     "direction_map": null,
     "motion": "card"
   },
-  "status": "validated",
+  "status": "learning_in_progress",
   "inputs": {
     "operation_type": "render_graphics_scene",
     "parameters": []
@@ -35,7 +35,8 @@
     ],
     "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
   },
-  "validated": {
+  "validated": null,
+  "previous_validated": {
     "at": "2026-10-28T12:10:54.196Z",
     "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
     "xfade_names": [],
@@ -81,7 +82,6 @@
       "the light card has its own background (luma 238)"
     ]
   },
-  "previous_validated": null,
   "known_limitations": [
     "shows the approved text and an accent bar only",
     "no logo is drawn",
@@ -115,8 +115,15 @@
       "outcome": "validated",
       "input_hash": "600094e8ac6b8d56a93f09c87f3935e90d667526fdbf4750c7687acb91dd00a8",
       "reasons": []
+    },
+    {
+      "attempt_id": "a-4bf16923",
+      "at": "2026-10-28T12:31:17.131Z",
+      "outcome": "in_progress",
+      "input_hash": "72cf789aadcfc626fa63f24b0ee81a2621395cdc4bd78517fa43d5eb2192a587",
+      "reasons": []
     }
   ],
   "migrated_from": null,
-  "record_hash": "3b29628bb49c7dd9ab695d8ef6500479082dfd881eb925f4cdaf6449b90b4b98"
+  "record_hash": "66a9eca8f0c31640ad209bae521ebbd424b3072c9d6f6cf0147d70cdc8967a42"
 }

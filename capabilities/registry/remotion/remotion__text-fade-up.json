@@ -37,10 +37,10 @@
     "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
   },
   "validated": {
-    "at": "2026-10-28T12:10:00.003Z",
+    "at": "2026-10-28T12:30:23.887Z",
     "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
     "xfade_names": [],
-    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 987be5aa47380fda",
+    "browser": "msedge.exe 64-bit; remotion 4.0.539; scenes 4650704457b079b8",
     "renders": [
       {
         "variant": "fixed",
@@ -156,8 +156,15 @@
       "outcome": "validated",
       "input_hash": "6c31e073a6fea3d37c876ad500950f81ea2209ddbb170f894c832180d48cd11b",
       "reasons": []
+    },
+    {
+      "attempt_id": "a-973f4afe",
+      "at": "2026-10-28T12:30:23.887Z",
+      "outcome": "validated",
+      "input_hash": "aac0b87e8883507c866c9c004212347a7bd56ef575b1c0aaca11714db6e83cfc",
+      "reasons": []
     }
   ],
   "migrated_from": null,
-  "record_hash": "980280a4620175b3693b45ef790045bde8bbcd80ba2845c4c21435757c24709a"
+  "record_hash": "5527e729ddebbcfc37e75ef9c5a0777216ed5a380ae46d542dbdf4ac96ceb9e2"
 }
