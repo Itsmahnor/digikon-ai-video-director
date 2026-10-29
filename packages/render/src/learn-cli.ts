@@ -21,7 +21,9 @@ if (args.includes("--list")) {
   const l = loadCapabilityRegistry(root);
   for (const e of CAPABILITY_CATALOG) {
     const r = l.get(e.engine, e.recipe_id);
-    console.log(`${l.usable.some((s) => s.template === e.template) ? "validated  " : r ? r.status.padEnd(11) : "not learned "} ${e.engine}:${e.recipe_id} ${e.template} v${e.version}${r?.attempts.length ? ` (${r.attempts.length} attempt${r.attempts.length === 1 ? "" : "s"})` : ""}`);
+    const why = l.unusable.find((u) => u.record.template === e.template)?.reason;
+    const label = l.usable.some((s) => s.template === e.template) ? "validated  " : why && r?.status === "validated" ? "NOT USABLE " : r ? r.status.padEnd(11) : "not learned ";
+    console.log(`${label} ${e.engine}:${e.recipe_id} ${e.template} v${e.version}${r?.attempts.length ? ` (${r.attempts.length} attempt${r.attempts.length === 1 ? "" : "s"})` : ""}${why && r?.status === "validated" ? ` - ${why}` : ""}`);
   }
   for (const p of l.problems) console.log(`ignored: ${p}`);
   process.exit(0);

@@ -74,6 +74,22 @@ function film(candidates: readonly ComposedTemplate[], entry: CatalogEntry, ops:
   };
 }
 
+/** The approved copy a card is validated with: two lines, because that is what the Director writes for an end card. */
+const CARD_COPY = "Book your table\nOrder today";
+
+/** Rows of a frame that hold text, as [first row, last row] bands. Text is whatever differs clearly in brightness from the plain background. */
+function textBands(buf: Buffer, bgLuma: number): [number, number][] {
+  const rows: boolean[] = [];
+  for (let y = 0; y < H; y++) {
+    let hit = false;
+    for (let x = 0; x < W && !hit; x++) { const i = (y * W + x) * 3; if (Math.abs(0.299 * buf[i]! + 0.587 * buf[i + 1]! + 0.114 * buf[i + 2]! - bgLuma) > 80) hit = true; }
+    rows.push(hit);
+  }
+  const bands: [number, number][] = [];
+  rows.forEach((r, y) => { if (r) { const last = bands[bands.length - 1]; if (last && y - last[1] <= 3) last[1] = y; else bands.push([y, y]); } });
+  return bands;
+}
+
 const bright = (buf: Buffer, row: number): number[] => { const xs: number[] = []; for (let x = 0; x < W; x++) { const i = (row * W + x) * 3; if (Math.min(buf[i]!, buf[i + 1]!, buf[i + 2]!) > 200) xs.push(x); } return xs; };
 /** The centre white stripe as [left edge, right edge], looked for around the middle of a row. */
 const centreStripe = (buf: Buffer): [number, number] | null => {
@@ -231,18 +247,22 @@ async function validateLogo(entry: CatalogEntry, variant: string | null, opts: {
 
 async function validateCard(entry: CatalogEntry, variant: string | null, opts: { fontFile: string; ffmpegPath?: string }, workRoot: string): Promise<VariantOutcome> {
   const ffmpegPath = opts.ffmpegPath ?? "ffmpeg";
-  const f = film([templateOf(entry)], entry, [op("E01", "S01", "render_graphics_scene", { hold_s: 2, background: variant ?? "brand" }, { text: "Book your table", start: 0 }, [], entry.recipe_id)], { E01: entry.template }, null, opts, workRoot);
+  // representative approved copy: two lines, as the Director writes them (a line break between the headline and the call to action)
+  const f = film([templateOf(entry)], entry, [op("E01", "S01", "render_graphics_scene", { hold_s: 2, background: variant ?? "brand" }, { text: CARD_COPY, start: 0 }, [], entry.recipe_id)], { E01: entry.template }, null, opts, workRoot);
   const r = await f.render();
   if (!r.ok) return r;
   const last = await rawFrame(f.out, SECONDS * FPS - 1, W, H, ffmpegPath);
   const px = [last[0]!, last[1]!, last[2]!];
   const luma = 0.299 * px[0]! + 0.587 * px[1]! + 0.114 * px[2]!;
   const ok = variant === "light" ? luma > 200 : variant === "dark" ? luma < 30 : luma > 20 && luma < 70;
-  const ink = inkIn(last.length ? Buffer.from(last) : last, W, H, 0, H - 1);
-  void ink;
   const checks = [...r.checks];
   if (!ok) return { ok: false, reasons: [`${entry.template}: the ${variant} card has the wrong background (luma ${luma.toFixed(0)})`] };
   checks.push(`the ${variant} card has its own background (luma ${luma.toFixed(0)})`);
+  // the words themselves: drawn, legible against the card, one line per approved line, inside the frame
+  const bands = textBands(last, luma);
+  if (bands.length < 2) return { ok: false, reasons: [`${entry.template}: the approved two-line copy is drawn as ${bands.length} line(s) of text on the ${variant} card`] };
+  if (bands.some(([a, b]) => a < 4 || b > H - 5)) return { ok: false, reasons: [`${entry.template}: the text on the ${variant} card touches the edge of the frame`] };
+  checks.push(`the approved two-line copy is drawn as ${bands.length} separate lines of text on the ${variant} card, inside the frame`);
   return { ok: true, render: { variant: variant ?? "fixed", sha256: r.sha256, bytes: r.bytes, width: r.width, height: r.height, fps: r.fps, duration_s: r.duration_s }, checks };
 }
 
@@ -255,7 +275,7 @@ const packageVersion = (name: string): string => { try { return (createRequire(i
 export const implementationHash = (engine: string): string => {
   try {
     const h = createHash("sha256");
-    for (const f of ["web-composed.ts", "web-composed-verify.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
+    for (const f of ["web-composed.ts", "web-composed-verify.ts", "web-scenes.ts", "text.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
     if (engine === "hyperframes") for (const f of ["hyperframes.ts", "hyperframes-composed.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
     else {
       const dir = fileURLToPath(new URL("../remotion-project/", import.meta.url));
@@ -271,6 +291,12 @@ function impl(family: CapabilityFamily, variants: (e: CatalogEntry) => (string |
       if (e.engine === "hyperframes") return findChrome() ? null : "no Chrome is installed for HyperFrames (nothing is downloaded)";
       if (e.engine !== "remotion") return `no ${e.engine} implementation of the ${family} family exists in this build`;
       return selectRemotionBrowser().path ? null : "no compatible 64-bit browser is installed for Remotion (nothing is downloaded)";
+    },
+    stale: (r) => {
+      const recorded = /scenes ([0-9a-f]{16}|unknown)/.exec(r.validated?.browser ?? "")?.[1];
+      if (!recorded) return "its evidence does not record which scene implementation it was validated against";
+      const now = implementationHash(r.engine);
+      return recorded === now ? null : `the ${r.engine} scene implementation changed after it was validated (the evidence is for scenes ${recorded}, the code is now ${now}); it must be validated again`;
     },
     versions: async (o, entry) => {
       const ffmpeg_version = execFileSync(o.ffmpegPath ?? "ffmpeg", ["-version"], { encoding: "utf8", windowsHide: true, timeout: 30_000 }).split(/\r?\n/)[0]!.trim();

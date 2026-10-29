@@ -209,6 +209,8 @@ export interface FamilyImpl {
   unavailable(e: { engine: Engine; family: CapabilityFamily; xfade: string | null; direction_map: Record<string, string> | null; motion?: string | undefined }): string | null;
   /** Versions of what the evidence depends on, recorded with it and hashed into the input hash. */
   versions(opts: LearnOptions, entry: CatalogEntry): Promise<{ ffmpeg_version: string; browser: string | null; needs: string[] }>;
+  /** Why this validated record no longer describes the code that would run (the implementation changed after validation), or null. Evidence about other code is never trusted. */
+  stale?(r: CapabilityRecord): string | null;
   variants(entry: CatalogEntry): (string | null)[];
   validate(entry: CatalogEntry, variant: string | null, opts: LearnOptions, workRoot: string): Promise<VariantOutcome>;
 }
@@ -221,7 +223,7 @@ export function registerFamily(family: CapabilityFamily, impl: FamilyImpl): void
 export function defaultDependencyCheck(r: CapabilityRecord): string | null {
   const impl = FAMILIES.get(r.family);
   if (!impl) return `no implementation of ${r.family} is registered in this build`;
-  return impl.unavailable({ engine: r.engine, family: r.family, xfade: r.spec.xfade, direction_map: r.spec.direction_map, motion: r.spec.motion });
+  return impl.unavailable({ engine: r.engine, family: r.family, xfade: r.spec.xfade, direction_map: r.spec.direction_map, motion: r.spec.motion }) ?? impl.stale?.(r) ?? null;
 }
 function readRecord(file: string, catalog: readonly CatalogEntry[], engineDir: Engine): { record: CapabilityRecord } | { problem: string } {
   let raw: unknown;

@@ -1,6 +1,7 @@
 import { statSync } from "node:fs";
 import { basename, extname, isAbsolute, relative, resolve } from "node:path";
 import type { RenderJob } from "./adapter.js";
+import { hasInvalidControl, normaliseText } from "./text.js";
 import { WEB_ACCENTS, WEB_BACKGROUNDS, wrapLines } from "./web-scenes.js";
 
 /**
@@ -79,7 +80,6 @@ export interface ComposedPlanOptions {
 
 const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".webp"]);
 const MAX_SCENES = 60, MAX_TEXT = 120, MAX_IMAGE_BYTES = 50 * 1024 * 1024, MAX_FPS = 240;
-const CONTROL = /[\u0000-\u001f\u007f]/;
 const CHAR_W = 0.55;
 const EASINGS = ["linear", "ease_in_out"];
 export const CARD_BACKGROUNDS = { brand: WEB_BACKGROUNDS.navy, dark: "#101114", light: "#f2efe6" } as const;
@@ -252,10 +252,11 @@ export function planComposedScenes(job: Omit<RenderJob, "signal">, opts: Compose
     const wordsOp = textOps[0] ?? cards[0];
     if (wordsOp) {
       const t = tpl(wordsOp.operation_id)!, p = params.get(wordsOp.operation_id)!;
-      const words = wordsOp.caption?.text;
+      const rawWords = wordsOp.caption?.text;
+      const words = typeof rawWords === "string" ? normaliseText(rawWords) : rawWords;
       if (typeof words !== "string" || !words.trim()) issues.push(`operation ${wordsOp.operation_id}: the scene has no text to show`);
       else if (words.length > MAX_TEXT) issues.push(`operation ${wordsOp.operation_id}: text is longer than ${MAX_TEXT} characters`);
-      else if (CONTROL.test(words)) issues.push(`operation ${wordsOp.operation_id}: text contains control characters`);
+      else if (hasInvalidControl(words)) issues.push(`operation ${wordsOp.operation_id}: text contains control characters`);
       else if (t.family === "end_card") {
         const variant = (p["background"] as "brand" | "dark" | "light") ?? "brand";
         background = CARD_BACKGROUNDS[variant]; light = variant === "light";
@@ -263,7 +264,7 @@ export function planComposedScenes(job: Omit<RenderJob, "signal">, opts: Compose
         if (hold > duration_s + 1e-9) issues.push(`operation ${wordsOp.operation_id}: hold_s (${hold}s) is longer than the scene`);
         end_card = { accent: WEB_ACCENTS.amber, hold_frames: Math.round(hold * s.fps), variant };
       }
-      if (typeof words === "string" && words.trim() && !CONTROL.test(words) && words.length <= MAX_TEXT) {
+      if (typeof words === "string" && words.trim() && !hasInvalidControl(words) && words.length <= MAX_TEXT) {
         const lt = t.motion === "lower_third";
         const over = !!image || lt;
         const S = Math.min(s.height, Math.round((s.width * 9) / 16));

@@ -376,11 +376,20 @@ async function decide(decision) {
     else syncSteps(d);
     state.tab = d.status === "approved" ? "audit" : d.gate === "edit_plan" ? "edits" : "scenes";
     if (d.status === "escalated") toast("The change limit was reached, so this needs your decision.", "");
-    else if (d.status === "approved") toast("Both approvals are recorded. Nothing is rendered yet.", "ok");
+    else if (d.status === "approved") toast("Both approvals are recorded. Preparing the preview in your chosen format.", "ok");
     else if (decision === "approved") toast("Storyboard approved. The edit plan is ready for review.", "ok");
     else toast(`Changes applied. Version ${d.versions[d.gate]} is ready for review.`, "ok");
   } catch (e) { fail(e); }
   state.busy = false; renderAll();
+  if (state.run?.result?.status === "approved" && decision === "approved") autoPreview();
+}
+/** Right after the second approval: run the Editor, size the film to the approved format and render the preview. Only ever runs once both approvals are recorded; a problem is shown in the panel, never hidden. */
+async function autoPreview() {
+  const r = rstate();
+  if (r.busy || r.result) return;
+  await renderStep("editor");
+  if (r.error || !r.view || !(r.view.can_render ?? r.view.eligible)) return;
+  await renderStep("render");
 }
 
 // ---------- stage rendering ----------
@@ -547,6 +556,20 @@ const renderSettings = (r) => {
   const num = (x) => (String(x).trim() === "" ? undefined : Number(x)); // blank stays blank: nothing is filled in on the user's behalf
   return { aspect_ratio: v.needs.aspect_ratio, duration_s: v.needs.duration_s, ...v.needs.supported_output, width: num(s.width), height: num(s.height), fps: num(s.fps) };
 };
+/** Width and height in the plan's own format: the long side is `long` px. 16:9 -> 1280x720, 9:16 -> 720x1280, 1:1 -> 720x720. */
+function sizeFor(aspect, long = 1280) {
+  const m = /^(\d+):(\d+)$/.exec(String(aspect));
+  const a = m ? Number(m[1]) : 16, b = m ? Number(m[2]) : 9;
+  const even = (n) => Math.max(2, Math.round(n / 2) * 2);
+  return a >= b ? { width: even(a === b ? long * 0.5625 : long), height: even(((a === b ? long * 0.5625 : long) * b) / a) } : { width: even((long * a) / b), height: even(long) };
+}
+/** Sizes are never left to chance: when nothing was typed, the form is filled with a size in the approved format, visibly, and can be changed before rendering. */
+function applyDefaultSize(r) {
+  const s = r.settings;
+  if (!r.view || s.width || s.height) return;
+  const { width, height } = sizeFor(r.view.needs.aspect_ratio);
+  Object.assign(s, { width: String(width), height: String(height), fps: s.fps || "30" });
+}
 const problem = (d) => `${d.message ?? "Request failed."}${d.reasons?.length ? ` ${d.reasons.join("; ")}` : ""}`;
 async function refreshPlan(r) {
   const base = `/api/sessions/${state.sid}/render`;
@@ -560,7 +583,7 @@ async function renderStep(kind) {
   try {
     if (kind === "editor") {
       const { status, data } = await rawPost(`/api/sessions/${state.sid}/editor`);
-      if (status === 200) { r.editor = data; r.result = null; await refreshPlan(r); } else r.error = problem(data);
+      if (status === 200) { r.editor = data; r.result = null; await refreshPlan(r); applyDefaultSize(r); if (r.settings.width) await refreshPlan(r); } else r.error = problem(data);
     } else if (kind === "plan") await refreshPlan(r);
     else if (kind === "render") {
       const { data } = await rawPost(`/api/sessions/${state.sid}/render`, { settings: renderSettings(r) });
@@ -591,7 +614,7 @@ function renderPanel() {
   const form = v ? `<h3 style="margin:14px 0 8px">Output settings</h3>
     <p class="hint" style="margin-bottom:8px">Fixed by your approved plan: ${esc(v.needs.aspect_ratio)}, ${fmtDur(v.needs.duration_s)}. The only output the renderers write: ${esc(v.needs.supported_output.container)}, ${esc(v.needs.supported_output.video_codec)}, no audio. Size and frame rate are yours to choose; none are assumed.</p>
     <div class="row" style="align-items:flex-end">${field("width", "Width (px)", "width")}${field("height", "Height (px)", "height")}${field("fps", "Frames per second", "fps")}
-      <button class="ghost" data-action="fill-test" ${b}>Fill test values (640 x 360, 30 fps)</button></div>
+      <button class="ghost" data-action="fill-test" ${b}>Fill a small test size in the plan's format</button></div>
     <div class="row" style="margin-top:12px"><button class="ghost" data-action="render-plan" ${b}>Check the plan</button><button class="primary sm" data-action="render-go" ${b || ((v.can_render ?? v.eligible) ? "" : "disabled")}>${r.busy ? "Working..." : v.eligible ? "Render preview" : "Render preview (labelled incomplete if scenes are missing)"}</button></div>
     <p class="hint" style="margin-top:6px">${esc(v.label)}</p>` : "";
   return `<div class="card"><h3>Editor and preview render</h3>${editorHtml}${err}${ops}${form}${resultHtml(r)}</div>`;
@@ -632,7 +655,7 @@ document.addEventListener("click", async (e) => {
   if (a === "editor-run") return renderStep("editor");
   if (a === "render-plan") return renderStep("plan");
   if (a === "render-go") return renderStep("render");
-  if (a === "fill-test") { Object.assign(rstate().settings, { width: "640", height: "360", fps: "30" }); return renderStep("plan"); }
+  if (a === "fill-test") { const r = rstate(), z = sizeFor(r.view?.needs.aspect_ratio, 640); Object.assign(r.settings, { width: String(z.width), height: String(z.height), fps: "30" }); return renderStep("plan"); }
   if (a === "remove-asset") {
     try { const r = await api(`/api/sessions/${state.sid}/assets/${el.dataset.id}`, { method: "DELETE" }); state.assets = r.assets; state.route = null; state.run = null; delete state.transcripts[el.dataset.id]; delete state.analysis[el.dataset.id]; renderAll(); } catch (er) { fail(er); }
   } else if (a === "view-transcript") {

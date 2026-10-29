@@ -216,7 +216,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     section("Directing principles", formatHits(principles)),
     section("Verified platform specs", specs.length ? formatHits(specs) : "none available (spec unverified)"),
     `Create scenes that cover the whole target duration of ${project.target_duration}s exactly (the scene durations must add up to it). Give durations, not start or end times. No scene may be longer than ${maxScene}s (the longest the editing recipes support), so split long beats into several scenes. Each scene's source_in_seconds plus duration must lie inside one usable segment of its video asset. Only reference claim_ids that are supported or illustrative, never an unsupported factual claim. Scene ids are S01, S02, ... Use overlay text only for supported claims or neutral copy.`,
-    `For every scene fill required_assets, one entry per thing the scene needs. availability "supplied" (with asset_id) only for files listed above. "generate_graphics" for anything the graphics workflow can build: animated text, shapes, cursors and windows drawn as graphics, progress bars, end cards, UI-style graphics. A graphics-led shot is NOT impossible just because no footage was supplied; never write "not realisable" in visual_action. For a logo, product screen or image that was not supplied, use kind logo, ui_screenshot or image with generate_graphics only as a placeholder: set placeholder true and add an unresolved item of kind placeholder, so the user can approve it. Do not invent a platform name, a logo, product screenshots or product capabilities. "needs_external" is for live-action footage or real material that was not supplied, with a fallback that keeps the creative intent; "missing_blocking" only when nothing can stand in. A supplied picture is known only through its notes: its measured kind, and what a reviewer said it shows if it was reviewed. Never assign a picture to a need that depends on what it shows (people, a product screen, a logo) unless its review says it fits. When a need is optional ("if one matches") and every supplied picture has been reviewed and none fits, do not use needs_external: use generate_graphics with the generic alternative as a placeholder (placeholder true, with an unresolved item). If pictures have not been reviewed, say so in unresolved instead of guessing. Put spoken words exactly in voiceover and keep audio_cues for music and effects. Use unresolved for placeholders, missing inputs and open creative decisions.`,
+    `For every scene fill required_assets, one entry per thing the scene needs. availability "supplied" (with asset_id) only for files listed above. "generate_graphics" for anything the graphics workflow can build: animated text, shapes, cursors and windows drawn as graphics, progress bars, end cards, UI-style graphics. A graphics-led shot is NOT impossible just because no footage was supplied; never write "not realisable" in visual_action. For a logo, product screen or image that was not supplied, use kind logo, ui_screenshot or image with generate_graphics only as a placeholder: set placeholder true and add an unresolved item of kind placeholder, so the user can approve it. Do not invent a platform name, a logo, product screenshots or product capabilities. "needs_external" is for live-action footage or real material that was not supplied, with a fallback that keeps the creative intent, and it blocks production until the user supplies it, so use it only when the brief insists on real footage, real people or a real track; when no footage was supplied and the brief does not require it, plan the graphics treatment itself (generate_graphics, no live-action wording) instead of listing the footage as needed, and plan no music or sound unless the brief asks for it or an audio file was supplied; "missing_blocking" only when nothing can stand in. A supplied picture is known only through its notes: its measured kind, and what a reviewer said it shows if it was reviewed. Never assign a picture to a need that depends on what it shows (people, a product screen, a logo) unless its review says it fits. When a need is optional ("if one matches") and every supplied picture has been reviewed and none fits, do not use needs_external: use generate_graphics with the generic alternative as a placeholder (placeholder true, with an unresolved item). If pictures have not been reviewed, say so in unresolved instead of guessing. Put spoken words exactly in voiceover and keep audio_cues for music and effects. Use unresolved for placeholders, missing inputs and open creative decisions.`,
     ...(revision ? [revisionSection("storyboard", revision)] : []),
   ].join("\n\n");
 
@@ -240,6 +240,11 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   return { ...result, skills, references, citations: [...principles, ...specs].map((h) => h.doc.id) };
 }
 
+/** True when any scene carries voiceover or audio cues, or an audio asset was supplied. */
+export function planHasAudio(plan: ScenePlan, assets: Asset[]): boolean {
+  return plan.scenes.some((s) => s.voiceover || s.audio_cues.length > 0) || assets.some((a) => a.media_type === "audio");
+}
+
 /** Per-scene candidate recipes. Two-stage: find by intent and filters here, then show full records to the model. */
 export async function candidateRecipes(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan): Promise<Recipe[]> {
   const include_draft = deps.recipes.minStatus === "draft";
@@ -252,9 +257,28 @@ export async function candidateRecipes(deps: Deps, project: Project, assets: Ass
     add(await retrieve(deps, "shot_recipes", `${s.shot.camera_motion} ${s.shot.visual_action}`, 3, { ...base, recipe_type: "camera_move" }, 900));
     if (s.overlay) add(await retrieve(deps, "shot_recipes", `${s.overlay.text} ${s.purpose} on-screen text`, 3, { ...base, recipe_type: "animation" }, 900));
   }
-  const audio = { aspect_ratio: project.aspect_ratio, include_draft };
-  add(await retrieve(deps, "shot_recipes", "music duck loudness normalise sound effect", 4, { ...audio, recipe_type: "sound_cue" }, 900));
+  // Sound recipes only make sense when the approved storyboard has something to mix. A brief with no voiceover, music, sound
+  // effects or audio assets must never be offered (and so never receive) an audio operation such as loudness-normalise.
+  if (planHasAudio(plan, assets)) {
+    const audio = { aspect_ratio: project.aspect_ratio, include_draft };
+    add(await retrieve(deps, "shot_recipes", "music duck loudness normalise sound effect", 4, { ...audio, recipe_type: "sound_cue" }, 900));
+  }
   return [...found.values()].sort((a, b) => a.recipe_id.localeCompare(b.recipe_id));
+}
+
+/** True when the brief itself rules out audio: "no voiceover", "no music", "no sound effects", "no audio" or "silent". */
+export function briefForbidsAudio(project: Pick<Project, "brief">): boolean {
+  return /\bno\s+(?:voice-?\s?overs?|narration|music|sound(?:\s+effects?)?|sfx|audio)\b/i.test(project.brief) || /\b(?:silent|without\s+(?:any\s+)?(?:audio|sound|music|voice-?\s?overs?))\b/i.test(project.brief);
+}
+
+/**
+ * An audio operation (loudness, ducking, sound effects) is never planned for a brief that rules out audio. Skills and principles talk about loudness in general, so a model
+ * can add it to any plan; this is checked in code, and an unrequested one is sent back for repair. It is a generation-time check only: it does not re-judge a plan that was already approved.
+ */
+export function unrequestedAudioIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "recipes">, project: Pick<Project, "brief">): string[] {
+  if (!briefForbidsAudio(project)) return [];
+  void plan;
+  return edit.uses.flatMap((u) => { const r = deps.recipes.get(u.recipe_id); return r?.operation_type === "mix_audio" ? [`${u.use_id} (${u.scene_id}): audio_not_requested - ${r.recipe_id} is an audio operation, but the brief rules out audio (no voiceover, music or sound effects), so no audio operation may be planned; remove it`] : []; });
 }
 
 export function editIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "recipes">, project: Project, assets: Asset[]): string[] {
@@ -288,7 +312,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets) })))),
     section("Directing principles", formatHits(principles)),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
-    `Return uses as {use_id (U01, U02, ...), scene_id, recipe_id, params, rationale}. Omit a parameter to use its default. Each non-final scene whose transition_out is crossfade, dip_to_black or wipe needs the matching transition recipe. Respect max uses per film across the whole plan. Add loudness-normalise once on the last scene if it is a candidate. Do not request any operation that is not a candidate recipe.`,
+    `Return uses as {use_id (U01, U02, ...), scene_id, recipe_id, params, rationale}. Omit a parameter to use its default. Each non-final scene whose transition_out is crossfade, dip_to_black or wipe needs the matching transition recipe. Respect max uses per film across the whole plan. Add loudness-normalise once on the last scene only if it is listed among the candidate recipes above (it is listed only when the storyboard has voiceover, audio cues or audio assets). Never plan an audio operation for a brief that asked for no voiceover, music or sound effects. Do not request any operation that is not a candidate recipe.`,
     ...(revision ? [revisionSection("edit plan", revision)] : []),
   ].join("\n\n");
 
@@ -297,7 +321,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
       const out = await deps.llm.generate({ name: "edit_plan", system, user: base + repairNote(prev), schema: EditPlanOut });
       return EditPlan.parse({ project_id: project.project_id, version, uses: out.uses });
     },
-    check: (edit) => editIssues(edit, plan, deps, project, assets),
+    check: (edit) => [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project)],
   });
   return { ...result, skills, references, citations: [...principles.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
 }

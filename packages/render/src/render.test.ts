@@ -7,7 +7,7 @@ import { RenderRecord, handoffContentHash, type DirectorHandoff, type EditorOper
 import {
   NO_RENDERERS, ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, runEditor, type DirectorStateType, type EditorDeps,
 } from "@digikon/director";
-import { cfg, deps, knowledge, learnEdit, learnInput, learnStoryboard, learnTreatment, root } from "../../director/src/fixtures.js";
+import { cfg, deps, knowledge, learnEdit, learnInput, learnStoryboard, learnStoryboardWithAudio, learnTreatment, root } from "../../director/src/fixtures.js";
 import { AdapterRegistry, NO_ADAPTERS, executeRender, loadRenderRecord, planRender, saveRenderRecord, validateOutput, type RenderAdapter, type RenderDeps, type RenderJob } from "./index.js";
 
 vi.setConfig({ testTimeout: 60_000 }); // several tests run real ffmpeg, which is slower while the whole suite runs in parallel
@@ -52,7 +52,7 @@ async function approvedRun(id: string, edit: unknown, storyboard: ReturnType<typ
 
 let single: Awaited<ReturnType<typeof approvedRun>>, mixed: Awaited<ReturnType<typeof approvedRun>>;
 // The single-renderer plan has no crossfade, so it needs no ffmpeg recipe.
-beforeAll(async () => { single = await approvedRun("r-single", remotionOnly, learnStoryboard({ S03: plainScene("One place."), S04: plainScene("Everything together."), S05: plainScene("Pick up where you left off.") })); mixed = await approvedRun("r-mixed", learnEdit); }, 60_000);
+beforeAll(async () => { single = await approvedRun("r-single", remotionOnly, learnStoryboard({ S03: plainScene("One place."), S04: plainScene("Everything together."), S05: plainScene("Pick up where you left off.") })); mixed = await approvedRun("r-mixed", learnEdit, learnStoryboardWithAudio()); }, 60_000);
 
 const rdeps = (t: typeof single, adapters: AdapterRegistry, over: Partial<RenderDeps> = {}): RenderDeps => ({ recipes: t.recipes, adapters, outputRoot: tmp, ...over });
 const plan = (t: typeof single, adapters: AdapterRegistry, over: { settings?: unknown; purpose?: "production" | "preview"; editor_output?: unknown; handoff?: unknown } = {}, d: Partial<RenderDeps> = {}) =>

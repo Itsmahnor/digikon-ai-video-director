@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { DirectorHandoff, EditorOperation } from "@digikon/contracts";
 import { ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, runEditor, type DirectorStateType } from "@digikon/director";
-import { cfg, deps, knowledge, learnInput, learnStoryboard, learnTreatment, root } from "../../director/src/fixtures.js";
+import { cfg, deps, knowledge, learnInput, learnStoryboard, learnStoryboardWithAudio, learnTreatment, root } from "../../director/src/fixtures.js";
 import {
   AdapterRegistry, TEXT_CARD_TEMPLATE, buildFilterGraph, buildRenderEvidence, createFfmpegAdapter, executeRender, planRender, planTextCards, runRenderQa,
   saveRenderEvidence, validateOutput, type ExecutablePlan, type RenderDeps, type RenderJob,
@@ -165,7 +165,7 @@ describe.skipIf(skipReal(!!font))("what the adapter supports and refuses", () =>
 
   it("the planner refuses plans that need recipes this adapter does not implement", async () => {
     // The six-operation example plan mixes remotion and ffmpeg recipes; none but text-card has a template.
-    const mixed = deps(new ScriptedClient([ready, learnTreatment(), learnStoryboard(), { uses: [{ ...useOf(1, "S01"), recipe_id: "text-fade-up" }, { ...useOf(2, "S02"), recipe_id: "text-word-stagger" }, { ...useOf(3, "S03"), recipe_id: "crossfade" }, { ...useOf(4, "S05"), recipe_id: "crossfade" }, { ...useOf(5, "S06"), recipe_id: "end-card-cta" }, { ...useOf(6, "S06"), recipe_id: "loudness-normalise" }] }]));
+    const mixed = deps(new ScriptedClient([ready, learnTreatment(), learnStoryboardWithAudio(), { uses: [{ ...useOf(1, "S01"), recipe_id: "text-fade-up" }, { ...useOf(2, "S02"), recipe_id: "text-word-stagger" }, { ...useOf(3, "S03"), recipe_id: "crossfade" }, { ...useOf(4, "S05"), recipe_id: "crossfade" }, { ...useOf(5, "S06"), recipe_id: "end-card-cta" }, { ...useOf(6, "S06"), recipe_id: "loudness-normalise" }] }]));
     const graph = buildDirectorGraph(mixed);
     const g1 = await graph.invoke(learnInput, cfg("other"));
     const g2 = await graph.invoke(approveCurrent(g1), cfg("other"));
@@ -198,7 +198,7 @@ describe.skipIf(skipReal(!!font))("what the adapter supports and refuses", () =>
     ["a prototype-chain background", (j) => mutateOp(j, (o) => { o.parameters = { ...o.parameters, background: "toString" }; }), "background must be one of"],
     ["no text", (j) => mutateOp(j, (o) => { o.caption = null; }), "no text to show"],
     ["blank text", (j) => mutateOp(j, (o) => { o.caption = { text: "   ", start_s: 0, end_s: 1 }; }), "no text to show"],
-    ["text with a newline", (j) => mutateOp(j, (o) => { o.caption = { text: "a\nb", start_s: 0, end_s: 1 }; }), "control characters"],
+    ["text with a tab", (j) => mutateOp(j, (o) => { o.caption = { text: "a\tb", start_s: 0, end_s: 1 }; }), "control characters"],
     ["text with a NUL", (j) => mutateOp(j, (o) => { o.caption = { text: "a\u0000b", start_s: 0, end_s: 1 }; }), "control characters"],
     ["text that is too long", (j) => mutateOp(j, (o) => { o.caption = { text: "x".repeat(121), start_s: 0, end_s: 1 }; }), "longer than 120"],
     ["a gap in the timeline", (j) => mutateOp(j, (o) => { o.timing = { start_s: o.timing.start_s + 1, duration_s: o.timing.duration_s }; }, 1), "gaps and overlaps are not rendered"],

@@ -36,15 +36,15 @@
     "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
   },
   "validated": {
-    "at": "2026-10-28T12:16:04.555Z",
+    "at": "2026-10-29T08:07:06.844Z",
     "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
     "xfade_names": [],
-    "browser": "chrome.exe; hyperframes 0.8.207; scenes 93f7a19330386b0c",
+    "browser": "chrome.exe; hyperframes 0.8.207; scenes 583400f0f270c92d",
     "renders": [
       {
         "variant": "brand",
-        "sha256": "2298a6105eb920f7d8fa5042a5ddb40d8a5dfd68fdcdf905d8870eab5bea4197",
-        "bytes": 14893,
+        "sha256": "662cc11d491a39a9fe5e435ce434c90f624ad35bbd986f272a24a7451537d41c",
+        "bytes": 21631,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -52,8 +52,8 @@
       },
       {
         "variant": "dark",
-        "sha256": "24dae7ededa525dc948f7158368aa12a2da98805e31e19dc0e658c0c7ed3d54d",
-        "bytes": 12862,
+        "sha256": "ae1f2d06bf6b13a2148d0f1384985f91e3777df408c0fd196690344279daad69",
+        "bytes": 17583,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -61,8 +61,8 @@
       },
       {
         "variant": "light",
-        "sha256": "b1c2c90ad48c7ba5203be90e2169d1cd3621ea1df9d0df4d3abeb099577094ed",
-        "bytes": 17166,
+        "sha256": "848713235816482d6f3f4a0f0da7e1aa0f80ab938c87c75dcc408b14d5cf0be0",
+        "bytes": 25420,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -73,12 +73,15 @@
       "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
       "the adapter's own content check passed on the rendered scene",
       "the brand card has its own background (luma 32)",
+      "the approved two-line copy is drawn as 3 separate lines of text on the brand card, inside the frame",
       "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
       "the adapter's own content check passed on the rendered scene",
       "the dark card has its own background (luma 16)",
+      "the approved two-line copy is drawn as 3 separate lines of text on the dark card, inside the frame",
       "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
       "the adapter's own content check passed on the rendered scene",
-      "the light card has its own background (luma 237)"
+      "the light card has its own background (luma 237)",
+      "the approved two-line copy is drawn as 2 separate lines of text on the light card, inside the frame"
     ]
   },
   "previous_validated": null,
@@ -108,8 +111,29 @@
       "outcome": "validated",
       "input_hash": "272fb3ac5210f254e22a70e376d67c63284bbc9e7e2e2c0d1cab5382bb7ecfa2",
       "reasons": []
+    },
+    {
+      "attempt_id": "a-d1568dab",
+      "at": "2026-10-28T12:36:13.889Z",
+      "outcome": "validated",
+      "input_hash": "19f9ab6d6eb92a25a8f03f22ac2835fc9e921fa57afc68a4502ecb4e62729e70",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-045162d0",
+      "at": "2026-10-29T07:53:05.168Z",
+      "outcome": "validated",
+      "input_hash": "ff671c11df26c84670087ec3ecda195e4806fd9372d297bd40826b96e11a7537",
+      "reasons": []
+    },
+    {
+      "attempt_id": "a-0257677b",
+      "at": "2026-10-29T08:07:06.844Z",
+      "outcome": "validated",
+      "input_hash": "7a9317111c73b4a3507d29c5cab10e6198d134b57d46e7cdb2062ee650c4de70",
+      "reasons": []
     }
   ],
   "migrated_from": null,
-  "record_hash": "be85a590302f5d0b6c60f9637c031a377623673a600650cbd43919d51bd4769a"
+  "record_hash": "5e8e2b59a7670bda722c80f6017a14ca1b22f50d2b320b93e832f56201bcf3e1"
 }

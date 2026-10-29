@@ -58,7 +58,9 @@ beforeAll(async () => {
   if (!a.ok) throw new Error("test image rejected");
   const pic = [{ need: "A supplied picture", kind: "image", availability: "supplied", asset_id: "asset_00000001" }];
   const scenes = (audioInLast: boolean) => [
-    sc("S01", "Welcome", "dip_to_black"), sc("S02", "Your clients, in one place.", "crossfade", { motion: "slow_push_in", assets: ["asset_00000001"], required: pic }), sc("S03", "Third scene", "wipe"), sc("S04", audioInLast ? "Thanks for watching" : "Thanks", "cut"),
+    sc("S01", "Welcome", "dip_to_black"), sc("S02", "Your clients, in one place.", "crossfade", { motion: "slow_push_in", assets: ["asset_00000001"], required: pic }), sc("S03", "Third scene", "wipe"),
+    // loudness-normalise is only plannable when the storyboard asks for audio, so the audio variant carries an approved cue
+    { ...sc("S04", audioInLast ? "Thanks for watching" : "Thanks", "cut"), ...(audioInLast ? { audio_cues: ["Soft closing chime"] } : {}) },
   ];
   const uses = (audioInLast: boolean) => [
     use(1, "S01", "text-card-fade"), use(2, "S01", "dip-to-black", { duration_s: 0.6 }),

@@ -2,6 +2,7 @@ import { statSync } from "node:fs";
 import { basename, extname, isAbsolute, relative, resolve } from "node:path";
 import type { Renderer } from "@digikon/contracts";
 import type { RenderJob } from "./adapter.js";
+import { hasInvalidControl, normaliseText, wrapText } from "./text.js";
 
 /**
  * What the browser-based renderers (Remotion, HyperFrames) have in common: the checks that run before anything starts, and the
@@ -23,7 +24,6 @@ const ENUMS = { background: Object.keys(WEB_BACKGROUNDS), accent: Object.keys(WE
 const PARAMS: Record<WebKind, readonly string[]> = { text: ["fade_in_s", "background", "accent"], image: ["fade_in_s", "background", "fit", "motion"] };
 const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".webp"]);
 const MAX_SCENES = 60, MAX_TEXT = 120, MAX_IMAGE_BYTES = 50 * 1024 * 1024, MAX_FPS = 240;
-const CONTROL = /[\u0000-\u001f\u007f]/;
 const CHAR_W = 0.55; // average glyph width as a share of the font size: deliberately generous, so text is refused rather than clipped
 
 export interface WebScene {
@@ -58,18 +58,7 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
 const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 
 /** The conservative line break the planner uses to decide whether text fits. The browser wraps by itself and never needs more lines than this. */
-export function wrapLines(text: string, max: number): string[] {
-  const lines: string[] = [];
-  let line = "";
-  for (let word of text.split(/\s+/).filter(Boolean)) {
-    while (word.length > max) { if (line) { lines.push(line); line = ""; } lines.push(word.slice(0, max)); word = word.slice(max); }
-    if (!line) line = word;
-    else if (line.length + 1 + word.length <= max) line += ` ${word}`;
-    else { lines.push(line); line = word; }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
+export const wrapLines = wrapText;
 
 /**
  * Checks a job against everything the browser renderers can do, before any process starts. It refuses: other operation types and
@@ -125,10 +114,11 @@ export function planWebScenes(job: Omit<RenderJob, "signal">, opts: WebPlanOptio
     const fit = kind === "image" ? choice("fit") : "contain";
     const motion = kind === "image" ? choice("motion") : "none";
 
-    const text = op.caption?.text;
+    const rawText = op.caption?.text;
+    const text = typeof rawText === "string" ? normaliseText(rawText) : rawText;
     if (typeof text !== "string" || !text.trim()) issues.push(`${at}: the scene has no text to show`);
     else if (text.length > MAX_TEXT) issues.push(`${at}: text is longer than ${MAX_TEXT} characters`);
-    else if (CONTROL.test(text)) issues.push(`${at}: text contains control characters`);
+    else if (hasInvalidControl(text)) issues.push(`${at}: text contains control characters`);
 
     let image: WebScene["image"] = null;
     if (kind === "image") {

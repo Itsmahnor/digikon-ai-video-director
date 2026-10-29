@@ -123,7 +123,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   if (purpose === "production") blockers.push(...h.readiness.blockers.map((b) => `handoff is not production-ready: ${b}`));
   else notes.push("preview render: it may use draft recipes and is not a production video");
   const renderers = new Set(operations.map((o) => o.renderer).filter((r): r is Renderer => !!r));
-  if (renderers.size > 1) blockers.push(`the operations need more than one renderer (${[...renderers].join(", ")}); composing renderers into one video is not built yet`);
+  if (renderers.size > 1) blockers.push(`the operations need more than one renderer (${[...renderers].join(", ")}); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)`);
 
   // ----- coverage: every approved requirement must be carried out by the selected renderer, or it is a blocker naming the scene -----
   // This is the same check the console shows. It runs here so no caller can render a plan that leaves out an approved transition, camera move,

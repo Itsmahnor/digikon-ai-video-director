@@ -17,7 +17,7 @@ const Scene = ({ scene, width, height, fps, badge }) => {
   const p = interpolate(frame, [0, fadeFrames], [0, 1], { extrapolateRight: "clamp" });
   const text = {
     position: "absolute", left: `${((1 - scene.text_w) / 2) * 100}%`, width: `${scene.text_w * 100}%`, top: `${scene.text_y * 100}%`,
-    fontSize: scene.font_px, fontFamily: `${FAMILY}, sans-serif`, lineHeight: 1.2, color: "#fff", textAlign: "center", overflowWrap: "anywhere",
+    fontSize: scene.font_px, fontFamily: `${FAMILY}, sans-serif`, lineHeight: 1.2, color: "#fff", textAlign: "center", overflowWrap: "anywhere", whiteSpace: "pre-line",
   };
   if (scene.kind === "text") {
     // slides up a short way while it fades in
@@ -65,7 +65,7 @@ const Composed = ({ scene, width, height }) => {
   const tx = scene.text;
   const base = tx && {
     position: "absolute", left: `${((1 - tx.w) / 2) * 100}%`, width: `${tx.w * 100}%`, top: `${tx.y * 100}%`, fontSize: tx.font_px, fontFamily: `${FAMILY}, sans-serif`, lineHeight: 1.2,
-    color: tx.color, textAlign: "center", overflowWrap: "anywhere", ...(tx.strip ? { background: "rgba(0,0,0,.55)", padding: "18px 0" } : {}),
+    color: tx.color, textAlign: "center", overflowWrap: "anywhere", whiteSpace: "pre-line", ...(tx.strip ? { background: "rgba(0,0,0,.55)", padding: "18px 0" } : {}),
   };
   let words = null;
   if (tx && tx.mode === "stagger") {

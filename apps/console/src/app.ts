@@ -851,6 +851,8 @@ export function createApp(ctx: AppContext) {
     return new Response(Readable.toWeb(createReadStream(path)) as never, { headers: { ...headers, "Content-Length": String(size) } });
   }
 
+  // The page and its script are always revalidated, so a console update is never hidden behind a cached copy of an older app.js.
+  app.use("/*", async (c, next) => { await next(); if (!c.req.path.startsWith("/api/")) c.header("Cache-Control", "no-cache"); });
   app.use("/*", serveStatic({ root: ctx.publicDir }));
   return app;
 }

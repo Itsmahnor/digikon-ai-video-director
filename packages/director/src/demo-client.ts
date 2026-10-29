@@ -129,7 +129,7 @@ export class DemoClient implements LlmClient {
         if (s.overlay) add(s.scene_id, "text-fade-up", "Simple, readable headline entrance.");
       }
     });
-    add(scenes[scenes.length - 1]!.scene_id, "loudness-normalise", "Level the final mix once, at the end.");
+    if (user.includes("- id: loudness-normalise ")) add(scenes[scenes.length - 1]!.scene_id, "loudness-normalise", "Level the final mix once, at the end.");
     return { uses };
   }
 }

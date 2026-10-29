@@ -69,7 +69,7 @@ html,body{width:${width}px;height:${height}px;overflow:hidden;background:#000}
 .scene{position:absolute;left:0;top:0;width:${width}px;height:${height}px;overflow:hidden;font-family:${WEB_FONT_FAMILY},sans-serif}
 .pic{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden}
 .pic img{width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
-.tx{position:absolute;text-align:center;line-height:1.2;overflow-wrap:anywhere}
+.tx{position:absolute;text-align:center;line-height:1.2;overflow-wrap:anywhere;white-space:pre-line}
 .strip,.bar{position:absolute}
 @keyframes sw{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 ${css.join("\n")}

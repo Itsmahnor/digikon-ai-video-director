@@ -157,7 +157,8 @@ describe("routing and the Director run", () => {
     const { app, id } = await atGate1();
     const g2 = await decided(await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved", notes: "good" }));
     expect(g2.state).toMatchObject({ status: "awaiting_approval", gate: "edit_plan", versions: { storyboard: 1, edit_plan: 1 } });
-    expect(g2.state.editPlan.uses.length).toBeGreaterThan(2);
+    expect(g2.state.editPlan.uses.length).toBeGreaterThan(1);
+    expect(g2.state.editPlan.uses.map((u: any) => u.recipe_id)).not.toContain("loudness-normalise"); // the brief asks for no audio
     expect(g2.state.approvals).toHaveLength(1);
     expect(g2.state.renderable.ok).toBe(false);
     expect(g2.state.renderable.reasons).toEqual(["the edit plan has not been approved"]);

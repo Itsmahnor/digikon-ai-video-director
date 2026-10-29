@@ -92,6 +92,9 @@ export const learnStoryboard = (over: Record<string, Record<string, unknown>> = 
 const useOf = (n: number, scene_id: string, recipe_id: string) => ({ use_id: `U0${n}`, scene_id, recipe_id, params: {}, rationale: "fits the beat" });
 export const learnEdit = { uses: [useOf(1, "S01", "text-fade-up"), useOf(2, "S02", "text-word-stagger"), useOf(3, "S03", "crossfade"), useOf(4, "S05", "crossfade"), useOf(5, "S06", "end-card-cta"), useOf(6, "S06", "loudness-normalise")] };
 
+/** The explainer storyboard with an approved audio cue on the last scene: the only kind of storyboard that may plan loudness-normalise. */
+export const learnStoryboardWithAudio = () => learnStoryboard({ S06: { audio_cues: ["Soft closing chime"] } });
+
 /** An execution report for tests that only care about the contract: no renderer, so nothing can run. */
 export const noExecution = (operations: { operation_id: string }[]) => ({
   rendered: false, executable: false, production_executable: false,

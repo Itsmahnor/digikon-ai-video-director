@@ -251,7 +251,7 @@ describe.skipIf(skipReal(!!font))("unsupported content never becomes a misleadin
     expect(readdirSync(renderDirs(sessionDir(id), runId).records).filter((f) => f.startsWith("rn_"))).toEqual([]);
   });
 
-  it("refuses the Director's ordinary demo plan (footage, transitions, audio), listing every blocker", async () => {
+  it("refuses the Director's ordinary demo plan (footage, transitions; no audio), listing every blocker", async () => {
     const app = build({}, new DemoClient());
     const { id, runId } = await approved(app);
     const ed = await editor(app, id);
@@ -259,9 +259,9 @@ describe.skipIf(skipReal(!!font))("unsupported content never becomes a misleadin
     const res = await renderNow(app, id);
     expect(res.status).toBe(409);
     const v = await body(res);
-    expect(v).toMatchObject({ error: "not_renderable", eligible: false, plan: { state: "planning", supported: 0, unsupported: 3 } });
+    expect(v).toMatchObject({ error: "not_renderable", eligible: false, plan: { state: "planning", supported: 0, unsupported: 2 } });
     expect(v.blockers.join(" ")).toContain("no template is registered for remotion/text-fade-up");
-    expect(v.blockers.join(" ")).toContain("no template is registered for ffmpeg/loudnorm");
+    expect(v.blockers.join(" ")).not.toContain("ffmpeg/loudnorm"); // a no-audio brief gets no audio operation
     expect(outFiles(id, runId)).toEqual([]);
   });
 

@@ -61,7 +61,7 @@ export function buildComposition(scenes: readonly WebScene[], width: number, hei
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:${width}px;height:${height}px;overflow:hidden;background:#000}
 .scene{position:absolute;left:0;top:0;width:${width}px;height:${height}px;overflow:hidden;font-family:${WEB_FONT_FAMILY},sans-serif;color:#fff}
-.t{position:absolute;text-align:center;line-height:1.2;overflow-wrap:anywhere}
+.t{position:absolute;text-align:center;line-height:1.2;overflow-wrap:anywhere;white-space:pre-line}
 .bar,.frame,.badge{position:absolute}
 .frame{overflow:hidden}
 .badge{color:#fff;background:rgba(0,0,0,.65);padding:6px 8px;line-height:1.2}
