@@ -152,7 +152,7 @@ describe.skipIf(skipReal(!!font))("what the adapter supports and refuses", () =>
     expect(a.renderer).toBe("ffmpeg");
     expect(a.templates).toEqual({
       [TEXT_CARD_TEMPLATE]: ["render_graphics_scene"], "ffmpeg/title-subtitle": ["render_graphics_scene"], "ffmpeg/bullet-list": ["render_graphics_scene"],
-      "ffmpeg/stat-callout": ["render_graphics_scene"], "ffmpeg/image-scene": ["render_graphics_scene"], "ffmpeg/xfade-fade": ["concat"], "ffmpeg/clip-play": ["trim_clip"],
+      "ffmpeg/stat-callout": ["render_graphics_scene"], "ffmpeg/image-scene": ["render_graphics_scene"], "ffmpeg/xfade-fade": ["concat"], "ffmpeg/concat-cut": ["concat"], "ffmpeg/match-cut": ["concat"], "ffmpeg/clip-play": ["trim_clip"],
     });
     const r = new AdapterRegistry([a]);
     expect(r.template("ffmpeg/text-card")).toEqual({ renderer: "ffmpeg" });
@@ -160,7 +160,7 @@ describe.skipIf(skipReal(!!font))("what the adapter supports and refuses", () =>
     expect(r.supports("ffmpeg/xfade-fade", "concat")).toBe(true);
     for (const type of ["overlay_text", "concat", "mix_audio", "trim_clip"] as const) expect(r.supports("ffmpeg/text-card", type)).toBe(false);
     for (const type of ["render_graphics_scene", "mix_audio", "trim_clip", "overlay_text"] as const) expect(r.supports("ffmpeg/xfade-fade", type)).toBe(false);
-    for (const ref of ["ffmpeg/loudnorm", "ffmpeg/concat-cut", "ffmpeg/xfade-wipe", "ffmpeg/xfade-fadeblack", "ffmpeg/sidechain-duck", "ffmpeg/trim-hold", "remotion/end-card-cta"]) expect(r.template(ref), ref).toBeNull();
+    for (const ref of ["ffmpeg/loudnorm", "ffmpeg/xfade-wipe", "ffmpeg/xfade-fadeblack", "ffmpeg/sidechain-duck", "ffmpeg/trim-hold", "remotion/end-card-cta"]) expect(r.template(ref), ref).toBeNull();
   });
 
   it("the planner refuses plans that need recipes this adapter does not implement", async () => {

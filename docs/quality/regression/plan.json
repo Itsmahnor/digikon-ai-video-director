@@ -1,0 +1,1953 @@
+{
+ "run_id": "9a44fee151f6-1793346641368",
+ "renderer_available": true,
+ "editor": {
+  "status": "ready",
+  "validation": {
+   "ok": true,
+   "issues": []
+  },
+  "conflicts": [],
+  "revision_requests": [],
+  "operations": 23,
+  "rendered": false
+ },
+ "renderer": {
+  "selected": null,
+  "needed": [
+   "remotion",
+   "ffmpeg"
+  ],
+  "composition_required": true,
+  "registered": [
+   "ffmpeg",
+   "remotion",
+   "hyperframes"
+  ]
+ },
+ "plan": {
+  "state": "planning",
+  "purpose": "preview",
+  "operations": [
+   {
+    "operation_id": "E01",
+    "scene_id": "S01",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E02",
+    "scene_id": "S01",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E03",
+    "scene_id": "S02",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E04",
+    "scene_id": "S02",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E05",
+    "scene_id": "S03",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E06",
+    "scene_id": "S03",
+    "note": null,
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E07",
+    "scene_id": "S04",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E08",
+    "scene_id": "S04",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E09",
+    "scene_id": "S05",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E10",
+    "scene_id": "S05",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E11",
+    "scene_id": "S06",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E12",
+    "scene_id": "S06",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E13",
+    "scene_id": "S07",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E14",
+    "scene_id": "S07",
+    "note": null,
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E15",
+    "scene_id": "S08",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E16",
+    "scene_id": "S08",
+    "note": null,
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E17",
+    "scene_id": "S09",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E18",
+    "scene_id": "S09",
+    "note": null,
+    "recipe_id": "directional-wipe",
+    "template": "ffmpeg/xfade-wipe",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E19",
+    "scene_id": "S10",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E20",
+    "scene_id": "S10",
+    "note": null,
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E21",
+    "scene_id": "S11",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   },
+   {
+    "operation_id": "E22",
+    "scene_id": "S11",
+    "note": null,
+    "recipe_id": "dip-to-black",
+    "template": "ffmpeg/xfade-fadeblack",
+    "renderer": "ffmpeg",
+    "supported": true
+   },
+   {
+    "operation_id": "E23",
+    "scene_id": "S12",
+    "note": null,
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "supported": true
+   }
+  ],
+  "supported": 23,
+  "unsupported": 0,
+  "notes": [
+   "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E02: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E04: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E08: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E09: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E10: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E11: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E12: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E13: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E14: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E15: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E16: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E17: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E18: recipe directional-wipe is draft: no review evidence; it may be used for planning and tests, not production",
+   "E19: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E20: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E21: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E22: recipe dip-to-black is draft: no review evidence; it may be used for planning and tests, not production",
+   "E23: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "preview render: it may use draft recipes and is not a production video",
+   "S01: drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S01: the approved shot size (medium) and visual action (\"Lead messages pile up on screen while loose glowing nodes dâ€¦\") describe the content; the renderer does not change or check them",
+   "S02: drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S02: the approved shot size (close up) and visual action (\"The line YOUR TECHNOLOGY SHOULD TOO. rises in a mask revealâ€¦\") describe the content; the renderer does not change or check them",
+   "S03: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S03: the approved shot size (wide) and visual action (\"The typeset wordmark DIGIKON SOLUTIONS rises with a soft grâ€¦\") describe the content; the renderer does not change or check them",
+   "S03: the brand mark is a typeset wordmark, not a logo (\"DigiKon Solutions logo (none supplied). Typeset wordmark as \")",
+   "S04: drawn from the approved visual spec (process flow) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S04: the approved shot size (wide) and visual action (\"Five steps connect one after another along a green line: WEâ€¦\") describe the content; the renderer does not change or check them",
+   "S05: drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S05: the approved shot size (medium) and visual action (\"A drawn CRM window lists the six capabilities one by one. Tâ€¦\") describe the content; the renderer does not change or check them",
+   "S05: the product screen is a drawn concept illustration, not the real product (\"Drawn CRM and pipeline window, shown as a concept illustrati\")",
+   "S06: drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S06: the approved shot size (close up) and visual action (\"The words YOUR BUSINESS. CONNECTED. AUTOMATED. pop in one aâ€¦\") describe the content; the renderer does not change or check them",
+   "S07: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S07: the approved shot size (medium) and visual action (\"Four capability cards stack with parallax depth, and CRM & â€¦\") describe the content; the renderer does not change or check them",
+   "S08: drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S08: the approved shot size (wide) and visual action (\"A drawn browser window assembles its sections one by one. Tâ€¦\") describe the content; the renderer does not change or check them",
+   "S08: the product screen is a drawn concept illustration, not the real product (\"Drawn browser window with desktop and mobile layouts, shown \")",
+   "S09: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S09: the approved shot size (close up) and visual action (\"Three app screens layer in with strong depth: Home, Bookingâ€¦\") describe the content; the renderer does not change or check them",
+   "S09: the product screen is a drawn concept illustration, not the real product (\"Drawn app screens, shown as a concept illustration (not a re\")",
+   "S10: drawn from the approved visual spec (data chart) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S10: the approved shot size (extreme wide) and visual action (\"A line rises through connected points labelled Data, Model â€¦\") describe the content; the renderer does not change or check them",
+   "S11: drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S11: the approved shot size (close up) and visual action (\"The lines ONE TEAM. DIFFERENT EXPERTISE. ONE SHARED VISION.â€¦\") describe the content; the renderer does not change or check them",
+   "S12: drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+   "S12: the approved shot size (medium) and visual action (\"The end card holds still. The wordmark DIGIKON SOLUTIONS siâ€¦\") describe the content; the renderer does not change or check them",
+   "S12: the brand mark is a typeset wordmark, not a logo (\"DigiKon Solutions logo (none supplied). Typeset wordmark as \")"
+  ]
+ },
+ "coverage": {
+  "complete": false,
+  "scenes": [
+   {
+    "scene_id": "S01",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (medium) and visual action (\"Lead messages pile up on screen while loose glowing nodes dâ€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S02",
+    "represented": false,
+    "missing": [
+     "its match cut transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (close up) and visual action (\"The line YOUR TECHNOLOGY SHOULD TOO. rises in a mask revealâ€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S03",
+    "represented": false,
+    "missing": [
+     "its crossfade transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (wide) and visual action (\"The typeset wordmark DIGIKON SOLUTIONS rises with a soft grâ€¦\") describe the content; the renderer does not change or check them",
+     "the brand mark is a typeset wordmark, not a logo (\"DigiKon Solutions logo (none supplied). Typeset wordmark as \")"
+    ]
+   },
+   {
+    "scene_id": "S04",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (process flow) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (wide) and visual action (\"Five steps connect one after another along a green line: WEâ€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S05",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (medium) and visual action (\"A drawn CRM window lists the six capabilities one by one. Tâ€¦\") describe the content; the renderer does not change or check them",
+     "the product screen is a drawn concept illustration, not the real product (\"Drawn CRM and pipeline window, shown as a concept illustrati\")"
+    ]
+   },
+   {
+    "scene_id": "S06",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (close up) and visual action (\"The words YOUR BUSINESS. CONNECTED. AUTOMATED. pop in one aâ€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S07",
+    "represented": false,
+    "missing": [
+     "its crossfade transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (medium) and visual action (\"Four capability cards stack with parallax depth, and CRM & â€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S08",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (wide) and visual action (\"A drawn browser window assembles its sections one by one. Tâ€¦\") describe the content; the renderer does not change or check them",
+     "the product screen is a drawn concept illustration, not the real product (\"Drawn browser window with desktop and mobile layouts, shown \")"
+    ]
+   },
+   {
+    "scene_id": "S09",
+    "represented": false,
+    "missing": [
+     "its wipe transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (close up) and visual action (\"Three app screens layer in with strong depth: Home, Bookingâ€¦\") describe the content; the renderer does not change or check them",
+     "the product screen is a drawn concept illustration, not the real product (\"Drawn app screens, shown as a concept illustration (not a re\")"
+    ]
+   },
+   {
+    "scene_id": "S10",
+    "represented": false,
+    "missing": [
+     "its crossfade transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (data chart) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (extreme wide) and visual action (\"A line rises through connected points labelled Data, Model â€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S11",
+    "represented": false,
+    "missing": [
+     "its dip to black transition is not rendered (a hard cut would be used)"
+    ],
+    "labelled": [
+     "drawn from the approved visual spec (kinetic type) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (close up) and visual action (\"The lines ONE TEAM. DIFFERENT EXPERTISE. ONE SHARED VISION.â€¦\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   {
+    "scene_id": "S12",
+    "represented": true,
+    "missing": [],
+    "labelled": [
+     "drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "the approved shot size (medium) and visual action (\"The end card holds still. The wordmark DIGIKON SOLUTIONS siâ€¦\") describe the content; the renderer does not change or check them",
+     "the brand mark is a typeset wordmark, not a logo (\"DigiKon Solutions logo (none supplied). Typeset wordmark as \")"
+    ]
+   }
+  ]
+ },
+ "capability": [
+  {
+   "operation_id": "E01",
+   "scene_id": "S01",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E02",
+   "scene_id": "S01",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E03",
+   "scene_id": "S02",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E04",
+   "scene_id": "S02",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E05",
+   "scene_id": "S03",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E06",
+   "scene_id": "S03",
+   "recipe_id": "crossfade",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/xfade-fade",
+   "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E07",
+   "scene_id": "S04",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E08",
+   "scene_id": "S04",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E09",
+   "scene_id": "S05",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E10",
+   "scene_id": "S05",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E11",
+   "scene_id": "S06",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E12",
+   "scene_id": "S06",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E13",
+   "scene_id": "S07",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E14",
+   "scene_id": "S07",
+   "recipe_id": "crossfade",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/xfade-fade",
+   "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E15",
+   "scene_id": "S08",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E16",
+   "scene_id": "S08",
+   "recipe_id": "hard-cut",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/concat-cut",
+   "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/concat-cut is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E17",
+   "scene_id": "S09",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E18",
+   "scene_id": "S09",
+   "recipe_id": "directional-wipe",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/xfade-wipe",
+   "reason": "ffmpeg/xfade-wipe was validated by real render on 2026-10-28 (ffmpeg:directional-wipe v1.0.0)",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/xfade-wipe was validated by real render on 2026-10-28 (ffmpeg:directional-wipe v1.0.0)"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for directional-wipe and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe directional-wipe does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E19",
+   "scene_id": "S10",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E20",
+   "scene_id": "S10",
+   "recipe_id": "crossfade",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/xfade-fade",
+   "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E21",
+   "scene_id": "S11",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E22",
+   "scene_id": "S11",
+   "recipe_id": "dip-to-black",
+   "status": "validated_available",
+   "selected_engine": "ffmpeg",
+   "selected_template": "ffmpeg/xfade-fadeblack",
+   "reason": "ffmpeg/xfade-fadeblack was validated by real render on 2026-10-28 (ffmpeg:dip-to-black v1.0.0)",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "usable",
+     "reason": "ffmpeg/xfade-fadeblack was validated by real render on 2026-10-28 (ffmpeg:dip-to-black v1.0.0)"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "not_implemented",
+     "reason": "remotion has no validated template for dip-to-black and no engine family in this project can implement it"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe dip-to-black does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  },
+  {
+   "operation_id": "E23",
+   "scene_id": "S12",
+   "recipe_id": "scene-composition",
+   "status": "validated_available",
+   "selected_engine": "remotion",
+   "selected_template": "remotion/scene-composition",
+   "reason": "remotion/scene-composition is a built-in template of remotion",
+   "engines": [
+    {
+     "engine": "ffmpeg",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+    },
+    {
+     "engine": "remotion",
+     "verdict": "usable",
+     "reason": "remotion/scene-composition is a built-in template of remotion"
+    },
+    {
+     "engine": "hyperframes",
+     "verdict": "not_permitted",
+     "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+    }
+   ]
+  }
+ ],
+ "eligible": false,
+ "assembly": {
+  "ok": true,
+  "complete": false,
+  "scenes": [
+   {
+    "scene_id": "S01",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S02",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": [
+     "its match cut transition is not rendered (a hard cut would be used)"
+    ]
+   },
+   {
+    "scene_id": "S03",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S04",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S05",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S06",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S07",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S08",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S09",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S10",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S11",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   },
+   {
+    "scene_id": "S12",
+    "engine": "remotion",
+    "renderable": true,
+    "reason": null,
+    "unmet": []
+   }
+  ],
+  "transitions": [
+   {
+    "after_scene": "S01",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S02",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S03",
+    "template": "ffmpeg/xfade-fade",
+    "applied": true,
+    "reason": "applied by the FFmpeg assembler"
+   },
+   {
+    "after_scene": "S04",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S05",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S06",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S07",
+    "template": "ffmpeg/xfade-fade",
+    "applied": true,
+    "reason": "applied by the FFmpeg assembler"
+   },
+   {
+    "after_scene": "S08",
+    "template": "ffmpeg/concat-cut",
+    "applied": true,
+    "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+   },
+   {
+    "after_scene": "S09",
+    "template": "ffmpeg/xfade-wipe",
+    "applied": true,
+    "reason": "applied by the FFmpeg assembler"
+   },
+   {
+    "after_scene": "S10",
+    "template": "ffmpeg/xfade-fade",
+    "applied": true,
+    "reason": "applied by the FFmpeg assembler"
+   },
+   {
+    "after_scene": "S11",
+    "template": "ffmpeg/xfade-fadeblack",
+    "applied": true,
+    "reason": "applied by the FFmpeg assembler"
+   }
+  ],
+  "omitted": [],
+  "label": "Only an INCOMPLETE preview can be made: scenes or operations that nothing can render are listed and shown as labelled placeholders."
+ },
+ "can_render": true,
+ "blockers": [
+  "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+  "S02: its match cut transition is not rendered (a hard cut would be used)",
+  "S03: its crossfade transition is not rendered (a hard cut would be used)",
+  "S07: its crossfade transition is not rendered (a hard cut would be used)",
+  "S09: its wipe transition is not rendered (a hard cut would be used)",
+  "S10: its crossfade transition is not rendered (a hard cut would be used)",
+  "S11: its dip to black transition is not rendered (a hard cut would be used)",
+  "operation E02: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S01: it has 2 composition operations; one is supported per scene",
+  "operation E04: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S02: it has 2 composition operations; one is supported per scene",
+  "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+  "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+  "scene S03: it has 2 composition operations; one is supported per scene",
+  "operation E08: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S04: it has 2 composition operations; one is supported per scene",
+  "operation E10: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S05: it has 2 composition operations; one is supported per scene",
+  "operation E12: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S06: it has 2 composition operations; one is supported per scene",
+  "operation E14: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+  "operation E14: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+  "scene S07: it has 2 composition operations; one is supported per scene",
+  "operation E16: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+  "scene S08: it has 2 composition operations; one is supported per scene",
+  "operation E18: ffmpeg/xfade-wipe cannot be combined with remotion/scene-composition in one scene",
+  "operation E18: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+  "scene S09: it has 2 composition operations; one is supported per scene",
+  "operation E20: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+  "operation E20: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+  "scene S10: it has 2 composition operations; one is supported per scene",
+  "operation E22: ffmpeg/xfade-fadeblack cannot be combined with remotion/scene-composition in one scene",
+  "operation E22: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+  "scene S11: it has 2 composition operations; one is supported per scene"
+ ],
+ "production": {
+  "ready": false,
+  "blockers": [
+   "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E02: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E04: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E08: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E09: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E10: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E11: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E12: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E13: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E14: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E15: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E16: recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production",
+   "E17: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E18: recipe directional-wipe is draft: no review evidence; it may be used for planning and tests, not production",
+   "E19: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E20: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+   "E21: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "E22: recipe dip-to-black is draft: no review evidence; it may be used for planning and tests, not production",
+   "E23: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+   "handoff is not production-ready: recipe crossfade is draft: no review evidence",
+   "handoff is not production-ready: recipe dip-to-black is draft: no review evidence",
+   "handoff is not production-ready: recipe directional-wipe is draft: no review evidence",
+   "handoff is not production-ready: recipe hard-cut is draft: no review evidence",
+   "handoff is not production-ready: recipe scene-composition is draft: no review evidence",
+   "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+   "S02: its match cut transition is not rendered (a hard cut would be used)",
+   "S03: its crossfade transition is not rendered (a hard cut would be used)",
+   "S07: its crossfade transition is not rendered (a hard cut would be used)",
+   "S09: its wipe transition is not rendered (a hard cut would be used)",
+   "S10: its crossfade transition is not rendered (a hard cut would be used)",
+   "S11: its dip to black transition is not rendered (a hard cut would be used)",
+   "operation E02: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S01: it has 2 composition operations; one is supported per scene",
+   "operation E04: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S02: it has 2 composition operations; one is supported per scene",
+   "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S03: it has 2 composition operations; one is supported per scene",
+   "operation E08: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S04: it has 2 composition operations; one is supported per scene",
+   "operation E10: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S05: it has 2 composition operations; one is supported per scene",
+   "operation E12: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S06: it has 2 composition operations; one is supported per scene",
+   "operation E14: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E14: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S07: it has 2 composition operations; one is supported per scene",
+   "operation E16: ffmpeg/concat-cut cannot be combined with remotion/scene-composition in one scene",
+   "scene S08: it has 2 composition operations; one is supported per scene",
+   "operation E18: ffmpeg/xfade-wipe cannot be combined with remotion/scene-composition in one scene",
+   "operation E18: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S09: it has 2 composition operations; one is supported per scene",
+   "operation E20: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E20: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S10: it has 2 composition operations; one is supported per scene",
+   "operation E22: ffmpeg/xfade-fadeblack cannot be combined with remotion/scene-composition in one scene",
+   "operation E22: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S11: it has 2 composition operations; one is supported per scene"
+  ],
+  "operations": [
+   {
+    "operation_id": "E01",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E02",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E03",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E04",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E05",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E06",
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E07",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E08",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E09",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E10",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E11",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E12",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E13",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E14",
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E15",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E16",
+    "recipe_id": "hard-cut",
+    "template": "ffmpeg/concat-cut",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe hard-cut is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E17",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E18",
+    "recipe_id": "directional-wipe",
+    "template": "ffmpeg/xfade-wipe",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe directional-wipe is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E19",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E20",
+    "recipe_id": "crossfade",
+    "template": "ffmpeg/xfade-fade",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E21",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E22",
+    "recipe_id": "dip-to-black",
+    "template": "ffmpeg/xfade-fadeblack",
+    "renderer": "ffmpeg",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe dip-to-black is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   },
+   {
+    "operation_id": "E23",
+    "recipe_id": "scene-composition",
+    "template": "remotion/scene-composition",
+    "renderer": "remotion",
+    "reviewed": false,
+    "missing": null,
+    "open": [
+     "recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production"
+    ]
+   }
+  ]
+ },
+ "readiness": [
+  {
+   "operation_id": "E01",
+   "scene_id": "S01",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E02",
+   "scene_id": "S01",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E03",
+   "scene_id": "S02",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E04",
+   "scene_id": "S02",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E05",
+   "scene_id": "S03",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E06",
+   "scene_id": "S03",
+   "recipe_id": "crossfade",
+   "template": "ffmpeg/xfade-fade",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E07",
+   "scene_id": "S04",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E08",
+   "scene_id": "S04",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E09",
+   "scene_id": "S05",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E10",
+   "scene_id": "S05",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E11",
+   "scene_id": "S06",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E12",
+   "scene_id": "S06",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E13",
+   "scene_id": "S07",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E14",
+   "scene_id": "S07",
+   "recipe_id": "crossfade",
+   "template": "ffmpeg/xfade-fade",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E15",
+   "scene_id": "S08",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E16",
+   "scene_id": "S08",
+   "recipe_id": "hard-cut",
+   "template": "ffmpeg/concat-cut",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E17",
+   "scene_id": "S09",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E18",
+   "scene_id": "S09",
+   "recipe_id": "directional-wipe",
+   "template": "ffmpeg/xfade-wipe",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "learned",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E19",
+   "scene_id": "S10",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E20",
+   "scene_id": "S10",
+   "recipe_id": "crossfade",
+   "template": "ffmpeg/xfade-fade",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": false,
+   "validation_basis": "built_in",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E21",
+   "scene_id": "S11",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E22",
+   "scene_id": "S11",
+   "recipe_id": "dip-to-black",
+   "template": "ffmpeg/xfade-fadeblack",
+   "operation_type": "concat",
+   "engine": "ffmpeg",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "learned",
+   "compatible_with_scene": null,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  },
+  {
+   "operation_id": "E23",
+   "scene_id": "S12",
+   "recipe_id": "scene-composition",
+   "template": "remotion/scene-composition",
+   "operation_type": "render_graphics_scene",
+   "engine": "remotion",
+   "registry_status": "validated_available",
+   "registered": true,
+   "validated_in_isolation": true,
+   "validation_basis": "built_in",
+   "compatible_with_scene": true,
+   "rendered_with_scene_inputs": null,
+   "validated_in_final": null,
+   "missing": null
+  }
+ ],
+ "layout_constraints": {
+  "frame": "1280x720",
+  "min_text_px": 24,
+  "min_detail_px": 16,
+  "content_area_px": {
+   "w": 922,
+   "h": 620
+  },
+  "content_area_with_headline_px": {
+   "w": 1180,
+   "h": 432
+  },
+  "guidance": [
+   "Text is never drawn below 24px (16px for small print) in this frame; the renderer wraps long wording, switches between column, row and grid, and pages steps within the approved duration, but it never cuts words.",
+   "Keep step and row labels under about 40 characters; wording is kept exactly as approved.",
+   "A process flow of up to about 8 short steps fits one page; more steps are shown in pages and need at least 2 seconds per page."
+  ]
+ },
+ "needs": {
+  "aspect_ratio": "16:9",
+  "duration_s": 60,
+  "supported_output": {
+   "container": "mp4",
+   "video_codec": "h264",
+   "audio_codec": null
+  },
+  "you_provide": [
+   "width",
+   "height",
+   "fps"
+  ]
+ },
+ "label": "No preview can be made yet. Nothing here is rendered, and no partial video is offered."
+}

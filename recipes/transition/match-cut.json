@@ -1,0 +1,50 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "match-cut",
+    "type":  "transition",
+    "operation_type":  "concat",
+    "title":  "Match cut",
+    "purpose":  "A cut between two scenes that share a shape, a position or a movement, so the eye carries on from one to the next. It is only a match cut when the last picture of one scene and the first picture of the next really match; the assembler measures that and reports it as not applied when they do not.",
+    "intents":  [
+                    "match cut",
+                    "graphic match",
+                    "continuity cut",
+                    "shape match",
+                    "cut on action"
+                ],
+    "parameters":  [
+
+                   ],
+    "constraints":  {
+                        "min_duration_s":  0.5,
+                        "max_duration_s":  60,
+                        "max_uses_per_film":  3,
+                        "energy":  "medium"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "remotion",
+                                            "ffmpeg"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "video",
+                                              "image",
+                                              "none"
+                                          ]
+                      },
+    "implementation_ref":  "ffmpeg/match-cut"
+}

@@ -131,6 +131,11 @@ export const LayeredCards = z.object({
   block: z.literal("layered_cards"),
   cards: z.array(z.object({ title: Txt(24), detail: Txt(36).nullable().default(null) })).min(2).max(4),
   depth: z.enum(["subtle", "strong"]).default("subtle"),
+  /**
+   * A match cut into this scene: the scene opens with one word of the previous kinetic_type scene held exactly as that scene ends (same place, size,
+   * colour, same background), then carries it into the title of one of its cards. Absent when the scene opens normally.
+   */
+  held: z.object({ card: z.number().int().min(0).max(3), from_scene: z.string().regex(/^S\d{2,3}$/), word_index: z.number().int().min(0).max(30) }).optional(),
   ...Common,
 });
 export const EndCard = z.object({
@@ -189,6 +194,17 @@ export function creativeIssues(
     if (prev && prev.block === s.visual.block) issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
     if (s.visual.block === "kinetic_type" && !s.overlay) issues.push({ scene_id: s.scene_id, code: "kinetic_without_text", message: "kinetic_type animates the scene's overlay text, so the scene needs overlay text" });
     if (s.visual.block === "ui_demo" && s.visual.cursor_target !== null && s.visual.cursor_target >= s.visual.rows.length) issues.push({ scene_id: s.scene_id, code: "cursor_out_of_range", message: `cursor_target ${s.visual.cursor_target} is not a row (there are ${s.visual.rows.length})` });
+    if (s.visual.block === "layered_cards" && s.visual.held) {
+      const h = s.visual.held, src = scenes[i - 1];
+      if (h.card >= s.visual.cards.length) issues.push({ scene_id: s.scene_id, code: "held_card_out_of_range", message: `held.card ${h.card} is not a card (there are ${s.visual.cards.length})` });
+      else if (!src || src.scene_id !== h.from_scene || src.visual?.block !== "kinetic_type" || !src.overlay) issues.push({ scene_id: s.scene_id, code: "held_source", message: `held.from_scene must be the scene straight before, and a kinetic_type scene with overlay text` });
+      else {
+        const word = src.overlay.text.split(/\s+/).filter(Boolean)[h.word_index]?.replace(/[^\p{L}\p{N}]+/gu, "").toLowerCase() ?? "";
+        const title = s.visual.cards[h.card]!.title.replace(/[^\p{L}\p{N}]+/gu, "").toLowerCase();
+        if (!word || word !== title) issues.push({ scene_id: s.scene_id, code: "held_word_mismatch", message: `word ${h.word_index} of ${h.from_scene}'s text is "${word}", but card ${h.card}'s title is "${title}"; a match cut carries the same word` });
+        if (src.visual.emphasis_word !== h.word_index) issues.push({ scene_id: s.scene_id, code: "held_not_emphasised", message: `${h.from_scene} draws word ${h.word_index} in the normal colour; the held word must be the emphasised one so the colour matches` });
+      }
+    }
     if (s.visual.block === "data_chart" && s.visual.highlight_index !== null && s.visual.highlight_index >= s.visual.points.length) issues.push({ scene_id: s.scene_id, code: "highlight_out_of_range", message: `highlight_index ${s.visual.highlight_index} is not a point` });
     // figures, money and percentages in drawn text read as claims; they need a claim behind the scene
     const shown = visualTexts(s.visual);

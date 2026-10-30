@@ -2,6 +2,8 @@ import { basename, isAbsolute, relative, resolve } from "node:path";
 import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, contrastRatio, type Palette } from "@digikon/contracts";
 import type { RenderJob } from "./adapter.js";
 import { hasInvalidControl, normaliseText, wrapText } from "./text.js";
+import { ESTIMATE_METER, type TextMeter } from "./font-metrics.js";
+import { describeAttempts, detectOverflow, fitText, fits, layoutAreas, layoutSteps, layoutWindow, stepRect, wrapMeasured, type Areas, type StepsLayout, type WindowLayout } from "./layout.js";
 
 /**
  * The scene-composition template: one scene drawn from a structured visual spec (message thread, product UI demo, process flow, data chart,
@@ -46,10 +48,18 @@ export interface CompositionScene {
   lines: Record<string, string[]>;
   visual: SceneVisual;
   badge: string | null;
+  /** The adaptive layout chosen for the blocks that have one (steps, window): the geometry the drawing uses, measured with the font. */
+  /** A match cut into this scene: the previous scene's emphasised word, held as that scene ends, then carried into a card title. */
+  held: null | { text: string; from_scene: string; card: number; font_px: number; x: number; y: number; bar: Box; hold_frames: number; move_frames: number };
+  layout: null | { kind: "steps"; strategy: StepsLayout["strategy"]; steps: StepsLayout } | { kind: "window"; window: WindowLayout };
 }
 export type CompositionPlan = { ok: true; scenes: CompositionScene[]; total_frames: number } | { ok: false; issues: string[] };
 
-export interface CompositionPlanOptions { outputRoot: string }
+export interface CompositionPlanOptions {
+  outputRoot: string;
+  /** Measures text with the real font. Without it widths are estimated, generously. */
+  meter?: TextMeter;
+}
 
 const wrapCount = (text: string, widthPx: number, fontPx: number, upper: boolean) => wrapText(text, Math.max(3, Math.floor(widthPx / (fontPx * CHAR_W * (upper ? 1.12 : 1)))));
 
@@ -60,13 +70,8 @@ export function fitFont(texts: readonly string[], widthPx: number, maxPx: number
 }
 
 /** Layout areas: a headline column beside the picture in landscape, above it in portrait or square. */
-export function areas(width: number, height: number, hasHeadline: boolean): { headline: Box | null; content: Box; portrait: boolean; wide: boolean } {
-  const portrait = height >= width, wide = width / height >= 1.5;
-  const m = Math.round(Math.min(width, height) * 0.07);
-  if (!hasHeadline) return { headline: null, content: { x: wide ? Math.round(width * 0.14) : m, y: m, w: wide ? Math.round(width * 0.72) : width - 2 * m, h: height - 2 * m }, portrait, wide };
-  if (wide) return { headline: { x: m, y: m, w: Math.round(width * 0.34), h: height - 2 * m }, content: { x: Math.round(width * 0.44), y: m, w: Math.round(width * 0.5), h: height - 2 * m }, portrait, wide };
-  const hh = Math.round(height * (portrait ? 0.2 : 0.24));
-  return { headline: { x: m, y: m, w: width - 2 * m, h: hh }, content: { x: m, y: m + hh + Math.round(m * 0.6), w: width - 2 * m, h: height - 2 * m - hh - Math.round(m * 0.6) }, portrait, wide };
+export function areas(width: number, height: number, hasHeadline: boolean, variant: "side" | "top" = "side"): Areas {
+  return layoutAreas(width, height, hasHeadline, variant);
 }
 
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -128,77 +133,137 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
     const scaleMult = SCALE[direction?.typography.scale ?? "standard"];
     const portrait = s.height >= s.width;
     const short = Math.min(s.width, s.height);
-    const ar = areas(s.width, s.height, !!headlineText && visual.block !== "kinetic_type" && visual.block !== "end_card");
+    const style = { upper, bold };
+    const meter = opts.meter ?? ESTIMATE_METER;
+    /** The largest size from `maxPx` to `minPx` at which every text wraps within the width, the line count and the height. Null when none does. */
+    const fitPx = (texts: readonly string[], widthPx: number, maxPx: number, minPxFloor: number, maxLines: number, maxH = Infinity): number | null => {
+      const r = fitText({ texts, meter, style, maxW: widthPx, maxPx, minPx: minPxFloor, maxLines, maxH, lineHeight: 1.15, breakWords: true });
+      return fits(r) ? r.px : null;
+    };
+    const wrapAt = (text: string, widthPx: number, px: number): string[] => wrapMeasured(text, meter, px, widthPx, style, true).lines;
+    const hasHeadlineArea = !!headlineText && visual.block !== "kinetic_type" && visual.block !== "end_card";
+    const ar = areas(s.width, s.height, hasHeadlineArea);
     const lines: Record<string, string[]> = {};
     let headline: CompositionScene["headline"] = null;
+    let layout: CompositionScene["layout"] = null;
+    let held: CompositionScene["held"] = null;
     const minPx = Math.round(short * 0.034);
     const sizes = { body: Math.round(short * 0.042 * scaleMult), small: Math.round(short * 0.026), big: Math.round(short * 0.1 * scaleMult) };
     let box = ar.content;
 
-    if (headlineText && ar.headline) {
-      const hb = ar.headline;
-      const maxLines = ar.wide ? 6 : 3;
-      const f = fitFont([headlineText], hb.w, Math.round(short * (ar.wide ? 0.085 : 0.075) * scaleMult), minPx, maxLines, upper, hb.h * 0.85);
-      if (f === null) issues.push(`${at}: the headline "${headlineText.length > 30 ? `${headlineText.slice(0, 29)}â€¦` : headlineText}" does not fit its area at a legible size`);
-      else {
-        const ls = wrapCount(headlineText, hb.w, f, upper);
-        if (ls.length * f * 1.15 > hb.h) issues.push(`${at}: the headline needs ${Math.round(ls.length * f * 1.15)}px of height and the area has ${hb.h}px`);
-        headline = { text: headlineText, lines: ls, font_px: f, box: hb, align: "left" };
-      }
+    /** Fits the headline into an area's headline box: the headline, or why it does not fit. */
+    const placeHeadline = (a: Areas): { headline: CompositionScene["headline"]; issue: string | null } => {
+      if (!headlineText || !a.headline) return { headline: null, issue: null };
+      const hb = a.headline;
+      const f = fitPx([headlineText], hb.w, Math.round(short * (a.wide && a.variant === "side" ? 0.085 : 0.075) * scaleMult), minPx, a.wide && a.variant === "side" ? 6 : 3, hb.h * 0.85);
+      if (f === null) return { headline: null, issue: `${at}: the headline "${headlineText.length > 30 ? `${headlineText.slice(0, 29)}...` : headlineText}" does not fit its area at a legible size` };
+      const ls = wrapAt(headlineText, hb.w, f);
+      if (ls.length * f * 1.15 > hb.h) return { headline: null, issue: `${at}: the headline needs ${Math.round(ls.length * f * 1.15)}px of height and the area has ${hb.h}px` };
+      return { headline: { text: headlineText, lines: ls, font_px: f, box: hb, align: "left" }, issue: null };
+    };
+    /** A headline band above the picture is only as tall as its text needs; the rest of the height goes to the picture. */
+    const tighten = (a: Areas, h: CompositionScene["headline"]): Areas => {
+      if (!h || a.variant !== "top" || !a.headline) return a;
+      const used = Math.min(a.headline.h, Math.ceil(h.font_px * 0.6 + h.lines.length * h.font_px * 1.15));
+      const gap = Math.round(Math.min(s.width, s.height) * 0.07 * 0.6), top = a.headline.y;
+      return { ...a, headline: { ...a.headline, h: used }, content: { x: a.content.x, y: top + used + gap, w: a.content.w, h: s.height - Math.round(Math.min(s.width, s.height) * 0.07) - (top + used + gap) } };
+    };
+    const adaptive = visual.block === "ui_demo" || visual.block === "process_flow" || visual.block === "message_thread";
+    // a wide frame may put the headline in a band above the picture when that is what lets the picture be legible
+    const variants: ("side" | "top")[] = ar.wide && hasHeadlineArea ? ["side", "top"] : ["side"];
+    if (!adaptive) {
+      const h = placeHeadline(ar);
+      if (h.issue) issues.push(h.issue); else headline = h.headline;
     }
-
     switch (visual.block) {
       case "message_thread": {
-        const texts = visual.messages.map((m) => m.text);
-        const f = fitFont(texts, box.w * 0.72, Math.round(short * 0.054 * scaleMult), minPx, 2, upper);
-        if (f === null) { issues.push(`${at}: a message does not fit a bubble at a legible size`); break; }
-        sizes.body = f;
-        visual.messages.forEach((m, i) => { lines[`m${i}`] = wrapCount(m.text, box.w * 0.72, f, upper); });
-        const need = visual.messages.reduce((a, _m, i) => a + lines[`m${i}`]!.length * f * 1.25 + f * 1.1, 0) * (visual.mode === "pile_up" ? 0.7 : 1);
-        if (need > box.h) issues.push(`${at}: the messages need ${Math.round(need)}px of height and the area has ${box.h}px`);
+        // the largest legible type at which the whole thread fits: bubbles may take up to three lines and a wider share of the area, and a wide frame may
+        // put the headline in a band above the thread; the thread is never drawn smaller than the legibility floor and never clipped
+        const mult = visual.mode === "pile_up" ? 0.7 : 1;
+        type Cand = { a: Areas; h: CompositionScene["headline"]; f: number; lines: Record<string, string[]>; tight: boolean };
+        const cands: Cand[] = [], notes: string[] = [];
+        for (const v of variants) {
+          const a0 = areas(s.width, s.height, hasHeadlineArea, v), h = placeHeadline(a0), a = tighten(a0, h.headline);
+          if (h.issue) { notes.push(`${v} area: ${h.issue.replace(`${at}: `, "")}`); continue; }
+          let last = "";
+          search: for (let f = Math.round(short * 0.054 * scaleMult); f >= minPx; f--) {
+            for (const [share, tight] of [[0.72, false], [0.78, false], [0.78, true]] as const) {
+              const ls: Record<string, string[]> = {};
+              visual.messages.forEach((m, i) => { ls[`m${i}`] = wrapAt(m.text, a.content.w * share, f); });
+              const need = visual.messages.reduce((acc, _m, i) => acc + ls[`m${i}`]!.length * f * (tight ? 1.15 : 1.25) + f * (tight ? 0.8 : 1.1), 0) * mult;
+              if (visual.messages.some((_m, i) => ls[`m${i}`]!.length > 3)) { last = `a message needs more than 3 lines at ${f}px`; continue; }
+              if (need <= a.content.h * 0.9) { cands.push({ a, h: a.headline && h.headline ? { ...h.headline, box: a.headline } : h.headline, f, lines: ls, tight }); break search; }
+              last = `the ${visual.messages.length} messages need ${Math.round(need)}px of height at ${f}px and the area has ${Math.round(a.content.h * 0.9)}px usable`;
+            }
+          }
+          if (!cands.some((c) => c.a === a)) notes.push(`${v} area (${a.content.w}x${a.content.h}px): ${last}`);
+        }
+        const best = cands.sort((x, y) => y.f - x.f)[0];
+        if (!best) { issues.push(`${at}: the thread cannot be laid out at a legible size (minimum ${minPx}px) in a ${s.width}x${s.height} frame: ${notes.join(" | ")}`); break; }
+        box = best.a.content; headline = best.h; sizes.body = best.f;
+        Object.assign(lines, best.lines);
+        lines["tight"] = [best.tight ? "1" : "0"];
+        // measured width of each bubble's widest line, so the drawing does not have to guess it
+        visual.messages.forEach((_m, i) => { lines[`w${i}`] = [String(Math.max(...best.lines[`m${i}`]!.map((l) => meter.width(l, best.f, style))))]; });
         break;
       }
       case "ui_demo": {
-        const labelW = box.w * (visual.sidebar.length ? 0.4 : 0.55);
-        const f = fitFont([...visual.rows.map((r) => r.label), visual.window_title, ...(visual.confirm_text ? [visual.confirm_text] : [])], labelW, sizes.body, minPx, 1, upper);
-        if (f === null) { issues.push(`${at}: a row label or the window title does not fit on one line at a legible size`); break; }
-        sizes.body = f;
-        const side = fitFont(visual.sidebar, box.w * 0.2, sizes.small, Math.round(short * 0.022), 1, upper);
-        if (visual.sidebar.length && side === null) { issues.push(`${at}: a sidebar item does not fit at a legible size`); break; }
-        if (side) sizes.small = side;
-        const need = f * 2 + visual.rows.length * f * 2.1 + f * 3;
-        if (need > box.h) issues.push(`${at}: the window needs ${Math.round(need)}px of height and the area has ${box.h}px`);
+        type Cand = { a: Areas; h: CompositionScene["headline"]; w: WindowLayout };
+        const cands: Cand[] = [], notes: string[] = [];
+        for (const v of variants) {
+          const a0 = areas(s.width, s.height, hasHeadlineArea, v), h = placeHeadline(a0), a = tighten(a0, h.headline);
+          if (h.issue) { notes.push(`${v} area: ${h.issue.replace(`${at}: `, "")}`); continue; }
+          // the picture is labelled "Concept illustration" along the bottom of its area; that strip is kept clear
+          const wbox = { ...a.content, h: a.content.h - Math.round(sizes.small * 1.9) };
+          const r = layoutWindow({ title: visual.window_title, sidebar: visual.sidebar, rows: visual.rows, confirm: visual.confirm_text, box: wbox, meter, style, maxPx: sizes.body, minPx, minSmallPx: Math.round(short * 0.022), maxSmallPx: sizes.small });
+          if (r.ok) cands.push({ a, h: a.headline && h.headline ? { ...h.headline, box: a.headline } : h.headline, w: r.layout }); else notes.push(`${v} area (${a.content.w}x${a.content.h}px): ${describeAttempts(r.attempts)}`);
+        }
+        const best = cands.sort((x, y) => y.w.font_px - x.w.font_px)[0];
+        if (!best) { issues.push(`${at}: the window (${visual.rows.length} rows) cannot be laid out at a legible size (minimum ${minPx}px) in a ${s.width}x${s.height} frame: ${notes.join(" | ")}`); break; }
+        const over = detectOverflow(best.w.placed, best.a.content, { overlapOk: (p, q) => p === "the window" || q === "the window" });
+        if (over.length) { issues.push(`${at}: the window layout is not clean: ${over.join("; ")}`); break; }
+        box = best.a.content; headline = best.h; layout = { kind: "window", window: best.w };
+        sizes.body = best.w.font_px; sizes.small = best.w.small_px;
         break;
       }
       case "process_flow": {
-        const horizontal = box.w / box.h > 1.15;
-        const n = visual.steps.length;
-        const nodeW = horizontal ? (box.w - (n - 1) * box.w * 0.06) / n : box.w * 0.84;
-        const f = fitFont([...visual.steps.map((st) => st.label), ...visual.steps.flatMap((st) => (st.detail ? [st.detail] : []))], nodeW - sizes.body * 1.4, sizes.body, minPx, horizontal ? 3 : 2, upper);
-        if (f === null) { issues.push(`${at}: a step does not fit its node at a legible size`); break; }
-        sizes.body = f;
-        const nodeH = horizontal ? f * 6.2 : (box.h - (n - 1) * box.h * 0.07) / n;
-        if (!horizontal && nodeH < f * 2.6) issues.push(`${at}: ${n} steps do not fit the height at a legible size`);
+        type Cand = { a: Areas; h: CompositionScene["headline"]; l: StepsLayout };
+        const cands: Cand[] = [], notes: string[] = [];
+        for (const v of variants) {
+          const a0 = areas(s.width, s.height, hasHeadlineArea, v), h = placeHeadline(a0), a = tighten(a0, h.headline);
+          if (h.issue) { notes.push(`${v} area: ${h.issue.replace(`${at}: `, "")}`); continue; }
+          const r = layoutSteps({ steps: visual.steps, box: a.content, meter, style, maxPx: sizes.body, minPx, minDetailPx: Math.round(short * 0.022), maxDetailPx: sizes.small, durationS: duration_s });
+          if (r.ok) cands.push({ a, h: a.headline && h.headline ? { ...h.headline, box: a.headline } : h.headline, l: r.layout }); else notes.push(`${v} area (${a.content.w}x${a.content.h}px): ${describeAttempts(r.attempts)}`);
+        }
+        // all steps on one page beat pages; then the larger type; then the plainer reading order
+        const best = cands.sort((x, y) => Number(x.l.strategy === "pages") - Number(y.l.strategy === "pages") || y.l.font_px - x.l.font_px)[0];
+        if (!best) { issues.push(`${at}: the ${visual.steps.length} steps cannot be laid out at a legible size (minimum ${minPx}px) in a ${s.width}x${s.height} frame, even in pages: ${notes.join(" | ")}`); break; }
+        const rects = (best.l.pages.flat()).map((i) => ({ name: `step ${i + 1}`, rect: stepRect(best.l, i) }));
+        const perPage = best.l.pages.map((p) => p.map((i) => ({ name: `step ${i + 1}`, rect: stepRect(best.l, i) })));
+        const over = (best.l.strategy === "pages" ? perPage : [rects]).flatMap((pg) => detectOverflow(pg, best.a.content));
+        if (over.length) { issues.push(`${at}: the steps layout is not clean: ${over.join("; ")}`); break; }
+        box = best.a.content; headline = best.h; layout = { kind: "steps", strategy: best.l.strategy, steps: best.l };
+        sizes.body = best.l.font_px; sizes.small = best.l.detail_px;
         break;
       }
       case "data_chart": {
         const n = visual.points.length;
-        const f = fitFont(visual.points.map((p) => p.label), box.w / n - sizes.small * 0.4, sizes.small * 1.15, Math.round(short * 0.022), 1, upper);
+        const f = fitPx(visual.points.map((p) => p.label), box.w / n - sizes.small * 0.4, sizes.small * 1.15, Math.round(short * 0.022), 1);
         if (f === null) { issues.push(`${at}: a chart label does not fit under its bar at a legible size`); break; }
         sizes.small = f;
-        const t = fitFont([visual.title], box.w, sizes.body, minPx, 2, upper);
+        const t = fitPx([visual.title], box.w, sizes.body, minPx, 2);
         if (t === null) { issues.push(`${at}: the chart title does not fit at a legible size`); break; }
         sizes.body = t;
-        lines["title"] = wrapCount(visual.title, box.w, t, upper);
+        lines["title"] = wrapAt(visual.title, box.w, t);
         break;
       }
       case "kinetic_type": {
         if (!headlineText) break;
         const m = Math.round(short * 0.07);
         const bw = s.width - 2 * m;
-        const f = fitFont([headlineText], bw * 0.9, Math.round(short * (portrait ? 0.13 : 0.15) * scaleMult), minPx, portrait ? 7 : 4, upper);
+        const f = fitPx([headlineText], bw * 0.9, Math.round(short * (portrait ? 0.13 : 0.15) * scaleMult), minPx, portrait ? 7 : 4);
         if (f === null) { issues.push(`${at}: the text does not fit at a legible size`); break; }
-        const ls = wrapCount(headlineText, bw * 0.9, f, upper);
+        const ls = wrapAt(headlineText, bw * 0.9, f);
         if (ls.length * f * 1.12 > s.height - 2 * m) { issues.push(`${at}: the text needs more height than the frame has`); break; }
         sizes.big = f;
         box = { x: m, y: m, w: bw, h: s.height - 2 * m };
@@ -207,22 +272,41 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
         break;
       }
       case "layered_cards": {
-        const f = fitFont(visual.cards.flatMap((c) => [c.title, ...(c.detail ? [c.detail] : [])]), box.w * 0.62 - sizes.body, sizes.body, minPx, 2, upper);
+        const f = fitPx(visual.cards.flatMap((c) => [c.title, ...(c.detail ? [c.detail] : [])]), box.w * 0.62 - sizes.body, sizes.body, minPx, 2);
         if (f === null) { issues.push(`${at}: a card does not fit at a legible size`); break; }
         sizes.body = f;
+        if (visual.held) {
+          const hd = visual.held, src = job.scene_visuals?.[hd.from_scene];
+          const sv = src ? SceneVisual.safeParse(src.visual) : null;
+          if (!src || !sv?.success || sv.data.block !== "kinetic_type" || typeof src.overlay_text !== "string") { issues.push(`${at}: it holds a word from ${hd.from_scene}, which has no kinetic type text to hold`); break; }
+          if (frames < Math.round((0.3 + 0.8 + 1) * s.fps)) { issues.push(`${at}: ${duration_s}s is too short to hold a word, carry it into its card and show the scene (at least 2.1s)`); break; }
+          // the previous scene's headline, laid out exactly as that scene lays it out, so the held word is where that scene left it
+          const text = normaliseText(src.overlay_text), m = Math.round(short * 0.07), bw = s.width - 2 * m;
+          const kf = fitPx([text], bw * 0.9, Math.round(short * (portrait ? 0.13 : 0.15) * scaleMult), minPx, portrait ? 7 : 4);
+          if (kf === null) { issues.push(`${at}: the text of ${hd.from_scene} does not fit, so its word cannot be held`); break; }
+          const ls = wrapAt(text, bw * 0.9, kf), blockH = ls.length * kf * 1.12, top = m + (s.height - 2 * m - blockH) / 2;
+          const hits: { r: number; x: number; w: string }[] = [];
+          let wi = 0;
+          ls.forEach((l, r) => { let x = m + kf * 0.4; for (const w of l.split(" ")) { if (wi === hd.word_index) hits.push({ r, x, w }); x += meter.width(w, kf, style) + kf * 0.28; wi++; } });
+          const word = hits[0];
+          const norm = (t: string) => t.replace(/[^\p{L}\p{N}]+/gu, "").toLowerCase();
+          if (!word) { issues.push(`${at}: word ${hd.word_index} does not exist in the text of ${hd.from_scene}`); break; }
+          if (norm(word.w) !== norm(visual.cards[hd.card]?.title ?? "")) { issues.push(`${at}: word ${hd.word_index} of ${hd.from_scene} is "${word.w}", which is not the title of card ${hd.card}`); break; }
+          held = { text: word.w, from_scene: hd.from_scene, card: hd.card, font_px: kf, x: word.x, y: top + word.r * kf * 1.12, bar: { x: m, y: top, w: Math.max(4, kf * 0.1), h: blockH }, hold_frames: Math.round(0.3 * s.fps), move_frames: Math.round(0.8 * s.fps) };
+        }
         break;
       }
       case "end_card": {
         const m = Math.round(short * 0.07), bw = s.width - 2 * m;
-        const f = headlineText ? fitFont([headlineText], bw * 0.9, Math.round(short * (portrait ? 0.1 : 0.115) * scaleMult), minPx, portrait ? 4 : 3, upper) : sizes.big;
+        const f = headlineText ? fitPx([headlineText], bw * 0.9, Math.round(short * (portrait ? 0.1 : 0.115) * scaleMult), minPx, portrait ? 4 : 3) : sizes.big;
         if (f === null) { issues.push(`${at}: the headline does not fit at a legible size`); break; }
         sizes.big = f;
-        const bf = fitFont([visual.button], bw * 0.6 - sizes.body * 2, sizes.body, minPx, 1, upper);
+        const bf = fitPx([visual.button], bw * 0.6 - sizes.body * 2, sizes.body, minPx, 1);
         if (bf === null) { issues.push(`${at}: the button label does not fit on one line`); break; }
         sizes.body = bf;
-        if (visual.subline && fitFont([visual.subline], bw, sizes.small, Math.round(short * 0.022), 2, upper) === null) issues.push(`${at}: the subline does not fit`);
+        if (visual.subline && fitPx([visual.subline], bw, sizes.small, Math.round(short * 0.022), 2) === null) issues.push(`${at}: the subline does not fit`);
         box = { x: m, y: m, w: bw, h: s.height - 2 * m };
-        if (headlineText) headline = { text: headlineText, lines: wrapCount(headlineText, bw * 0.9, f, upper), font_px: f, box, align: "center" };
+        if (headlineText) headline = { text: headlineText, lines: wrapAt(headlineText, bw * 0.9, f), font_px: f, box, align: "center" };
         break;
       }
     }
@@ -234,7 +318,7 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
       const motion = { speed: SPEED[direction?.motion_language.feel ?? "precise"], easing: direction?.motion_language.easing ?? "ease_out", feel: direction?.motion_language.feel ?? "precise" } as const;
       scenes.push({
         kind: "composition", scene_id: sceneId, operation_ids: ops.map((o) => o.operation_id), from_frame: cursorFrame, frames, width: s.width, height: s.height, portrait, palette,
-        type: { bold, upper }, motion: { ...motion }, headline, content: box, sizes, lines, visual,
+        type: { bold, upper }, motion: { ...motion }, headline, content: box, sizes, lines, visual, layout, held,
         badge: visual.block === "ui_demo" ? COMPOSITION_BADGE_UI : visual.block === "data_chart" ? COMPOSITION_BADGE_CHART : null,
       });
     }

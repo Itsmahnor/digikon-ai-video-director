@@ -1,0 +1,178 @@
+{
+  "project_id": "proj_9a44fee151f6",
+  "version": 2,
+  "uses": [
+    {
+      "use_id": "U01",
+      "scene_id": "S01",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "Scene has a message_thread visual block and no footage, so scene-composition draws it alone. The problem shows from frame one."
+    },
+    {
+      "use_id": "U02",
+      "scene_id": "S01",
+      "recipe_id": "hard-cut",
+      "params": {},
+      "rationale": "Scene is a cut. A hard cut keeps the hook punchy."
+    },
+    {
+      "use_id": "U03",
+      "scene_id": "S02",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "kinetic_type block carries the hook line. The visual spec holds the mask reveal and the green snap."
+    },
+    {
+      "use_id": "U04",
+      "scene_id": "S02",
+      "recipe_id": "match-cut",
+      "params": {},
+      "rationale": "The storyboard asks for a match cut from S02 to S03. The match-cut recipe replaces the hard-cut approximation. It is only a match cut if S02's last picture and S03's first picture match; the assembler measures that and reports it as not applied otherwise (see the matching specification)."
+    },
+    {
+      "use_id": "U05",
+      "scene_id": "S03",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "layered_cards block gives the brand reveal with the wordmark in front and the tagline behind."
+    },
+    {
+      "use_id": "U06",
+      "scene_id": "S03",
+      "recipe_id": "crossfade",
+      "params": {
+        "duration_s": 0.6
+      },
+      "rationale": "A calm settle from the brand reveal into the flagship section. 0.6s is well under half of the 5s scene."
+    },
+    {
+      "use_id": "U07",
+      "scene_id": "S04",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "process_flow block shows the full lead-to-customer path."
+    },
+    {
+      "use_id": "U08",
+      "scene_id": "S04",
+      "recipe_id": "hard-cut",
+      "params": {},
+      "rationale": "Scene is a cut. It moves directly into the UI demo."
+    },
+    {
+      "use_id": "U09",
+      "scene_id": "S05",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "ui_demo block draws the CRM window, the cursor and the booking confirmation."
+    },
+    {
+      "use_id": "U10",
+      "scene_id": "S05",
+      "recipe_id": "hard-cut",
+      "params": {},
+      "rationale": "Scene is a cut. It leads into the promise line."
+    },
+    {
+      "use_id": "U11",
+      "scene_id": "S06",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "kinetic_type block states the promise. The 2.5s length is inside the recipe range."
+    },
+    {
+      "use_id": "U12",
+      "scene_id": "S06",
+      "recipe_id": "hard-cut",
+      "params": {},
+      "rationale": "Scene is a cut. The short punchy beat keeps its pace."
+    },
+    {
+      "use_id": "U13",
+      "scene_id": "S07",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "layered_cards block stacks the flagship capabilities with parallax."
+    },
+    {
+      "use_id": "U14",
+      "scene_id": "S07",
+      "recipe_id": "crossfade",
+      "params": {
+        "duration_s": 0.6
+      },
+      "rationale": "The storyboard asks for a crossfade at the end of the flagship section. 0.6s is under the 1.25s limit (half of 2.5s)."
+    },
+    {
+      "use_id": "U15",
+      "scene_id": "S08",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "ui_demo block draws the website assembling for desktop and mobile."
+    },
+    {
+      "use_id": "U16",
+      "scene_id": "S08",
+      "recipe_id": "hard-cut",
+      "params": {},
+      "rationale": "Scene is a cut."
+    },
+    {
+      "use_id": "U17",
+      "scene_id": "S09",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "layered_cards block draws the three app screens stacking with depth."
+    },
+    {
+      "use_id": "U18",
+      "scene_id": "S09",
+      "recipe_id": "directional-wipe",
+      "params": {
+        "direction": "left",
+        "duration_s": 0.5
+      },
+      "rationale": "The storyboard asks for a wipe. A wipe suits the product reveal and uses 1 of 3 allowed. 0.5s is under half of the 6s scene."
+    },
+    {
+      "use_id": "U19",
+      "scene_id": "S10",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "data_chart block draws the rising line of connected points for the AI scene."
+    },
+    {
+      "use_id": "U20",
+      "scene_id": "S10",
+      "recipe_id": "crossfade",
+      "params": {
+        "duration_s": 0.8
+      },
+      "rationale": "A calm blend from the AI scene into the team beat. This is the third crossfade, used only where the storyboard calls for one, and it is within limits."
+    },
+    {
+      "use_id": "U21",
+      "scene_id": "S11",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "kinetic_type block carries the team message in type alone, since no team footage exists."
+    },
+    {
+      "use_id": "U22",
+      "scene_id": "S11",
+      "recipe_id": "dip-to-black",
+      "params": {
+        "duration_s": 0.8
+      },
+      "rationale": "A chapter break before the end card. 0.8s is under half of the 6s scene. This is 1 of 2 allowed uses."
+    },
+    {
+      "use_id": "U23",
+      "scene_id": "S12",
+      "recipe_id": "scene-composition",
+      "params": {},
+      "rationale": "The end_card visual block means scene-composition draws the whole card, held still. end-card-cta is not combined with it. This is the final scene, so no outgoing transition recipe is planned. No audio recipe is planned because the storyboard has no audio cues or assets."
+    }
+  ]
+}

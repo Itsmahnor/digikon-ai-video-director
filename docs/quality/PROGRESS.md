@@ -25,3 +25,23 @@ Nothing is committed. Rules: no commit/push/stash/checkout/reset; no new depende
 
 ## Final (2026-10-30)
 - Phases 4-6 done. docs/quality/BEFORE_AFTER.md written. Final tree: npm test 54 files / 946 tests pass; typecheck 0 errors; eval 16/16 (demo); capabilities:visual all 7 blocks validated against current code. Nothing committed.
+
+## Checkpoint 2026-10-30 (adaptive layout / transitions / status task, session 2)
+Task: adaptive layout engine (S04/S05), real boundary transitions (match cut, crossfade, wipe, dip), one authoritative delivery status, accurate readiness diagnostics, 12-scene regression render. No commit; no gate weakened.
+Regression case: storage/sessions/9a44fee151f6 (12 scenes, 1280x720@30, S04 process_flow 5 steps, S05 ui_demo 6 rows; S02 match_cut has only a hard-cut op E04).
+- DONE: packages/render/src/font-metrics.ts (real glyph widths from the TTF), layout.ts (wrap, fitText, areas, grid shapes, steps column/row/grid/pages, window layout, overflow detection, layoutConstraints); composition.ts uses them (ui_demo/process_flow adaptive, `layout` on CompositionScene); remotion.ts passes the font meter.
+- TODO next: Compositions.jsx draw from scene.layout; tests; match-cut recipe + assembler; delivery status model; readiness diagnostics; Director constraints; regression render.
+- DONE (cont.): Compositions.jsx draws ui_demo/process_flow from scene.layout; layout.test.ts (34 tests) + composition.test.ts pass (real Remotion renders). S04/S05 plan OK at 1280x720, 1920x1080, 854x480, 720x1280, 1080x1080, 1080x1350, 640x360.
+- NEXT: transitions (match-cut recipe+assembler verify, type-specific frame checks), status model, readiness diagnostics, Director constraints, regression render.
+- DONE: ffmpeg.ts registers ffmpeg/concat-cut + ffmpeg/match-cut (fixes 'concat-cut unavailable'); recipes/transition/match-cut.json; Director TRANSITION_RECIPE.match_cut; transition-checks.ts (dissolve/dip/wipe/match measured on real frames); delivery-status.ts (decideDelivery, 6 criteria) integrated into assemble.ts (report.decision, readiness per op, late match-cut failure -> omitted). typecheck OK for render+console.
+- NEXT: console app.ts/app.js use report.decision + readiness view + visualCheck/isolation deps; update tests broken by changes; new tests (transition-checks, delivery-status, assembly); Director layout constraints; revalidate capabilities:visual (fingerprint changed); regression render.
+- DONE: tests added (delivery-status, transition-checks, match-cut, assemble decision/readiness); existing tests updated for new semantics (content_validated counts engine-checked scenes only; concat-cut/match-cut registered). capabilities:visual revalidation started (fingerprint changed). NEXT: full npm test/typecheck/eval, then regression render of session 9a44fee151f6 via console demo server + frame inspection.
+
+## Final (adaptive layout / transitions / status task)
+- npm test 58 files / 1005 tests pass; typecheck clean; eval 16/16; capabilities:visual 7/7 revalidated. Regression render: docs/quality/regression (render.json, plan.json, frames, contact sheets), video storage/sessions/9a44fee151f6/.../out/rn_bdb5bf7a58714b81.mp4. 12/12 scenes by remotion, all blends applied and frame-verified; S02 match cut stays unmet (approved edit plan U04 = hard-cut). Status: incomplete_preview. Nothing committed.
+
+## Final (adaptive layout / transitions / status task)
+- npm test 58 files / 1005 tests pass; typecheck clean; eval 16/16; capabilities:visual 7/7 revalidated. Regression render: docs/quality/regression (render.json, plan.json, frames, contact sheets); video storage/sessions/9a44fee151f6/renders/9a44fee151f6-1793346641368/out/rn_bdb5bf7a58714b81.mp4. 12/12 scenes by remotion, blends applied and frame-verified; S02 match cut unmet (approved edit plan U04 = hard-cut). Status incomplete_preview. Nothing committed.
+
+## Match cut revision (approved by user 2026-10-30)
+- New session 9a44fee151f7 (storyboard v2 + edit plan v2, approvals recorded from the user's chat approval); original session 9a44fee151f6 untouched. Render: 12/12 remotion, 1280x720 30fps 60s; match cut measured: bg diff 0.0 (<=16 ok), correlation 0.45 (<0.50 FAIL), centre shift 3% (<=12 ok) -> not applied, incomplete_preview. Video: storage/sessions/9a44fee151f7/renders/*/out/rn_37ab1a5834de40f1.mp4. Evidence docs/quality/regression2.

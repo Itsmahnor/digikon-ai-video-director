@@ -10,6 +10,7 @@ import { composedCapabilities, planComposedScenes, type ComposedTemplate } from 
 import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, planWebScenes, type WebTemplate } from "./web-scenes.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
+import { loadFontMeter } from "./font-metrics.js";
 import { verifyCompositionScenes } from "./composition-verify.js";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
@@ -72,12 +73,13 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
     throw new Error(`no compatible browser is installed for Remotion (nothing is downloaded)${seen ? `. Looked at: ${seen}` : ""}`);
   }
   for (const l of opts.learned ?? []) if (!l.template.startsWith("remotion/")) throw new Error(`${l.template} is not a Remotion template, so the Remotion adapter will not run it`);
+  const meter = loadFontMeter(opts.fontFile);
   const planOpts = { renderer: "remotion" as const, templates: REMOTION_TEMPLATES, outputRoot: opts.outputRoot };
   const composedTemplates = Object.fromEntries((opts.learned ?? []).map((l) => [l.template, l]));
   /** A film that uses any learned template is planned as composed scenes; otherwise as the plain text and image scenes. The two are not mixed in one film yet. */
   const plan = (job: Parameters<RenderAdapter["render"]>[0] | Omit<Parameters<RenderAdapter["render"]>[0], "signal">) => {
     if (job.operations.some((o) => job.templates[o.operation_id] === COMPOSITION_TEMPLATE)) {
-      const p = planCompositionScenes(job, { outputRoot: opts.outputRoot });
+      const p = planCompositionScenes(job, { outputRoot: opts.outputRoot, meter });
       return p.ok ? { kind: "composition" as const, plan: p } : { kind: "issues" as const, issues: p.issues };
     }
     const composed = job.operations.some((o) => composedTemplates[job.templates[o.operation_id] ?? ""]);

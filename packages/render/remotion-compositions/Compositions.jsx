@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AbsoluteFill, Sequence, cancelRender, continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // The scene-composition template. Every number here was planned and checked beforehand (packages/render/src/composition.ts); this only
@@ -83,8 +83,10 @@ const MessageThread = ({ scene, p }) => {
   const v = scene.visual, box = scene.content, pal = scene.palette;
   const pile = v.mode === "pile_up";
   // every height and gap is proportional to the type size, so a long thread is shrunk as a whole to fit the frame (a pile also tilts, so keep some air)
+  const tight = scene.lines["tight"] && scene.lines["tight"][0] === "1";
+  const LH = tight ? 1.15 : 1.25, PADV = tight ? 0.4 : 0.55;
   const layout = (f) => {
-    const items = v.messages.map((m, i) => { const ls = scene.lines[`m${i}`]; const h = ls.length * f * 1.25 + f * 1.1; const w = Math.min(box.w * 0.78, Math.max(...ls.map((l) => l.length)) * f * CHAR + f * 1.8); return { m, ls, h, w }; });
+    const items = v.messages.map((m, i) => { const ls = scene.lines[`m${i}`]; const h = ls.length * f * LH + f * PADV * 2; const mw = scene.lines[`w${i}`] ? parseFloat(scene.lines[`w${i}`][0]) * (f / scene.sizes.body) : Math.max(...ls.map((l) => l.length)) * f * CHAR; const w = Math.min(box.w * 0.78, mw + f * 1.8); return { m, ls, h, w }; });
     const gap = pile ? -f * 0.3 : f * 0.5;
     return { items, gap, total: items.reduce((a, it) => a + it.h, 0) + gap * (items.length - 1) };
   };
@@ -102,7 +104,7 @@ const MessageThread = ({ scene, p }) => {
         const rot = pile ? ((i % 2 ? 1 : -1) * 2.8 * (0.4 + i / items.length)) : 0;
         const jitter = pile ? (i % 2 ? 1 : -1) * f * 0.35 : 0;
         return (
-          <div key={i} style={{ position: "absolute", left: x + jitter, top: yy, width: it.w, height: it.h, boxSizing: "border-box", padding: `${f * 0.55}px ${f * 0.9}px`, borderRadius: f * 0.9, background: bg, color: fg, fontSize: f, lineHeight: 1.25, fontFamily: `${FAMILY}, sans-serif`, fontWeight: scene.type.bold ? 700 : 400, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre", opacity: clamp(q * 2), transform: `translateY(${(1 - q) * f * 1.3}px) scale(${0.88 + 0.12 * q}) rotate(${rot * q}deg)`, boxShadow: `0 ${f * 0.3}px ${f * 0.8}px ${rgba("#000000", 0.25)}`, zIndex: i }}>
+          <div key={i} style={{ position: "absolute", left: x + jitter, top: yy, width: it.w, height: it.h, boxSizing: "border-box", padding: `${f * PADV}px ${f * 0.9}px`, borderRadius: f * 0.9, background: bg, color: fg, fontSize: f, lineHeight: LH, fontFamily: `${FAMILY}, sans-serif`, fontWeight: scene.type.bold ? 700 : 400, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre", opacity: clamp(q * 2), transform: `translateY(${(1 - q) * f * 1.3}px) scale(${0.88 + 0.12 * q}) rotate(${rot * q}deg)`, boxShadow: `0 ${f * 0.3}px ${f * 0.8}px ${rgba("#000000", 0.25)}`, zIndex: i }}>
             {it.ls.join("\n")}
           </div>
         );
@@ -118,100 +120,100 @@ const Cursor = ({ x, y, size, scale, color }) => (
 );
 
 const UiDemo = ({ scene, p, lin }) => {
-  const v = scene.visual, box = scene.content, f = scene.sizes.body, pal = scene.palette;
-  const rowH = f * 2.1;
-  const titleH = f * 2;
-  const need = titleH + v.rows.length * rowH + f * 1.2;
-  const h = Math.min(box.h - f * 2, need), w = box.w;
-  const x = box.x, y = box.y + (box.h - h - f * 1.6) / 2;
-  const win = p(0, 0.2);
-  const side = v.sidebar.length ? w * 0.24 : 0;
-  const rowsTop = y + titleH + f * 0.3;
+  const v = scene.visual, pal = scene.palette;
+  const L = scene.layout.window, f = L.font_px;
+  const { win, title_h: titleH } = L;
+  const winP = p(0, 0.2);
   const tgt = v.cursor_target;
-  const tgtY = tgt === null ? 0 : rowsTop + tgt * rowH + rowH / 2;
-  const tgtX = x + side + (w - side) * 0.45;
+  const tgtRect = tgt === null ? null : L.row_rects[tgt];
+  const tgtX = tgtRect ? tgtRect.x + tgtRect.w * 0.45 : 0, tgtY = tgtRect ? tgtRect.y + tgtRect.h / 2 : 0;
   const cur = lin(0.3, 0.3), click = p(0.62, 0.08);
   const e = (t) => t * t * (3 - 2 * t);
-  const cx = lerp(x + w * 0.95, tgtX, e(cur)), cy = lerp(y + h + f * 1.2, tgtY, e(cur));
+  const cx = lerp(win.x + win.w * 0.95, tgtX, e(cur)), cy = lerp(win.y + win.h + f * 1.2, tgtY, e(cur));
   const confirm = p(0.7, 0.18);
+  const cf = L.confirm_px;
   return (
     <>
-      <div style={{ position: "absolute", left: x, top: y + (1 - win) * f * 1.5, width: w, height: h, borderRadius: f * 0.9, background: pal.surface, opacity: clamp(win * 2), overflow: "hidden", boxShadow: `0 ${f}px ${f * 2.4}px ${rgba("#000000", 0.35)}`, border: `1px solid ${rgba(pal.text, 0.1)}` }}>
-        <div style={{ height: titleH, display: "flex", alignItems: "center", padding: `0 ${f}px`, borderBottom: `1px solid ${rgba(pal.text, 0.08)}` }}>
-          {[pal.accent, pal.accent_2, pal.muted].map((c, i) => <div key={i} style={{ width: f * 0.55, height: f * 0.55, borderRadius: "50%", background: c, marginRight: f * 0.45 }} />)}
-          <div style={{ marginLeft: f * 0.6, fontSize: f * 0.92, color: pal.muted, fontFamily: `${FAMILY}, sans-serif`, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre" }}>{v.window_title}</div>
+      <div style={{ position: "absolute", left: win.x, top: win.y + (1 - winP) * f * 1.5, width: win.w, height: win.h, borderRadius: f * 0.9, background: pal.surface, opacity: clamp(winP * 2), overflow: "hidden", boxShadow: `0 ${f}px ${f * 2.4}px ${rgba("#000000", 0.35)}`, border: `1px solid ${rgba(pal.text, 0.1)}` }}>
+        <div style={{ height: titleH, boxSizing: "border-box", display: "flex", alignItems: "center", padding: `0 ${f}px`, borderBottom: `1px solid ${rgba(pal.text, 0.08)}` }}>
+          {[pal.accent, pal.accent_2, pal.muted].map((c, i) => <div key={i} style={{ flex: "none", width: f * 0.55, height: f * 0.55, borderRadius: "50%", background: c, marginRight: f * 0.45 }} />)}
+          <div style={{ marginLeft: f * 0.6, fontSize: L.title_px, lineHeight: 1.2, color: pal.muted, fontFamily: `${FAMILY}, sans-serif`, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre" }}>{L.title_lines.join("\n")}</div>
         </div>
-        {side ? (
-          <div style={{ position: "absolute", left: 0, top: titleH, width: side, bottom: 0, borderRight: `1px solid ${rgba(pal.text, 0.08)}`, padding: `${f * 0.7}px ${f * 0.6}px` }}>
-            {v.sidebar.map((s, i) => { const q = p(0.05 + i * 0.05, 0.15); return <div key={i} style={{ fontSize: scene.sizes.small, color: i === 0 ? pal.text : pal.muted, fontFamily: `${FAMILY}, sans-serif`, fontWeight: i === 0 ? 700 : 400, padding: `${f * 0.35}px ${f * 0.4}px`, marginBottom: f * 0.25, borderRadius: f * 0.4, background: i === 0 ? rgba(pal.accent, 0.2) : "transparent", opacity: q, whiteSpace: "pre", textTransform: scene.type.upper ? "uppercase" : "none" }}>{s}</div>; })}
-          </div>
-        ) : null}
+        {L.side_w ? <div style={{ position: "absolute", left: 0, top: titleH, width: L.side_w, bottom: 0, borderRight: `1px solid ${rgba(pal.text, 0.08)}` }} /> : null}
       </div>
+      {L.side_rects.map((r, i) => {
+        const q = p(0.05 + i * 0.05, 0.15);
+        return <div key={`s${i}`} style={{ position: "absolute", left: r.x, top: r.y, width: r.w, height: r.h, boxSizing: "border-box", padding: `${f * 0.35}px ${f * 0.4}px`, fontSize: L.small_px, lineHeight: 1.2, color: i === 0 ? pal.text : pal.muted, fontFamily: `${FAMILY}, sans-serif`, fontWeight: i === 0 ? 700 : 400, borderRadius: f * 0.4, background: i === 0 ? rgba(pal.accent, 0.2) : "transparent", opacity: q * winP, whiteSpace: "pre", textTransform: scene.type.upper ? "uppercase" : "none" }}>{L.side_lines[i].join("\n")}</div>;
+      })}
       {v.rows.map((r, i) => {
         const q = p(0.08 + i * 0.07, 0.16);
+        const rect = L.row_rects[i];
         const selected = tgt === i;
         const lit = selected ? click : r.state === "selected" ? 1 : 0;
         const bg = lit > 0 ? `rgba(${hexToRgb(pal.accent).join(",")},${0.18 + 0.82 * lit * (selected ? 1 : 0.6)})` : rgba(pal.text, 0.06);
         const fg = lit > 0.55 && selected ? onColor(pal.accent) : r.state === "busy" ? pal.muted : pal.text;
         return (
-          <div key={i} style={{ position: "absolute", left: x + side + f * 0.8, top: rowsTop + i * rowH + (1 - q) * f, width: w - side - f * 1.6, height: rowH - f * 0.4, borderRadius: f * 0.5, background: bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${f * 0.8}px`, opacity: clamp(q * 2) * win, boxSizing: "border-box" }}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ width: f * 0.6, height: f * 0.6, borderRadius: "50%", background: r.state === "busy" ? pal.muted : pal.accent_2, marginRight: f * 0.7 }} />
-              <div style={{ fontSize: f, color: fg, fontFamily: `${FAMILY}, sans-serif`, textDecoration: r.state === "busy" ? "line-through" : "none", whiteSpace: "pre", textTransform: scene.type.upper ? "uppercase" : "none" }}>{r.label}</div>
+          <div key={i} style={{ position: "absolute", left: rect.x, top: rect.y + (1 - q) * f, width: rect.w, height: rect.h, borderRadius: f * 0.5, background: bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${f * 0.8}px`, opacity: clamp(q * 2) * winP, boxSizing: "border-box" }}>
+            <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+              <div style={{ flex: "none", width: f * 0.6, height: f * 0.6, borderRadius: "50%", background: r.state === "busy" ? pal.muted : pal.accent_2, marginRight: f * 0.7 }} />
+              <div style={{ fontSize: f, lineHeight: 1.2, color: fg, fontFamily: `${FAMILY}, sans-serif`, textDecoration: r.state === "busy" ? "line-through" : "none", whiteSpace: "pre", textTransform: scene.type.upper ? "uppercase" : "none" }}>{L.row_lines[i].join("\n")}</div>
             </div>
-            {r.tag ? <div style={{ fontSize: scene.sizes.small, color: fg, opacity: 0.85, fontFamily: `${FAMILY}, sans-serif`, whiteSpace: "pre" }}>{r.tag}</div> : null}
+            {r.tag ? <div style={{ flex: "none", marginLeft: f * 0.5, fontSize: L.small_px, color: fg, opacity: 0.85, fontFamily: `${FAMILY}, sans-serif`, whiteSpace: "pre" }}>{r.tag}</div> : null}
           </div>
         );
       })}
       {tgt !== null ? <Cursor x={cx} y={cy} size={f * 1.5} scale={1 - 0.18 * (click > 0 && click < 1 ? Math.sin(click * Math.PI) : 0)} color="#ffffff" /> : null}
-      {v.confirm_text ? (
-        <div style={{ position: "absolute", left: x + w / 2, top: y + h + f * 0.45, transform: `translate(-50%, ${(1 - confirm) * f * 1.5}px) scale(${0.85 + 0.15 * confirm})`, opacity: clamp(confirm * 2), display: "flex", alignItems: "center", padding: `${f * 0.5}px ${f * 1.1}px`, borderRadius: f * 2, background: pal.accent_2, color: onColor(pal.accent_2), fontSize: f * 0.95, fontFamily: `${FAMILY}, sans-serif`, fontWeight: 700, boxShadow: `0 ${f * 0.4}px ${f}px ${rgba("#000000", 0.35)}`, whiteSpace: "pre" }}>
-          <svg width={f} height={f} viewBox="0 0 20 20" style={{ marginRight: f * 0.5 }}><path d="M4 10.5 L8.5 15 L16 5.5" fill="none" stroke={onColor(pal.accent_2)} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          {v.confirm_text}
+      {L.confirm ? (
+        <div style={{ position: "absolute", left: L.confirm.rect.x, top: L.confirm.rect.y, width: L.confirm.rect.w, height: L.confirm.rect.h, boxSizing: "border-box", transform: `translateY(${(1 - confirm) * f * 1.5}px) scale(${0.85 + 0.15 * confirm})`, opacity: clamp(confirm * 2), display: "flex", alignItems: "center", justifyContent: "center", padding: `0 ${f * 1.1}px`, borderRadius: f * 2, background: pal.accent_2, color: onColor(pal.accent_2), fontSize: cf, lineHeight: 1.2, fontFamily: `${FAMILY}, sans-serif`, fontWeight: 700, boxShadow: `0 ${f * 0.4}px ${f}px ${rgba("#000000", 0.35)}`, whiteSpace: "pre" }}>
+          <svg width={cf} height={cf} viewBox="0 0 20 20" style={{ flex: "none", marginRight: cf * 0.5 }}><path d="M4 10.5 L8.5 15 L16 5.5" fill="none" stroke={onColor(pal.accent_2)} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          {L.confirm.lines.join("\n")}
         </div>
       ) : null}
     </>
   );
 };
 
-const ProcessFlow = ({ scene, p }) => {
-  const v = scene.visual, box = scene.content, f = scene.sizes.body, pal = scene.palette;
-  const n = v.steps.length;
-  const horizontal = box.w / box.h > 1.15;
-  const gapX = box.w * 0.06, gapY = box.h * 0.07;
-  const nodeW = horizontal ? (box.w - gapX * (n - 1)) / n : box.w * 0.84;
-  const nodeH = horizontal ? Math.min(box.h * 0.8, f * 6.4) : Math.min(f * 5.2, (box.h - gapY * (n - 1)) / n);
-  const startX = horizontal ? box.x : box.x + (box.w - nodeW) / 2;
-  const startY = horizontal ? box.y + (box.h - nodeH) / 2 : box.y + (box.h - (nodeH * n + gapY * (n - 1))) / 2;
-  const pos = (i) => ({ x: horizontal ? startX + i * (nodeW + gapX) : startX, y: horizontal ? startY : startY + i * (nodeH + gapY) });
+// Steps are laid out by the planner (column, row, grid, or pages of a grid within the approved duration). A page is shown for an equal share of the scene.
+const ProcessFlow = ({ scene, p, frame, fps }) => {
+  const v = scene.visual, pal = scene.palette, S = scene.layout.steps, f = S.font_px;
+  const n = v.steps.length, P = S.pages.length;
+  const seg = scene.frames / P;
+  const k = Math.min(P - 1, Math.floor(frame / seg));
+  const pl = P === 1 ? p : makeP({ ...scene, frames: Math.round(seg) }, frame - k * seg, fps);
+  const fadeOut = P > 1 && k < P - 1 ? clamp((seg - (frame - k * seg)) / 8) : 1;
+  const page = S.pages[k];
+  const rectOf = (i) => { const j = page.indexOf(i); const r = Math.floor(j / S.cols), c = j % S.cols; return { x: S.origin.x + c * (S.cell.w + S.gap.x), y: S.origin.y + r * (S.node_h + S.gap.y), w: S.cell.w, h: S.node_h }; };
   return (
-    <>
+    <div style={{ opacity: fadeOut }}>
       <svg width={scene.width} height={scene.height} style={{ position: "absolute", left: 0, top: 0 }}>
-        {v.steps.slice(0, -1).map((_, i) => {
-          const a = pos(i), b = pos(i + 1);
-          const x1 = horizontal ? a.x + nodeW : a.x + nodeW / 2, y1 = horizontal ? a.y + nodeH / 2 : a.y + nodeH;
-          const x2 = horizontal ? b.x : b.x + nodeW / 2, y2 = horizontal ? b.y + nodeH / 2 : b.y;
-          const q = p(i * 0.2 + 0.12, 0.14);
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={pal.accent} strokeWidth={Math.max(3, f * 0.18)} strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - q} />;
+        {page.slice(0, -1).map((si, j) => {
+          const a = rectOf(si), b = rectOf(page[j + 1]);
+          const sameRow = Math.abs(a.y - b.y) < 1, sameCol = Math.abs(a.x - b.x) < 1;
+          const q = pl(j * 0.2 + 0.12, 0.14);
+          const d = sameRow ? `M ${a.x + a.w} ${a.y + a.h / 2} L ${b.x} ${b.y + b.h / 2}` : sameCol ? `M ${a.x + a.w / 2} ${a.y + a.h} L ${b.x + b.w / 2} ${b.y}` : `M ${a.x + a.w / 2} ${a.y + a.h} V ${(a.y + a.h + b.y) / 2} H ${b.x + b.w / 2} V ${b.y}`;
+          return <path key={si} d={d} fill="none" stroke={pal.accent} strokeWidth={Math.max(3, f * 0.18)} strokeLinecap="round" strokeLinejoin="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - q} />;
         })}
       </svg>
-      {v.steps.map((st, i) => {
-        const q = p(i * 0.2, 0.2), lit = p(i * 0.2 + 0.1, 0.1);
-        const { x, y } = pos(i);
-        const last = i === n - 1;
+      {page.map((si, j) => {
+        const st = v.steps[si];
+        const q = pl(j * 0.2, 0.2), lit = pl(j * 0.2 + 0.1, 0.1);
+        const { x, y, w, h } = rectOf(si);
+        const last = si === n - 1;
         const filled = last && lit > 0.9;
+        const fg = filled ? onColor(pal.accent) : pal.text;
         return (
-          <div key={i} style={{ position: "absolute", left: x, top: y + (1 - q) * f, width: nodeW, height: nodeH, boxSizing: "border-box", borderRadius: f * 0.8, background: filled ? pal.accent : pal.surface, border: `${Math.max(2, f * 0.1)}px solid ${lit > 0.5 ? pal.accent : rgba(pal.text, 0.15)}`, opacity: clamp(q * 2), padding: f * 0.7, display: "flex", flexDirection: "column", justifyContent: "center", color: filled ? onColor(pal.accent) : pal.text, fontFamily: `${FAMILY}, sans-serif` }}>
-            <div style={{ width: f * 1.5, height: f * 1.5, borderRadius: "50%", background: filled ? onColor(pal.accent) : pal.accent, color: filled ? pal.accent : onColor(pal.accent), display: "flex", alignItems: "center", justifyContent: "center", fontSize: f * 0.85, fontWeight: 700, marginBottom: f * 0.4 }}>{i + 1}</div>
-            <div style={{ fontSize: f, fontWeight: scene.type.bold ? 700 : 400, textTransform: scene.type.upper ? "uppercase" : "none", lineHeight: 1.15, whiteSpace: "pre-wrap" }}>{st.label}</div>
-            {st.detail ? <div style={{ fontSize: scene.sizes.small, color: filled ? onColor(pal.accent) : pal.muted, marginTop: f * 0.25, lineHeight: 1.2, textTransform: scene.type.upper ? "uppercase" : "none" }}>{st.detail}</div> : null}
+          <div key={si} style={{ position: "absolute", left: x, top: y + (1 - q) * f, width: w, height: h, boxSizing: "border-box", borderRadius: f * 0.8, background: filled ? pal.accent : pal.surface, border: `${Math.max(2, f * 0.1)}px solid ${lit > 0.5 ? pal.accent : rgba(pal.text, 0.15)}`, opacity: clamp(q * 2), padding: S.pad, display: "flex", flexDirection: "row", alignItems: "center", color: fg, fontFamily: `${FAMILY}, sans-serif` }}>
+            <div style={{ flex: "none", width: S.badge, height: S.badge, borderRadius: "50%", background: filled ? onColor(pal.accent) : pal.accent, color: filled ? pal.accent : onColor(pal.accent), display: "flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(S.badge * 0.56), fontWeight: 700, marginRight: f * 0.6 }}>{si + 1}</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: f, fontWeight: scene.type.bold ? 700 : 400, textTransform: scene.type.upper ? "uppercase" : "none", lineHeight: 1.15, whiteSpace: "pre" }}>{S.labels[si].join("\n")}</div>
+              {st.detail ? <div style={{ fontSize: S.detail_px, color: filled ? onColor(pal.accent) : pal.muted, marginTop: S.detail_px * 0.3, lineHeight: 1.2, whiteSpace: "pre", textTransform: scene.type.upper ? "uppercase" : "none" }}>{S.details[si].join("\n")}</div> : null}
+            </div>
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
-
 const DataChart = ({ scene, p, lin }) => {
   const v = scene.visual, box = scene.content, f = scene.sizes.body, sm = scene.sizes.small, pal = scene.palette;
   const n = v.points.length;
@@ -273,22 +275,34 @@ const KineticType = ({ scene, p }) => {
   );
 };
 
-const LayeredCards = ({ scene, p, frame, fps }) => {
-  const v = scene.visual, box = scene.content, f = scene.sizes.body, pal = scene.palette;
+// where card i sits once it has settled (q = 1), for the drawing and for the word a match cut carries into it
+const cardsGeom = (scene, frame, fps) => {
+  const v = scene.visual, box = scene.content, f = scene.sizes.body;
   const n = v.cards.length;
   const k = v.depth === "strong" ? 14 : 6;
   const cw = box.w * 0.64, ch = f * 4.6;
   const stepX = (box.w - cw) / Math.max(1, n - 1), stepY = Math.min(f * 3.2, (box.h - ch) / Math.max(1, n - 1));
   const drift = Math.sin((frame / fps) * 0.9);
+  const rect = (i, q = 1) => { const depth = (i + 1) / n; return { left: box.x + i * stepX + drift * k * depth, top: box.y + (box.h - ch - stepY * (n - 1)) / 2 + i * stepY + (1 - q) * f * 3, sc: 0.94 + 0.06 * depth }; };
+  return { n, k, cw, ch, rect };
+};
+// progress of the carried word: 0 while it is held, then 0 to 1 as it moves into its card
+const heldProgress = (scene, frame) => (scene.held ? clamp((frame - scene.held.hold_frames) / scene.held.move_frames) : 1);
+
+const LayeredCards = ({ scene, p, frame, fps }) => {
+  const v = scene.visual, f = scene.sizes.body, pal = scene.palette;
+  const { n, cw, ch, rect } = cardsGeom(scene, frame, fps);
+  const arrived = heldProgress(scene, frame) >= 1;
   return (
     <>
       {v.cards.map((c, i) => {
         const front = i === n - 1;
         const q = p(i * 0.16, 0.22);
         const depth = (i + 1) / n;
+        const r0 = rect(i, q);
         return (
-          <div key={i} style={{ position: "absolute", left: box.x + i * stepX + drift * k * depth, top: box.y + (box.h - ch - stepY * (n - 1)) / 2 + i * stepY + (1 - q) * f * 3, width: cw, height: ch, boxSizing: "border-box", borderRadius: f * 0.9, background: front ? pal.surface : rgba(pal.surface, 0.9), border: `${Math.max(2, f * 0.08)}px solid ${front ? pal.accent : rgba(pal.text, 0.12)}`, padding: f * 0.9, color: pal.text, fontFamily: `${FAMILY}, sans-serif`, opacity: clamp(q * 2) * (0.7 + 0.3 * depth), transform: `scale(${0.94 + 0.06 * depth})`, boxShadow: `0 ${f * 0.6}px ${f * 1.6}px ${rgba("#000000", 0.3)}`, zIndex: i }}>
-            <div style={{ fontSize: f, fontWeight: scene.type.bold ? 700 : 400, lineHeight: 1.15, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre-wrap" }}>{c.title}</div>
+          <div key={i} style={{ position: "absolute", left: r0.left, top: r0.top, width: cw, height: ch, boxSizing: "border-box", borderRadius: f * 0.9, background: front ? pal.surface : rgba(pal.surface, 0.9), border: `${Math.max(2, f * 0.08)}px solid ${front ? pal.accent : rgba(pal.text, 0.12)}`, padding: f * 0.9, color: pal.text, fontFamily: `${FAMILY}, sans-serif`, opacity: clamp(q * 2) * (0.7 + 0.3 * depth), transform: `scale(${0.94 + 0.06 * depth})`, boxShadow: `0 ${f * 0.6}px ${f * 1.6}px ${rgba("#000000", 0.3)}`, zIndex: i }}>
+            <div style={{ fontSize: f, fontWeight: scene.type.bold ? 700 : 400, lineHeight: 1.15, textTransform: scene.type.upper ? "uppercase" : "none", whiteSpace: "pre-wrap", opacity: scene.held && scene.held.card === i && !arrived ? 0 : 1 }}>{c.title}</div>
             {c.detail ? <div style={{ fontSize: scene.sizes.small, color: pal.muted, marginTop: f * 0.4, lineHeight: 1.2, textTransform: scene.type.upper ? "uppercase" : "none" }}>{c.detail}</div> : null}
             {front ? <div style={{ position: "absolute", right: f * 0.9, top: f * 0.9, width: f * 0.8, height: f * 0.8, borderRadius: "50%", background: pal.accent }} /> : null}
           </div>
@@ -312,11 +326,36 @@ const EndCard = ({ scene, p }) => {
   );
 };
 
+// The match cut: the previous scene's emphasised word, held exactly where that scene left it, then carried into its card title. It is drawn outside the camera
+// and the iris, so its first frame is the previous scene's last pose; the target is followed through the camera as it moves.
+const HeldWord = ({ scene, frame, fps, cam }) => {
+  const H = scene.held, pal = scene.palette, f = scene.sizes.body;
+  const a = heldProgress(scene, frame), e = inOutCubic(a);
+  const g = cardsGeom(scene, frame, fps), r = g.rect(H.card);
+  const b = Math.max(2, f * 0.08), pad = f * 0.9;
+  const cx = r.left + g.cw / 2, cy = r.top + g.ch / 2;
+  const tx0 = cx + (r.left + b + pad - cx) * r.sc, ty0 = cy + (r.top + b + pad - cy) * r.sc;
+  const W = scene.width, Hh = scene.height;
+  const tx = W / 2 + (tx0 - W / 2) * cam.s + cam.tx, ty = Hh / 2 + (ty0 - Hh / 2) * cam.s;
+  const endScale = (f * r.sc * cam.s) / H.font_px;
+  const s = lerp(1, endScale, e);
+  const mixc = (c1, c2, t) => { const A = hexToRgb(c1), B = hexToRgb(c2); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(",")})`; };
+  return (
+    <>
+      <div style={{ position: "absolute", left: H.bar.x, top: H.bar.y, width: H.bar.w, height: H.bar.h, background: pal.accent, borderRadius: 4, opacity: 1 - e }} />
+      {a < 1 ? <div style={{ position: "absolute", left: 0, top: 0, transform: `translate(${lerp(H.x, tx, e)}px, ${lerp(H.y, ty, e)}px) scale(${s})`, transformOrigin: "0 0", fontSize: H.font_px, lineHeight: 1.12, whiteSpace: "pre", color: mixc(pal.accent, pal.text, e), ...typeStyle(scene), ...{ color: mixc(pal.accent, pal.text, e) } }}>{H.text}</div> : null}
+    </>
+  );
+};
+
 const BLOCKS = { message_thread: MessageThread, ui_demo: UiDemo, process_flow: ProcessFlow, data_chart: DataChart, kinetic_type: KineticType, layered_cards: LayeredCards, end_card: EndCard };
 
 const Scene = ({ scene, fps }) => {
   const frame = useCurrentFrame();
-  const p = makeP(scene, frame, fps), lin = makeLinear(scene, frame, fps);
+  // a scene that opens on a carried word starts its own animation after the word has been held
+  const hold = scene.held ? scene.held.hold_frames : 0;
+  const pf = Math.max(0, frame - hold);
+  const p = makeP(scene, pf, fps), lin = makeLinear(scene, pf, fps);
   const v = scene.visual, pal = scene.palette;
   const Block = BLOCKS[v.block];
   const T = Math.max(1, scene.frames - 1);
@@ -330,9 +369,11 @@ const Scene = ({ scene, fps }) => {
   const S = (z) => Math.min(z, sMax);
   const camera = cam === "push_in" ? `scale(${lerp(1, S(1.07), inOutCubic(t))})` : cam === "pull_out" ? `scale(${lerp(S(1.08), 1, inOutCubic(t))})` : cam === "pan_left" ? `translateX(${lerp(1.5, -1.5, t)}%) scale(${S(1.06)})` : cam === "pan_right" ? `translateX(${lerp(-1.5, 1.5, t)}%) scale(${S(1.06)})` : "none";
   // the camera moves the picture, not the headline: type stays on its margin, so a push or pan can never clip it
-  const rv = clamp(frame / fps / (0.7 * scene.motion.speed));
+  const rv = clamp(pf / fps / (0.7 * scene.motion.speed));
   const r = outCubic(rv);
   const clip = v.reveal === "wipe_right" ? `inset(0 ${(1 - r) * 100}% 0 0)` : v.reveal === "wipe_up" ? `inset(${(1 - r) * 100}% 0 0 0)` : v.reveal === "iris" ? `circle(${r * 75}% at 50% 50%)` : "none";
+  const camS = cam === "push_in" ? lerp(1, S(1.07), inOutCubic(t)) : cam === "pull_out" ? lerp(S(1.08), 1, inOutCubic(t)) : cam === "pan_left" || cam === "pan_right" ? S(1.06) : 1;
+  const camTx = cam === "pan_left" ? (lerp(1.5, -1.5, t) / 100) * scene.width : cam === "pan_right" ? (lerp(-1.5, 1.5, t) / 100) * scene.width : 0;
   const showHeadline = scene.headline && v.block !== "kinetic_type" && v.block !== "end_card";
   return (
     <AbsoluteFill style={{ background: pal.background, overflow: "hidden" }}>
@@ -344,6 +385,7 @@ const Scene = ({ scene, fps }) => {
         </AbsoluteFill>
         {showHeadline ? <Headline scene={scene} p={p} /> : null}
       </AbsoluteFill>
+      {scene.held ? <HeldWord scene={scene} frame={frame} fps={fps} cam={{ s: camS, tx: camTx }} /> : null}
     </AbsoluteFill>
   );
 };

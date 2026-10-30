@@ -1,4 +1,4 @@
-﻿import { execFile } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { QAFinding } from "@digikon/contracts";
 
@@ -23,6 +23,8 @@ export interface VisualSceneSpan {
   drawn_by: string;
   /** False for a placeholder slate: it is reported, never judged as a design. */
   rendered: boolean;
+  /** Seconds at the end of the scene that the approved transition into the next scene blends (a dip to black, a crossfade). The scene is judged on the part before it. */
+  transition_out_s?: number;
 }
 
 export interface VisualQaInput {
@@ -108,9 +110,11 @@ export async function visualQa(input: VisualQaInput): Promise<VisualQaResult> {
   const frames = new Map<string, Frame[]>();
 
   for (const s of input.scenes) {
-    const at = (f: number) => s.start_s + Math.min(s.duration_s - 0.04, f * s.duration_s);
+    // the part of the scene before its approved transition into the next one; a dip to black is meant to be black
+    const clean = Math.max(0.5, s.duration_s - (s.transition_out_s ?? 0));
+    const at = (f: number) => s.start_s + Math.min(clean - 0.04, f * clean);
     const times = [0.12, 0.35, 0.6, 0.85, 0.97].map(at);
-    const extra = [Math.min(s.start_s + 1, s.start_s + s.duration_s - 0.04), Math.max(s.start_s, s.start_s + s.duration_s - 0.6)];
+    const extra = [Math.min(s.start_s + 1, s.start_s + clean - 0.04), Math.max(s.start_s, s.start_s + clean - 0.6)];
     try {
       const fs = await Promise.all(times.map((t) => frameAt(input.video, t, ff)));
       const one = await frameAt(input.video, extra[0]!, ff), tail = await frameAt(input.video, extra[1]!, ff);

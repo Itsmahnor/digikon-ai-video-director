@@ -18,7 +18,7 @@ import {
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, COMPOSITION_TEMPLATE, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
@@ -623,7 +623,10 @@ export function createApp(ctx: AppContext) {
     const coverage = previewCoverage(handoff, stored.output, planned.record, selection.capabilities);
     const eligible = planned.record.state === "executable" && coverage.complete && !!planned.plan;
     // The multi-engine path: scene by scene, each by its own engine, assembled by FFmpeg. Planned from the same approvals; it changes nothing approved.
-    const assembleDeps: AssembleDeps | null = available && ctx.renderFont ? { ...base, fontFile: ctx.renderFont } : null;
+    // A template counts as validated on its own only with a current validation record for the block a scene draws with it (read once here, not per operation).
+    const visualRecords = loadVisualCapabilities(ctx.capabilitiesDir);
+    const isolation = (template: string, block: string | null) => template === COMPOSITION_TEMPLATE && !!block && visualRecords.some((v) => v.block === block && v.usable);
+    const assembleDeps: AssembleDeps | null = available && ctx.renderFont ? { ...base, fontFile: ctx.renderFont, isolation } : null;
     let assembly: AssemblePlanResult | null = null;
     try { assembly = assembleDeps ? planAssembly({ editor_output: stored.output, handoff, settings, purpose: "preview" }, assembleDeps) : null; } catch (e) { console.error(e instanceof Error ? e.message : e); }
     return { runId, handoff, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps };
@@ -644,8 +647,11 @@ export function createApp(ctx: AppContext) {
   /** A delivery report as the browser sees it: no absolute paths, a playback address only for a video that exists, and the stage flags kept apart. */
   const publicDelivery = (s: Session, r: DeliveryReport, runRoot: string) => ({
     ...r,
-    status: r.states.final_delivery_ready ? "final_delivery_ready" : r.kind === "complete" ? "complete_preview" : "incomplete_preview",
+    // the one decision, as the report holds it; a report written before it existed is read as incomplete or complete preview, never as final
+    status: r.decision?.status ?? (r.kind === "complete" ? "complete_preview" : "incomplete_preview"),
+    decision: r.decision ? { ...r.decision, criteria: r.decision.criteria.map((c) => ({ ...c, detail: scrub(c.detail, scrubRoots(s)), blockers: c.blockers.map((b) => scrub(b, scrubRoots(s))) })), blockers: r.decision.blockers.map((b) => scrub(b, scrubRoots(s))) } : null,
     final_delivery_blockers: r.final_delivery_blockers.map((b) => scrub(b, scrubRoots(s))),
+    transitions: r.transitions.map((t) => ({ ...t, reason: scrub(t.reason, scrubRoots(s)), check: t.check ? scrub(t.check, scrubRoots(s)) : null })),
     scenes: r.scenes.map((x) => ({ ...x, omitted_reason: x.omitted_reason ? scrub(x.omitted_reason, scrubRoots(s)) : null, operations: x.operations.map((o) => ({ ...o, reason: scrub(o.reason, scrubRoots(s)) })) })),
     omitted_operations: r.omitted_operations.map((o) => ({ ...o, reason: scrub(o.reason, scrubRoots(s)) })),
     output: r.output ? { ...r.output, path: relative(runRoot, r.output.path).replaceAll("\\", "/"), video_url: `/api/sessions/${s.id}/deliveries/${r.delivery_id}/video` } : null,
@@ -654,8 +660,9 @@ export function createApp(ctx: AppContext) {
   const planView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
     const sceneOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.target_scene_id]));
     const typeOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.operation_type]));
-    const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, note: typeOf.get(o.operation_id) === "mix_audio" ? "audio is not part of this phase: it is reported as unresolved and keeps the film from being complete or final" : null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer ?? (o.implementation_ref === "ffmpeg/concat-cut" ? "ffmpeg" : null), supported: o.renderer !== null || o.implementation_ref === "ffmpeg/concat-cut" /* a hard cut is the assembler's default join */ }));
-    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].filter((b) => !/concat-cut|\(hard-cut\)/.test(b)).map((b) => scrub(b, scrubRoots(s)));
+    const prodBlockers: string[] = p.production.ok ? p.production.record.blockers : [];
+    const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, note: typeOf.get(o.operation_id) === "mix_audio" ? "audio is not part of this phase: it is reported as unresolved and keeps the film from being complete or final" : null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, supported: o.renderer !== null }));
+    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s)));
     return {
       run_id: p.runId,
       renderer_available: p.available,
@@ -672,7 +679,17 @@ export function createApp(ctx: AppContext) {
       can_render: p.eligible || (p.assembly?.ok === true && p.assembly.plan.scenes.some((x) => x.renderable)),
       blockers,
       /** A separate question from the preview: could this go to production? Never true while any recipe is a draft. */
-      production: { ready: p.production.ok && p.production.record.state === "executable", blockers: p.production.ok ? p.production.record.blockers.map((b) => scrub(b, scrubRoots(s))) : [] },
+      production: {
+        ready: p.production.ok && p.production.record.state === "executable", blockers: p.production.ok ? p.production.record.blockers.map((b) => scrub(b, scrubRoots(s))) : [],
+        /** Per operation: whether its recipe is reviewed, and the exact template or renderer that is missing. */
+        operations: p.production.ok ? p.production.record.operations.map((o) => ({ operation_id: o.operation_id, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, reviewed: o.production_executable, missing: o.renderer === null ? `no renderer has the template ${o.implementation_ref} registered (registered here: ${p.registered.join(", ") || "none"})` : null, open: prodBlockers.filter((b) => b.startsWith(`${o.operation_id}:`)).map((b) => scrub(b.slice(o.operation_id.length + 1).trim(), scrubRoots(s))) })) : [],
+      },
+      /**
+       * How far each operation has been shown to work, kept apart: registered, validated on its own, compatible with this scene, rendered with this scene's
+       * inputs, validated in the finished video. A registry status of "validated_available" appears only as `registry_status`; it is not one of these levels.
+       */
+      readiness: p.assembly?.ok ? p.assembly.plan.scenes.flatMap((sc) => sc.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sc.scene_id, recipe_id: o.recipe_id, template: o.template, operation_type: o.operation_type, engine: o.engine, registry_status: o.status, ...o.readiness, missing: o.readiness.missing ? scrub(o.readiness.missing, scrubRoots(s)) : null }))) : null,
+      layout_constraints: p.planned.record.settings ? layoutConstraints(p.planned.record.settings.width, p.planned.record.settings.height) : null,
       needs: { aspect_ratio: p.handoff.constraints.aspect_ratio, duration_s: timelineEnd(p.handoff), supported_output: { container: "mp4", video_codec: "h264", audio_codec: null }, you_provide: ["width", "height", "fps"] },
       label: p.eligible ? "Preview only: every approved scene rendered with the templates of the selected renderer. It is not production-ready." : "No preview can be made yet. Nothing here is rendered, and no partial video is offered.",
     };
@@ -713,7 +730,7 @@ export function createApp(ctx: AppContext) {
       let learning: { attempted: unknown[]; not_learnable: unknown[] } | null = null;
       // Generation first: a capability nothing can run yet is learned (a real render that passes its checks), not treated as a reason to stop.
       if (!p.eligible && ctx.capabilitiesDir && ctx.renderFont && ctx.ffmpegOk) {
-        const all = findCapabilityGaps(p.planned.record, undefined, p.editor.operations).filter((g) => g.template !== "ffmpeg/concat-cut"); // a hard cut is the assembler's own join, not a gap
+        const all = findCapabilityGaps(p.planned.record, undefined, p.editor.operations);
         const gaps = all.filter((g) => g.learnable);
         if (all.length) {
           const results = gaps.length ? await learnGaps(gaps, { root: ctx.capabilitiesDir, fontFile: ctx.renderFont, recipes: ctx.recipes }) : [];
@@ -730,7 +747,9 @@ export function createApp(ctx: AppContext) {
         const a = p.assembly;
         if (!a?.ok || !p.assembleDeps || !a.plan.scenes.some((x) => x.renderable)) return c.json({ error: "not_renderable", message: "A preview cannot be rendered yet. No scene can be shown with the renderers and capabilities that exist.", learning, ...view }, 409);
         // Multi-engine, or incomplete: every scene by its own engine, assembled by FFmpeg, with anything missing listed and labelled.
-        const result = await renderAssembly(a.plan, p.assembleDeps);
+        // the visual QA runs inside the assembly, on the finished film, so the one delivery decision has its result; the same result is kept for the log
+        let measured: Awaited<ReturnType<typeof filmQuality>> | null = null;
+        const result = await renderAssembly(a.plan, { ...p.assembleDeps, visualCheck: async (rep, h) => { measured = await filmQuality(rep, h); return { critical_major: measured.visual.findings.filter((f) => f.severity === "critical" || f.severity === "major").map((f) => `visual ${f.scene_id ?? "film"}: ${f.description}`), not_checked: measured.visual.not_checked }; } });
         if (result.kind === "failed") return c.json({ kind: "failed", error: "render_failed", message: "The render failed. No video is offered.", errors: result.errors.map((e) => scrub(e, scrubRoots(s))), learning, ...view }, 502);
         const delivery = publicDelivery(s, result.report, p.dirs.root);
         try { saveDeliveryReport(p.dirs.records, result.report); } catch { await rm(result.report.output!.path, { force: true }); throw new HttpError(503, "not_saved", "The delivery report could not be saved, so the video was removed. Check free disk space."); }
@@ -742,10 +761,10 @@ export function createApp(ctx: AppContext) {
             writeFileSync(join(p.dirs.records, `${result.record.render_id}.qa.json`), JSON.stringify(qa, null, 2));
             for (const id of new Set(result.record.operations.map((o) => o.recipe_id))) saveRenderEvidence(p.dirs.evidence, buildRenderEvidence(result.record, ctx.recipes.get(id)!, qa));
           } catch (e) { console.error(e instanceof Error ? e.message : e); }
-          const quality = await filmQuality(result.report, p.handoff).catch(() => null); if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
+          const quality = measured ? { ...(measured as Awaited<ReturnType<typeof filmQuality>>), final_ready: result.report.decision?.final ?? false, blockers: result.report.decision?.blockers ?? [] } : null; if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
           return c.json({ kind: "complete", learning, delivery, quality, record: publicRecord(result.record, s.id, p.dirs.root, scrubRoots(s)), qa: qa ? { findings: qa.findings, passed: qa.passed, measurements: qa.measurements } : null, ...view });
         }
-        const quality = await filmQuality(result.report, p.handoff).catch(() => null); if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
+        const quality = measured ? { ...(measured as Awaited<ReturnType<typeof filmQuality>>), final_ready: result.report.decision?.final ?? false, blockers: result.report.decision?.blockers ?? [] } : null; if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
         return c.json({ kind: "partial", learning, delivery, quality, record: null, qa: null, ...view });
       }
       const save = (r: RenderRecord) => { try { saveRenderRecord(p.dirs.records, r); } catch { throw new HttpError(503, "not_saved", "The render record could not be saved, so nothing was rendered. Check free disk space."); } };

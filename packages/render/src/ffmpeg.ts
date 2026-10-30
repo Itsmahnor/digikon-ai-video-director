@@ -14,7 +14,7 @@ const run = promisify(execFile);
 export const TEXT_CARD_TEMPLATE = "ffmpeg/text-card";
 
 type SceneKind = "text-card" | "title-subtitle" | "bullet-list" | "stat-callout" | "image-scene" | "clip";
-type Kind = SceneKind | "crossfade";
+type Kind = SceneKind | "crossfade" | "cut" | "match-cut";
 type OpType = "render_graphics_scene" | "concat" | "trim_clip";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
@@ -25,11 +25,14 @@ export const FFMPEG_TEMPLATES: Readonly<Record<string, { kind: Kind; type: OpTyp
   "ffmpeg/stat-callout": { kind: "stat-callout", type: "render_graphics_scene" },
   "ffmpeg/image-scene": { kind: "image-scene", type: "render_graphics_scene" },
   "ffmpeg/xfade-fade": { kind: "crossfade", type: "concat" },
+  /** A hard cut and a match cut are joins made where the scene clips meet, by the assembler; they draw nothing. */
+  "ffmpeg/concat-cut": { kind: "cut", type: "concat" },
+  "ffmpeg/match-cut": { kind: "match-cut", type: "concat" },
   "ffmpeg/clip-play": { kind: "clip", type: "trim_clip" },
 };
 
 /** What this adapter can show beyond plain graphics, in the form the coverage check takes. A learned capability adds to it, see `ffmpegCapabilities`. */
-export const FFMPEG_CAPABILITIES = { image_templates: ["ffmpeg/image-scene"], video_templates: ["ffmpeg/clip-play"], transition_templates: { crossfade: ["ffmpeg/xfade-fade"] } } as const;
+export const FFMPEG_CAPABILITIES = { image_templates: ["ffmpeg/image-scene"], video_templates: ["ffmpeg/clip-play"], transition_templates: { crossfade: ["ffmpeg/xfade-fade"], match_cut: ["ffmpeg/match-cut"] } } as const;
 
 /** Fixed colours, chosen by name. Parameter text never reaches an FFmpeg argument. */
 const BACKGROUNDS = { navy: "0x16213e", charcoal: "0x2b2d31", forest: "0x1e3d2f" } as const;
@@ -47,6 +50,8 @@ const PARAMS: Record<Kind, readonly string[]> = {
   "image-scene": ["fade_in_s", "background", "fit", "motion"],
   clip: ["fade_in_s", "background", "fit", "source_audio"],
   crossfade: ["duration_s"],
+  cut: [],
+  "match-cut": [],
 };
 /** The built-in templates plus the learned transitions this adapter was given. A learned template is data for the crossfade engine, never code. */
 function templatesWith(learned: readonly LearnedTransition[] = []): Record<string, { kind: Kind; type: OpType; learned?: LearnedTransition }> {
@@ -55,7 +60,7 @@ function templatesWith(learned: readonly LearnedTransition[] = []): Record<strin
 
 /** What this adapter can show, including the transitions it has learned, by the storyboard's transition name. */
 export function ffmpegCapabilities(learned: readonly LearnedTransition[] = []) {
-  const transitions: Record<string, string[]> = { crossfade: [...FFMPEG_CAPABILITIES.transition_templates.crossfade] };
+  const transitions: Record<string, string[]> = { crossfade: [...FFMPEG_CAPABILITIES.transition_templates.crossfade], match_cut: [...FFMPEG_CAPABILITIES.transition_templates.match_cut] };
   for (const l of learned) (transitions[l.storyboard_transition] ??= []).push(l.template);
   return { image_templates: FFMPEG_CAPABILITIES.image_templates, video_templates: FFMPEG_CAPABILITIES.video_templates, transition_templates: transitions };
 }
@@ -341,6 +346,11 @@ export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdap
     const at = `operation ${op.operation_id}`;
     const t = template(op.operation_id);
     if (!t || t.type !== "concat") continue;
+    if (t.kind === "cut" || t.kind === "match-cut") {
+      for (const k of Object.keys(op.parameters)) issues.push(`${at}: unknown parameter ${k}`);
+      if (t.kind === "match-cut") issues.push(`${at}: a match cut is checked between the finished clips of the two scenes it joins, which only the scene-by-scene assembly does`);
+      continue;
+    }
     const target = sceneEnds.get(op.target_scene_id);
     const sc = target ? scenes.find((x) => x.operation_id === sceneOps[target.index]!.operation_id) : undefined;
     if (!target || !sc) { issues.push(`${at}: its scene ${op.target_scene_id} is not rendered, so there is nothing to fade from`); continue; }

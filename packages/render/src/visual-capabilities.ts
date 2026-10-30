@@ -30,7 +30,7 @@ const pkgVersion = (name: string): string => { try { return (createRequire(impor
 export function compositionFingerprint(): string {
   try {
     const h = createHash("sha256");
-    for (const f of ["composition.ts", "composition-verify.ts", "text.ts"]) h.update(f).update(readFileSync(join(here, f)));
+    for (const f of ["composition.ts", "composition-verify.ts", "text.ts", "layout.ts", "font-metrics.ts"]) h.update(f).update(readFileSync(join(here, f)));
     h.update("visual.ts").update(readFileSync(join(here, "..", "..", "contracts", "src", "visual.ts")));
     const d = join(here, "..", "remotion-compositions");
     for (const f of readdirSync(d).filter((x) => /\.(jsx?|json)$/.test(x)).sort()) h.update(f).update(readFileSync(join(d, f)));

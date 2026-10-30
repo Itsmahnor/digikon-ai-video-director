@@ -119,10 +119,10 @@ describe.skipIf(skipReal(can))("a film that needs FFmpeg, Remotion and HyperFram
     const r = result.report;
     expect(DeliveryReport.parse(r)).toBeTruthy();
     expect(r.kind).toBe("complete");
-    expect(r.states).toMatchObject({ plan_created: true, plan_approved: true, scenes_total: 4, scenes_rendered: 4, scenes_content_validated: 4, final_video_validated: true, final_delivery_ready: false });
+    expect(r.states).toMatchObject({ plan_created: true, plan_approved: true, scenes_total: 4, scenes_rendered: 4, scenes_content_validated: 2, final_video_validated: true, final_delivery_ready: false }); // the two FFmpeg scenes are checked for being non-blank only
     expect(r.final_delivery_blockers.join(" ")).toContain("every recipe used is still a draft");
     expect(r.label).toContain("COMPLETE PREVIEW");
-    expect(r.label).toContain("not a final deliverable");
+    expect(r.label).toContain("not final delivery");
     expect(r.engines_used.sort()).toEqual(["ffmpeg", "hyperframes", "remotion"]);
     expect(r.scenes.map((s) => [s.scene_id, s.engine, s.status])).toEqual([["S01", "ffmpeg", "rendered_unverified"], ["S02", "remotion", "rendered_and_verified"], ["S03", "hyperframes", "rendered_and_verified"], ["S04", "ffmpeg", "rendered_unverified"]]);
     expect(r.scenes.every((s) => s.content.end_to_end_checked && s.content.checks.length >= 3)).toBe(true);
@@ -132,6 +132,40 @@ describe.skipIf(skipReal(can))("a film that needs FFmpeg, Remotion and HyperFram
     expect(r.scenes.map((s) => s.operations.map((o) => o.status))).toEqual([["validated_available", "validated_available"], ["validated_available", "validated_available", "validated_available"], ["validated_available", "validated_available"], ["validated_available"]]);
     const file = saveDeliveryReport(join(tmp, "reports"), r);
     expect(loadDeliveryReport(file)).toEqual(r);
+  });
+  it("has one authoritative decision, and every other status field is a copy of it", () => {
+    if (result.kind !== "complete") throw new Error("no complete result");
+    const r = result.report, d = r.decision!;
+    expect(d).toMatchObject({ status: "complete_preview", final: false, complete: true, file_valid: true });
+    expect(r.kind).toBe("complete");
+    expect(r.states.final_delivery_ready).toBe(d.final);
+    expect(r.label).toBe(d.label);
+    expect(r.final_delivery_blockers).toEqual(d.blockers);
+    // a technically valid MP4 is reported, and it does not make the film final, validated or approved
+    expect(r.states.final_video_validated).toBe(true);
+    expect(d.criteria.map((c) => [c.id, c.ok])).toEqual([["scene_render", true], ["required_operations", true], ["content_validation", false], ["visual_validation", null], ["plan_compliance", true], ["recipe_review", false]]);
+    expect(d.blockers.join(" ")).toMatch(/visual validation has not been run/);
+  });
+
+  it("checks the frames of every transition and reports what they showed", () => {
+    if (result.kind !== "complete") throw new Error("no complete result");
+    const t = result.report.transitions;
+    expect(t.map((x) => [x.after_scene, x.template, x.status])).toEqual([["S01", "ffmpeg/xfade-fadeblack", "applied"], ["S02", "ffmpeg/xfade-fade", "applied"], ["S03", "ffmpeg/xfade-wipe", "applied"]]);
+    expect(t[0]!.check).toMatch(/darkest of 7 sampled frames/);
+    expect(t[1]!.check).toMatch(/average of the two pictures/);
+    expect(t[2]!.check).toMatch(/still show the first picture/);
+  });
+
+  it("keeps the readiness levels apart: registry status is not proof that a scene renders", () => {
+    if (result.kind !== "complete") throw new Error("no complete result");
+    const ops = result.report.scenes.flatMap((s) => s.operations);
+    for (const o of ops) expect(o.readiness, o.operation_id).toBeTruthy();
+    const drawn = ops.filter((o) => o.operation_type !== "concat");
+    expect(drawn.every((o) => o.readiness!.registered && o.readiness!.compatible_with_scene === true && o.readiness!.rendered_with_scene_inputs === true && o.readiness!.validated_in_final === true && o.readiness!.missing === null)).toBe(true);
+    // a built-in template is registered but has not been validated on its own: that is said, not implied by "validated_available"
+    expect(drawn.some((o) => o.status === "validated_available" && o.readiness!.validated_in_isolation === false && o.readiness!.validation_basis === "built_in")).toBe(true);
+    const transitions = ops.filter((o) => o.operation_type === "concat");
+    expect(transitions.every((o) => o.readiness!.registered && o.readiness!.validated_in_final === true)).toBe(true);
   });
 
   it("the final video really shows each scene: order, exact boundaries, durations, colours, text, camera motion and the three transitions", async () => {
@@ -200,7 +234,7 @@ describe.skipIf(skipReal(can))("one unsupported operation does not stop the othe
     expect(r.kind).toBe("partial");
     expect(r.label).toMatch(/^INCOMPLETE PREVIEW: 1 scene\(s\) were not rendered/);
     expect(r.states).toMatchObject({ scenes_total: 4, scenes_rendered: 3, final_video_validated: true, final_delivery_ready: false });
-    expect(r.final_delivery_blockers.join(" ")).toContain("the film is incomplete");
+    expect(r.final_delivery_blockers.join(" ")).toMatch(/S\d\d was not rendered/);
     expect(r.scenes.map((s) => [s.scene_id, s.status])).toEqual([["S01", "rendered_unverified"], ["S02", "placeholder"], ["S03", "rendered_and_verified"], ["S04", "rendered_unverified"]]);
     expect(r.scenes[1]).toMatchObject({ engine: null, omitted_reason: expect.stringContaining("text-fade-up") });
     expect(r.omitted_operations.map((o) => o.operation_id)).toEqual(expect.arrayContaining(["E03", "E04"]));
@@ -299,7 +333,7 @@ describe.skipIf(skipReal(can))("every engine can move a picture or animate text,
     expect(res.kind).toBe("complete");
     if (res.kind !== "complete") return;
     expect(res.report.engines_used.sort()).toEqual(["ffmpeg", "hyperframes", "remotion"]);
-    expect(res.report.states).toMatchObject({ scenes_total: 4, scenes_rendered: 4, scenes_content_validated: 4, final_video_validated: true, final_delivery_ready: false });
+    expect(res.report.states).toMatchObject({ scenes_total: 4, scenes_rendered: 4, scenes_content_validated: res.report.scenes.filter((s) => s.engine !== "ffmpeg").length, final_video_validated: true, final_delivery_ready: false });
     expect(res.report.output).toMatchObject({ frames: 360, width: 640, height: 360, fps: 30 });
     if (proofDir) { mkdirSync(proofDir, { recursive: true }); copyFileSync(res.report.output!.path, join(proofDir, "all-engines-film.mp4")); }
   });

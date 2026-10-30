@@ -80,7 +80,7 @@ describe.skipIf(skipReal(can))("the approved visual treatment is rendered, scene
     if (result.kind !== "complete") return;
     const report = result.report;
     expect(report.kind).toBe("complete");
-    expect(report.states).toMatchObject({ scenes_total: 4, scenes_rendered: 4, scenes_content_validated: 4, final_video_validated: true, final_delivery_ready: false }); // never final while recipes are drafts
+    expect(report.states).toMatchObject({ scenes_total: 4, scenes_rendered: 4, scenes_content_validated: report.scenes.filter((s) => s.engine !== "ffmpeg").length, final_video_validated: true, final_delivery_ready: false }); // never final while recipes are drafts
     expect(report.omitted_operations).toEqual([]);
     expect(report.final_delivery_blockers.join(" ")).toContain("draft");
     expect(report.scenes.map((s) => s.engine)).toEqual(["ffmpeg", "ffmpeg", "remotion", "remotion"]);

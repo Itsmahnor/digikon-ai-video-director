@@ -1,0 +1,804 @@
+{
+  "project_id": "proj_9a44fee151f6",
+  "version": 2,
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "purpose": "Hook: a concrete problem from frame one. Lead messages pile up with nothing connecting them.",
+      "start_time": 0,
+      "end_time": 3,
+      "duration_seconds": 3,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Drawn message thread with drifting nodes (animated graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "missing_input",
+          "note": "No verified LinkedIn specs were available, so the safe area is the generic platform_safe setting. Confirm it before delivery."
+        }
+      ],
+      "visual_purpose": "Shows the problem as a conversation: unanswered, disconnected lead messages. It is the only scene that tells the problem as a thread.",
+      "visual": {
+        "block": "message_thread",
+        "messages": [
+          {
+            "from": "them",
+            "text": "Hi, I filled in your form on the website"
+          },
+          {
+            "from": "them",
+            "text": "Do you have time for a quick call?"
+          },
+          {
+            "from": "them",
+            "text": "Following up on my enquiry"
+          },
+          {
+            "from": "them",
+            "text": "Is anyone available to talk?"
+          }
+        ],
+        "mode": "pile_up",
+        "camera": "push_in",
+        "reveal": "none",
+        "backdrop": "dots"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [],
+      "shot": {
+        "shot_size": "medium",
+        "camera_motion": "slow_push_in",
+        "visual_action": "Lead messages pile up on screen while loose glowing nodes drift apart in dark teal space. The headline BUSINESS IS EVOLVING. cuts in on the left third."
+      },
+      "overlay": {
+        "text": "BUSINESS IS EVOLVING.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "cut",
+      "constraints": [
+        "Sample messages contain no numbers, names or results.",
+        "Headline stays inside the platform safe area."
+      ]
+    },
+    {
+      "scene_id": "S02",
+      "purpose": "Complete the hook line. The nodes lock into a single line, which sets up the 'scattered to connected' concept.",
+      "start_time": 3,
+      "end_time": 6,
+      "duration_seconds": 3,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Animated headline type with a green accent line (graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [],
+      "visual_purpose": "Turns the problem into the idea. A single sentence is the whole picture, and its green accent marks the snap into one line.",
+      "visual": {
+        "block": "kinetic_type",
+        "style": "mask_rise",
+        "emphasis_word": 1,
+        "camera": "static",
+        "reveal": "wipe_up",
+        "backdrop": "flat"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [],
+      "shot": {
+        "shot_size": "close_up",
+        "camera_motion": "static",
+        "visual_action": "The line YOUR TECHNOLOGY SHOULD TOO. rises in a mask reveal. The word TECHNOLOGY is emphasised as the drifting nodes snap onto one green line."
+      },
+      "overlay": {
+        "text": "YOUR TECHNOLOGY SHOULD TOO.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "match_cut",
+      "constraints": [
+        "Text-only scene: the sentence is the idea."
+      ]
+    },
+    {
+      "scene_id": "S03",
+      "purpose": "Brand reveal after the hook. The typeset wordmark and tagline are introduced.",
+      "start_time": 6,
+      "end_time": 11,
+      "duration_seconds": 5,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "DigiKon Solutions logo (none supplied). Typeset wordmark as a placeholder.",
+          "kind": "logo",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": true,
+          "fallback": "Typeset text wordmark in the brand palette."
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "placeholder",
+          "note": "The wordmark DIGIKON SOLUTIONS is typeset text standing in for a logo. Supply the real logo file or approve the wordmark."
+        },
+        {
+          "kind": "creative_decision",
+          "note": "The tagline 'TECHNOLOGY. AUTOMATION. GROWTH.' is not backed by an approved fact (C09). 'GROWTH' could read as a results promise, so the client must approve it."
+        }
+      ],
+      "visual_purpose": "Introduces the brand as a layered, dimensional title: the wordmark in front and the tagline behind it. It is the only brand-reveal scene.",
+      "visual": {
+        "block": "layered_cards",
+        "cards": [
+          {
+            "title": "TECHNOLOGY",
+            "detail": "Automation"
+          },
+          {
+            "title": "DIGIKON SOLUTIONS",
+            "detail": "Typeset wordmark (concept)"
+          }
+        ],
+        "depth": "strong",
+        "camera": "pull_out",
+        "reveal": "iris",
+        "backdrop": "gradient",
+        "held": {
+          "card": 0,
+          "from_scene": "S02",
+          "word_index": 1
+        }
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [],
+      "shot": {
+        "shot_size": "wide",
+        "camera_motion": "pull_out",
+        "visual_action": "The typeset wordmark DIGIKON SOLUTIONS rises with a soft green light sweep. Behind it a tagline card settles into place."
+      },
+      "overlay": {
+        "text": "TECHNOLOGY. AUTOMATION. GROWTH.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "crossfade",
+      "constraints": [
+        "The wordmark is typeset text, not the official logo.",
+        "The tagline is a brand line only. Show no growth figures or result promises."
+      ]
+    },
+    {
+      "scene_id": "S04",
+      "purpose": "Flagship I: show the core idea as one connected journey from lead to customer.",
+      "start_time": 11,
+      "end_time": 17,
+      "duration_seconds": 6,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Animated five-step process diagram (graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "missing_input",
+          "note": "No approved fact confirms GoHighLevel as DigiKon's flagship service or permits using the name on screen. Confirm both with the client."
+        }
+      ],
+      "visual_purpose": "Explains how the system works as a sequence. It is the first and clearest GoHighLevel moment, and the only scene that shows the whole path.",
+      "visual": {
+        "block": "process_flow",
+        "steps": [
+          {
+            "label": "WEBSITE LEAD",
+            "detail": null
+          },
+          {
+            "label": "CRM",
+            "detail": null
+          },
+          {
+            "label": "AUTOMATED FOLLOW-UP",
+            "detail": null
+          },
+          {
+            "label": "APPOINTMENT BOOKED",
+            "detail": null
+          },
+          {
+            "label": "CUSTOMER",
+            "detail": null
+          }
+        ],
+        "camera": "push_in",
+        "reveal": "wipe_right",
+        "backdrop": "grid"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C01",
+        "C02"
+      ],
+      "shot": {
+        "shot_size": "wide",
+        "camera_motion": "slow_push_in",
+        "visual_action": "Five steps connect one after another along a green line: WEBSITE LEAD, CRM, AUTOMATED FOLLOW-UP, APPOINTMENT BOOKED, CUSTOMER. The camera pushes in slowly."
+      },
+      "overlay": {
+        "text": "ONE CONNECTED JOURNEY, BUILT ON GOHIGHLEVEL",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "cut",
+      "constraints": [
+        "Concept diagram only. No speed, volume or conversion figures.",
+        "Name GoHighLevel only as the platform the service is built on. Do not mention partner status or certification."
+      ]
+    },
+    {
+      "scene_id": "S05",
+      "purpose": "Flagship II: show the system at work. A booking is confirmed in a concept CRM interface and the capability labels appear in turn.",
+      "start_time": 17,
+      "end_time": 24,
+      "duration_seconds": 7,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Drawn CRM and pipeline window, shown as a concept illustration (not a real product screen)",
+          "kind": "ui_screenshot",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": true,
+          "fallback": "Generic drawn interface labelled as a concept illustration."
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "placeholder",
+          "note": "No product capture was supplied, so the interface is a drawn concept illustration. Supply real captures if the client wants them shown."
+        }
+      ],
+      "visual_purpose": "Shows what the service does in one gesture: a cursor selecting a booking row and confirming it. It is the only scene that shows an interface in use and lists the six capability labels.",
+      "visual": {
+        "block": "ui_demo",
+        "window_title": "Pipeline (concept)",
+        "sidebar": [
+          "Contacts",
+          "Pipeline",
+          "Automations"
+        ],
+        "rows": [
+          {
+            "label": "CRM & Pipeline Management",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Lead Capture & Follow-ups",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Workflow Automation",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Appointment Booking",
+            "tag": "Booked",
+            "state": "selected"
+          },
+          {
+            "label": "SMS & Email Automation",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Agency Systems",
+            "tag": null,
+            "state": "open"
+          }
+        ],
+        "cursor_target": 3,
+        "confirm_text": "Appointment booked",
+        "camera": "pan_right",
+        "reveal": "wipe_up",
+        "backdrop": "gradient"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C01",
+        "C03"
+      ],
+      "shot": {
+        "shot_size": "medium",
+        "camera_motion": "pan_right",
+        "visual_action": "A drawn CRM window lists the six capabilities one by one. The cursor moves to Appointment Booking and a confirmation appears."
+      },
+      "overlay": {
+        "text": "THE SYSTEM AT WORK",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "cut",
+      "constraints": [
+        "Sample rows contain no numbers, named clients or results.",
+        "The window is a concept illustration, not the real GoHighLevel product."
+      ]
+    },
+    {
+      "scene_id": "S06",
+      "purpose": "Flagship III: state the promise as one sentence.",
+      "start_time": 24,
+      "end_time": 26.5,
+      "duration_seconds": 2.5,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Animated headline type (graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [],
+      "visual_purpose": "Gives the film its main message as one sentence in big type. It is the only scene that states the promise outright.",
+      "visual": {
+        "block": "kinetic_type",
+        "style": "word_pop",
+        "emphasis_word": 2,
+        "camera": "static",
+        "reveal": "none",
+        "backdrop": "flat"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C01"
+      ],
+      "shot": {
+        "shot_size": "close_up",
+        "camera_motion": "static",
+        "visual_action": "The words YOUR BUSINESS. CONNECTED. AUTOMATED. pop in one at a time, with CONNECTED held in green."
+      },
+      "overlay": {
+        "text": "YOUR BUSINESS. CONNECTED. AUTOMATED.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "cut",
+      "constraints": [
+        "Text-only scene: the sentence is the idea."
+      ]
+    },
+    {
+      "scene_id": "S07",
+      "purpose": "Close the flagship section with the capabilities stacked as parts of one system.",
+      "start_time": 26.5,
+      "end_time": 29,
+      "duration_seconds": 2.5,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Layered capability cards (graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [],
+      "visual_purpose": "Shows the capabilities as layers of one whole with parallax. It is the only scene that stacks the flagship services together.",
+      "visual": {
+        "block": "layered_cards",
+        "cards": [
+          {
+            "title": "Lead Capture",
+            "detail": null
+          },
+          {
+            "title": "Follow-ups",
+            "detail": null
+          },
+          {
+            "title": "Workflow Automation",
+            "detail": null
+          },
+          {
+            "title": "CRM & Pipeline",
+            "detail": null
+          }
+        ],
+        "depth": "subtle",
+        "camera": "push_in",
+        "reveal": "none",
+        "backdrop": "dots"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C03"
+      ],
+      "shot": {
+        "shot_size": "medium",
+        "camera_motion": "slow_push_in",
+        "visual_action": "Four capability cards stack with parallax depth, and CRM & Pipeline settles at the front."
+      },
+      "overlay": {
+        "text": "THE PARTS OF ONE SYSTEM",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "crossfade",
+      "constraints": [
+        "Labels only. No figures."
+      ]
+    },
+    {
+      "scene_id": "S08",
+      "purpose": "Web development: a drawn website layout assembles for desktop and mobile.",
+      "start_time": 29,
+      "end_time": 36,
+      "duration_seconds": 7,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Drawn browser window with desktop and mobile layouts, shown as a concept illustration (not real client work)",
+          "kind": "ui_screenshot",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": true,
+          "fallback": "Generic drawn layout labelled as a concept illustration."
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "placeholder",
+          "note": "No website captures or client work were supplied, so the layouts are drawn concept illustrations."
+        }
+      ],
+      "visual_purpose": "Shows a website being assembled from sections, with a desktop and a mobile layout. It is the only scene about the web.",
+      "visual": {
+        "block": "ui_demo",
+        "window_title": "Website (concept)",
+        "sidebar": [
+          "Desktop",
+          "Mobile"
+        ],
+        "rows": [
+          {
+            "label": "Hero section",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Landing page",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Contact form",
+            "tag": null,
+            "state": "open"
+          },
+          {
+            "label": "Mobile layout",
+            "tag": "Responsive",
+            "state": "selected"
+          }
+        ],
+        "cursor_target": 3,
+        "confirm_text": "Layout ready",
+        "camera": "pan_left",
+        "reveal": "wipe_right",
+        "backdrop": "grid"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C04"
+      ],
+      "shot": {
+        "shot_size": "wide",
+        "camera_motion": "pan_left",
+        "visual_action": "A drawn browser window assembles its sections one by one. The cursor selects the mobile layout and it confirms."
+      },
+      "overlay": {
+        "text": "WEB DEVELOPMENT — Digital experiences, built with intent.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "cut",
+      "constraints": [
+        "Generic layouts only. Do not present them as client work.",
+        "'Make an impact' is replaced by 'built with intent'."
+      ]
+    },
+    {
+      "scene_id": "S09",
+      "purpose": "Mobile app development: app screens stack up into a phone experience.",
+      "start_time": 36,
+      "end_time": 42,
+      "duration_seconds": 6,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Drawn app screens, shown as a concept illustration (not a real product capture)",
+          "kind": "ui_screenshot",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": true,
+          "fallback": "Generic drawn app interface labelled as a concept illustration."
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "creative_decision",
+          "note": "The brief's line 'Powerful experiences' is promotional and has no approved fact behind it, so it was replaced with 'Experiences built for the phone.' Confirm the wording with the client."
+        },
+        {
+          "kind": "placeholder",
+          "note": "No app captures were supplied, so the screens are drawn concept illustrations."
+        }
+      ],
+      "visual_purpose": "Shows app screens as layers with strong depth and a tap-to-confirm step. It is the only scene about mobile apps.",
+      "visual": {
+        "block": "layered_cards",
+        "cards": [
+          {
+            "title": "Home screen",
+            "detail": "Phone layout"
+          },
+          {
+            "title": "Booking screen",
+            "detail": "Choose a time"
+          },
+          {
+            "title": "Confirm",
+            "detail": "Tap to confirm"
+          }
+        ],
+        "depth": "strong",
+        "camera": "push_in",
+        "reveal": "iris",
+        "backdrop": "gradient"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C05"
+      ],
+      "shot": {
+        "shot_size": "close_up",
+        "camera_motion": "slow_push_in",
+        "visual_action": "Three app screens layer in with strong depth: Home, Booking, then a Confirm screen at the front. The camera pushes in."
+      },
+      "overlay": {
+        "text": "MOBILE APP DEVELOPMENT — Experiences built for the phone.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "wipe",
+      "constraints": [
+        "Generic drawn app screens. Do not present them as a real product."
+      ]
+    },
+    {
+      "scene_id": "S10",
+      "purpose": "AI-powered products: abstract connected nodes and a shape-only chart suggest intelligence.",
+      "start_time": 42,
+      "end_time": 48,
+      "duration_seconds": 6,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Animated line chart and connected nodes (graphics). Shape only, no printed values.",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [],
+      "visual_purpose": "Shows data turning into insight as a rising line with connected points. It is the only scene that uses a chart and the only one about AI.",
+      "visual": {
+        "block": "data_chart",
+        "chart": "line",
+        "title": "Signals to insight (concept)",
+        "points": [
+          {
+            "label": "Data",
+            "value": 20
+          },
+          {
+            "label": "Model",
+            "value": 45
+          },
+          {
+            "label": "Insight",
+            "value": 80
+          }
+        ],
+        "highlight_index": 2,
+        "camera": "pull_out",
+        "reveal": "wipe_right",
+        "backdrop": "dots"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [
+        "C06"
+      ],
+      "shot": {
+        "shot_size": "extreme_wide",
+        "camera_motion": "pull_out",
+        "visual_action": "A line rises through connected points labelled Data, Model and Insight, with the final point highlighted in green. The camera pulls out."
+      },
+      "overlay": {
+        "text": "AI-POWERED PRODUCTS — Building intelligent solutions.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "crossfade",
+      "constraints": [
+        "The renderer labels the chart 'Illustrative data'. Print no values and make no performance claims."
+      ]
+    },
+    {
+      "scene_id": "S11",
+      "purpose": "Team beat: one shared vision, carried by type alone because no team footage exists.",
+      "start_time": 48,
+      "end_time": 54,
+      "duration_seconds": 6,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "Animated headline type (graphics)",
+          "kind": "graphics",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": false,
+          "fallback": null
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "missing_input",
+          "note": "No team footage was supplied, so this scene is a typographic treatment with no people drawn. Ask the client for real footage if they want people shown."
+        },
+        {
+          "kind": "creative_decision",
+          "note": "The team claim (C07) has no approved fact, so this scene states a theme and not a fact about the team. Confirm the wording."
+        }
+      ],
+      "visual_purpose": "Says the unity message as one stacked sentence. Without supplied team footage, type alone carries it, and it is the only scene about the people behind the work.",
+      "visual": {
+        "block": "kinetic_type",
+        "style": "slide_stack",
+        "emphasis_word": 6,
+        "camera": "static",
+        "reveal": "none",
+        "backdrop": "flat"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [],
+      "shot": {
+        "shot_size": "close_up",
+        "camera_motion": "static",
+        "visual_action": "The lines ONE TEAM. DIFFERENT EXPERTISE. ONE SHARED VISION. slide in and stack, with VISION held in green."
+      },
+      "overlay": {
+        "text": "ONE TEAM. DIFFERENT EXPERTISE. ONE SHARED VISION.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "dip_to_black",
+      "constraints": [
+        "Draw no people. State no team size, experience or credentials.",
+        "Text-only scene: the sentence is the idea."
+      ]
+    },
+    {
+      "scene_id": "S12",
+      "purpose": "Close on one action, held still.",
+      "start_time": 54,
+      "end_time": 60,
+      "duration_seconds": 6,
+      "voiceover": null,
+      "production_method": "graphics",
+      "required_assets": [
+        {
+          "need": "DigiKon Solutions logo (none supplied). Typeset wordmark as a placeholder.",
+          "kind": "logo",
+          "availability": "generate_graphics",
+          "asset_id": null,
+          "placeholder": true,
+          "fallback": "Typeset text wordmark in the brand palette."
+        }
+      ],
+      "unresolved": [
+        {
+          "kind": "placeholder",
+          "note": "The wordmark is typeset text standing in for a logo. Supply the real logo or approve the wordmark."
+        },
+        {
+          "kind": "creative_decision",
+          "note": "The treatment's call to action, 'LET'S TALK ABOUT YOUR PROJECT' (29 characters), is longer than the 24-character button limit. The button reads 'TALK ABOUT YOUR PROJECT'. Approve the shortened wording, or the full line can go in the headline."
+        },
+        {
+          "kind": "creative_decision",
+          "note": "The sign-off 'Grow.' is not backed by an approved fact (C09). It is used as a brand sign-off only, with no results shown. The client must approve it."
+        }
+      ],
+      "visual_purpose": "Closes on one clear action, held still. It is the only end card.",
+      "visual": {
+        "block": "end_card",
+        "wordmark": "DIGIKON SOLUTIONS",
+        "button": "TALK ABOUT YOUR PROJECT",
+        "subline": "Automate. Innovate. Grow.",
+        "camera": "static",
+        "reveal": "none",
+        "backdrop": "gradient"
+      },
+      "asset_ids": [],
+      "source_in_seconds": 0,
+      "claim_ids": [],
+      "shot": {
+        "shot_size": "medium",
+        "camera_motion": "static",
+        "visual_action": "The end card holds still. The wordmark DIGIKON SOLUTIONS sits with a green glow, with the headline, the subline and a single button below it."
+      },
+      "overlay": {
+        "text": "LET'S BUILD WHAT'S NEXT.",
+        "safe_area": "platform_safe"
+      },
+      "audio_cues": [],
+      "transition_out": "dip_to_black",
+      "constraints": [
+        "Hold still on one action: the button.",
+        "The wordmark is typeset text, not the official logo.",
+        "Show no growth figures or result promises."
+      ]
+    }
+  ]
+}

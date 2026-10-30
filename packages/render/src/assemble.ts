@@ -16,6 +16,10 @@ import { validateOutput } from "./output.js";
 import { planRender, type RenderDeps, type RenderInput } from "./render.js";
 import { RENDERER_CAPABILITIES } from "./select.js";
 import { rawFrame } from "./verify.js";
+import { wrapText } from "./text.js";
+import { DeliveryDecision, decideDelivery } from "./delivery-status.js";
+import { checkBlend, checkMatchCut } from "./transition-checks.js";
+import { planDifferences } from "./visual-report.js";
 
 const run = promisify(execFile);
 
@@ -29,7 +33,27 @@ const run = promisify(execFile);
 
 export type DeliveryKind = "complete" | "partial" | "nothing";
 
-const SceneOp = z.object({ operation_id: z.string(), recipe_id: z.string(), template: z.string(), operation_type: z.string(), status: z.enum(["validated_available", "learning_required", "learning_in_progress", "validation_failed", "blocked_with_reason", "rendered_and_verified"]), engine: z.enum(["ffmpeg", "remotion", "hyperframes"]).nullable(), reason: z.string() });
+/**
+ * How far an operation has been shown to work, one level at a time. `status` (from the capability registry) says only what was established in isolation;
+ * it is never evidence that this scene renders. Each level is true, false, or null (not reached).
+ */
+const Readiness = z.object({
+  /** A renderer or the assembler has this template registered. */
+  registered: z.boolean(),
+  /** The template was validated on its own (a real render in the capability registry), not merely built in. */
+  validated_in_isolation: z.boolean(),
+  validation_basis: z.enum(["learned", "built_in", "none"]),
+  /** The engine accepts this scene's approved inputs (size, text, content, timing). */
+  compatible_with_scene: z.boolean().nullable(),
+  /** The engine rendered this scene's clip from those inputs and the clip passed its checks. */
+  rendered_with_scene_inputs: z.boolean().nullable(),
+  /** The operation's effect was found in the finished, assembled video. */
+  validated_in_final: z.boolean().nullable(),
+  /** The exact template or renderer that is missing, or the exact reason the engine refuses this scene. */
+  missing: z.string().nullable(),
+});
+export type Readiness = z.infer<typeof Readiness>;
+const SceneOp = z.object({ operation_id: z.string(), recipe_id: z.string(), template: z.string(), operation_type: z.string(), status: z.enum(["validated_available", "learning_required", "learning_in_progress", "validation_failed", "blocked_with_reason", "rendered_and_verified"]), engine: z.enum(["ffmpeg", "remotion", "hyperframes"]).nullable(), reason: z.string(), readiness: Readiness.optional() });
 export const DeliveryReport = z.object({
   format: z.literal("digikon.delivery-report"),
   format_version: z.literal(1),
@@ -43,8 +67,11 @@ export const DeliveryReport = z.object({
   states: z.object({
     plan_created: z.boolean(), plan_approved: z.boolean(),
     scenes_total: z.number().int(), scenes_rendered: z.number().int(), scenes_content_validated: z.number().int(),
+    /** The MP4 file passed technical validation. It says nothing about completeness or approval; see `decision`. */
     final_video_validated: z.boolean(), final_delivery_ready: z.boolean(),
   }),
+  /** The one authoritative delivery decision. `kind`, `states.final_delivery_ready`, `label` and `final_delivery_blockers` are copies of it. Absent in reports written before it existed. */
+  decision: DeliveryDecision.optional(),
   final_delivery_blockers: z.array(z.string()),
   label: z.string(),
   scenes: z.array(z.object({
@@ -58,7 +85,7 @@ export const DeliveryReport = z.object({
     content: z.object({ engine_checked: z.boolean(), end_to_end_checked: z.boolean(), checks: z.array(z.string()), limitations: z.array(z.string()) }),
     clip_sha256: z.string().nullable(),
   })),
-  transitions: z.array(z.object({ after_scene: z.string(), operation_id: z.string(), template: z.string(), status: z.enum(["applied", "omitted"]), reason: z.string() })),
+  transitions: z.array(z.object({ after_scene: z.string(), operation_id: z.string(), template: z.string(), status: z.enum(["applied", "omitted"]), reason: z.string(), /** What the frames at the join showed. */ check: z.string().nullable().optional(), /** How long the blend into the next scene lasts; 0 for a cut. */ duration_s: z.number().optional() })),
   omitted_operations: z.array(z.object({ operation_id: z.string(), scene_id: z.string(), recipe_id: z.string(), status: z.string(), reason: z.string() })),
   engines_used: z.array(z.enum(["ffmpeg", "remotion", "hyperframes"])),
   assembly: z.object({ tool: z.literal("ffmpeg"), ffmpeg_version: z.string(), lossy_encodes: z.number().int(), known_differences: z.array(z.string()) }),
@@ -73,15 +100,22 @@ export interface AssembleDeps extends RenderDeps {
   ffmpegPath?: string;
   ffprobePath?: string;
   workRoot?: string;
+  /**
+   * Measures the finished film's frames and returns the critical and major problems it found. Supplied by the caller (the console runs the visual QA);
+   * without it visual validation is "not run", which keeps the film from being final.
+   */
+  /** Whether a template has validation evidence of its own (a real render recorded for it, and still current), for the block a scene draws with it. */
+  isolation?: (template: string, block: string | null) => boolean;
+  visualCheck?: (report: DeliveryReport, handoff: DirectorHandoff) => Promise<{ critical_major: string[]; not_checked: string[] } | null>;
 }
 
-interface SceneOpState { operation_id: string; recipe_id: string; template: string; operation_type: string; status: OperationStatus; engine: Engine | null; reason: string }
+interface SceneOpState { operation_id: string; recipe_id: string; template: string; operation_type: string; status: OperationStatus; engine: Engine | null; reason: string; readiness: Readiness }
 interface ScenePlan {
   scene_id: string; index: number; start_s: number; duration_s: number; frames: number; from_frame: number;
   renderable: boolean; engine: Engine | null; adapter: RenderAdapter | null; job: Omit<RenderJob, "signal"> | null;
   operations: SceneOpState[]; unmet: string[]; reason: string | null;
 }
-interface TransitionPlan { after_scene: string; operation_id: string; template: string; xfade: string | null; frames: number; applied: boolean; reason: string }
+interface TransitionPlan { after_scene: string; operation_id: string; template: string; xfade: string | null; frames: number; applied: boolean; reason: string; kind: "blend" | "cut" | "match"; check?: string | null }
 
 export interface AssemblyPlan {
   render_id: string;
@@ -137,10 +171,21 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
     if (frames < 1 || Math.abs(frames / fps - s.duration_seconds) > 1e-6) return { ok: false, stage: "settings", reasons: [`scene ${s.scene_id} lasts ${s.duration_seconds}s, which is not a whole number of frames at ${fps} fps`] };
     const ops = out.operations.filter((o) => o.target_scene_id === s.scene_id);
     const visual = ops.filter((o) => o.operation_type !== "concat" && o.operation_type !== "mix_audio");
+    const registeredRenderers = deps.adapters.renderers();
     const states: SceneOpState[] = ops.map((o) => {
       const d = diag.get(o.operation_id), r = recOps.get(o.operation_id);
-      if (o.operation_type === "concat" && r?.implementation_ref === "ffmpeg/concat-cut") return { operation_id: o.operation_id, recipe_id: o.recipe_id, template: r.implementation_ref, operation_type: o.operation_type, status: "validated_available" as OperationStatus, engine: "ffmpeg" as Engine, reason: "a hard cut is the assembler's default join" };
-      return { operation_id: o.operation_id, recipe_id: o.recipe_id, template: r?.implementation_ref ?? "", operation_type: o.operation_type, status: d?.status ?? "blocked_with_reason", engine: (r?.renderer as Engine | null) ?? null, reason: d?.reason ?? "no diagnosis" };
+      const template = r?.implementation_ref ?? "";
+      // a join made where the clips meet belongs to the assembler, which is FFmpeg: it is registered whether or not a scene adapter lists it
+      const assemblerOwn = o.operation_type === "concat" && (template === "ffmpeg/concat-cut" || template === "ffmpeg/match-cut");
+      const registered = assemblerOwn || r?.renderer != null;
+      const basis = d?.engines.find((e) => e.verdict === "usable")?.implementation ?? "none";
+      const readiness: Readiness = {
+        registered, validated_in_isolation: registered && (basis === "learned" || !!deps.isolation?.(template, s.visual?.block ?? null)), validation_basis: basis === "learned" ? "learned" : registered ? "built_in" : "none",
+        compatible_with_scene: null, rendered_with_scene_inputs: null, validated_in_final: null,
+        missing: registered ? null : `no renderer has the template ${template || "(none)"} registered (registered here: ${registeredRenderers.join(", ") || "none"}). ${d?.reason ?? ""}`.trim(),
+      };
+      if (assemblerOwn) return { operation_id: o.operation_id, recipe_id: o.recipe_id, template, operation_type: o.operation_type, status: "validated_available" as OperationStatus, engine: "ffmpeg" as Engine, reason: template === "ffmpeg/match-cut" ? "a match cut is a join made by the assembler, applied only when the two pictures match" : "a hard cut is the assembler's default join", readiness };
+      return { operation_id: o.operation_id, recipe_id: o.recipe_id, template, operation_type: o.operation_type, status: d?.status ?? "blocked_with_reason", engine: (r?.renderer as Engine | null) ?? null, reason: d?.reason ?? "no diagnosis", readiness };
     });
     const sp: ScenePlan = { scene_id: s.scene_id, index, start_s: s.start_time, duration_s: s.duration_seconds, frames, from_frame: from, renderable: false, engine: null, adapter: null, job: null, operations: states, unmet: [], reason: null };
     from += frames;
@@ -168,6 +213,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
         const issues = adapter.check?.(job) ?? [];
         if (issues.length) sp.reason = `the ${engine} adapter refuses this scene: ${issues.join("; ")}`;
         else { sp.renderable = true; sp.engine = engine; sp.adapter = adapter; sp.job = job; }
+        for (const st of sp.operations) if (st.operation_type !== "concat" && st.operation_type !== "mix_audio") { st.readiness.compatible_with_scene = issues.length === 0; if (issues.length) st.readiness.missing = `${recOps.get(st.operation_id)?.implementation_ref ?? st.template} is registered, but it cannot draw this scene: ${issues.join("; ")}`; }
       }
     }
     scenes.push(sp);
@@ -202,12 +248,19 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
     const cf = Math.round(d * fps);
     let reason = "";
     // A hard cut is no operation at all: the assembler joins scenes with a cut unless a transition is approved.
-    if (t === "ffmpeg/concat-cut") { transitions.push({ after_scene: o.target_scene_id, operation_id: o.operation_id, template: t, xfade: null, frames: 0, applied: true, reason: "a hard cut is the assembler's default join: the next scene starts on the next frame" }); continue; }
+    if (t === "ffmpeg/concat-cut") { transitions.push({ after_scene: o.target_scene_id, operation_id: o.operation_id, template: t, xfade: null, frames: 0, applied: true, kind: "cut", reason: "a hard cut is the assembler's default join: the next scene starts on the next frame" }); continue; }
+    // A match cut is a cut that is only a match cut if the two pictures match. Whether they do is measured on the finished clips, so it is applied
+    // provisionally here and decided in `renderAssembly`; with a scene missing it cannot be measured at all.
+    if (t === "ffmpeg/match-cut") {
+      const why = i < 0 || i === scenes.length - 1 ? "it has no following scene to match" : !scenes[i]!.renderable || !scenes[i + 1]!.renderable ? "a neighbouring scene is not rendered, so the match cannot be checked" : "";
+      transitions.push({ after_scene: o.target_scene_id, operation_id: o.operation_id, template: t, xfade: null, frames: 0, applied: !why, kind: "match", reason: why || "a cut whose match is measured on the two scene clips" });
+      continue;
+    }
     if (i < 0 || i === scenes.length - 1) reason = "it has no following scene to blend into";
     else if (!xf) reason = `${t || "its template"} has no validated FFmpeg implementation (${diag.get(o.operation_id)?.status ?? "unsupported"}): ${diag.get(o.operation_id)?.reason ?? ""}`.trim();
     else if (!scenes[i]!.renderable || !scenes[i + 1]!.renderable) reason = "a neighbouring scene is not rendered, so a hard cut is used there";
     else if (cf < 1 || Math.abs(cf / fps - d) > 1e-6 || cf > Math.floor(scenes[i]!.frames / 2) || cf > scenes[i + 1]!.frames) reason = `${d}s is not a whole number of frames, or is longer than half of ${scenes[i]!.scene_id} or longer than the next scene`;
-    transitions.push({ after_scene: o.target_scene_id, operation_id: o.operation_id, template: t, xfade: xf, frames: cf, applied: !reason, reason: reason || "applied by the FFmpeg assembler" });
+    transitions.push({ after_scene: o.target_scene_id, operation_id: o.operation_id, template: t, xfade: xf, frames: cf, applied: !reason, kind: "blend", reason: reason || "applied by the FFmpeg assembler" });
   }
   // A scene's approved transition that no operation provides is already in its coverage as "unmet"; one an operation provides but cannot be applied is too.
   for (const t of transitions.filter((x) => !x.applied)) { const sp = scenes.find((s) => s.scene_id === t.after_scene); const msg = `its transition (${t.operation_id}) is not applied: ${t.reason}`; if (sp && !sp.unmet.includes(msg)) sp.unmet.push(msg); }
@@ -233,8 +286,11 @@ async function frameCount(path: string, ffprobe: string): Promise<number> {
 async function renderSlate(sp: ScenePlan, reason: string, deps: AssembleDeps, settings: RenderSettings, outPath: string, work: string): Promise<void> {
   const ffmpeg = deps.ffmpegPath ?? "ffmpeg";
   const clean = (t: string) => t.replace(/[\u0000-\u001f\u007f]/g, " ").trim();
-  await writeFile(join(work, `slate-${sp.scene_id}.txt`), `INCOMPLETE PREVIEW\n${sp.scene_id} NOT RENDERED\n${clean(reason).slice(0, 110)}`, "utf8");
-  const fs = Math.max(10, Math.round(settings.height / 14));
+  // the reason is wrapped to the frame width (at about 0.56 em per character) and kept whole up to 360 characters, never run off the edge
+  const fs = Math.max(10, Math.round(settings.height / 22));
+  const perLine = Math.max(12, Math.floor((settings.width * 0.88) / (fs * 0.6)));
+  const wrapped = wrapText(clean(reason).slice(0, 360), perLine).join("\n");
+  await writeFile(join(work, `slate-${sp.scene_id}.txt`), `INCOMPLETE PREVIEW\n${sp.scene_id} NOT RENDERED\n${wrapped}`, "utf8");
   await run(ffmpeg, ["-v", "error", "-y", "-f", "lavfi", "-i", `color=c=0x5a1e1e:s=${settings.width}x${settings.height}:r=${settings.fps}:d=${(sp.frames / settings.fps).toFixed(6)}`,
     "-vf", `drawtext=fontfile=font.ttf:textfile=slate-${sp.scene_id}.txt:expansion=none:fontcolor=white:fontsize=${fs}:x=(w-text_w)/2:y=(h-text_h)/2:text_align=center,format=yuv420p`,
     "-frames:v", String(sp.frames), "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-threads", "1", outPath], { cwd: work, windowsHide: true });
@@ -277,7 +333,11 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
   const now = opts.now ?? (() => new Date());
   const ffmpeg = deps.ffmpegPath ?? "ffmpeg", ffprobe = deps.ffprobePath ?? "ffprobe";
   const signal = opts.signal ?? new AbortController().signal;
-  const { settings, scenes, transitions } = plan;
+  const { settings, scenes } = plan;
+  // the transitions as decided here: a match cut is only known to be one once the finished clips can be measured
+  const transitions = plan.transitions.map((t) => ({ ...t }));
+  const opsOf = new Map(scenes.map((s) => [s.scene_id, s.operations.map((o) => ({ ...o, readiness: { ...o.readiness } }))]));
+  const W = settings.width, H = settings.height;
   const work = await mkdtemp(join(deps.workRoot ?? tmpdir(), "assemble-"));
   const clipsDir = join(deps.outputRoot, "clips");
   mkdirSync(clipsDir, { recursive: true });
@@ -305,8 +365,20 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       const n = await frameCount(path, ffprobe);
       if (n !== sp.frames) { errors.push(`scene ${sp.scene_id} (${sp.engine}): its clip has ${n} frames, not the approved ${sp.frames}`); continue; }
       clips.set(sp.scene_id, { path, sha256: v.output.sha256, placeholder: false });
+      for (const o of opsOf.get(sp.scene_id)!) if (o.operation_type !== "concat" && o.operation_type !== "mix_audio") o.readiness.rendered_with_scene_inputs = true;
     }
     if (errors.length) return { kind: "failed", errors, report: null };
+
+    // 1b. match cuts: a cut is a match cut only if the last picture of one scene and the first of the next really match
+    for (const t of transitions.filter((x) => x.kind === "match" && x.applied)) {
+      const i = scenes.findIndex((s) => s.scene_id === t.after_scene), a = scenes[i]!, b = scenes[i + 1]!;
+      const ca = clips.get(a.scene_id)!, cb = clips.get(b.scene_id)!;
+      if (ca.placeholder || cb.placeholder) { t.applied = false; t.reason = "a neighbouring scene is a placeholder, so the match cannot be checked"; continue; }
+      const m = checkMatchCut(await rawFrame(ca.path, a.frames - 1, W, H, ffmpeg), await rawFrame(cb.path, 0, W, H, ffmpeg), W, H);
+      t.check = m.detail;
+      t.applied = m.ok;
+      t.reason = m.ok ? `the two pictures match: ${m.detail}` : `the last picture of ${a.scene_id} and the first of ${b.scene_id} do not match, so this join is not a match cut and is not reported as one: ${m.detail}`;
+    }
 
     // 2. assembly, one final encode
     const args = ["-hide_banner", "-nostdin", "-v", "error", "-n", ...scenes.flatMap((s) => ["-i", clips.get(s.scene_id)!.path]), "-filter_complex", assembleGraph(scenes, transitions, settings.fps), "-map", "[out]", "-an",
@@ -323,7 +395,6 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
     // 4. end to end: the final film must show each scene's clip, and the transitions must really blend
     const problems: string[] = [];
     const sceneChecks = new Map<string, string[]>();
-    const W = settings.width, H = settings.height;
     const fr = (file: string, n: number) => rawFrame(file, n, W, H, ffmpeg);
     for (const sp of scenes) {
       const clip = clips.get(sp.scene_id)!.path, out = transitions.find((t) => t.applied && t.frames > 0 && t.after_scene === sp.scene_id);
@@ -343,10 +414,13 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
     for (const t of transitions.filter((x) => x.applied && x.frames > 0)) {
       const i = scenes.findIndex((s) => s.scene_id === t.after_scene), sp = scenes[i]!, next = scenes[i + 1]!;
       const mid = sp.frames - Math.ceil(t.frames / 2);
-      const f = await fr(finalPath, sp.from_frame + mid);
-      const a = mad(f, await fr(clips.get(sp.scene_id)!.path, mid)), b = mad(f, await fr(clips.get(next.scene_id)!.path, 0));
-      if (a < 2.5 || b < 2.5) problems.push(`the transition after ${sp.scene_id} does not blend: the middle frame is ${a.toFixed(1)} from the first scene and ${b.toFixed(1)} from the next (a real blend differs from both)`);
-      else sceneChecks.get(sp.scene_id)!.push(`the ${t.template} transition really blends (middle frame ${a.toFixed(1)} from the scene and ${b.toFixed(1)} from the next)`);
+      // seven frames across the join; a dip is judged on the darkest, a dissolve or wipe on the middle one
+      const samples: Buffer[] = [];
+      for (let k = 1; k <= 7; k++) samples.push(await fr(finalPath, sp.from_frame + sp.frames - t.frames + Math.min(t.frames - 1, Math.round((k * t.frames) / 8))));
+      const c = checkBlend(t.xfade ?? "fade", samples, await fr(clips.get(sp.scene_id)!.path, mid), await fr(clips.get(next.scene_id)!.path, 0), W, H);
+      t.check = c.detail;
+      if (!c.ok) problems.push(`the ${t.template} (${t.xfade}) transition after ${sp.scene_id} does not show what it should in the finished video: ${c.detail}`);
+      else sceneChecks.get(sp.scene_id)!.push(`the ${t.template} (${t.xfade}) transition is in the finished video: ${c.detail}`);
       const after = mad(await fr(finalPath, next.from_frame), await fr(clips.get(next.scene_id)!.path, 0));
       if (after > E2E_TOLERANCE) problems.push(`scene ${next.scene_id} does not start cleanly after the transition (${after.toFixed(1)} from its own clip)`);
     }
@@ -357,35 +431,57 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
     const engines = [...new Set(scenes.map((s) => s.engine).filter((e): e is Engine => !!e))];
     const rendered = scenes.filter((s) => !clips.get(s.scene_id)!.placeholder);
     const draft = plan.base.record.operations.some((o) => !o.production_executable);
-    const finalBlockers = [
-      ...(plan.complete ? [] : ["the film is incomplete: some approved scenes or operations are missing (see omitted_operations)"]),
-      ...(plan.base.record.audio_required ? ["the approved plan requires audio, which this phase cannot produce"] : []),
-      ...(draft || plan.purpose !== "production" ? ["every recipe used is still a draft, so this is a preview and production rendering stays blocked"] : []),
-    ];
     const output = final.output as RenderOutput;
-    const report: DeliveryReport = DeliveryReport.parse({
-      format: "digikon.delivery-report", format_version: 1, delivery_id: `dl_${randomUUID().replaceAll("-", "").slice(0, 16)}`, render_id: plan.render_id, kind: plan.complete ? "complete" : "partial", purpose: plan.purpose,
+
+    // Operations the plan expected to carry out and the finished clips showed otherwise (a match that is not a match) join the ones missing from the start.
+    const wasApplied = new Map(plan.transitions.map((t) => [t.operation_id, t.applied]));
+    const late = transitions.filter((t) => !t.applied && wasApplied.get(t.operation_id) === true);
+    const unmetOf = new Map(scenes.map((s) => [s.scene_id, [...s.unmet]]));
+    for (const t of late) { const msg = `its transition (${t.operation_id}) is not applied: ${t.reason}`; const u = unmetOf.get(t.after_scene); if (u && !u.includes(msg)) u.push(msg); }
+    const omittedAll = [...plan.omitted, ...late.map((t) => ({ operation_id: t.operation_id, scene_id: t.after_scene, recipe_id: t.template, status: "blocked_with_reason", reason: t.reason }))];
+    for (const t of transitions) {
+      const o = opsOf.get(t.after_scene)?.find((x) => x.operation_id === t.operation_id);
+      if (o) { o.readiness.compatible_with_scene = wasApplied.get(t.operation_id) ?? false; o.readiness.validated_in_final = t.applied; if (!t.applied) o.readiness.missing = t.reason; }
+    }
+    for (const sp of scenes) if (!clips.get(sp.scene_id)!.placeholder) for (const o of opsOf.get(sp.scene_id)!) if (o.operation_type !== "concat" && o.operation_type !== "mix_audio") o.readiness.validated_in_final = true;
+    const complete = plan.complete && late.length === 0;
+    const baseReport = {
+      format: "digikon.delivery-report" as const, format_version: 1 as const, delivery_id: `dl_${randomUUID().replaceAll("-", "").slice(0, 16)}`, render_id: plan.render_id, kind: complete ? "complete" as const : "partial" as const, purpose: plan.purpose,
       handoff_content_hash: plan.handoff.content_hash,
-      states: { plan_created: true, plan_approved: true, scenes_total: scenes.length, scenes_rendered: rendered.length, scenes_content_validated: rendered.length, final_video_validated: true, final_delivery_ready: finalBlockers.length === 0 },
-      final_delivery_blockers: finalBlockers,
-      label: plan.complete ? "COMPLETE PREVIEW: every approved scene and operation is present and verified, but it is a preview of draft recipes, not a final deliverable." : `INCOMPLETE PREVIEW: ${scenes.length - rendered.length} scene(s) were not rendered and ${plan.omitted.length} approved operation(s) are missing or unsupported. This is not the approved video.`,
+      states: { plan_created: true, plan_approved: true, scenes_total: scenes.length, scenes_rendered: rendered.length, scenes_content_validated: rendered.filter((s) => s.engine !== "ffmpeg").length, final_video_validated: true, final_delivery_ready: false },
+      final_delivery_blockers: [] as string[], label: "",
       scenes: scenes.map((s) => {
         const c = clips.get(s.scene_id)!, notes = sceneNotes.get(s.scene_id) ?? [];
         return {
-          scene_id: s.scene_id, start_s: s.start_s, duration_s: s.duration_s, frames: s.frames, status: c.placeholder ? "placeholder" : s.engine === "ffmpeg" ? "rendered_unverified" : "rendered_and_verified",
-          engine: s.engine, operations: s.operations, unmet: s.unmet, omitted_reason: c.placeholder ? s.reason : null,
+          scene_id: s.scene_id, start_s: s.start_s, duration_s: s.duration_s, frames: s.frames, status: c.placeholder ? "placeholder" as const : s.engine === "ffmpeg" ? "rendered_unverified" as const : "rendered_and_verified" as const,
+          engine: s.engine, operations: opsOf.get(s.scene_id)!, unmet: unmetOf.get(s.scene_id)!, omitted_reason: c.placeholder ? s.reason : null,
           content: { engine_checked: !c.placeholder && s.engine !== "ffmpeg", end_to_end_checked: true, checks: sceneChecks.get(s.scene_id) ?? [], limitations: s.engine === "ffmpeg" ? ["FFmpeg scenes are checked for being non-blank and for matching the final video, not for their text or layout"] : notes.filter((n) => /checked|pixel|OCR/i.test(n)) },
           clip_sha256: c.sha256,
         };
       }),
-      transitions: transitions.map((t) => ({ after_scene: t.after_scene, operation_id: t.operation_id, template: t.template, status: t.applied ? "applied" : "omitted", reason: t.reason })),
-      omitted_operations: plan.omitted, engines_used: engines,
-      assembly: { tool: "ffmpeg", ffmpeg_version: ffv, lossy_encodes: 2, known_differences: ["each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)", "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2", "scene clips are h264 intermediates, not lossless"] },
+      transitions: transitions.map((t) => ({ after_scene: t.after_scene, operation_id: t.operation_id, template: t.template, status: t.applied ? "applied" as const : "omitted" as const, reason: t.reason, check: t.check ?? null, duration_s: t.applied ? t.frames / settings.fps : 0 })),
+      omitted_operations: omittedAll, engines_used: engines,
+      assembly: { tool: "ffmpeg" as const, ffmpeg_version: ffv, lossy_encodes: 2, known_differences: ["each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)", "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2", "scene clips are h264 intermediates, not lossless"] },
       output: { path: finalPath, bytes: output.bytes, sha256: output.sha256, width: output.width, height: output.height, fps: output.fps, duration_s: output.duration_s, frames: finalFrames, video_codec: output.video_codec, audio_tracks: output.audio_tracks },
       limitations: ["only the first, middle and last clean frame of each scene are compared with its clip", "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR", "audio is not produced in this phase"],
       created_at: now().toISOString(),
+    };
+    const draftReport: DeliveryReport = DeliveryReport.parse(baseReport);
+
+    // The one decision, from all six criteria. Nothing below this line decides delivery again.
+    const visual = deps.visualCheck ? await deps.visualCheck(draftReport, plan.handoff).catch(() => null) : null;
+    const isTransition = new Set(transitions.map((t) => t.operation_id));
+    const decision = decideDelivery({
+      file_valid: true,
+      scenes: scenes.map((s) => { const r = draftReport.scenes.find((x) => x.scene_id === s.scene_id)!; return { scene_id: s.scene_id, rendered: r.status !== "placeholder", engine_content_checked: r.content.engine_checked, end_to_end_checked: r.content.end_to_end_checked, unmet: r.unmet.filter((u) => !u.startsWith("its transition (")) }; }),
+      omitted: omittedAll.filter((o) => !isTransition.has(o.operation_id)),
+      transitions_not_applied: transitions.filter((t) => !t.applied).map((t) => ({ after_scene: t.after_scene, template: t.template, reason: t.reason })),
+      audio_required: plan.base.record.audio_required,
+      visual, plan_problems: planDifferences(draftReport, plan.handoff),
+      recipes: { draft, preview_only: plan.purpose !== "production", blockers: plan.purpose === "production" ? plan.base.record.blockers : [] },
     });
-    if (plan.complete && !plan.base.record.audio_required) {
+    const report: DeliveryReport = DeliveryReport.parse({ ...baseReport, kind: decision.complete ? "complete" : "partial", states: { ...baseReport.states, final_delivery_ready: decision.final }, decision, label: decision.label, final_delivery_blockers: decision.blockers });
+    if (decision.complete && !plan.base.record.audio_required) {
       const record = RenderRecord.parse({ ...plan.base.record, state: "rendered", blockers: [], errors: [], output: { ...output, checks: [...output.checks, `assembled from ${scenes.length} scene clips by ${engines.join(", ")} and FFmpeg; every scene matches its clip`] }, notes: [...plan.base.record.notes, `assembled from scene clips (${engines.join(", ")}); ${report.label}`], started_at: now().toISOString(), finished_at: now().toISOString() });
       return { kind: "complete", record, report };
     }

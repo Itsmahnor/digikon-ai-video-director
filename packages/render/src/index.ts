@@ -22,3 +22,7 @@ export * from "./composition-verify.js";
 export * from "./composition-examples.js";
 export * from "./visual-report.js";
 export * from "./visual-capabilities.js";
+export * from "./layout.js";
+export * from "./font-metrics.js";
+export * from "./delivery-status.js";
+export * from "./transition-checks.js";

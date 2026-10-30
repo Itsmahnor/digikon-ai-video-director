@@ -23,6 +23,28 @@ export interface FilmQuality {
 
 const MOTION = /scene-composition|slow-push|pull-out|pan-reframe|text-fade|word-stagger|lower-third|logo-reveal|end-card|punch|crop/;
 
+/**
+ * How the finished film differs from the approved plan in ways other than a missing scene or operation (those are reported as such): the scenes and their
+ * order, their timing, and the template that drew a scene with an approved visual.
+ */
+export function planDifferences(report: DeliveryReport, handoff: DirectorHandoff): string[] {
+  const problems: string[] = [];
+  const approved = handoff.storyboard.scenes.map((s) => s.scene_id);
+  const got = report.scenes.map((s) => s.scene_id);
+  if (approved.join() !== got.join()) problems.push(`the scenes in the film (${got.join(", ")}) are not the approved scenes in order (${approved.join(", ")})`);
+  for (const s of handoff.storyboard.scenes) {
+    const r = report.scenes.find((x) => x.scene_id === s.scene_id);
+    if (!r) continue;
+    if (Math.abs(r.duration_s - s.duration_seconds) > 1e-6 || Math.abs(r.start_s - s.start_time) > 1e-6) problems.push(`${s.scene_id}: planned ${s.start_time}s for ${s.duration_seconds}s, rendered ${r.start_s}s for ${r.duration_s}s`);
+    if (s.visual && r.status !== "placeholder" && !r.operations.some((o) => o.template === "remotion/scene-composition")) problems.push(`${s.scene_id}: the approved visual (${s.visual.block}) was not drawn by the composition template; ${r.operations.map((o) => o.template).join(", ") || "no operation"} was used instead`);
+  }
+  if (report.output) {
+    const planned = Math.max(...handoff.storyboard.scenes.map((s) => s.start_time + s.duration_seconds));
+    if (Math.abs(report.output.duration_s - planned) > 1 / Math.max(1, report.output.fps)) problems.push(`the film lasts ${report.output.duration_s}s, but the approved storyboard lasts ${planned}s`);
+  }
+  return problems;
+}
+
 export function planCompliance(report: DeliveryReport, handoff: DirectorHandoff): FilmQuality["plan_compliance"] {
   const problems: string[] = [], evidence: string[] = [];
   const approved = handoff.storyboard.scenes.map((s) => s.scene_id);
@@ -50,16 +72,17 @@ export async function filmQuality(report: DeliveryReport, handoff: DirectorHando
   const visual = report.output
     ? await visualQa({
         video: report.output.path, ffmpegPath: opts.ffmpegPath, palette_background: handoff.treatment.art_direction?.palette.background ?? null,
-        scenes: report.scenes.map((s) => ({ scene_id: s.scene_id, start_s: s.start_s, duration_s: s.duration_s, rendered: s.status !== "placeholder", planned_motion: s.operations.some((o) => MOTION.test(o.template)), drawn_by: s.operations.map((o) => o.template).filter((t) => !t.startsWith("ffmpeg/concat")).join("+") || "nothing" })),
+        scenes: report.scenes.map((s) => ({ scene_id: s.scene_id, start_s: s.start_s, duration_s: s.duration_s, rendered: s.status !== "placeholder", transition_out_s: report.transitions.find((t) => t.after_scene === s.scene_id && t.status === "applied")?.duration_s ?? 0, planned_motion: s.operations.some((o) => MOTION.test(o.template)), drawn_by: s.operations.map((o) => o.template).filter((t) => !t.startsWith("ffmpeg/concat")).join("+") || "nothing" })),
       })
     : empty;
-  const blockers = [
+  // The one delivery decision, when the report has it, is the answer; the list below is what a report written before it existed can say.
+  const blockers = report.decision ? [...report.decision.blockers] : [
     ...(technical.ok ? [] : ["the rendered file did not pass technical validation"]),
     ...compliance.problems.map((p) => `plan: ${p}`),
     ...visual.findings.filter((f) => f.severity === "critical" || f.severity === "major").map((f) => `visual ${f.scene_id ?? "film"}: ${f.description}`),
     ...report.final_delivery_blockers,
   ];
-  return { technical, plan_compliance: compliance, visual, tickets: ticketsFromFindings(visual.findings, report.scenes.map((s) => s.scene_id)), final_ready: blockers.length === 0 && report.kind === "complete", blockers };
+  return { technical, plan_compliance: compliance, visual, tickets: ticketsFromFindings(visual.findings, report.scenes.map((s) => s.scene_id)), final_ready: report.decision ? report.decision.final : blockers.length === 0 && report.kind === "complete", blockers };
 }
 
 /** Appends one line per visual-QA run to a log, so failures and what fixed them are kept (capabilities/visual/qa-log.jsonl). */
