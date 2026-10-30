@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "validation_rules": [],
+  "source": { "origin": "original", "url": null, "license": "Digikon original" },
+  "status": "draft",
+  "recipe_id": "scene-composition",
+  "type": "animation",
+  "operation_type": "render_graphics_scene",
+  "title": "Drawn scene from the approved visual spec (Remotion)",
+  "purpose": "Draws the whole scene from the scene's approved structured visual: a message thread, a product UI demo with a cursor, a connected process flow, an illustrative chart, kinetic type, layered parallax cards or an end card, in the film's approved palette, type and motion language, with the scene's own camera move and reveal. Use it for scenes that are graphics-led and have no supplied footage. Needs a visual spec on the scene; takes no parameters because the spec carries them. Do not combine it with any other operation in the same scene.",
+  "intents": ["drawn graphics scene", "product ui demo animation", "message thread hook", "process diagram", "animated chart", "kinetic typography", "layered cards parallax", "end card button", "graphics led scene"],
+  "parameters": [],
+  "constraints": { "min_duration_s": 2, "max_duration_s": 12, "max_uses_per_film": null, "energy": "medium" },
+  "compatibility": { "renderers": ["remotion"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["none"] },
+  "implementation_ref": "remotion/scene-composition"
+}

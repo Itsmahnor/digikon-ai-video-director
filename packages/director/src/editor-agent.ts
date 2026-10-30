@@ -60,7 +60,7 @@ export const CUT_MARKER_S = 0.04;
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const showsOverlayText = (r: Recipe) => r.validation_rules.some((x) => x.kind === "requires_overlay_text");
 const pad = (n: number) => String(n).padStart(2, "0");
-const short = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
+const short = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}â€¦` : s);
 
 /** Where an operation sits inside its scene. Transitions sit at the tail of the outgoing scene; everything else spans the scene. */
 function place(recipe: Recipe, params: Record<string, number | string | boolean>, scene: Scene) {
@@ -154,7 +154,7 @@ export async function planEditorWork(h: DirectorHandoff, deps: Pick<EditorDeps, 
     }
     // Overlay text is only shown by a recipe that renders text. Inventing a text operation would change the approved plan.
     if (s.overlay) {
-      const shown = h.edit_plan.uses.some((u) => u.scene_id === s.scene_id && deps.recipes.get(u.recipe_id) && showsOverlayText(deps.recipes.get(u.recipe_id)!));
+      const shown = h.edit_plan.uses.some((u) => u.scene_id === s.scene_id && deps.recipes.get(u.recipe_id) && (showsOverlayText(deps.recipes.get(u.recipe_id)!) || (u.recipe_id === "scene-composition" && !!s.visual))); // a drawn composition shows the scene's overlay text as its headline
       if (!shown) revision_requests.push({ target: "edit_plan", scene_ids: [s.scene_id], reason: `${s.scene_id} has approved overlay text ("${short(s.overlay.text, 50)}"), but no recipe use in the edit plan displays text, so it would never appear.`, requires_reapproval: true });
     }
     if (s.asset_ids.some((id) => assets.get(id)?.media_type !== "audio") && !operations.some((o) => o.target_scene_id === s.scene_id && o.operation_type === "trim_clip")) {
@@ -345,3 +345,4 @@ export async function runEditor(raw: unknown, deps: EditorDeps): Promise<EditorR
   EditorInput.parse({ schema_version: EDITOR_SCHEMA_VERSION, handoff: h, skills: output.provenance.skills, retrieval_scope: "editor" });
   return { ok: true, output, check: { ok: validation.ok, issues, requires_reapproval: revision_requests.length > 0 || drift } };
 }
+

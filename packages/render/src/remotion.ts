@@ -9,22 +9,26 @@ import { verifySceneFidelity } from "./verify.js";
 import { composedCapabilities, planComposedScenes, type ComposedTemplate } from "./web-composed.js";
 import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, planWebScenes, type WebTemplate } from "./web-scenes.js";
+import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
+import { verifyCompositionScenes } from "./composition-verify.js";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
 export const REMOTION_TEMPLATES: Readonly<Record<string, WebTemplate>> = {
   "remotion/text-slide": { kind: "text", type: "render_graphics_scene" },
   "remotion/image-caption": { kind: "image", type: "render_graphics_scene" },
 };
+/** The drawn-composition template: it is planned by composition.ts, not by the plain-scene planner. */
+const COMPOSITION_TYPES = { [COMPOSITION_TEMPLATE]: ["render_graphics_scene"] as const };
 
 /** What this adapter can show beyond plain graphics, in the form the coverage check takes. No transitions, clips or audio are built. */
-export const REMOTION_CAPABILITIES = { image_templates: ["remotion/image-caption"], video_templates: [], transition_templates: {} } as const;
+export const REMOTION_CAPABILITIES = { image_templates: ["remotion/image-caption"], video_templates: [], transition_templates: {}, drawn_templates: [COMPOSITION_TEMPLATE] } as const;
 
 /**
  * What this adapter can show, including the learned templates it was given: camera moves (by the storyboard motion they carry out), the
  * templates that show their own image, and the templates that start text at the approved delay.
  */
 export function remotionCapabilities(learned: readonly ComposedTemplate[] = []) {
-  return { image_templates: REMOTION_CAPABILITIES.image_templates, video_templates: REMOTION_CAPABILITIES.video_templates, transition_templates: REMOTION_CAPABILITIES.transition_templates, ...composedCapabilities(learned) };
+  return { image_templates: REMOTION_CAPABILITIES.image_templates, video_templates: REMOTION_CAPABILITIES.video_templates, transition_templates: REMOTION_CAPABILITIES.transition_templates, drawn_templates: REMOTION_CAPABILITIES.drawn_templates, ...composedCapabilities(learned) };
 }
 
 export interface RemotionAdapterOptions {
@@ -49,6 +53,8 @@ export interface RemotionAdapterOptions {
 }
 
 const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-project", "index.jsx");
+/** The scene-composition template has its own Remotion project, so the evidence of the plain and composed scenes stays valid. */
+export const COMPOSITIONS_ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-compositions", "index.jsx");
 
 /**
  * The Remotion adapter. It bundles the fixed React composition in `remotion-project/` together with the font and the supplied
@@ -70,6 +76,10 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
   const composedTemplates = Object.fromEntries((opts.learned ?? []).map((l) => [l.template, l]));
   /** A film that uses any learned template is planned as composed scenes; otherwise as the plain text and image scenes. The two are not mixed in one film yet. */
   const plan = (job: Parameters<RenderAdapter["render"]>[0] | Omit<Parameters<RenderAdapter["render"]>[0], "signal">) => {
+    if (job.operations.some((o) => job.templates[o.operation_id] === COMPOSITION_TEMPLATE)) {
+      const p = planCompositionScenes(job, { outputRoot: opts.outputRoot });
+      return p.ok ? { kind: "composition" as const, plan: p } : { kind: "issues" as const, issues: p.issues };
+    }
     const composed = job.operations.some((o) => composedTemplates[job.templates[o.operation_id] ?? ""]);
     if (!composed) { const p = planWebScenes(job, planOpts); return p.ok ? { kind: "base" as const, plan: p } : { kind: "issues" as const, issues: p.issues }; }
     const mixed = job.operations.filter((o) => !composedTemplates[job.templates[o.operation_id] ?? ""]);
@@ -80,7 +90,7 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
 
   return {
     renderer: "remotion",
-    templates: { ...Object.fromEntries(Object.entries(REMOTION_TEMPLATES).map(([ref, t]) => [ref, [t.type]])), ...Object.fromEntries((opts.learned ?? []).map((l) => [l.template, [l.type]])) },
+    templates: { ...Object.fromEntries(Object.entries(REMOTION_TEMPLATES).map(([ref, t]) => [ref, [t.type]])), ...COMPOSITION_TYPES, ...Object.fromEntries((opts.learned ?? []).map((l) => [l.template, [l.type]])) },
     capabilities: remotionCapabilities(opts.learned),
     check(job) {
       const p = plan(job);
@@ -105,11 +115,12 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         }));
         const { bundle } = await import("@remotion/bundler");
         const { renderMedia, selectComposition, makeCancelSignal } = await import("@remotion/renderer");
-        const serveUrl = await bundle({ entryPoint: ENTRY, outDir: join(dir, "bundle"), publicDir });
+        const serveUrl = await bundle({ entryPoint: planned.kind === "composition" ? COMPOSITIONS_ENTRY : ENTRY, outDir: join(dir, "bundle"), publicDir });
         const inputProps = { width, height, fps, total_frames: plan2.total_frames, font: "font.ttf", badge: CONCEPT_BADGE, scenes };
+        const compId = planned.kind === "composition" ? "Compositions" : "Scenes";
         // "chrome-for-testing" is Remotion's mode for a full browser (headless=new); its default mode targets chrome-headless-shell, which is not installed
         const common = { browserExecutable: chrome, chromeMode: "chrome-for-testing" as const, logLevel: "error" as const, chromiumOptions: { gl: "angle" as const } };
-        const composition = await selectComposition({ serveUrl, id: "Scenes", inputProps, ...common });
+        const composition = await selectComposition({ serveUrl, id: compId, inputProps, ...common });
         if (composition.width !== width || composition.height !== height || composition.fps !== fps || composition.durationInFrames !== plan2.total_frames) {
           throw new Error(`remotion measured the composition as ${composition.width}x${composition.height} at ${composition.fps} fps for ${composition.durationInFrames} frames, not what was approved`);
         }
@@ -121,7 +132,9 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         } finally {
           job.signal.removeEventListener("abort", onAbort);
         }
-        const checked = planned.kind === "composed"
+        const checked = planned.kind === "composition"
+          ? await verifyCompositionScenes(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot })
+          : planned.kind === "composed"
           ? await verifyComposedScenes(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot })
           : await verifySceneFidelity(resolve(job.output_path), planned.plan.scenes, width, height, { fontFile: opts.fontFile, workRoot: opts.workRoot });
         if (checked.problems.length) {
@@ -140,3 +153,4 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
     },
   };
 }
+

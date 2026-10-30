@@ -35,8 +35,8 @@ export function loadReference(skill: Skill, file: string): string {
 /** Which skills apply at which step. Mirrors skills/video-director/references/routing.md. */
 export const STEP_SKILLS = {
   intake: ["video-director"],
-  treatment: ["commercial-strategy"],
-  storyboard: ["commercial-strategy", "cinematography"],
+  treatment: ["commercial-strategy", "creative-direction"],
+  storyboard: ["commercial-strategy", "cinematography", "creative-direction"],
   edit_plan: ["editing-director", "motion-graphics", "sound-design"],
 } as const;
 export type Step = keyof typeof STEP_SKILLS;
@@ -47,8 +47,8 @@ export type Step = keyof typeof STEP_SKILLS;
  */
 export const STEP_REFERENCES: Record<Step, readonly string[]> = {
   intake: [],
-  treatment: ["commercial-strategy/structures.md", "commercial-strategy/claims-register.md"],
-  storyboard: ["cinematography/footage-limits.md", "commercial-strategy/structures.md", "commercial-strategy/claims-register.md"],
+  treatment: ["commercial-strategy/structures.md", "commercial-strategy/claims-register.md", "creative-direction/visual-blocks.md"],
+  storyboard: ["cinematography/footage-limits.md", "commercial-strategy/structures.md", "commercial-strategy/claims-register.md", "creative-direction/visual-blocks.md"],
   edit_plan: ["editing-director/edit-operations.md", "motion-graphics/safe-areas.md", "sound-design/loudness.md"],
 };
 

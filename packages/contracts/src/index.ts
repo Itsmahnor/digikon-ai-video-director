@@ -1,3 +1,4 @@
+export * from "./visual.js";
 export * from "./schemas.js";
 export * from "./recipe.js";
 export * from "./director.js";

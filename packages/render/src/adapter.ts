@@ -17,6 +17,10 @@ export interface RenderJob {
   asset_info: Record<string, { duration: number | null; width: number | null; height: number | null; audio_tracks: number }>;
   /** Supplied images the plan presents as product screens without the user having declared them a genuine capture. They must be labelled as a concept. */
   concept_asset_ids: string[];
+  /** The approved visual spec of each scene that has one, with the scene's approved overlay text, by scene_id. Data only. */
+  scene_visuals?: Record<string, { visual: unknown; overlay_text: string | null; visual_purpose: string | null }>;
+  /** The approved art direction of the film, when the treatment has one. */
+  art_direction?: unknown;
   /** The only path the adapter may write. It does not exist when the job starts. */
   output_path: string;
   signal: AbortSignal;
@@ -64,3 +68,4 @@ export class AdapterRegistry implements RendererRegistry {
 
 /** No adapters: nothing is executable. This is the real state of the repository today. */
 export const NO_ADAPTERS = new AdapterRegistry();
+

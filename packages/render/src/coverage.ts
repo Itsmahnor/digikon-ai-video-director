@@ -33,6 +33,8 @@ export interface RenderCapabilities {
   image_via_templates?: readonly string[];
   /** Templates that start their text at the approved `delay_s` themselves, so a delayed caption is carried out and not merely tolerated. */
   caption_timing_templates?: readonly string[];
+  /** Templates that draw the scene from its approved visual spec: they draw its text, graphics, UI-style pictures and camera motion themselves. */
+  drawn_templates?: readonly string[];
 }
 
 /**
@@ -52,7 +54,9 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     if (!sceneOps.length) missing.push("no operation covers this scene");
     for (const o of ops) if (!supported.has(o.operation_id)) missing.push(`${o.operation_id} (${o.recipe_id}) has no renderer that can run it`);
     const shown = sceneOps.filter((o) => supported.has(o.operation_id));
-    if (s.overlay && !shown.some((o) => o.caption)) missing.push("the scene's text is not shown by any operation");
+    // A scene drawn from its approved visual spec: the template draws the scene's text, its UI-style pictures and its camera itself.
+    const drawn = !!s.visual && shown.some((o) => (caps.drawn_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref));
+    if (s.overlay && !drawn && !shown.some((o) => o.caption)) missing.push("the scene's text is not shown by any operation");
     // Renderers show a caption for the whole scene, from its first frame. A caption approved for other times is not carried out, so it is reported.
     for (const o of shown) {
       if (!o.caption) continue;
@@ -64,8 +68,9 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
       }
     }
     // What the renderer does about the approved text placement is stated, never implied.
-    if (s.overlay) labelled.push(`text is centred and kept inside the middle 84% of the frame width; the approved ${s.overlay.safe_area === "platform_safe" ? "platform safe area" : "full-frame"} setting is not checked against any platform specification (none is verified in this project)`);
-    labelled.push(`the approved shot size (${s.shot.shot_size.replaceAll("_", " ")}) and visual action ("${s.shot.visual_action.length > 60 ? `${s.shot.visual_action.slice(0, 59)}…` : s.shot.visual_action}") describe the content; the renderer does not change or check them`);
+    if (drawn) labelled.push(`drawn from the approved visual spec (${s.visual!.block.replaceAll("_", " ")}) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data`);
+    else if (s.overlay) labelled.push(`text is centred and kept inside the middle 84% of the frame width; the approved ${s.overlay.safe_area === "platform_safe" ? "platform safe area" : "full-frame"} setting is not checked against any platform specification (none is verified in this project)`);
+    labelled.push(`the approved shot size (${s.shot.shot_size.replaceAll("_", " ")}) and visual action ("${s.shot.visual_action.length > 60 ? `${s.shot.visual_action.slice(0, 59)}â€¦` : s.shot.visual_action}") describe the content; the renderer does not change or check them`);
 
     const shownImages = new Set(shown.filter((o) => caps.image_templates.includes(supported.get(o.operation_id)!.implementation_ref) || (caps.image_via_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref)).flatMap((o) => o.asset_ids));
     const videoOps = new Map(shown.filter((o) => (caps.video_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref)).flatMap((o) => o.asset_ids.map((id) => [id, o] as const)));
@@ -79,10 +84,13 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     }
     // Supplied media is played or shown unchanged. A camera move in the approved shot is not carried out, so it is not silently dropped.
     const motion = s.shot.camera_motion;
-    const moved = motion !== "static" && (caps.camera_templates?.[motion] ?? []).some((c) => shown.some((o) => supported.get(o.operation_id)!.implementation_ref === c.template && (!c.param || o.parameters[c.param.name] === c.param.value)));
+    const drawnMotion = drawn ? ({ static: "static", push_in: "slow_push_in", pull_out: "pull_out", pan_left: "pan_left", pan_right: "pan_right" } as Record<string, string>)[s.visual!.camera] : null;
+    const moved = motion !== "static" && (drawnMotion === motion || (caps.camera_templates?.[motion] ?? []).some((c) => shown.some((o) => supported.get(o.operation_id)!.implementation_ref === c.template && (!c.param || o.parameters[c.param.name] === c.param.value))));
     if (motion !== "static" && !moved) missing.push(`the approved shot calls for camera motion (${s.shot.camera_motion.replaceAll("_", " ")}), but no renderer here has a camera-move template, so ${s.asset_ids.length ? "supplied media is shown unchanged" : "the scene would be shown static"}`);
     for (const r of s.required_assets) {
       if (r.kind === "graphics") continue;
+      // a product screen, logo or picture that was not supplied is drawn as a labelled concept (a typeset wordmark for a logo) when the scene has a visual spec
+      if (drawn && r.availability === "generate_graphics" && (r.kind === "ui_screenshot" || r.kind === "logo" || r.kind === "image")) { labelled.push(`${r.kind === "logo" ? "the brand mark is a typeset wordmark, not a logo" : r.kind === "ui_screenshot" ? "the product screen is a drawn concept illustration, not the real product" : "the picture is drawn graphics"} ("${r.need.slice(0, 60)}")`); continue; }
       const label = r.kind === "ui_screenshot" ? "a product screen" : r.kind === "logo" ? "a logo" : r.kind === "footage" ? "footage" : r.kind === "audio" ? "audio" : "an image";
       if (r.kind === "footage" && r.availability === "supplied" && r.asset_id && !r.placeholder && videoOps.has(r.asset_id)) continue;
       if (r.availability === "supplied" && r.asset_id && !r.placeholder && shownImages.has(r.asset_id)) {
@@ -100,3 +108,5 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
   });
   return { complete: result.every((x) => x.represented), scenes: result };
 }
+
+

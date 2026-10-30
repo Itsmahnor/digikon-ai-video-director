@@ -11,6 +11,7 @@ import { diagnoseOperations, type Engine, type OperationStatus } from "./capabil
 import { previewCoverage, type RenderCapabilities } from "./coverage.js";
 import { ffmpegCapabilities } from "./ffmpeg.js";
 import type { RenderAdapter, RenderJob } from "./adapter.js";
+import { jobVisuals } from "./composition.js";
 import { validateOutput } from "./output.js";
 import { planRender, type RenderDeps, type RenderInput } from "./render.js";
 import { RENDERER_CAPABILITIES } from "./select.js";
@@ -162,7 +163,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
           templates: Object.fromEntries(visual.map((o) => [o.operation_id, recOps.get(o.operation_id)!.implementation_ref])),
           assets: base.plan?.job.assets.filter((a) => used.has(a.asset_id)) ?? h.assets.filter((a) => used.has(a.asset_id)).map((a) => ({ asset_id: a.asset_id, media_type: a.media_type, uri: a.uri })),
           clips: [], asset_info: Object.fromEntries(h.assets.filter((a) => used.has(a.asset_id)).map((a) => [a.asset_id, { duration: a.duration, width: a.width, height: a.height, audio_tracks: a.audio_tracks }])),
-          concept_asset_ids: base.plan?.job.concept_asset_ids.filter((id) => used.has(id)) ?? [], output_path: join(deps.outputRoot, "clips", `${render_id}.mp4`),
+          concept_asset_ids: base.plan?.job.concept_asset_ids.filter((id) => used.has(id)) ?? [], ...jobVisuals(h), output_path: join(deps.outputRoot, "clips", `${render_id}.mp4`),
         };
         const issues = adapter.check?.(job) ?? [];
         if (issues.length) sp.reason = `the ${engine} adapter refuses this scene: ${issues.join("; ")}`;
@@ -411,3 +412,4 @@ export function saveDeliveryReport(dir: string, report: DeliveryReport): string 
 export function loadDeliveryReport(file: string): DeliveryReport | null {
   try { const p = DeliveryReport.safeParse(JSON.parse(readFileSync(file, "utf8"))); return p.success ? p.data : null; } catch { return null; }
 }
+

@@ -1,0 +1,177 @@
+{
+  "format": "digikon.visual-capability",
+  "format_version": 1,
+  "capability_id": "remotion:scene-composition:process_flow",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/scene-composition",
+  "block": "process_flow",
+  "creative_use": "Show how something works as a sequence: nodes light up in order along a line that draws itself.",
+  "example": {
+    "visual": {
+      "block": "process_flow",
+      "camera": "pan_right",
+      "reveal": "none",
+      "backdrop": "flat",
+      "steps": [
+        {
+          "label": "Share times",
+          "detail": "Your open slots"
+        },
+        {
+          "label": "Client picks",
+          "detail": "One tap"
+        },
+        {
+          "label": "Confirmed",
+          "detail": "Added to calendar"
+        }
+      ]
+    },
+    "overlay_text": "From request to booked in three steps."
+  },
+  "limitations": [
+    "Two to five steps; labels of at most 22 characters.",
+    "Lays out horizontally in wide areas and vertically in tall ones.",
+    "No branching or loops.",
+    "Validated on one example spec per block at the listed frame sizes, in one palette. Other text, lengths, palettes and sizes are checked when a film is rendered, not by this record.",
+    "Frame checks measure background, coverage, edge contact, headline ink and movement. They do not read text or judge design quality.",
+    "No audio, no supplied images or footage inside a block, one typeface file, one block per scene."
+  ],
+  "not_validated": [
+    "any other text, list length, palette or frame size than the listed inputs",
+    "1:1 frames",
+    "frame rates other than 30",
+    "scenes longer or shorter than 3 s",
+    "a person's judgement of the design"
+  ],
+  "status": "validated",
+  "validated": {
+    "at": "2026-10-30T07:05:58.505Z",
+    "fingerprint": "96526c51841e53f3",
+    "remotion": "4.0.539",
+    "browser": "chrome via remotion",
+    "inputs": [
+      {
+        "width": 960,
+        "height": 540,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "09e260cf2b312ed6",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "From request to booked in three steps."
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "09e260cf2b312ed6",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "From request to booked in three steps."
+      }
+    ],
+    "renders": [
+      {
+        "width": 960,
+        "height": 540,
+        "sha256": "134f6e8481a4c34f7963625eb4f740d07b64022444c587d87c2fb4ffa538c5aa",
+        "bytes": 1400896,
+        "frames": 630,
+        "film_scene": "S03 of a 7-scene film"
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "sha256": "4d31d43debef154d187e48483095e3c360a5af7673c5a64f40874dc3b6125ed3",
+        "bytes": 1229744,
+        "frames": 630,
+        "film_scene": "S03 of a 7-scene film"
+      }
+    ],
+    "checks": [
+      "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 14% of the frame drawn, nothing on the frame edge, headline area inked, motion 16.2 of 255 between frames, file probed as 960x540",
+      "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 13% of the frame drawn, nothing on the frame edge, headline area inked, motion 15.1 of 255 between frames, file probed as 540x960"
+    ],
+    "measures": [
+      {
+        "width": 960,
+        "coverage": 0.144,
+        "motion": 16.18,
+        "edge_ink": 0
+      },
+      {
+        "width": 540,
+        "coverage": 0.132,
+        "motion": 15.12,
+        "edge_ink": 0
+      }
+    ]
+  },
+  "history": [
+    {
+      "at": "2026-10-30T06:35:44.814Z",
+      "fingerprint": "3bf1d3e333dece14",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "09e260cf2b312ed6",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "From request to booked in three steps."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "09e260cf2b312ed6",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "From request to booked in three steps."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "1ba1820ca4fbca1662617cdd167f5aeff97e85487e842192c6fe281aa4e4a7d2",
+          "bytes": 1645591,
+          "frames": 630,
+          "film_scene": "S03 of a 7-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "efd7c21d0242c4b9ac5c551755942847798ba202b667be1566feeaa044314f1a",
+          "bytes": 1463391,
+          "frames": 630,
+          "film_scene": "S03 of a 7-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 15% of the frame drawn, nothing on the frame edge, headline area inked, motion 21.5 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 14% of the frame drawn, nothing on the frame edge, headline area inked, motion 18.8 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.149,
+          "motion": 21.52,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.14,
+          "motion": 18.77,
+          "edge_ink": 0
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "record_hash": "76b10912e2dcd2bd"
+}

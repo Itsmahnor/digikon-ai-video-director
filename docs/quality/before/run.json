@@ -1,0 +1,2782 @@
+{
+ "session": "35e1221287dc",
+ "route": {
+  "result": {
+   "status": "ready",
+   "request": {
+    "mode": "create_minimal",
+    "language": null,
+    "assumptions": [
+     "Format 16:9 chosen from the platform \"YouTube\".",
+     "Tone noted: Calm, clear, modern."
+    ],
+    "project": {
+     "project_id": "proj_35e1221287dc",
+     "owner_id": "console-user",
+     "brief": "A 20 second YouTube explainer for Slotly, a scheduling app for small business owners. Calm, clear, modern. The goal is free trial sign-ups. Audience: small business owners who lose hours to back-and-forth booking emails. No footage, no logo file, no voiceover, no music.",
+     "objective": "Drive free trial sign-ups for Slotly, a scheduling app for small business owners",
+     "audience": "Small business owners who lose hours to back-and-forth booking emails",
+     "platform": "YouTube",
+     "aspect_ratio": "16:9",
+     "target_duration": 20,
+     "brand_id": null,
+     "approval_status": "draft"
+    },
+    "edit": null,
+    "asset_ids": []
+   },
+   "rationale": "The user wants a new video made, and the inventory is empty (no videos, images or audio). That rules out edit_existing and create_full, so this is create_minimal with graphics-led scenes. The goal, audience, platform, duration and tone are stated. Aspect ratio was not stated, so it is null. YouTube suggests 16:9, but I am not guessing, and the application will fill the default and tell the user. Language is not stated. The brief is in English, but I am leaving it null. Nothing essential blocks the work, so I am asking no questions.",
+   "confidence": 0.93
+  },
+  "turns": [
+   {
+    "role": "user",
+    "text": "A 20 second YouTube explainer for Slotly, a scheduling app for small business owners. Calm, clear, modern. The goal is free trial sign-ups. Audience: small business owners who lose hours to back-and-forth booking emails. No footage, no logo file, no voiceover, no music.",
+    "from_voice": false,
+    "language": null
+   }
+  ]
+ },
+ "state1": {
+  "timing": {
+   "total_s": 20,
+   "target_s": 20,
+   "scenes": 5,
+   "matches_target": true
+  },
+  "claimsAudit": [
+   {
+    "claim_id": "C01",
+    "text": "Free for 14 days.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F01",
+     "text": "Free for 14 days.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S05"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F01 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C02",
+    "text": "Works with Google Calendar and Outlook.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F02",
+     "text": "Works with Google Calendar and Outlook.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S04"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F02 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C03",
+    "text": "Booking by email can turn into a long back-and-forth of messages (dramatised example thread, with no quantity of time or emails stated).",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S01",
+     "S02"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show it as a dramatised sample thread with no numbers and no stated time lost."
+   },
+   {
+    "claim_id": "C04",
+    "text": "Slotly lets you share open times and your client picks one, which becomes a booking (shown as a concept).",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S03"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show as a stylised concept illustration, not a real UI screenshot. Do not describe specific features, automation or results beyond the pick-a-slot idea."
+   },
+   {
+    "claim_id": "C05",
+    "text": "Slotly saves small business owners hours of booking time.",
+    "status": "unsupported",
+    "fact": null,
+    "scene_ids": [],
+    "usable_in_scenes": false,
+    "explanation": "No approved fact supports this wording. It must not be presented as a verified product fact.",
+    "safe_alternative": "Leave out any time-saving or hours claim. Show only the simple pick-a-slot flow as a concept. An approved fact with a source for the time saved is needed before this can be claimed."
+   }
+  ],
+  "assetFeasibility": {
+   "items": [
+    {
+     "scene_id": "S01",
+     "need": "Animated email-style chat bubbles with sample booking messages, drawn as graphics",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S01: \"Animated email-style chat bubbles with sample booking messages, drawn as graphics\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Tangled bubble and line animation, drawn as graphics",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S02: \"Tangled bubble and line animation, drawn as graphics\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Animated headline text, large sans-serif",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S02: \"Animated headline text, large sans-serif\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S03: \"Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.",
+     "kind": "ui_screenshot",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Generic stylised calendar concept illustration with no real UI claims.",
+     "severity": "warning",
+     "message": "S03: \"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S04: \"Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S05",
+     "need": "Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.",
+     "kind": "logo",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Plain typeset 'Slotly' text wordmark with no invented logo.",
+     "severity": "warning",
+     "message": "S05: \"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S05",
+     "need": "Button-style end-card graphic and CTA text",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S05: \"Button-style end-card graphic and CTA text\" can be built with the graphics workflow."
+    }
+   ],
+   "counts": {
+    "supplied": 0,
+    "generate_graphics": 8,
+    "needs_external": 0,
+    "missing_blocking": 0
+   },
+   "blockers": [],
+   "warnings": [
+    "S01: creative decision: Accent colour and typeface are not specified in the brief. The graphics workflow needs to pick a soft neutral palette plus one accent, and this needs user approval.",
+    "S02: missing input: No verified YouTube safe-area numbers were supplied. 'platform_safe' is used as a flag only, and the margins need to be confirmed.",
+    "S03: \"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S03: placeholder: The calendar UI is a stylised concept placeholder because no product screenshot was supplied. The user needs to approve it or supply a real screenshot.",
+    "S05: \"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S05: placeholder: The 'Slotly' wordmark is a typeset text placeholder because no logo file was supplied. The user needs to approve it or supply the real logo.",
+    "S05: missing input: No sign-up URL or destination was given. The button graphic carries no web address, so one is needed if it should be shown."
+   ]
+  },
+  "status": "awaiting_approval",
+  "intake": {
+   "status": "ready",
+   "questions": []
+  },
+  "treatment": {
+   "logline": "A calm, silent, typographic explainer that turns a messy booking-email thread into one tidy calendar confirmation, ending on a free 14-day trial invitation for Slotly.",
+   "hook": "0–4s: On a clean off-white 16:9 canvas, email-style bubbles bounce back and forth (\"Does Tuesday work?\", \"Can we do Thursday?\", \"Actually, Friday?\") and stack until the frame feels crowded. No logo and no title card.",
+   "tone": "Calm, clear, modern. Soft neutral palette with one accent colour, smooth eased motion, generous white space and large sans-serif type. There is no voiceover or music, so on-screen text and motion carry the story.",
+   "beats": [
+    {
+     "beat": "HOOK – Back-and-forth: motion-graphic booking bubbles ping-pong and pile up (C03).",
+     "purpose": "Show the audience's pain concretely in the first frame, with no logo or slow title.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "PROBLEM – The bubbles tangle. Text appears: \"Booking shouldn't take this many emails.\" The text sits inside the title-safe area.",
+     "purpose": "Make the problem felt and state the benefit as a viewpoint. It makes no numeric or time-saving claim.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "SOLUTION – The tangle clears into a simple calendar graphic with open time slots. A cursor picks one slot, which turns into a confirmed booking. Text: \"Share your open times. Your client picks one.\" The interface is a stylised concept illustration, not a real screenshot (C04).",
+     "purpose": "Explain in one visual what the product does. It is shown as a concept because there is no product footage.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "FIT – Text only, with no third-party logos: \"Works with Google Calendar and Outlook.\" The two names slide in beside the calendar graphic (C02).",
+     "purpose": "Give an approved proof point that lowers the barrier to trying the app.",
+     "approx_seconds": 3
+    },
+    {
+     "beat": "CTA – The calendar clears to the typeset word \"Slotly\" (a text wordmark, since no logo file exists) with a button-style graphic below. Text: \"Start your free 14-day trial.\" The text holds static for the last 2 seconds so it can be read (C01).",
+     "purpose": "Give one clear action tied to the sign-up goal, and show the brand name long enough to register.",
+     "approx_seconds": 4
+    }
+   ],
+   "cta": "Start your free 14-day trial.",
+   "claims": [
+    {
+     "claim_id": "C01",
+     "text": "Free for 14 days.",
+     "brand_fact_id": "F01",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C02",
+     "text": "Works with Google Calendar and Outlook.",
+     "brand_fact_id": "F02",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C03",
+     "text": "Booking by email can turn into a long back-and-forth of messages (dramatised example thread, with no quantity of time or emails stated).",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show it as a dramatised sample thread with no numbers and no stated time lost."
+    },
+    {
+     "claim_id": "C04",
+     "text": "Slotly lets you share open times and your client picks one, which becomes a booking (shown as a concept).",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show as a stylised concept illustration, not a real UI screenshot. Do not describe specific features, automation or results beyond the pick-a-slot idea."
+    },
+    {
+     "claim_id": "C05",
+     "text": "Slotly saves small business owners hours of booking time.",
+     "brand_fact_id": null,
+     "kind": "factual",
+     "safe_alternative": "Leave out any time-saving or hours claim. Show only the simple pick-a-slot flow as a concept. An approved fact with a source for the time saved is needed before this can be claimed."
+    }
+   ],
+   "conflicts_log": [
+    {
+     "conflict": "The brief says the audience 'lose hours' to booking emails, but no approved fact supports a time-saved or time-lost claim.",
+     "decision": "Claims discipline wins. C05 is kept in the register as unsupported and is not used in any beat, caption or the CTA. The audience's pain is shown only as a dramatised thread."
+    },
+    {
+     "conflict": "The brief has no footage and no logo file, but the hook-first and CTA playbooks ask for a real view of the product and the brand mark.",
+     "decision": "Product fidelity is kept by labelling the UI as a stylised concept, not a fake screenshot. The brand appears as a typeset 'Slotly' text wordmark, not an invented logo. The hook opens on a concrete motion-graphic scene."
+    },
+    {
+     "conflict": "The brief has no voiceover or music, and the explainer needs clear messaging.",
+     "decision": "Message clarity is carried by large on-screen text inside the title-safe area, with each line held long enough to read. The video is designed to work with sound off."
+    },
+    {
+     "conflict": "A calm tone could slow the pacing against the need for an early hook.",
+     "decision": "Pacing yields to message clarity and the tone. The hook is concrete from frame one, while the later beats use slower eased motion. No edit recipes are referenced because no recipe library was provided for this step."
+    }
+   ]
+  },
+  "scenePlan": {
+   "project_id": "proj_35e1221287dc",
+   "version": 1,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "purpose": "Hook: show the booking back-and-forth concretely from frame one, with no logo or title card.",
+     "start_time": 0,
+     "end_time": 4,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Animated email-style chat bubbles with sample booking messages, drawn as graphics",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "creative_decision",
+       "note": "Accent colour and typeface are not specified in the brief. The graphics workflow needs to pick a soft neutral palette plus one accent, and this needs user approval."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "static",
+      "visual_action": "On a clean off-white 16:9 canvas, email-style bubbles ping-pong left and right with sample text ('Does Tuesday work?', 'Can we do Thursday?', 'Actually, Friday?') and stack until the frame feels crowded. Dramatised sample thread with no numbers and no time stated. Soft neutral palette with one accent colour, eased motion."
+     },
+     "overlay": null,
+     "audio_cues": [],
+     "transition_out": "cut",
+     "constraints": [
+      "No logo and no title card in the first frame.",
+      "Bubbles are a dramatised example; show no counts of emails and no time lost.",
+      "Keep all bubble text inside the platform-safe area."
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "purpose": "Problem: let the tangle be felt and state the audience's viewpoint, with no numeric or time-saving claim.",
+     "start_time": 4,
+     "end_time": 8,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Tangled bubble and line animation, drawn as graphics",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      },
+      {
+       "need": "Animated headline text, large sans-serif",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "missing_input",
+       "note": "No verified YouTube safe-area numbers were supplied. 'platform_safe' is used as a flag only, and the margins need to be confirmed."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "slow_push_in",
+      "visual_action": "The bubbles overlap and tangle into a knot of lines at the centre of the canvas. A slow push-in tightens the frame, then the headline text fades in over the tangle in large sans-serif type and holds so it can be read."
+     },
+     "overlay": {
+      "text": "Booking shouldn't take this many emails.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text sits inside the title-safe area and holds long enough to read.",
+      "Do not claim hours or any amount of time saved (C05 is unsupported)."
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "purpose": "Solution: show in one visual what the product does (share open times, the client picks one) as a concept illustration.",
+     "start_time": 8,
+     "end_time": 13,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      },
+      {
+       "need": "Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.",
+       "kind": "ui_screenshot",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Generic stylised calendar concept illustration with no real UI claims."
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "The calendar UI is a stylised concept placeholder because no product screenshot was supplied. The user needs to approve it or supply a real screenshot."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C04"
+     ],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "static",
+      "visual_action": "The tangle clears into a simple, stylised calendar graphic with several open time slots. A drawn cursor moves to one slot and clicks it. The slot changes to the accent colour and becomes a confirmed booking with a tick. Concept illustration only, not a real product screenshot."
+     },
+     "overlay": {
+      "text": "Share your open times. Your client picks one.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "cut",
+     "constraints": [
+      "Show only the pick-a-slot idea. Do not depict specific features, automation or results.",
+      "Do not present the graphic as the real Slotly interface."
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "purpose": "Fit: give the approved compatibility proof point with text only and no third-party logos.",
+     "start_time": 13,
+     "end_time": 16,
+     "duration_seconds": 3,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C02"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "static",
+      "visual_action": "The calendar graphic shifts to one side. The two names 'Google Calendar' and 'Outlook' slide in beside it as plain typeset text, with no third-party logos, and settle into place."
+     },
+     "overlay": {
+      "text": "Works with Google Calendar and Outlook.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text only. Do not use Google or Microsoft logos.",
+      "The wording matches approved fact F02 and goes no further than it."
+     ]
+    },
+    {
+     "scene_id": "S05",
+     "purpose": "CTA: show the brand name and one clear action, with the text static for the last 2 seconds.",
+     "start_time": 16,
+     "end_time": 20,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.",
+       "kind": "logo",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Plain typeset 'Slotly' text wordmark with no invented logo."
+      },
+      {
+       "need": "Button-style end-card graphic and CTA text",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "The 'Slotly' wordmark is a typeset text placeholder because no logo file was supplied. The user needs to approve it or supply the real logo."
+      },
+      {
+       "kind": "missing_input",
+       "note": "No sign-up URL or destination was given. The button graphic carries no web address, so one is needed if it should be shown."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C01"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "static",
+      "visual_action": "The calendar clears to the typeset word 'Slotly' (a text wordmark) centred on the off-white canvas. A button-style graphic appears below it, and the CTA line sits under the button. All elements hold static for the final 2 seconds."
+     },
+     "overlay": {
+      "text": "Start your free 14-day trial.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "dip_to_black",
+     "constraints": [
+      "One call to action only.",
+      "The trial wording matches approved fact F01 ('Free for 14 days'). Add no price and no other offer terms.",
+      "Hold the text static for the last 2 seconds."
+     ]
+    }
+   ]
+  },
+  "editPlan": null,
+  "escalation": null,
+  "gate": "storyboard",
+  "versions": {
+   "storyboard": 1,
+   "edit_plan": null
+  },
+  "hashes": {
+   "storyboard": "400d48b55c95a361bed5358c29fac32545510da614b0ac107306d536054c85c4",
+   "edit_plan": null
+  },
+  "approvals": [],
+  "revisions": {
+   "used": {
+    "storyboard": 0,
+    "edit_plan": 0
+   },
+   "max": 2
+  },
+  "renderable": {
+   "ok": false,
+   "reasons": [
+    "there is no edit plan yet",
+    "the storyboard has not been approved",
+    "the edit plan has not been approved"
+   ]
+  },
+  "citations": [
+   "claims-discipline",
+   "hook-first-seconds",
+   "single-clear-cta",
+   "F01",
+   "F02",
+   "reframing-limits",
+   "shot-size-progression",
+   "axis-180-rule",
+   "cut-on-motion"
+  ],
+  "skillsUsed": [
+   "video-director",
+   "cinematography",
+   "commercial-strategy"
+  ],
+  "referencesUsed": [
+   "commercial-strategy/structures.md",
+   "commercial-strategy/claims-register.md",
+   "cinematography/footage-limits.md"
+  ],
+  "trace": [
+   "intake: ready",
+   "analyse_assets: 0 asset(s), 0 with uncertainty",
+   "treatment: 5 beats, 5 claims (3 unsupported)",
+   "storyboard: version 1, 5 scenes in 1 attempt(s)"
+  ],
+  "notes": [],
+  "run_id": "35e1221287dc-1793273791656",
+  "checkpoint": {
+   "saved": true
+  }
+ },
+ "approve1": {
+  "status": 200,
+  "gate": "edit_plan",
+  "st": "awaiting_approval"
+ },
+ "approve2": {
+  "status": 200,
+  "st": "approved"
+ },
+ "state_final": {
+  "timing": {
+   "total_s": 20,
+   "target_s": 20,
+   "scenes": 5,
+   "matches_target": true
+  },
+  "claimsAudit": [
+   {
+    "claim_id": "C01",
+    "text": "Free for 14 days.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F01",
+     "text": "Free for 14 days.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S05"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F01 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C02",
+    "text": "Works with Google Calendar and Outlook.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F02",
+     "text": "Works with Google Calendar and Outlook.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S04"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F02 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C03",
+    "text": "Booking by email can turn into a long back-and-forth of messages (dramatised example thread, with no quantity of time or emails stated).",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S01",
+     "S02"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show it as a dramatised sample thread with no numbers and no stated time lost."
+   },
+   {
+    "claim_id": "C04",
+    "text": "Slotly lets you share open times and your client picks one, which becomes a booking (shown as a concept).",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S03"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show as a stylised concept illustration, not a real UI screenshot. Do not describe specific features, automation or results beyond the pick-a-slot idea."
+   },
+   {
+    "claim_id": "C05",
+    "text": "Slotly saves small business owners hours of booking time.",
+    "status": "unsupported",
+    "fact": null,
+    "scene_ids": [],
+    "usable_in_scenes": false,
+    "explanation": "No approved fact supports this wording. It must not be presented as a verified product fact.",
+    "safe_alternative": "Leave out any time-saving or hours claim. Show only the simple pick-a-slot flow as a concept. An approved fact with a source for the time saved is needed before this can be claimed."
+   }
+  ],
+  "assetFeasibility": {
+   "items": [
+    {
+     "scene_id": "S01",
+     "need": "Animated email-style chat bubbles with sample booking messages, drawn as graphics",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S01: \"Animated email-style chat bubbles with sample booking messages, drawn as graphics\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Tangled bubble and line animation, drawn as graphics",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S02: \"Tangled bubble and line animation, drawn as graphics\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Animated headline text, large sans-serif",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S02: \"Animated headline text, large sans-serif\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S03: \"Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.",
+     "kind": "ui_screenshot",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Generic stylised calendar concept illustration with no real UI claims.",
+     "severity": "warning",
+     "message": "S03: \"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S04: \"Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S05",
+     "need": "Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.",
+     "kind": "logo",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Plain typeset 'Slotly' text wordmark with no invented logo.",
+     "severity": "warning",
+     "message": "S05: \"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S05",
+     "need": "Button-style end-card graphic and CTA text",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S05: \"Button-style end-card graphic and CTA text\" can be built with the graphics workflow."
+    }
+   ],
+   "counts": {
+    "supplied": 0,
+    "generate_graphics": 8,
+    "needs_external": 0,
+    "missing_blocking": 0
+   },
+   "blockers": [],
+   "warnings": [
+    "S01: creative decision: Accent colour and typeface are not specified in the brief. The graphics workflow needs to pick a soft neutral palette plus one accent, and this needs user approval.",
+    "S02: missing input: No verified YouTube safe-area numbers were supplied. 'platform_safe' is used as a flag only, and the margins need to be confirmed.",
+    "S03: \"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S03: placeholder: The calendar UI is a stylised concept placeholder because no product screenshot was supplied. The user needs to approve it or supply a real screenshot.",
+    "S05: \"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S05: placeholder: The 'Slotly' wordmark is a typeset text placeholder because no logo file was supplied. The user needs to approve it or supply the real logo.",
+    "S05: missing input: No sign-up URL or destination was given. The button graphic carries no web address, so one is needed if it should be shown."
+   ]
+  },
+  "status": "approved",
+  "intake": {
+   "status": "ready",
+   "questions": []
+  },
+  "treatment": {
+   "logline": "A calm, silent, typographic explainer that turns a messy booking-email thread into one tidy calendar confirmation, ending on a free 14-day trial invitation for Slotly.",
+   "hook": "0–4s: On a clean off-white 16:9 canvas, email-style bubbles bounce back and forth (\"Does Tuesday work?\", \"Can we do Thursday?\", \"Actually, Friday?\") and stack until the frame feels crowded. No logo and no title card.",
+   "tone": "Calm, clear, modern. Soft neutral palette with one accent colour, smooth eased motion, generous white space and large sans-serif type. There is no voiceover or music, so on-screen text and motion carry the story.",
+   "beats": [
+    {
+     "beat": "HOOK – Back-and-forth: motion-graphic booking bubbles ping-pong and pile up (C03).",
+     "purpose": "Show the audience's pain concretely in the first frame, with no logo or slow title.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "PROBLEM – The bubbles tangle. Text appears: \"Booking shouldn't take this many emails.\" The text sits inside the title-safe area.",
+     "purpose": "Make the problem felt and state the benefit as a viewpoint. It makes no numeric or time-saving claim.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "SOLUTION – The tangle clears into a simple calendar graphic with open time slots. A cursor picks one slot, which turns into a confirmed booking. Text: \"Share your open times. Your client picks one.\" The interface is a stylised concept illustration, not a real screenshot (C04).",
+     "purpose": "Explain in one visual what the product does. It is shown as a concept because there is no product footage.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "FIT – Text only, with no third-party logos: \"Works with Google Calendar and Outlook.\" The two names slide in beside the calendar graphic (C02).",
+     "purpose": "Give an approved proof point that lowers the barrier to trying the app.",
+     "approx_seconds": 3
+    },
+    {
+     "beat": "CTA – The calendar clears to the typeset word \"Slotly\" (a text wordmark, since no logo file exists) with a button-style graphic below. Text: \"Start your free 14-day trial.\" The text holds static for the last 2 seconds so it can be read (C01).",
+     "purpose": "Give one clear action tied to the sign-up goal, and show the brand name long enough to register.",
+     "approx_seconds": 4
+    }
+   ],
+   "cta": "Start your free 14-day trial.",
+   "claims": [
+    {
+     "claim_id": "C01",
+     "text": "Free for 14 days.",
+     "brand_fact_id": "F01",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C02",
+     "text": "Works with Google Calendar and Outlook.",
+     "brand_fact_id": "F02",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C03",
+     "text": "Booking by email can turn into a long back-and-forth of messages (dramatised example thread, with no quantity of time or emails stated).",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show it as a dramatised sample thread with no numbers and no stated time lost."
+    },
+    {
+     "claim_id": "C04",
+     "text": "Slotly lets you share open times and your client picks one, which becomes a booking (shown as a concept).",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show as a stylised concept illustration, not a real UI screenshot. Do not describe specific features, automation or results beyond the pick-a-slot idea."
+    },
+    {
+     "claim_id": "C05",
+     "text": "Slotly saves small business owners hours of booking time.",
+     "brand_fact_id": null,
+     "kind": "factual",
+     "safe_alternative": "Leave out any time-saving or hours claim. Show only the simple pick-a-slot flow as a concept. An approved fact with a source for the time saved is needed before this can be claimed."
+    }
+   ],
+   "conflicts_log": [
+    {
+     "conflict": "The brief says the audience 'lose hours' to booking emails, but no approved fact supports a time-saved or time-lost claim.",
+     "decision": "Claims discipline wins. C05 is kept in the register as unsupported and is not used in any beat, caption or the CTA. The audience's pain is shown only as a dramatised thread."
+    },
+    {
+     "conflict": "The brief has no footage and no logo file, but the hook-first and CTA playbooks ask for a real view of the product and the brand mark.",
+     "decision": "Product fidelity is kept by labelling the UI as a stylised concept, not a fake screenshot. The brand appears as a typeset 'Slotly' text wordmark, not an invented logo. The hook opens on a concrete motion-graphic scene."
+    },
+    {
+     "conflict": "The brief has no voiceover or music, and the explainer needs clear messaging.",
+     "decision": "Message clarity is carried by large on-screen text inside the title-safe area, with each line held long enough to read. The video is designed to work with sound off."
+    },
+    {
+     "conflict": "A calm tone could slow the pacing against the need for an early hook.",
+     "decision": "Pacing yields to message clarity and the tone. The hook is concrete from frame one, while the later beats use slower eased motion. No edit recipes are referenced because no recipe library was provided for this step."
+    }
+   ]
+  },
+  "scenePlan": {
+   "project_id": "proj_35e1221287dc",
+   "version": 1,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "purpose": "Hook: show the booking back-and-forth concretely from frame one, with no logo or title card.",
+     "start_time": 0,
+     "end_time": 4,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Animated email-style chat bubbles with sample booking messages, drawn as graphics",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "creative_decision",
+       "note": "Accent colour and typeface are not specified in the brief. The graphics workflow needs to pick a soft neutral palette plus one accent, and this needs user approval."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "static",
+      "visual_action": "On a clean off-white 16:9 canvas, email-style bubbles ping-pong left and right with sample text ('Does Tuesday work?', 'Can we do Thursday?', 'Actually, Friday?') and stack until the frame feels crowded. Dramatised sample thread with no numbers and no time stated. Soft neutral palette with one accent colour, eased motion."
+     },
+     "overlay": null,
+     "audio_cues": [],
+     "transition_out": "cut",
+     "constraints": [
+      "No logo and no title card in the first frame.",
+      "Bubbles are a dramatised example; show no counts of emails and no time lost.",
+      "Keep all bubble text inside the platform-safe area."
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "purpose": "Problem: let the tangle be felt and state the audience's viewpoint, with no numeric or time-saving claim.",
+     "start_time": 4,
+     "end_time": 8,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Tangled bubble and line animation, drawn as graphics",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      },
+      {
+       "need": "Animated headline text, large sans-serif",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "missing_input",
+       "note": "No verified YouTube safe-area numbers were supplied. 'platform_safe' is used as a flag only, and the margins need to be confirmed."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "slow_push_in",
+      "visual_action": "The bubbles overlap and tangle into a knot of lines at the centre of the canvas. A slow push-in tightens the frame, then the headline text fades in over the tangle in large sans-serif type and holds so it can be read."
+     },
+     "overlay": {
+      "text": "Booking shouldn't take this many emails.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text sits inside the title-safe area and holds long enough to read.",
+      "Do not claim hours or any amount of time saved (C05 is unsupported)."
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "purpose": "Solution: show in one visual what the product does (share open times, the client picks one) as a concept illustration.",
+     "start_time": 8,
+     "end_time": 13,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Stylised calendar with open slots, cursor and confirmed-booking state, drawn as a concept illustration",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      },
+      {
+       "need": "Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.",
+       "kind": "ui_screenshot",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Generic stylised calendar concept illustration with no real UI claims."
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "The calendar UI is a stylised concept placeholder because no product screenshot was supplied. The user needs to approve it or supply a real screenshot."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C04"
+     ],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "static",
+      "visual_action": "The tangle clears into a simple, stylised calendar graphic with several open time slots. A drawn cursor moves to one slot and clicks it. The slot changes to the accent colour and becomes a confirmed booking with a tick. Concept illustration only, not a real product screenshot."
+     },
+     "overlay": {
+      "text": "Share your open times. Your client picks one.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "cut",
+     "constraints": [
+      "Show only the pick-a-slot idea. Do not depict specific features, automation or results.",
+      "Do not present the graphic as the real Slotly interface."
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "purpose": "Fit: give the approved compatibility proof point with text only and no third-party logos.",
+     "start_time": 13,
+     "end_time": 16,
+     "duration_seconds": 3,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Animated plain-text labels for 'Google Calendar' and 'Outlook' beside the calendar graphic",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C02"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "static",
+      "visual_action": "The calendar graphic shifts to one side. The two names 'Google Calendar' and 'Outlook' slide in beside it as plain typeset text, with no third-party logos, and settle into place."
+     },
+     "overlay": {
+      "text": "Works with Google Calendar and Outlook.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text only. Do not use Google or Microsoft logos.",
+      "The wording matches approved fact F02 and goes no further than it."
+     ]
+    },
+    {
+     "scene_id": "S05",
+     "purpose": "CTA: show the brand name and one clear action, with the text static for the last 2 seconds.",
+     "start_time": 16,
+     "end_time": 20,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.",
+       "kind": "logo",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Plain typeset 'Slotly' text wordmark with no invented logo."
+      },
+      {
+       "need": "Button-style end-card graphic and CTA text",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "The 'Slotly' wordmark is a typeset text placeholder because no logo file was supplied. The user needs to approve it or supply the real logo."
+      },
+      {
+       "kind": "missing_input",
+       "note": "No sign-up URL or destination was given. The button graphic carries no web address, so one is needed if it should be shown."
+      }
+     ],
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C01"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "static",
+      "visual_action": "The calendar clears to the typeset word 'Slotly' (a text wordmark) centred on the off-white canvas. A button-style graphic appears below it, and the CTA line sits under the button. All elements hold static for the final 2 seconds."
+     },
+     "overlay": {
+      "text": "Start your free 14-day trial.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "dip_to_black",
+     "constraints": [
+      "One call to action only.",
+      "The trial wording matches approved fact F01 ('Free for 14 days'). Add no price and no other offer terms.",
+      "Hold the text static for the last 2 seconds."
+     ]
+    }
+   ]
+  },
+  "editPlan": {
+   "project_id": "proj_35e1221287dc",
+   "version": 1,
+   "uses": [
+    {
+     "use_id": "U01",
+     "scene_id": "S01",
+     "recipe_id": "hard-cut",
+     "params": {},
+     "rationale": "Punchy hook with no overlay: the crowded bubble thread cuts straight to the tangle in S02. Hard cut is the default and keeps pace tight."
+    },
+    {
+     "use_id": "U02",
+     "scene_id": "S02",
+     "recipe_id": "text-fade-up",
+     "params": {
+      "delay_s": 1,
+      "duration_s": 0.6,
+      "distance_px": 24
+     },
+     "rationale": "The headline should appear after the slow push-in has tightened on the tangle, then hold. Entrance ends at 1.6s, well inside the 60% limit (2.4s of 4s), leaving about 2.4s to read."
+    },
+    {
+     "use_id": "U03",
+     "scene_id": "S02",
+     "recipe_id": "crossfade",
+     "params": {
+      "duration_s": 0.8
+     },
+     "rationale": "The storyboard asks for a crossfade out of the problem into the solution, a calm mood shift as the tangle clears. 0.8s is under the half-scene limit of 2s."
+    },
+    {
+     "use_id": "U04",
+     "scene_id": "S03",
+     "recipe_id": "text-fade-up",
+     "params": {
+      "delay_s": 0.8,
+      "duration_s": 0.5,
+      "distance_px": 24
+     },
+     "rationale": "The line explaining the product appears just after the calendar graphic forms, so the text and the cursor action support each other. One dominant text motion in the scene. Entrance ends at 1.3s of 5s."
+    },
+    {
+     "use_id": "U05",
+     "scene_id": "S03",
+     "recipe_id": "hard-cut",
+     "params": {},
+     "rationale": "Storyboard specifies a cut from the solution to the compatibility proof point. The cut is quick and keeps the pace up."
+    },
+    {
+     "use_id": "U06",
+     "scene_id": "S04",
+     "recipe_id": "text-fade-up",
+     "params": {
+      "delay_s": 0.4,
+      "duration_s": 0.5,
+      "distance_px": 20
+     },
+     "rationale": "A short, quick entrance for the approved compatibility line as the names slide in. It ends at 0.9s, inside the 60% limit (1.8s of 3s), so the line can be read."
+    },
+    {
+     "use_id": "U07",
+     "scene_id": "S04",
+     "recipe_id": "crossfade",
+     "params": {
+      "duration_s": 0.6
+     },
+     "rationale": "The storyboard specifies a crossfade into the closing scene. 0.6s is under the half-scene limit of 1.5s."
+    },
+    {
+     "use_id": "U08",
+     "scene_id": "S05",
+     "recipe_id": "end-card-cta",
+     "params": {
+      "hold_s": 2,
+      "background": "light"
+     },
+     "rationale": "The closing card holds the CTA text static for the final 2 seconds, as the brief requires. The light background matches the off-white canvas. The recipe is used once, and a 2s hold fits a 4s scene. I did not add dip-to-black because S05 is the final scene and has no following scene to transition into. Fading the last frame would also cut into the 2s static hold."
+    }
+   ]
+  },
+  "escalation": null,
+  "gate": null,
+  "versions": {
+   "storyboard": 1,
+   "edit_plan": 1
+  },
+  "hashes": {
+   "storyboard": "400d48b55c95a361bed5358c29fac32545510da614b0ac107306d536054c85c4",
+   "edit_plan": "72271076419c122b19aae697260815bdfab4724fea38197b914ba2cb985016e2"
+  },
+  "approvals": [
+   {
+    "stage": "storyboard",
+    "plan_version": 1,
+    "storyboard_version": 1,
+    "plan_hash": "400d48b55c95a361bed5358c29fac32545510da614b0ac107306d536054c85c4",
+    "evidence_hash": "2c0c95f28e9c88a26e3fe8cf606adbade43c5b6b07ce1d1d9ebf5e5c91577fef",
+    "decision": "approved",
+    "notes": "",
+    "decided_at": "2026-10-29T11:37:37.688Z"
+   },
+   {
+    "stage": "edit_plan",
+    "plan_version": 1,
+    "storyboard_version": 1,
+    "plan_hash": "72271076419c122b19aae697260815bdfab4724fea38197b914ba2cb985016e2",
+    "evidence_hash": "2c0c95f28e9c88a26e3fe8cf606adbade43c5b6b07ce1d1d9ebf5e5c91577fef",
+    "decision": "approved",
+    "notes": "",
+    "decided_at": "2026-10-29T11:37:53.072Z"
+   }
+  ],
+  "revisions": {
+   "used": {
+    "storyboard": 0,
+    "edit_plan": 0
+   },
+   "max": 2
+  },
+  "renderable": {
+   "ok": true,
+   "reasons": []
+  },
+  "citations": [
+   "claims-discipline",
+   "hook-first-seconds",
+   "single-clear-cta",
+   "F01",
+   "F02",
+   "reframing-limits",
+   "shot-size-progression",
+   "axis-180-rule",
+   "cut-on-motion",
+   "motion-purpose-easing",
+   "j-and-l-cuts",
+   "cut-priority-murch",
+   "bullet-list",
+   "crossfade",
+   "dip-to-black",
+   "directional-wipe",
+   "end-card-cta",
+   "end-card-cta-hyperframes",
+   "hard-cut",
+   "stat-callout",
+   "text-card-fade",
+   "text-fade-hyperframes",
+   "text-fade-up",
+   "text-slide-remotion",
+   "title-subtitle"
+  ],
+  "skillsUsed": [
+   "video-director",
+   "cinematography",
+   "commercial-strategy",
+   "editing-director",
+   "motion-graphics",
+   "sound-design"
+  ],
+  "referencesUsed": [
+   "commercial-strategy/structures.md",
+   "commercial-strategy/claims-register.md",
+   "cinematography/footage-limits.md",
+   "editing-director/edit-operations.md",
+   "motion-graphics/safe-areas.md",
+   "sound-design/loudness.md"
+  ],
+  "trace": [
+   "intake: ready",
+   "analyse_assets: 0 asset(s), 0 with uncertainty",
+   "treatment: 5 beats, 5 claims (3 unsupported)",
+   "storyboard: version 1, 5 scenes in 1 attempt(s)",
+   "storyboard_gate: approved version 1",
+   "edit_plan: version 1, 8 recipe uses in 1 attempt(s)",
+   "edit_plan_gate: approved version 1"
+  ],
+  "notes": []
+ },
+ "editor": {
+  "status": 200,
+  "st": "ready",
+  "conflicts": [],
+  "revisions": []
+ },
+ "render_plan": {
+  "run_id": "35e1221287dc-1793273791656",
+  "renderer_available": true,
+  "editor": {
+   "status": "ready",
+   "validation": {
+    "ok": true,
+    "issues": []
+   },
+   "conflicts": [],
+   "revision_requests": [],
+   "operations": 8,
+   "rendered": false
+  },
+  "renderer": {
+   "selected": null,
+   "needed": [
+    "remotion",
+    "ffmpeg"
+   ],
+   "composition_required": true,
+   "registered": [
+    "ffmpeg",
+    "remotion",
+    "hyperframes"
+   ]
+  },
+  "plan": {
+   "state": "planning",
+   "purpose": "preview",
+   "operations": [
+    {
+     "operation_id": "E01",
+     "scene_id": "S01",
+     "note": null,
+     "recipe_id": "hard-cut",
+     "template": "ffmpeg/concat-cut",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E02",
+     "scene_id": "S02",
+     "note": null,
+     "recipe_id": "text-fade-up",
+     "template": "remotion/text-fade-up",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E03",
+     "scene_id": "S02",
+     "note": null,
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E04",
+     "scene_id": "S03",
+     "note": null,
+     "recipe_id": "text-fade-up",
+     "template": "remotion/text-fade-up",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E05",
+     "scene_id": "S03",
+     "note": null,
+     "recipe_id": "hard-cut",
+     "template": "ffmpeg/concat-cut",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E06",
+     "scene_id": "S04",
+     "note": null,
+     "recipe_id": "text-fade-up",
+     "template": "remotion/text-fade-up",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E07",
+     "scene_id": "S04",
+     "note": null,
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E08",
+     "scene_id": "S05",
+     "note": null,
+     "recipe_id": "end-card-cta",
+     "template": "remotion/end-card-cta",
+     "renderer": "remotion",
+     "supported": true
+    }
+   ],
+   "supported": 8,
+   "unsupported": 0,
+   "notes": [
+    "E02: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E03: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E04: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E06: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E07: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E08: recipe end-card-cta is draft: no review evidence; it may be used for planning and tests, not production",
+    "preview render: it may use draft recipes and is not a production video",
+    "S01: the approved shot size (wide) and visual action (\"On a clean off-white 16:9 canvas, email-style bubbles ping-…\") describe the content; the renderer does not change or check them",
+    "S02: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+    "S02: the approved shot size (close up) and visual action (\"The bubbles overlap and tangle into a knot of lines at the …\") describe the content; the renderer does not change or check them",
+    "S03: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+    "S03: the approved shot size (medium) and visual action (\"The tangle clears into a simple, stylised calendar graphic …\") describe the content; the renderer does not change or check them",
+    "S04: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+    "S04: the approved shot size (wide) and visual action (\"The calendar graphic shifts to one side. The two names 'Goo…\") describe the content; the renderer does not change or check them",
+    "S05: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+    "S05: the approved shot size (close up) and visual action (\"The calendar clears to the typeset word 'Slotly' (a text wo…\") describe the content; the renderer does not change or check them"
+   ]
+  },
+  "coverage": {
+   "complete": false,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "represented": false,
+     "missing": [
+      "no operation covers this scene",
+      "E01 (hard-cut) has no renderer that can run it"
+     ],
+     "labelled": [
+      "the approved shot size (wide) and visual action (\"On a clean off-white 16:9 canvas, email-style bubbles ping-…\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "represented": false,
+     "missing": [
+      "the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+      "its crossfade transition is not rendered (a hard cut would be used)"
+     ],
+     "labelled": [
+      "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+      "the approved shot size (close up) and visual action (\"The bubbles overlap and tangle into a knot of lines at the …\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "represented": false,
+     "missing": [
+      "E05 (hard-cut) has no renderer that can run it",
+      "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show"
+     ],
+     "labelled": [
+      "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+      "the approved shot size (medium) and visual action (\"The tangle clears into a simple, stylised calendar graphic …\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "represented": false,
+     "missing": [
+      "its crossfade transition is not rendered (a hard cut would be used)"
+     ],
+     "labelled": [
+      "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+      "the approved shot size (wide) and visual action (\"The calendar graphic shifts to one side. The two names 'Goo…\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S05",
+     "represented": false,
+     "missing": [
+      "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+     ],
+     "labelled": [
+      "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+      "the approved shot size (close up) and visual action (\"The calendar clears to the typeset word 'Slotly' (a text wo…\") describe the content; the renderer does not change or check them"
+     ]
+    }
+   ]
+  },
+  "capability": [
+   {
+    "operation_id": "E01",
+    "scene_id": "S01",
+    "recipe_id": "hard-cut",
+    "status": "blocked_with_reason",
+    "selected_engine": null,
+    "selected_template": null,
+    "reason": "no permitted engine has a validated implementation: ffmpeg: ffmpeg has no validated template for hard-cut and no engine family in this project can implement it; remotion: remotion has no validated template for hard-cut and no engine family in this project can implement it; hyperframes: recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_implemented",
+      "reason": "ffmpeg has no validated template for hard-cut and no engine family in this project can implement it"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E02",
+    "scene_id": "S02",
+    "recipe_id": "text-fade-up",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/text-fade-up",
+    "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E03",
+    "scene_id": "S02",
+    "recipe_id": "crossfade",
+    "status": "validated_available",
+    "selected_engine": "ffmpeg",
+    "selected_template": "ffmpeg/xfade-fade",
+    "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "usable",
+      "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E04",
+    "scene_id": "S03",
+    "recipe_id": "text-fade-up",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/text-fade-up",
+    "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E05",
+    "scene_id": "S03",
+    "recipe_id": "hard-cut",
+    "status": "blocked_with_reason",
+    "selected_engine": null,
+    "selected_template": null,
+    "reason": "no permitted engine has a validated implementation: ffmpeg: ffmpeg has no validated template for hard-cut and no engine family in this project can implement it; remotion: remotion has no validated template for hard-cut and no engine family in this project can implement it; hyperframes: recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_implemented",
+      "reason": "ffmpeg has no validated template for hard-cut and no engine family in this project can implement it"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E06",
+    "scene_id": "S04",
+    "recipe_id": "text-fade-up",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/text-fade-up",
+    "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E07",
+    "scene_id": "S04",
+    "recipe_id": "crossfade",
+    "status": "validated_available",
+    "selected_engine": "ffmpeg",
+    "selected_template": "ffmpeg/xfade-fade",
+    "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "usable",
+      "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E08",
+    "scene_id": "S05",
+    "recipe_id": "end-card-cta",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/end-card-cta",
+    "reason": "remotion/end-card-cta was validated by real render on 2026-10-29 (remotion:end-card-cta v1.0.0)",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe end-card-cta does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/end-card-cta was validated by real render on 2026-10-29 (remotion:end-card-cta v1.0.0)"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe end-card-cta does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   }
+  ],
+  "eligible": false,
+  "assembly": {
+   "ok": true,
+   "complete": false,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "engine": null,
+     "renderable": false,
+     "reason": "no operation produces this scene's picture",
+     "unmet": []
+    },
+    {
+     "scene_id": "S02",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": [
+      "the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+      "its transition (E03) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "engine": "remotion",
+     "renderable": false,
+     "reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+     "unmet": []
+    },
+    {
+     "scene_id": "S04",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": [
+      "its transition (E07) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+     ]
+    },
+    {
+     "scene_id": "S05",
+     "engine": "remotion",
+     "renderable": false,
+     "reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show",
+     "unmet": []
+    }
+   ],
+   "transitions": [
+    {
+     "after_scene": "S01",
+     "template": "ffmpeg/concat-cut",
+     "applied": true,
+     "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+    },
+    {
+     "after_scene": "S02",
+     "template": "ffmpeg/xfade-fade",
+     "applied": false,
+     "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+    },
+    {
+     "after_scene": "S03",
+     "template": "ffmpeg/concat-cut",
+     "applied": true,
+     "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+    },
+    {
+     "after_scene": "S04",
+     "template": "ffmpeg/xfade-fade",
+     "applied": false,
+     "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+    }
+   ],
+   "omitted": [
+    {
+     "operation_id": "E04",
+     "scene_id": "S03",
+     "recipe_id": "text-fade-up",
+     "status": "validated_available",
+     "reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show"
+    },
+    {
+     "operation_id": "E08",
+     "scene_id": "S05",
+     "recipe_id": "end-card-cta",
+     "status": "validated_available",
+     "reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+    },
+    {
+     "operation_id": "E03",
+     "scene_id": "S02",
+     "recipe_id": "ffmpeg/xfade-fade",
+     "status": "blocked_with_reason",
+     "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+    },
+    {
+     "operation_id": "E07",
+     "scene_id": "S04",
+     "recipe_id": "ffmpeg/xfade-fade",
+     "status": "blocked_with_reason",
+     "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+    }
+   ],
+   "label": "Only an INCOMPLETE preview can be made: scenes or operations that nothing can render are listed and shown as labelled placeholders."
+  },
+  "can_render": true,
+  "blockers": [
+   "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+   "S01: no operation covers this scene",
+   "S02: the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+   "S02: its crossfade transition is not rendered (a hard cut would be used)",
+   "S03: it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+   "S04: its crossfade transition is not rendered (a hard cut would be used)",
+   "S05: it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+  ],
+  "production": {
+   "ready": false,
+   "blockers": [
+    "E01: no template is registered for ffmpeg/concat-cut, and no remotion or ffmpeg renderer is available",
+    "E02: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E03: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E04: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E05: no template is registered for ffmpeg/concat-cut, and no remotion or ffmpeg renderer is available",
+    "E06: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+    "E07: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E08: recipe end-card-cta is draft: no review evidence; it may be used for planning and tests, not production",
+    "handoff is not production-ready: recipe crossfade is draft: no review evidence",
+    "handoff is not production-ready: recipe end-card-cta is draft: no review evidence",
+    "handoff is not production-ready: recipe hard-cut is draft: no review evidence",
+    "handoff is not production-ready: recipe text-fade-up is draft: no review evidence",
+    "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+    "S01: no operation covers this scene",
+    "S01: E01 (hard-cut) has no renderer that can run it",
+    "S02: the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+    "S02: its crossfade transition is not rendered (a hard cut would be used)",
+    "S03: E05 (hard-cut) has no renderer that can run it",
+    "S03: it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+    "S04: its crossfade transition is not rendered (a hard cut would be used)",
+    "S05: it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+   ]
+  },
+  "needs": {
+   "aspect_ratio": "16:9",
+   "duration_s": 20,
+   "supported_output": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "audio_codec": null
+   },
+   "you_provide": [
+    "width",
+    "height",
+    "fps"
+   ]
+  },
+  "label": "No preview can be made yet. Nothing here is rendered, and no partial video is offered."
+ },
+ "render": {
+  "status": 200,
+  "body": {
+   "kind": "partial",
+   "learning": null,
+   "delivery": {
+    "format": "digikon.delivery-report",
+    "format_version": 1,
+    "delivery_id": "dl_e3aade10f2d84ce4",
+    "render_id": "rn_d43dec8eac194967",
+    "kind": "partial",
+    "purpose": "preview",
+    "handoff_content_hash": "6d388ad0dc203b1fafe5b0874e1ac7ab7babbf75cb2eda87f1b68f54ea10ad39",
+    "states": {
+     "plan_created": true,
+     "plan_approved": true,
+     "scenes_total": 5,
+     "scenes_rendered": 2,
+     "scenes_content_validated": 2,
+     "final_video_validated": true,
+     "final_delivery_ready": false
+    },
+    "final_delivery_blockers": [
+     "the film is incomplete: some approved scenes or operations are missing (see omitted_operations)",
+     "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+    ],
+    "label": "INCOMPLETE PREVIEW: 3 scene(s) were not rendered and 4 approved operation(s) are missing or unsupported. This is not the approved video.",
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "start_s": 0,
+      "duration_s": 4,
+      "frames": 120,
+      "status": "placeholder",
+      "engine": null,
+      "operations": [
+       {
+        "operation_id": "E01",
+        "recipe_id": "hard-cut",
+        "template": "ffmpeg/concat-cut",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "a hard cut is the assembler's default join"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": "no operation produces this scene's picture",
+      "content": {
+       "engine_checked": false,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.1)",
+        "frame 59 of the final video matches the clip (difference 0.1)",
+        "frame 119 of the final video matches the clip (difference 0.1)"
+       ],
+       "limitations": []
+      },
+      "clip_sha256": null
+     },
+     {
+      "scene_id": "S02",
+      "start_s": 4,
+      "duration_s": 4,
+      "frames": 120,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E02",
+        "recipe_id": "text-fade-up",
+        "template": "remotion/text-fade-up",
+        "operation_type": "overlay_text",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+       },
+       {
+        "operation_id": "E03",
+        "recipe_id": "crossfade",
+        "template": "ffmpeg/xfade-fade",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+       }
+      ],
+      "unmet": [
+       "the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+       "its transition (E03) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+      ],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 1.0)",
+        "frame 59 of the final video matches the clip (difference 1.2)",
+        "frame 119 of the final video matches the clip (difference 1.2)"
+       ],
+       "limitations": [
+        "Composed scenes were checked on their last frame, plus the first frame and one frame inside the animation, by pixel comparison. They were not read by OCR and the other frames were not compared.",
+        "A camera move is checked by the supplied image at its end state and by the picture differing between the first and last frame; its easing curve is not measured frame by frame."
+       ]
+      },
+      "clip_sha256": "bfb7c8190636ccc233ff380a77793fea1020aad8bcaa35059657ab79e39ff62a"
+     },
+     {
+      "scene_id": "S03",
+      "start_s": 8,
+      "duration_s": 5,
+      "frames": 150,
+      "status": "placeholder",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E04",
+        "recipe_id": "text-fade-up",
+        "template": "remotion/text-fade-up",
+        "operation_type": "overlay_text",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+       },
+       {
+        "operation_id": "E05",
+        "recipe_id": "hard-cut",
+        "template": "ffmpeg/concat-cut",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "a hard cut is the assembler's default join"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+      "content": {
+       "engine_checked": false,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.2)",
+        "frame 74 of the final video matches the clip (difference 0.2)",
+        "frame 149 of the final video matches the clip (difference 0.2)"
+       ],
+       "limitations": []
+      },
+      "clip_sha256": null
+     },
+     {
+      "scene_id": "S04",
+      "start_s": 13,
+      "duration_s": 3,
+      "frames": 90,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E06",
+        "recipe_id": "text-fade-up",
+        "template": "remotion/text-fade-up",
+        "operation_type": "overlay_text",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+       },
+       {
+        "operation_id": "E07",
+        "recipe_id": "crossfade",
+        "template": "ffmpeg/xfade-fade",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+       }
+      ],
+      "unmet": [
+       "its transition (E07) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+      ],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 1.0)",
+        "frame 44 of the final video matches the clip (difference 1.2)",
+        "frame 89 of the final video matches the clip (difference 1.2)"
+       ],
+       "limitations": [
+        "Composed scenes were checked on their last frame, plus the first frame and one frame inside the animation, by pixel comparison. They were not read by OCR and the other frames were not compared.",
+        "A camera move is checked by the supplied image at its end state and by the picture differing between the first and last frame; its easing curve is not measured frame by frame."
+       ]
+      },
+      "clip_sha256": "debe29df03b93ea20b9752cc5ac9632470ab20ebbd1ddb42e6706c34520593d1"
+     },
+     {
+      "scene_id": "S05",
+      "start_s": 16,
+      "duration_s": 4,
+      "frames": 120,
+      "status": "placeholder",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E08",
+        "recipe_id": "end-card-cta",
+        "template": "remotion/end-card-cta",
+        "operation_type": "render_graphics_scene",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/end-card-cta was validated by real render on 2026-10-29 (remotion:end-card-cta v1.0.0)"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show",
+      "content": {
+       "engine_checked": false,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.2)",
+        "frame 59 of the final video matches the clip (difference 0.2)",
+        "frame 119 of the final video matches the clip (difference 0.2)"
+       ],
+       "limitations": []
+      },
+      "clip_sha256": null
+     }
+    ],
+    "transitions": [
+     {
+      "after_scene": "S01",
+      "operation_id": "E01",
+      "template": "ffmpeg/concat-cut",
+      "status": "applied",
+      "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+     },
+     {
+      "after_scene": "S02",
+      "operation_id": "E03",
+      "template": "ffmpeg/xfade-fade",
+      "status": "omitted",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     },
+     {
+      "after_scene": "S03",
+      "operation_id": "E05",
+      "template": "ffmpeg/concat-cut",
+      "status": "applied",
+      "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+     },
+     {
+      "after_scene": "S04",
+      "operation_id": "E07",
+      "template": "ffmpeg/xfade-fade",
+      "status": "omitted",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     }
+    ],
+    "omitted_operations": [
+     {
+      "operation_id": "E04",
+      "scene_id": "S03",
+      "recipe_id": "text-fade-up",
+      "status": "validated_available",
+      "reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show"
+     },
+     {
+      "operation_id": "E08",
+      "scene_id": "S05",
+      "recipe_id": "end-card-cta",
+      "status": "validated_available",
+      "reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+     },
+     {
+      "operation_id": "E03",
+      "scene_id": "S02",
+      "recipe_id": "ffmpeg/xfade-fade",
+      "status": "blocked_with_reason",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     },
+     {
+      "operation_id": "E07",
+      "scene_id": "S04",
+      "recipe_id": "ffmpeg/xfade-fade",
+      "status": "blocked_with_reason",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     }
+    ],
+    "engines_used": [
+     "remotion"
+    ],
+    "assembly": {
+     "tool": "ffmpeg",
+     "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+     "lossy_encodes": 2,
+     "known_differences": [
+      "each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)",
+      "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2",
+      "scene clips are h264 intermediates, not lossless"
+     ]
+    },
+    "output": {
+     "path": "out/rn_d43dec8eac194967.mp4",
+     "bytes": 211974,
+     "sha256": "a46ab0162d74d333c48a08b2a04b6abd44fe80a0ec17b7b7d4f03c67d9c09d20",
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration_s": 20,
+     "frames": 600,
+     "video_codec": "h264",
+     "audio_tracks": 0,
+     "video_url": "/api/sessions/35e1221287dc/deliveries/dl_e3aade10f2d84ce4/video"
+    },
+    "limitations": [
+     "only the first, middle and last clean frame of each scene are compared with its clip",
+     "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR",
+     "audio is not produced in this phase"
+    ],
+    "created_at": "2026-10-29T11:38:44.768Z",
+    "status": "incomplete_preview"
+   },
+   "record": null,
+   "qa": null,
+   "run_id": "35e1221287dc-1793273791656",
+   "renderer_available": true,
+   "editor": {
+    "status": "ready",
+    "validation": {
+     "ok": true,
+     "issues": []
+    },
+    "conflicts": [],
+    "revision_requests": [],
+    "operations": 8,
+    "rendered": false
+   },
+   "renderer": {
+    "selected": null,
+    "needed": [
+     "remotion",
+     "ffmpeg"
+    ],
+    "composition_required": true,
+    "registered": [
+     "ffmpeg",
+     "remotion",
+     "hyperframes"
+    ]
+   },
+   "plan": {
+    "state": "planning",
+    "purpose": "preview",
+    "operations": [
+     {
+      "operation_id": "E01",
+      "scene_id": "S01",
+      "note": null,
+      "recipe_id": "hard-cut",
+      "template": "ffmpeg/concat-cut",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E02",
+      "scene_id": "S02",
+      "note": null,
+      "recipe_id": "text-fade-up",
+      "template": "remotion/text-fade-up",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E03",
+      "scene_id": "S02",
+      "note": null,
+      "recipe_id": "crossfade",
+      "template": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E04",
+      "scene_id": "S03",
+      "note": null,
+      "recipe_id": "text-fade-up",
+      "template": "remotion/text-fade-up",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E05",
+      "scene_id": "S03",
+      "note": null,
+      "recipe_id": "hard-cut",
+      "template": "ffmpeg/concat-cut",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E06",
+      "scene_id": "S04",
+      "note": null,
+      "recipe_id": "text-fade-up",
+      "template": "remotion/text-fade-up",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E07",
+      "scene_id": "S04",
+      "note": null,
+      "recipe_id": "crossfade",
+      "template": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E08",
+      "scene_id": "S05",
+      "note": null,
+      "recipe_id": "end-card-cta",
+      "template": "remotion/end-card-cta",
+      "renderer": "remotion",
+      "supported": true
+     }
+    ],
+    "supported": 8,
+    "unsupported": 0,
+    "notes": [
+     "E02: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E03: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E04: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E06: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E07: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E08: recipe end-card-cta is draft: no review evidence; it may be used for planning and tests, not production",
+     "preview render: it may use draft recipes and is not a production video",
+     "S01: the approved shot size (wide) and visual action (\"On a clean off-white 16:9 canvas, email-style bubbles ping-…\") describe the content; the renderer does not change or check them",
+     "S02: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+     "S02: the approved shot size (close up) and visual action (\"The bubbles overlap and tangle into a knot of lines at the …\") describe the content; the renderer does not change or check them",
+     "S03: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+     "S03: the approved shot size (medium) and visual action (\"The tangle clears into a simple, stylised calendar graphic …\") describe the content; the renderer does not change or check them",
+     "S04: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+     "S04: the approved shot size (wide) and visual action (\"The calendar graphic shifts to one side. The two names 'Goo…\") describe the content; the renderer does not change or check them",
+     "S05: text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+     "S05: the approved shot size (close up) and visual action (\"The calendar clears to the typeset word 'Slotly' (a text wo…\") describe the content; the renderer does not change or check them"
+    ]
+   },
+   "coverage": {
+    "complete": false,
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "represented": false,
+      "missing": [
+       "no operation covers this scene",
+       "E01 (hard-cut) has no renderer that can run it"
+      ],
+      "labelled": [
+       "the approved shot size (wide) and visual action (\"On a clean off-white 16:9 canvas, email-style bubbles ping-…\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S02",
+      "represented": false,
+      "missing": [
+       "the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+       "its crossfade transition is not rendered (a hard cut would be used)"
+      ],
+      "labelled": [
+       "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+       "the approved shot size (close up) and visual action (\"The bubbles overlap and tangle into a knot of lines at the …\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S03",
+      "represented": false,
+      "missing": [
+       "E05 (hard-cut) has no renderer that can run it",
+       "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show"
+      ],
+      "labelled": [
+       "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+       "the approved shot size (medium) and visual action (\"The tangle clears into a simple, stylised calendar graphic …\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S04",
+      "represented": false,
+      "missing": [
+       "its crossfade transition is not rendered (a hard cut would be used)"
+      ],
+      "labelled": [
+       "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+       "the approved shot size (wide) and visual action (\"The calendar graphic shifts to one side. The two names 'Goo…\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S05",
+      "represented": false,
+      "missing": [
+       "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+      ],
+      "labelled": [
+       "text is centred and kept inside the middle 84% of the frame width; the approved platform safe area setting is not checked against any platform specification (none is verified in this project)",
+       "the approved shot size (close up) and visual action (\"The calendar clears to the typeset word 'Slotly' (a text wo…\") describe the content; the renderer does not change or check them"
+      ]
+     }
+    ]
+   },
+   "capability": [
+    {
+     "operation_id": "E01",
+     "scene_id": "S01",
+     "recipe_id": "hard-cut",
+     "status": "blocked_with_reason",
+     "selected_engine": null,
+     "selected_template": null,
+     "reason": "no permitted engine has a validated implementation: ffmpeg: ffmpeg has no validated template for hard-cut and no engine family in this project can implement it; remotion: remotion has no validated template for hard-cut and no engine family in this project can implement it; hyperframes: recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_implemented",
+       "reason": "ffmpeg has no validated template for hard-cut and no engine family in this project can implement it"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E02",
+     "scene_id": "S02",
+     "recipe_id": "text-fade-up",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/text-fade-up",
+     "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E03",
+     "scene_id": "S02",
+     "recipe_id": "crossfade",
+     "status": "validated_available",
+     "selected_engine": "ffmpeg",
+     "selected_template": "ffmpeg/xfade-fade",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "usable",
+       "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E04",
+     "scene_id": "S03",
+     "recipe_id": "text-fade-up",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/text-fade-up",
+     "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E05",
+     "scene_id": "S03",
+     "recipe_id": "hard-cut",
+     "status": "blocked_with_reason",
+     "selected_engine": null,
+     "selected_template": null,
+     "reason": "no permitted engine has a validated implementation: ffmpeg: ffmpeg has no validated template for hard-cut and no engine family in this project can implement it; remotion: remotion has no validated template for hard-cut and no engine family in this project can implement it; hyperframes: recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_implemented",
+       "reason": "ffmpeg has no validated template for hard-cut and no engine family in this project can implement it"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for hard-cut and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe hard-cut does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E06",
+     "scene_id": "S04",
+     "recipe_id": "text-fade-up",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/text-fade-up",
+     "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/text-fade-up was validated by real render on 2026-10-29 (remotion:text-fade-up v1.0.0)"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe text-fade-up does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E07",
+     "scene_id": "S04",
+     "recipe_id": "crossfade",
+     "status": "validated_available",
+     "selected_engine": "ffmpeg",
+     "selected_template": "ffmpeg/xfade-fade",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "usable",
+       "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E08",
+     "scene_id": "S05",
+     "recipe_id": "end-card-cta",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/end-card-cta",
+     "reason": "remotion/end-card-cta was validated by real render on 2026-10-29 (remotion:end-card-cta v1.0.0)",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe end-card-cta does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/end-card-cta was validated by real render on 2026-10-29 (remotion:end-card-cta v1.0.0)"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe end-card-cta does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    }
+   ],
+   "eligible": false,
+   "assembly": {
+    "ok": true,
+    "complete": false,
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "engine": null,
+      "renderable": false,
+      "reason": "no operation produces this scene's picture",
+      "unmet": []
+     },
+     {
+      "scene_id": "S02",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": [
+       "the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+       "its transition (E03) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+      ]
+     },
+     {
+      "scene_id": "S03",
+      "engine": "remotion",
+      "renderable": false,
+      "reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+      "unmet": []
+     },
+     {
+      "scene_id": "S04",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": [
+       "its transition (E07) is not applied: a neighbouring scene is not rendered, so a hard cut is used there"
+      ]
+     },
+     {
+      "scene_id": "S05",
+      "engine": "remotion",
+      "renderable": false,
+      "reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show",
+      "unmet": []
+     }
+    ],
+    "transitions": [
+     {
+      "after_scene": "S01",
+      "template": "ffmpeg/concat-cut",
+      "applied": true,
+      "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+     },
+     {
+      "after_scene": "S02",
+      "template": "ffmpeg/xfade-fade",
+      "applied": false,
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     },
+     {
+      "after_scene": "S03",
+      "template": "ffmpeg/concat-cut",
+      "applied": true,
+      "reason": "a hard cut is the assembler's default join: the next scene starts on the next frame"
+     },
+     {
+      "after_scene": "S04",
+      "template": "ffmpeg/xfade-fade",
+      "applied": false,
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     }
+    ],
+    "omitted": [
+     {
+      "operation_id": "E04",
+      "scene_id": "S03",
+      "recipe_id": "text-fade-up",
+      "status": "validated_available",
+      "reason": "it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show"
+     },
+     {
+      "operation_id": "E08",
+      "scene_id": "S05",
+      "recipe_id": "end-card-cta",
+      "status": "validated_available",
+      "reason": "it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+     },
+     {
+      "operation_id": "E03",
+      "scene_id": "S02",
+      "recipe_id": "ffmpeg/xfade-fade",
+      "status": "blocked_with_reason",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     },
+     {
+      "operation_id": "E07",
+      "scene_id": "S04",
+      "recipe_id": "ffmpeg/xfade-fade",
+      "status": "blocked_with_reason",
+      "reason": "a neighbouring scene is not rendered, so a hard cut is used there"
+     }
+    ],
+    "label": "Only an INCOMPLETE preview can be made: scenes or operations that nothing can render are listed and shown as labelled placeholders."
+   },
+   "can_render": true,
+   "blockers": [
+    "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+    "S01: no operation covers this scene",
+    "S02: the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+    "S02: its crossfade transition is not rendered (a hard cut would be used)",
+    "S03: it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+    "S04: its crossfade transition is not rendered (a hard cut would be used)",
+    "S05: it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+   ],
+   "production": {
+    "ready": false,
+    "blockers": [
+     "E01: no template is registered for ffmpeg/concat-cut, and no remotion or ffmpeg renderer is available",
+     "E02: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E03: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E04: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E05: no template is registered for ffmpeg/concat-cut, and no remotion or ffmpeg renderer is available",
+     "E06: recipe text-fade-up is draft: no review evidence; it may be used for planning and tests, not production",
+     "E07: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E08: recipe end-card-cta is draft: no review evidence; it may be used for planning and tests, not production",
+     "handoff is not production-ready: recipe crossfade is draft: no review evidence",
+     "handoff is not production-ready: recipe end-card-cta is draft: no review evidence",
+     "handoff is not production-ready: recipe hard-cut is draft: no review evidence",
+     "handoff is not production-ready: recipe text-fade-up is draft: no review evidence",
+     "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+     "S01: no operation covers this scene",
+     "S01: E01 (hard-cut) has no renderer that can run it",
+     "S02: the approved shot calls for camera motion (slow push in), but no renderer here has a camera-move template, so the scene would be shown static",
+     "S02: its crossfade transition is not rendered (a hard cut would be used)",
+     "S03: E05 (hard-cut) has no renderer that can run it",
+     "S03: it needs a product screen (\"Product UI screenshot (not supplied). The stylised calendar graphic stands in for it.\", currently a placeholder) that this renderer cannot show",
+     "S04: its crossfade transition is not rendered (a hard cut would be used)",
+     "S05: it needs a logo (\"Slotly brand mark. No logo file was supplied, so a typeset text wordmark is used as a placeholder.\", currently a placeholder) that this renderer cannot show"
+    ]
+   },
+   "needs": {
+    "aspect_ratio": "16:9",
+    "duration_s": 20,
+    "supported_output": {
+     "container": "mp4",
+     "video_codec": "h264",
+     "audio_codec": null
+    },
+    "you_provide": [
+     "width",
+     "height",
+     "fps"
+    ]
+   },
+   "label": "No preview can be made yet. Nothing here is rendered, and no partial video is offered."
+  }
+ }
+}

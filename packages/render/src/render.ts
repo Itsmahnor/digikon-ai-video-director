@@ -10,6 +10,7 @@ import {
   type AssetFiles, type RunStore,
 } from "@digikon/director";
 import type { RecipeLibrary } from "@digikon/recipes";
+import { jobVisuals } from "./composition.js";
 import { AdapterRegistry, type RenderAdapter, type RenderJob } from "./adapter.js";
 import { alternativeImplementation, diagnoseOperations, loadCapabilityRegistry, type LoadedRegistry, type OperationDiagnosis } from "./capabilities.js";
 import { previewCoverage } from "./coverage.js";
@@ -179,7 +180,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   // It is asked whenever the settings are valid and every operation has a renderer, even if other blockers exist, so all reasons are reported together.
   const askable = settings !== null && operations.every((o) => o.renderer !== null);
   const adapter = askable ? deps.adapters.adapterFor(operations[0]!.implementation_ref) : null;
-  const job = askable ? { render_id, settings: settings!, operations: out.operations, templates: Object.fromEntries(operations.map((o) => [o.operation_id, o.implementation_ref])), clips, asset_info, assets: assets.map(({ present: _p, ...a }) => a), concept_asset_ids, output_path: join(deps.outputRoot, `${render_id}.${settings!.container}`) } : null;
+  const job = askable ? { render_id, settings: settings!, operations: out.operations, templates: Object.fromEntries(operations.map((o) => [o.operation_id, o.implementation_ref])), clips, asset_info, assets: assets.map(({ present: _p, ...a }) => a), concept_asset_ids, ...jobVisuals(h), output_path: join(deps.outputRoot, `${render_id}.${settings!.container}`) } : null;
   if (job && adapter?.check) blockers.push(...adapter.check(job));
 
   const executable = blockers.length === 0 && settings !== null && !!job && !!adapter;
@@ -277,3 +278,4 @@ export async function executeRender(plan: ExecutablePlan, opts: ExecuteOptions =
   }
   return RenderRecord.parse({ ...started, state: "rendered", output: checked.output, notes: [...started.notes, ...adapterNotes], finished_at: iso(now()) });
 }
+

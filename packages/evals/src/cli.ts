@@ -15,7 +15,7 @@ async function main() {
   try { process.loadEnvFile(join(repoRoot, ".env")); } catch { /* optional */ }
 
   const live = flag("live");
-  const llm: LlmClient = live ? new AnthropicClient() : new DemoClient();
+  const llm: LlmClient = live ? new AnthropicClient() : new DemoClient({ creative: true });
   const mode = live ? `LIVE (${(llm as AnthropicClient).model})` : "DEMO: canned model, checks the harness and the pipeline, says nothing about Claude's quality";
 
   const recipes = loadRecipes(join(repoRoot, "recipes"));

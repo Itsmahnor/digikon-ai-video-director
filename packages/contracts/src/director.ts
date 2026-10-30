@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { QAFinding } from "./schemas.js";
+import { ArtDirection } from "./visual.js";
 
 /** Time range inside a source asset, in seconds. */
 const Range = z
@@ -88,6 +89,8 @@ export const Treatment = z.object({
     approx_seconds: z.number().positive(),
   })).min(1),
   cta: z.string().min(1),
+  /** The creative frame every scene follows. Null only for a treatment made before art direction existed. */
+  art_direction: ArtDirection.nullable().default(null),
   claims: z.array(Claim).default([]),
   /** Conflicts between skills and how the priority order resolved them. */
   conflicts_log: z.array(z.object({ conflict: z.string(), decision: z.string() })).default([]),

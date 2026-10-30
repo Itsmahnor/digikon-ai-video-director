@@ -18,7 +18,7 @@ import {
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, DeliveryReport, FFMPEG_TEMPLATES, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
@@ -742,9 +742,11 @@ export function createApp(ctx: AppContext) {
             writeFileSync(join(p.dirs.records, `${result.record.render_id}.qa.json`), JSON.stringify(qa, null, 2));
             for (const id of new Set(result.record.operations.map((o) => o.recipe_id))) saveRenderEvidence(p.dirs.evidence, buildRenderEvidence(result.record, ctx.recipes.get(id)!, qa));
           } catch (e) { console.error(e instanceof Error ? e.message : e); }
-          return c.json({ kind: "complete", learning, delivery, record: publicRecord(result.record, s.id, p.dirs.root, scrubRoots(s)), qa: qa ? { findings: qa.findings, passed: qa.passed, measurements: qa.measurements } : null, ...view });
+          const quality = await filmQuality(result.report, p.handoff).catch(() => null); if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
+          return c.json({ kind: "complete", learning, delivery, quality, record: publicRecord(result.record, s.id, p.dirs.root, scrubRoots(s)), qa: qa ? { findings: qa.findings, passed: qa.passed, measurements: qa.measurements } : null, ...view });
         }
-        return c.json({ kind: "partial", learning, delivery, record: null, qa: null, ...view });
+        const quality = await filmQuality(result.report, p.handoff).catch(() => null); if (quality && ctx.capabilitiesDir) logVisualQa(join(ctx.capabilitiesDir, "visual", "qa-log.jsonl"), { at: new Date().toISOString(), render_id: result.report.render_id, session: s.id, findings: quality.visual.findings.map((f) => ({ finding_id: f.finding_id, scene_id: f.scene_id, severity: f.severity, description: f.description })) });
+        return c.json({ kind: "partial", learning, delivery, quality, record: null, qa: null, ...view });
       }
       const save = (r: RenderRecord) => { try { saveRenderRecord(p.dirs.records, r); } catch { throw new HttpError(503, "not_saved", "The render record could not be saved, so nothing was rendered. Check free disk space."); } };
       const record = await executeRender(p.planned.plan, { storageRoot: s.dir, requireContentHash: true, onUpdate: save });

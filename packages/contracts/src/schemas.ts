@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SceneVisual } from "./visual.js";
 
 export const ShotSize = z.enum([
   "extreme_wide", "wide", "medium", "close_up", "macro_close_up",
@@ -86,6 +87,10 @@ export const Scene = z.object({
   required_assets: z.array(RequiredAsset).max(12).default([]),
   /** Placeholders, missing inputs and open creative decisions the user must see. */
   unresolved: z.array(UnresolvedItem).max(12).default([]),
+  /** What this scene's picture does that no other scene's does. Required once the treatment has art direction. */
+  visual_purpose: z.string().trim().min(1).max(240).nullable().default(null),
+  /** What the scene draws, as data: one of the supported visual blocks. Approved with the storyboard like everything else on the scene. */
+  visual: SceneVisual.nullable().default(null),
   asset_ids: z.array(z.string()).default([]),
   /** Offset into the source video where this scene starts, in seconds. */
   source_in_seconds: z.number().nonnegative().default(0),

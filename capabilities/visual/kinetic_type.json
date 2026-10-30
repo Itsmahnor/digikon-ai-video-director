@@ -1,0 +1,165 @@
+{
+  "format": "digikon.visual-capability",
+  "format_version": 1,
+  "capability_id": "remotion:scene-composition:kinetic_type",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/scene-composition",
+  "block": "kinetic_type",
+  "creative_use": "Let the words carry the scene when the sentence is the idea: a statement, a turn, a punchline.",
+  "example": {
+    "visual": {
+      "block": "kinetic_type",
+      "style": "word_pop",
+      "emphasis_word": 3,
+      "camera": "static",
+      "reveal": "none",
+      "backdrop": "gradient"
+    },
+    "overlay_text": "Booking should not take this many emails."
+  },
+  "limitations": [
+    "Animates the approved overlay text only (120 characters).",
+    "Three entrance styles: slide_stack, word_pop, mask_rise.",
+    "One typeface file: weight, scale and case are what vary.",
+    "Validated on one example spec per block at the listed frame sizes, in one palette. Other text, lengths, palettes and sizes are checked when a film is rendered, not by this record.",
+    "Frame checks measure background, coverage, edge contact, headline ink and movement. They do not read text or judge design quality.",
+    "No audio, no supplied images or footage inside a block, one typeface file, one block per scene."
+  ],
+  "not_validated": [
+    "any other text, list length, palette or frame size than the listed inputs",
+    "1:1 frames",
+    "frame rates other than 30",
+    "scenes longer or shorter than 3 s",
+    "a person's judgement of the design"
+  ],
+  "status": "validated",
+  "validated": {
+    "at": "2026-10-30T07:05:58.532Z",
+    "fingerprint": "96526c51841e53f3",
+    "remotion": "4.0.539",
+    "browser": "chrome via remotion",
+    "inputs": [
+      {
+        "width": 960,
+        "height": 540,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "8e12fd7c2c5fe3c6",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "Booking should not take this many emails."
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "8e12fd7c2c5fe3c6",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "Booking should not take this many emails."
+      }
+    ],
+    "renders": [
+      {
+        "width": 960,
+        "height": 540,
+        "sha256": "134f6e8481a4c34f7963625eb4f740d07b64022444c587d87c2fb4ffa538c5aa",
+        "bytes": 1400896,
+        "frames": 630,
+        "film_scene": "S05 of a 7-scene film"
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "sha256": "4d31d43debef154d187e48483095e3c360a5af7673c5a64f40874dc3b6125ed3",
+        "bytes": 1229744,
+        "frames": 630,
+        "film_scene": "S05 of a 7-scene film"
+      }
+    ],
+    "checks": [
+      "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 8% of the frame drawn, nothing on the frame edge, headline area inked, motion 7.6 of 255 between frames, file probed as 960x540",
+      "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 6% of the frame drawn, nothing on the frame edge, headline area inked, motion 5.7 of 255 between frames, file probed as 540x960"
+    ],
+    "measures": [
+      {
+        "width": 960,
+        "coverage": 0.082,
+        "motion": 7.63,
+        "edge_ink": 0
+      },
+      {
+        "width": 540,
+        "coverage": 0.065,
+        "motion": 5.69,
+        "edge_ink": 0
+      }
+    ]
+  },
+  "history": [
+    {
+      "at": "2026-10-30T06:35:44.835Z",
+      "fingerprint": "3bf1d3e333dece14",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "8e12fd7c2c5fe3c6",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Booking should not take this many emails."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "8e12fd7c2c5fe3c6",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Booking should not take this many emails."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "1ba1820ca4fbca1662617cdd167f5aeff97e85487e842192c6fe281aa4e4a7d2",
+          "bytes": 1645591,
+          "frames": 630,
+          "film_scene": "S05 of a 7-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "efd7c21d0242c4b9ac5c551755942847798ba202b667be1566feeaa044314f1a",
+          "bytes": 1463391,
+          "frames": 630,
+          "film_scene": "S05 of a 7-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 8% of the frame drawn, nothing on the frame edge, headline area inked, motion 7.6 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 6% of the frame drawn, nothing on the frame edge, headline area inked, motion 5.7 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.082,
+          "motion": 7.63,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.065,
+          "motion": 5.69,
+          "edge_ink": 0
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "record_hash": "8ee7dde371c79f43"
+}

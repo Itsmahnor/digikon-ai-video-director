@@ -49,6 +49,8 @@ export interface GenerateRequest<T> {
 
 /** The only model interface the Director uses, so tests and later providers can swap in. */
 export interface LlmClient {
+  /** True for a scripted or canned client whose answers predate art direction. The Director then treats art direction as optional. A real model never sets it. */
+  readonly predatesArtDirection?: boolean;
   generate<T>(req: GenerateRequest<T>): Promise<T>;
 }
 
@@ -143,6 +145,7 @@ export class AnthropicClient implements LlmClient {
 
 /** Test double: returns queued answers in order and records every call. Each answer is checked against the real schema. */
 export class ScriptedClient implements LlmClient {
+  readonly predatesArtDirection = true;
   readonly calls: { name: string; system: string; user: string }[] = [];
   constructor(private readonly answers: Array<unknown | ((req: GenerateRequest<unknown>) => unknown)>) {}
 

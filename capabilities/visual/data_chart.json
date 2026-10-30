@@ -1,0 +1,188 @@
+{
+  "format": "digikon.visual-capability",
+  "format_version": 1,
+  "capability_id": "remotion:scene-composition:data_chart",
+  "capability_version": "1.0.0",
+  "engine": "remotion",
+  "template": "remotion/scene-composition",
+  "block": "data_chart",
+  "creative_use": "Give a trend or a comparison a shape. Heights only; the chart is always labelled illustrative data.",
+  "example": {
+    "visual": {
+      "block": "data_chart",
+      "chart": "bars",
+      "camera": "static",
+      "reveal": "wipe_up",
+      "backdrop": "flat",
+      "title": "Back-and-forth, before and after",
+      "points": [
+        {
+          "label": "Mon",
+          "value": 80
+        },
+        {
+          "label": "Tue",
+          "value": 65
+        },
+        {
+          "label": "Wed",
+          "value": 70
+        },
+        {
+          "label": "Thu",
+          "value": 30
+        },
+        {
+          "label": "Fri",
+          "value": 20
+        }
+      ],
+      "highlight_index": 4
+    },
+    "overlay_text": "Fewer messages, more booked time."
+  },
+  "limitations": [
+    "Values are relative heights and are never printed.",
+    "Three to seven points; bars or one line.",
+    "It is illustrative: it must not be presented as a measured result.",
+    "Validated on one example spec per block at the listed frame sizes, in one palette. Other text, lengths, palettes and sizes are checked when a film is rendered, not by this record.",
+    "Frame checks measure background, coverage, edge contact, headline ink and movement. They do not read text or judge design quality.",
+    "No audio, no supplied images or footage inside a block, one typeface file, one block per scene."
+  ],
+  "not_validated": [
+    "any other text, list length, palette or frame size than the listed inputs",
+    "1:1 frames",
+    "frame rates other than 30",
+    "scenes longer or shorter than 3 s",
+    "a person's judgement of the design"
+  ],
+  "status": "validated",
+  "validated": {
+    "at": "2026-10-30T07:05:58.519Z",
+    "fingerprint": "96526c51841e53f3",
+    "remotion": "4.0.539",
+    "browser": "chrome via remotion",
+    "inputs": [
+      {
+        "width": 960,
+        "height": 540,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "15a5784124faa31c",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "Fewer messages, more booked time."
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "fps": 30,
+        "duration_s": 3,
+        "spec_hash": "15a5784124faa31c",
+        "art_direction_hash": "691eded9ff83822e",
+        "overlay_text": "Fewer messages, more booked time."
+      }
+    ],
+    "renders": [
+      {
+        "width": 960,
+        "height": 540,
+        "sha256": "134f6e8481a4c34f7963625eb4f740d07b64022444c587d87c2fb4ffa538c5aa",
+        "bytes": 1400896,
+        "frames": 630,
+        "film_scene": "S04 of a 7-scene film"
+      },
+      {
+        "width": 540,
+        "height": 960,
+        "sha256": "4d31d43debef154d187e48483095e3c360a5af7673c5a64f40874dc3b6125ed3",
+        "bytes": 1229744,
+        "frames": 630,
+        "film_scene": "S04 of a 7-scene film"
+      }
+    ],
+    "checks": [
+      "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 14% of the frame drawn, nothing on the frame edge, headline area inked, motion 10.1 of 255 between frames, file probed as 960x540",
+      "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 19% of the frame drawn, nothing on the frame edge, headline area inked, motion 12.2 of 255 between frames, file probed as 540x960"
+    ],
+    "measures": [
+      {
+        "width": 960,
+        "coverage": 0.137,
+        "motion": 10.14,
+        "edge_ink": 0
+      },
+      {
+        "width": 540,
+        "coverage": 0.186,
+        "motion": 12.19,
+        "edge_ink": 0
+      }
+    ]
+  },
+  "history": [
+    {
+      "at": "2026-10-30T06:35:44.824Z",
+      "fingerprint": "3bf1d3e333dece14",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "15a5784124faa31c",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Fewer messages, more booked time."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "15a5784124faa31c",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Fewer messages, more booked time."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "1ba1820ca4fbca1662617cdd167f5aeff97e85487e842192c6fe281aa4e4a7d2",
+          "bytes": 1645591,
+          "frames": 630,
+          "film_scene": "S04 of a 7-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "efd7c21d0242c4b9ac5c551755942847798ba202b667be1566feeaa044314f1a",
+          "bytes": 1463391,
+          "frames": 630,
+          "film_scene": "S04 of a 7-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 14% of the frame drawn, nothing on the frame edge, headline area inked, motion 10.1 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 19% of the frame drawn, nothing on the frame edge, headline area inked, motion 12.2 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.137,
+          "motion": 10.14,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.186,
+          "motion": 12.19,
+          "edge_ink": 0
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "record_hash": "4f52b694892d8848"
+}

@@ -41,7 +41,7 @@ describe("harness with the demo model (checks the pipeline, not Claude)", () => 
 describe("the harness is not vacuous: it catches a misbehaving model", () => {
   const sabotage = (edit: (name: string, out: any) => any): LlmClient => {
     const demo = new DemoClient();
-    return { generate: async (req) => { const out = await demo.generate({ ...req, schema: { parse: (x: unknown) => x } as never }); return req.schema.parse(edit(req.name, structuredClone(out))); } };
+    return { predatesArtDirection: demo.predatesArtDirection, generate: async (req) => { const out = await demo.generate({ ...req, schema: { parse: (x: unknown) => x } as never }); return req.schema.parse(edit(req.name, structuredClone(out))); } };
   };
   const first = (id: string) => briefs.filter((b) => b.id === id);
 

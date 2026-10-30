@@ -5,6 +5,9 @@ import type { GenerateRequest, LlmClient } from "./llm.js";
  * It is not Claude and does not understand briefs. The console shows a banner whenever it is active.
  */
 export class DemoClient implements LlmClient {
+  /** `creative` answers with art direction and drawn visuals, the way the real Director now must. Without it the canned answers are the older, plainer ones. */
+  constructor(private readonly opts: { creative?: boolean } = {}) {}
+  get predatesArtDirection(): boolean { return !this.opts.creative; }
   readonly model = "demo-scripted (not Claude)";
   async generate<T>(req: GenerateRequest<T>): Promise<T> {
     const out = this.answer(req.name, req.user);
@@ -64,6 +67,14 @@ export class DemoClient implements LlmClient {
         { beat: "Call to action", purpose: "Invite one action", approx_seconds: c },
       ],
       cta: "Order today", claims,
+      ...(!this.opts.creative ? {} : { art_direction: {
+        audience_response: "The viewer should feel confident enough to place one order.", concept: "One honest view of the product, then one action.", visual_metaphor: null,
+        palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#e8590c", accent_2: "#2b8a6e" },
+        typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "Bold sentence case reads as warm and direct." },
+        composition: "Headline on the left or top, one picture beside it, generous margins.",
+        motion_language: { feel: "precise", easing: "ease_out", description: "Elements ease out of place and every scene ends held still." },
+        narrative: { opening: "Open on the most concrete view.", development: "Show the detail that earns trust.", conclusion: "Hold on one clear action." },
+      } }),
       conflicts_log: [{ conflict: "Style wanted a superlative claim", decision: "Dropped: no approved fact supports it (claims rule wins)." }],
     };
   }
@@ -107,23 +118,26 @@ export class DemoClient implements LlmClient {
     const hookVideo = withVideo(hook);
     return {
       scenes: [
-        { scene_id: "S01", purpose: "Hook", duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Open on the idea in words" } : {}), ...(hookVideo.asset_ids.length || !this.opts.creative ? {} : { visual: { block: "kinetic_type", style: "word_pop", emphasis_word: 1, camera: "push_in", reveal: "none", backdrop: "gradient" } }), duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
         ...middleScenes.map((d, i) => {
           const v = withVideo(d);
-          return { scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof", duration_seconds: d, ...v, required_assets: needs(v, "Animated detail graphics"), shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"), claim_ids: i === 0 && hasClaim ? ["C01"] : [], overlay: null, transition_out: "cut" };
+          const blocks = [{ block: "layered_cards", depth: "subtle", cards: [{ title: "The detail", detail: null }, { title: "That earns trust", detail: null }] }, { block: "process_flow", steps: [{ label: "Look closer", detail: null }, { label: "See why", detail: null }] }];
+          const vis = v.asset_ids.length || !this.opts.creative ? {} : { visual: { ...blocks[i % 2]!, camera: i % 2 ? "pan_right" : "static", reveal: "none", backdrop: "flat" } };
+          return { scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof", ...(this.opts.creative ? { visual_purpose: `Proof ${i + 1}: ${i % 2 ? "how it works" : "the layers of the detail"}` } : {}), ...vis, duration_seconds: d, ...v, required_assets: needs(v, "Animated detail graphics"), shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"), claim_ids: i === 0 && hasClaim ? ["C01"] : [], overlay: null, transition_out: "cut" };
         }),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on one action, held still", visual: { block: "end_card", wordmark: null, button: "Order today", subline: null, camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
       ],
     };
   }
   private editPlan(user: string) {
-    const scenes = JSON.parse(/## Scenes\n([\s\S]*?)\n\n## /.exec(user)![1]!) as { scene_id: string; overlay: unknown; media: string[]; duration_seconds: number }[];
+    const scenes = JSON.parse(/## Scenes\n([\s\S]*?)\n\n## /.exec(user)![1]!) as { scene_id: string; overlay: unknown; media: string[]; duration_seconds: number; visual_block?: string | null }[];
     const uses: unknown[] = [];
     let n = 1;
     const add = (scene_id: string, recipe_id: string, rationale: string) => uses.push({ use_id: `U${String(n++).padStart(2, "0")}`, scene_id, recipe_id, params: {}, rationale });
     scenes.forEach((s, i) => {
       const last = i === scenes.length - 1;
-      if (last) add(s.scene_id, "end-card-cta", "Closing card holds the call to action.");
+      if (s.visual_block) add(s.scene_id, "scene-composition", "The scene is drawn from its approved visual.");
+      else if (last) add(s.scene_id, "end-card-cta", "Closing card holds the call to action.");
       else {
         if (s.media.includes("video") && s.duration_seconds >= 1.5) add(s.scene_id, "slow-push-in", "Gentle push builds focus on the real footage.");
         if (s.overlay) add(s.scene_id, "text-fade-up", "Simple, readable headline entrance.");
@@ -133,3 +147,4 @@ export class DemoClient implements LlmClient {
     return { uses };
   }
 }
+

@@ -45,7 +45,7 @@ export class ModelUnavailable extends Error {}
 
 function countingClient(llm: LlmClient): { client: LlmClient; calls: () => number } {
   let n = 0;
-  return { client: { generate: (req) => { n++; return llm.generate(req); } }, calls: () => n };
+  return { client: { predatesArtDirection: llm.predatesArtDirection, generate: (req) => { n++; return llm.generate(req); } }, calls: () => n };
 }
 
 const wrapModelErrors = async <T>(fn: () => Promise<T>): Promise<T> => {
@@ -70,7 +70,7 @@ function allText(s: DirectorStateType): string {
 }
 
 export function checkFinalState(s: DirectorStateType, c: DirectorCase, library: RecipeLibrary): Check[] {
-  const out: Check[] = [check("status", s.status === c.expect.status, `expected ${c.expect.status}, got ${s.status}`)];
+  const out: Check[] = [check("status", s.status === c.expect.status, `expected ${c.expect.status}, got ${s.status}${s.escalation ? `: ${s.escalation.what_failed} ${s.escalation.evidence.slice(0, 3).join(" | ")}` : ""}`)];
   if (s.status !== "awaiting_approval") return out; // the remaining checks describe a finished plan
 
   const plan = s.scenePlan!, treatment = s.treatmentDoc!, edit = s.editPlan!;

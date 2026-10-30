@@ -1,0 +1,3429 @@
+{
+ "session": "6b94e323b6db",
+ "route": {
+  "result": {
+   "status": "ready",
+   "request": {
+    "mode": "create_minimal",
+    "language": null,
+    "assumptions": [
+     "Format 16:9 chosen from the platform \"YouTube\".",
+     "Tone noted: Calm, clear, modern."
+    ],
+    "project": {
+     "project_id": "proj_6b94e323b6db",
+     "owner_id": "console-user",
+     "brief": "A 20 second YouTube explainer for Slotly, a scheduling app for small business owners. Calm, clear, modern. The goal is free trial sign-ups. Audience: small business owners who lose hours to back-and-forth booking emails. No footage, no logo file, no voiceover, no music.",
+     "objective": "Drive free trial sign-ups for Slotly, a scheduling app for small business owners",
+     "audience": "Small business owners who lose hours to back-and-forth booking emails",
+     "platform": "YouTube",
+     "aspect_ratio": "16:9",
+     "target_duration": 20,
+     "brand_id": null,
+     "approval_status": "draft"
+    },
+    "edit": null,
+    "asset_ids": []
+   },
+   "rationale": "The user wants a new video made and the inventory is empty (no videos, images or audio), so edit_existing and create_full are ruled out. This is a graphics-led create_minimal job. The goal, audience, platform, duration and tone are stated. Aspect ratio was not stated, so it stays null and the application fills the default. YouTube explainer does not state 16:9 explicitly, so I did not guess.",
+   "confidence": 0.92
+  },
+  "turns": [
+   {
+    "role": "user",
+    "text": "A 20 second YouTube explainer for Slotly, a scheduling app for small business owners. Calm, clear, modern. The goal is free trial sign-ups. Audience: small business owners who lose hours to back-and-forth booking emails. No footage, no logo file, no voiceover, no music.",
+    "from_voice": false,
+    "language": null
+   }
+  ]
+ },
+ "state1": {
+  "timing": {
+   "total_s": 20,
+   "target_s": 20,
+   "scenes": 4,
+   "matches_target": true
+  },
+  "claimsAudit": [
+   {
+    "claim_id": "C01",
+    "text": "Slotly is free for 14 days.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F01",
+     "text": "Free for 14 days.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S04"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F01 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C02",
+    "text": "Slotly works with Google Calendar and Outlook.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F02",
+     "text": "Works with Google Calendar and Outlook.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S03"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F02 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C03",
+    "text": "Slotly replaces back-and-forth booking emails with picking one open slot.",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S02"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show it only as a labelled concept illustration (message thread, then one slot selected) with no on-screen text asserting the feature works this way or that it gets results."
+   },
+   {
+    "claim_id": "C04",
+    "text": "Slotly saves small business owners hours of time.",
+    "status": "unsupported",
+    "fact": null,
+    "scene_ids": [],
+    "usable_in_scenes": false,
+    "explanation": "No approved fact supports this wording. It must not be presented as a verified product fact.",
+    "safe_alternative": "Don't state it. Show the pile of messages as the problem and leave the benefit implied, with no hours, numbers or percentages."
+   }
+  ],
+  "assetFeasibility": {
+   "items": [
+    {
+     "scene_id": "S01",
+     "need": "Drawn booking message thread, animated stacking and pile-up, in the art-direction palette",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S01: \"Drawn booking message thread, animated stacking and pile-up, in the art-direction palette\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen",
+     "kind": "ui_screenshot",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Use the drawn concept window labelled as a concept illustration.",
+     "severity": "warning",
+     "message": "S02: \"Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S03: \"Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Typeset Slotly wordmark, drawn as text and not as a logo",
+     "kind": "logo",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Keep the typeset wordmark.",
+     "severity": "warning",
+     "message": "S04: \"Typeset Slotly wordmark, drawn as text and not as a logo\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Drawn end card with button",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S04: \"Drawn end card with button\" can be built with the graphics workflow."
+    }
+   ],
+   "counts": {
+    "supplied": 0,
+    "generate_graphics": 5,
+    "needs_external": 0,
+    "missing_blocking": 0
+   },
+   "blockers": [],
+   "warnings": [
+    "S01: creative decision: The brief asks for no voiceover and no music, so this scene is silent and carried by text and motion.",
+    "S02: \"Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S02: placeholder: No real Slotly product capture was supplied. The drawn window is a concept illustration. Supply a screen recording if you want the real product shown.",
+    "S04: \"Typeset Slotly wordmark, drawn as text and not as a logo\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S04: placeholder: No logo file was supplied. The typeset Slotly wordmark is a stand-in. Supply a logo if you want the real mark."
+   ]
+  },
+  "status": "awaiting_approval",
+  "intake": {
+   "status": "ready",
+   "questions": []
+  },
+  "treatment": {
+   "logline": "A small business owner's booking emails pile up, then settle into one calm calendar, and the viewer starts Slotly's 14-day free trial.",
+   "hook": "Frame one: a booking email thread already in progress (\"Does Tuesday work?\" \"Actually, can we do Thursday?\") stacking up message by message. No logo and no title card.",
+   "tone": "Calm, clear, modern, and reassuring. It's a little wry about the email ping-pong, never panicky and never hype.",
+   "beats": [
+    {
+     "beat": "The pile-up",
+     "purpose": "Hook. Show the pain concretely: a booking thread of 'what time works?' messages piling up. The viewer thinks 'that's my inbox'.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "One calm calendar",
+     "purpose": "Turn. Show, as a concept illustration, open time slots with one slot being picked and confirmed. The mess resolves into a single action. No results or time-saved figures are stated.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "Fits your calendar",
+     "purpose": "Reassure. State the approved compatibility fact: works with Google Calendar and Outlook, shown as layered calendar cards.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "Start free",
+     "purpose": "Conclusion. Hold still on one action: start the free trial, free for 14 days, with the typeset Slotly wordmark.",
+     "approx_seconds": 6
+    }
+   ],
+   "cta": "Start your free 14-day trial",
+   "art_direction": {
+    "audience_response": "Feel the relief of recognising their own email ping-pong, think 'there must be a calmer way to book', and start the free trial.",
+    "concept": "From noise to one clear slot: the film moves from a crowded, overlapping inbox to a single quiet calendar choice, and the layout gets calmer as it goes.",
+    "visual_metaphor": "A tangle of overlapping message bubbles that straightens into one neat row of open time slots, which shows the shift from back-and-forth to a single choice.",
+    "palette": {
+     "background": "#F6F3EC",
+     "surface": "#FFFFFF",
+     "text": "#1F2A37",
+     "muted": "#5B6472",
+     "accent": "#1F7A6D",
+     "accent_2": "#E8A33D"
+    },
+    "typography": {
+     "weight": "bold",
+     "scale": "standard",
+     "case": "sentence",
+     "rationale": "Bold sentence case reads as friendly and plain-spoken for busy owners. Standard scale keeps 16:9 headlines legible without shouting."
+    },
+    "composition": "The headline sits top-left on a wide left-aligned column, and the picture fills the right two-thirds with generous empty space around it. Nothing crosses the safe margins. The final card is centred and uncluttered.",
+    "motion_language": {
+     "feel": "calm",
+     "easing": "ease_in_out",
+     "description": "Slow, smooth pushes and wipes with no bounce. Messages arrive at an even pace and the final card settles and holds."
+    },
+    "narrative": {
+     "opening": "Opens on a booking thread already under way, with messages stacking up, so the viewer sees the problem in the first frame.",
+     "development": "A calm calendar picks one slot, and then cards show that it works with the calendars owners already use.",
+     "conclusion": "A still end card with one button, the free 14-day trial, held long enough to read."
+    }
+   },
+   "claims": [
+    {
+     "claim_id": "C01",
+     "text": "Slotly is free for 14 days.",
+     "brand_fact_id": "F01",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C02",
+     "text": "Slotly works with Google Calendar and Outlook.",
+     "brand_fact_id": "F02",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C03",
+     "text": "Slotly replaces back-and-forth booking emails with picking one open slot.",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show it only as a labelled concept illustration (message thread, then one slot selected) with no on-screen text asserting the feature works this way or that it gets results."
+    },
+    {
+     "claim_id": "C04",
+     "text": "Slotly saves small business owners hours of time.",
+     "brand_fact_id": null,
+     "kind": "factual",
+     "safe_alternative": "Don't state it. Show the pile of messages as the problem and leave the benefit implied, with no hours, numbers or percentages."
+    }
+   ],
+   "conflicts_log": [
+    {
+     "conflict": "Message clarity and the hook want a time-saving benefit (C04), but no approved fact supports it.",
+     "decision": "Approved claims win. C04 stays in the register as unsupported and is kept out of every beat, caption and the CTA. The benefit is shown through the before/after visual instead."
+    },
+    {
+     "conflict": "The playbook says to open on a real view of the product, but no footage or product capture was supplied.",
+     "decision": "Product fidelity wins. Open on a drawn message thread, which is the problem and not the product. The product moment in beat 2 is a labelled concept illustration, not a real screen."
+    },
+    {
+     "conflict": "The playbook suggests ending with the brand mark, but no logo file exists.",
+     "decision": "Use a typeset 'Slotly' wordmark on the end card and don't present it as a logo. Flag that a logo file is needed if one is wanted."
+    },
+    {
+     "conflict": "The brief asks for no voiceover and no music, which limits pacing and emotion.",
+     "decision": "Carry the story with on-screen text and calm motion alone, at a steady even pace."
+    }
+   ]
+  },
+  "scenePlan": {
+   "project_id": "proj_6b94e323b6db",
+   "version": 1,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "purpose": "Hook: show the booking email ping-pong already under way so the viewer recognises their own inbox.",
+     "start_time": 0,
+     "end_time": 5,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn booking message thread, animated stacking and pile-up, in the art-direction palette",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "creative_decision",
+       "note": "The brief asks for no voiceover and no music, so this scene is silent and carried by text and motion."
+      }
+     ],
+     "visual_purpose": "Shows the problem as a crowded, overlapping conversation. It is the only scene that is noisy and cluttered.",
+     "visual": {
+      "block": "message_thread",
+      "messages": [
+       {
+        "from": "them",
+        "text": "Does Tuesday work?"
+       },
+       {
+        "from": "you",
+        "text": "Tuesday is tricky. Morning?"
+       },
+       {
+        "from": "them",
+        "text": "Actually, can we do Thursday?"
+       },
+       {
+        "from": "you",
+        "text": "Thursday afternoon could work."
+       },
+       {
+        "from": "them",
+        "text": "Hmm, what about Friday?"
+       },
+       {
+        "from": "you",
+        "text": "Let me check and get back to you."
+       }
+      ],
+      "mode": "pile_up",
+      "camera": "push_in",
+      "reveal": "none",
+      "backdrop": "dots"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "slow_push_in",
+      "visual_action": "A booking thread is already in progress. Messages stack up one by one at an even pace, then pile up and overlap, while the camera pushes in slowly."
+     },
+     "overlay": {
+      "text": "Booking by email is a lot of ping-pong.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "No numbers, prices or results in the sample messages.",
+      "Keep headline and picture inside the platform safe area.",
+      "No logo or title card in the first frame."
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "purpose": "Turn: the mess resolves into one calm calendar where a single open slot is picked and confirmed. Shown as a concept illustration.",
+     "start_time": 5,
+     "end_time": 10,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen",
+       "kind": "ui_screenshot",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Use the drawn concept window labelled as a concept illustration."
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "No real Slotly product capture was supplied. The drawn window is a concept illustration. Supply a screen recording if you want the real product shown."
+      }
+     ],
+     "visual_purpose": "Shows the single gesture of choosing one slot. It is the only scene with an interactive window and cursor, and it is quiet and ordered next to S01.",
+     "visual": {
+      "block": "ui_demo",
+      "window_title": "Pick a time",
+      "sidebar": [
+       "Calendar",
+       "Bookings"
+      ],
+      "rows": [
+       {
+        "label": "Tuesday morning",
+        "tag": "Open",
+        "state": "open"
+       },
+       {
+        "label": "Thursday afternoon",
+        "tag": "Open",
+        "state": "selected"
+       },
+       {
+        "label": "Friday morning",
+        "tag": "Open",
+        "state": "open"
+       }
+      ],
+      "cursor_target": 1,
+      "confirm_text": "Booked",
+      "camera": "static",
+      "reveal": "wipe_right",
+      "backdrop": "grid"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "static",
+      "visual_action": "A drawn calendar window wipes in with a few open slots. A cursor moves to one slot, selects it, and a confirmation appears."
+     },
+     "overlay": {
+      "text": "One calm calendar.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "C03 is illustrative only. No on-screen text may assert that the product works this way or that it gets results.",
+      "No times as digits and no figures in the rows."
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "purpose": "Reassure: state the approved compatibility fact with layered calendar cards.",
+     "start_time": 10,
+     "end_time": 14,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [],
+     "visual_purpose": "Shows that Slotly sits on top of the calendars owners already use. It is the only scene built from stacked cards with depth.",
+     "visual": {
+      "block": "layered_cards",
+      "cards": [
+       {
+        "title": "Google Calendar",
+        "detail": "Works with Slotly"
+       },
+       {
+        "title": "Outlook",
+        "detail": "Works with Slotly"
+       }
+      ],
+      "depth": "subtle",
+      "camera": "pull_out",
+      "reveal": "wipe_up",
+      "backdrop": "gradient"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C02"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "pull_out",
+      "visual_action": "Two layered cards slide into place with gentle parallax, one for Google Calendar and one for Outlook. The camera pulls out slowly."
+     },
+     "overlay": {
+      "text": "Works with Google Calendar and Outlook.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text names only. Do not draw third-party logos.",
+      "The wording must stay within approved fact F02."
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "purpose": "Conclusion: hold still on one action, starting the free 14-day trial.",
+     "start_time": 14,
+     "end_time": 20,
+     "duration_seconds": 6,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Typeset Slotly wordmark, drawn as text and not as a logo",
+       "kind": "logo",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Keep the typeset wordmark."
+      },
+      {
+       "need": "Drawn end card with button",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "No logo file was supplied. The typeset Slotly wordmark is a stand-in. Supply a logo if you want the real mark."
+      }
+     ],
+     "visual_purpose": "Closes on one held action with a single button. It is the only still, centred scene and the calmest in the film.",
+     "visual": {
+      "block": "end_card",
+      "wordmark": "Slotly",
+      "button": "Start free trial",
+      "subline": "Free for 14 days",
+      "camera": "static",
+      "reveal": "none",
+      "backdrop": "flat"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C01"
+     ],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "static",
+      "visual_action": "A centred end card settles and holds with the typeset Slotly wordmark, the headline, a single button and a short subline."
+     },
+     "overlay": {
+      "text": "Start your free 14-day trial",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "dip_to_black",
+     "constraints": [
+      "Hold still long enough to read.",
+      "Only one call to action.",
+      "The trial claim must match approved fact F01."
+     ]
+    }
+   ]
+  },
+  "editPlan": null,
+  "escalation": null,
+  "gate": "storyboard",
+  "versions": {
+   "storyboard": 1,
+   "edit_plan": null
+  },
+  "hashes": {
+   "storyboard": "bd839b2049b6e5355119cf18658a159c0a6a6515c78fa8e45a299e3bf531bb5d",
+   "edit_plan": null
+  },
+  "approvals": [],
+  "revisions": {
+   "used": {
+    "storyboard": 0,
+    "edit_plan": 0
+   },
+   "max": 2
+  },
+  "renderable": {
+   "ok": false,
+   "reasons": [
+    "there is no edit plan yet",
+    "the storyboard has not been approved",
+    "the edit plan has not been approved"
+   ]
+  },
+  "citations": [
+   "claims-discipline",
+   "hook-first-seconds",
+   "single-clear-cta",
+   "F01",
+   "F02",
+   "reframing-limits",
+   "axis-180-rule",
+   "cut-on-motion",
+   "shot-size-progression"
+  ],
+  "skillsUsed": [
+   "video-director",
+   "cinematography",
+   "commercial-strategy",
+   "creative-direction"
+  ],
+  "referencesUsed": [
+   "commercial-strategy/structures.md",
+   "commercial-strategy/claims-register.md",
+   "creative-direction/visual-blocks.md",
+   "cinematography/footage-limits.md"
+  ],
+  "trace": [
+   "intake: ready",
+   "analyse_assets: 0 asset(s), 0 with uncertainty",
+   "treatment: 4 beats, 4 claims (2 unsupported)",
+   "storyboard: version 1, 4 scenes in 1 attempt(s)"
+  ],
+  "notes": [],
+  "run_id": "6b94e323b6db-1793343355664",
+  "checkpoint": {
+   "saved": true
+  }
+ },
+ "approve1": {
+  "status": 200,
+  "gate": "edit_plan",
+  "st": "awaiting_approval"
+ },
+ "approve2": {
+  "status": 200,
+  "st": "approved"
+ },
+ "state_final": {
+  "timing": {
+   "total_s": 20,
+   "target_s": 20,
+   "scenes": 4,
+   "matches_target": true
+  },
+  "claimsAudit": [
+   {
+    "claim_id": "C01",
+    "text": "Slotly is free for 14 days.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F01",
+     "text": "Free for 14 days.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S04"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F01 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C02",
+    "text": "Slotly works with Google Calendar and Outlook.",
+    "status": "supported",
+    "fact": {
+     "fact_id": "F02",
+     "text": "Works with Google Calendar and Outlook.",
+     "source": "entered in the console"
+    },
+    "scene_ids": [
+     "S03"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "Supported by approved fact F02 (source: entered in the console).",
+    "safe_alternative": null
+   },
+   {
+    "claim_id": "C03",
+    "text": "Slotly replaces back-and-forth booking emails with picking one open slot.",
+    "status": "illustrative",
+    "fact": null,
+    "scene_ids": [
+     "S02"
+    ],
+    "usable_in_scenes": true,
+    "explanation": "A proposed feature or illustrative concept. No supplied evidence supports it, so show it as a concept and never as a verified product fact.",
+    "safe_alternative": "Show it only as a labelled concept illustration (message thread, then one slot selected) with no on-screen text asserting the feature works this way or that it gets results."
+   },
+   {
+    "claim_id": "C04",
+    "text": "Slotly saves small business owners hours of time.",
+    "status": "unsupported",
+    "fact": null,
+    "scene_ids": [],
+    "usable_in_scenes": false,
+    "explanation": "No approved fact supports this wording. It must not be presented as a verified product fact.",
+    "safe_alternative": "Don't state it. Show the pile of messages as the problem and leave the benefit implied, with no hours, numbers or percentages."
+   }
+  ],
+  "assetFeasibility": {
+   "items": [
+    {
+     "scene_id": "S01",
+     "need": "Drawn booking message thread, animated stacking and pile-up, in the art-direction palette",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S01: \"Drawn booking message thread, animated stacking and pile-up, in the art-direction palette\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S02",
+     "need": "Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen",
+     "kind": "ui_screenshot",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Use the drawn concept window labelled as a concept illustration.",
+     "severity": "warning",
+     "message": "S02: \"Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S03",
+     "need": "Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S03: \"Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.\" can be built with the graphics workflow."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Typeset Slotly wordmark, drawn as text and not as a logo",
+     "kind": "logo",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": true,
+     "fallback": "Keep the typeset wordmark.",
+     "severity": "warning",
+     "message": "S04: \"Typeset Slotly wordmark, drawn as text and not as a logo\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset."
+    },
+    {
+     "scene_id": "S04",
+     "need": "Drawn end card with button",
+     "kind": "graphics",
+     "availability": "generate_graphics",
+     "asset_id": null,
+     "placeholder": false,
+     "fallback": null,
+     "severity": "ok",
+     "message": "S04: \"Drawn end card with button\" can be built with the graphics workflow."
+    }
+   ],
+   "counts": {
+    "supplied": 0,
+    "generate_graphics": 5,
+    "needs_external": 0,
+    "missing_blocking": 0
+   },
+   "blockers": [],
+   "warnings": [
+    "S01: creative decision: The brief asks for no voiceover and no music, so this scene is silent and carried by text and motion.",
+    "S02: \"Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S02: placeholder: No real Slotly product capture was supplied. The drawn window is a concept illustration. Supply a screen recording if you want the real product shown.",
+    "S04: \"Typeset Slotly wordmark, drawn as text and not as a logo\" is a graphics-only placeholder, not the real thing. It needs your approval and should be replaced by the real asset.",
+    "S04: placeholder: No logo file was supplied. The typeset Slotly wordmark is a stand-in. Supply a logo if you want the real mark."
+   ]
+  },
+  "status": "approved",
+  "intake": {
+   "status": "ready",
+   "questions": []
+  },
+  "treatment": {
+   "logline": "A small business owner's booking emails pile up, then settle into one calm calendar, and the viewer starts Slotly's 14-day free trial.",
+   "hook": "Frame one: a booking email thread already in progress (\"Does Tuesday work?\" \"Actually, can we do Thursday?\") stacking up message by message. No logo and no title card.",
+   "tone": "Calm, clear, modern, and reassuring. It's a little wry about the email ping-pong, never panicky and never hype.",
+   "beats": [
+    {
+     "beat": "The pile-up",
+     "purpose": "Hook. Show the pain concretely: a booking thread of 'what time works?' messages piling up. The viewer thinks 'that's my inbox'.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "One calm calendar",
+     "purpose": "Turn. Show, as a concept illustration, open time slots with one slot being picked and confirmed. The mess resolves into a single action. No results or time-saved figures are stated.",
+     "approx_seconds": 5
+    },
+    {
+     "beat": "Fits your calendar",
+     "purpose": "Reassure. State the approved compatibility fact: works with Google Calendar and Outlook, shown as layered calendar cards.",
+     "approx_seconds": 4
+    },
+    {
+     "beat": "Start free",
+     "purpose": "Conclusion. Hold still on one action: start the free trial, free for 14 days, with the typeset Slotly wordmark.",
+     "approx_seconds": 6
+    }
+   ],
+   "cta": "Start your free 14-day trial",
+   "art_direction": {
+    "audience_response": "Feel the relief of recognising their own email ping-pong, think 'there must be a calmer way to book', and start the free trial.",
+    "concept": "From noise to one clear slot: the film moves from a crowded, overlapping inbox to a single quiet calendar choice, and the layout gets calmer as it goes.",
+    "visual_metaphor": "A tangle of overlapping message bubbles that straightens into one neat row of open time slots, which shows the shift from back-and-forth to a single choice.",
+    "palette": {
+     "background": "#F6F3EC",
+     "surface": "#FFFFFF",
+     "text": "#1F2A37",
+     "muted": "#5B6472",
+     "accent": "#1F7A6D",
+     "accent_2": "#E8A33D"
+    },
+    "typography": {
+     "weight": "bold",
+     "scale": "standard",
+     "case": "sentence",
+     "rationale": "Bold sentence case reads as friendly and plain-spoken for busy owners. Standard scale keeps 16:9 headlines legible without shouting."
+    },
+    "composition": "The headline sits top-left on a wide left-aligned column, and the picture fills the right two-thirds with generous empty space around it. Nothing crosses the safe margins. The final card is centred and uncluttered.",
+    "motion_language": {
+     "feel": "calm",
+     "easing": "ease_in_out",
+     "description": "Slow, smooth pushes and wipes with no bounce. Messages arrive at an even pace and the final card settles and holds."
+    },
+    "narrative": {
+     "opening": "Opens on a booking thread already under way, with messages stacking up, so the viewer sees the problem in the first frame.",
+     "development": "A calm calendar picks one slot, and then cards show that it works with the calendars owners already use.",
+     "conclusion": "A still end card with one button, the free 14-day trial, held long enough to read."
+    }
+   },
+   "claims": [
+    {
+     "claim_id": "C01",
+     "text": "Slotly is free for 14 days.",
+     "brand_fact_id": "F01",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C02",
+     "text": "Slotly works with Google Calendar and Outlook.",
+     "brand_fact_id": "F02",
+     "kind": "factual",
+     "safe_alternative": null
+    },
+    {
+     "claim_id": "C03",
+     "text": "Slotly replaces back-and-forth booking emails with picking one open slot.",
+     "brand_fact_id": null,
+     "kind": "illustrative",
+     "safe_alternative": "Show it only as a labelled concept illustration (message thread, then one slot selected) with no on-screen text asserting the feature works this way or that it gets results."
+    },
+    {
+     "claim_id": "C04",
+     "text": "Slotly saves small business owners hours of time.",
+     "brand_fact_id": null,
+     "kind": "factual",
+     "safe_alternative": "Don't state it. Show the pile of messages as the problem and leave the benefit implied, with no hours, numbers or percentages."
+    }
+   ],
+   "conflicts_log": [
+    {
+     "conflict": "Message clarity and the hook want a time-saving benefit (C04), but no approved fact supports it.",
+     "decision": "Approved claims win. C04 stays in the register as unsupported and is kept out of every beat, caption and the CTA. The benefit is shown through the before/after visual instead."
+    },
+    {
+     "conflict": "The playbook says to open on a real view of the product, but no footage or product capture was supplied.",
+     "decision": "Product fidelity wins. Open on a drawn message thread, which is the problem and not the product. The product moment in beat 2 is a labelled concept illustration, not a real screen."
+    },
+    {
+     "conflict": "The playbook suggests ending with the brand mark, but no logo file exists.",
+     "decision": "Use a typeset 'Slotly' wordmark on the end card and don't present it as a logo. Flag that a logo file is needed if one is wanted."
+    },
+    {
+     "conflict": "The brief asks for no voiceover and no music, which limits pacing and emotion.",
+     "decision": "Carry the story with on-screen text and calm motion alone, at a steady even pace."
+    }
+   ]
+  },
+  "scenePlan": {
+   "project_id": "proj_6b94e323b6db",
+   "version": 1,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "purpose": "Hook: show the booking email ping-pong already under way so the viewer recognises their own inbox.",
+     "start_time": 0,
+     "end_time": 5,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn booking message thread, animated stacking and pile-up, in the art-direction palette",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "creative_decision",
+       "note": "The brief asks for no voiceover and no music, so this scene is silent and carried by text and motion."
+      }
+     ],
+     "visual_purpose": "Shows the problem as a crowded, overlapping conversation. It is the only scene that is noisy and cluttered.",
+     "visual": {
+      "block": "message_thread",
+      "messages": [
+       {
+        "from": "them",
+        "text": "Does Tuesday work?"
+       },
+       {
+        "from": "you",
+        "text": "Tuesday is tricky. Morning?"
+       },
+       {
+        "from": "them",
+        "text": "Actually, can we do Thursday?"
+       },
+       {
+        "from": "you",
+        "text": "Thursday afternoon could work."
+       },
+       {
+        "from": "them",
+        "text": "Hmm, what about Friday?"
+       },
+       {
+        "from": "you",
+        "text": "Let me check and get back to you."
+       }
+      ],
+      "mode": "pile_up",
+      "camera": "push_in",
+      "reveal": "none",
+      "backdrop": "dots"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "slow_push_in",
+      "visual_action": "A booking thread is already in progress. Messages stack up one by one at an even pace, then pile up and overlap, while the camera pushes in slowly."
+     },
+     "overlay": {
+      "text": "Booking by email is a lot of ping-pong.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "No numbers, prices or results in the sample messages.",
+      "Keep headline and picture inside the platform safe area.",
+      "No logo or title card in the first frame."
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "purpose": "Turn: the mess resolves into one calm calendar where a single open slot is picked and confirmed. Shown as a concept illustration.",
+     "start_time": 5,
+     "end_time": 10,
+     "duration_seconds": 5,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn calendar window with open slots, cursor and confirmation, shown as a concept illustration and not a real product screen",
+       "kind": "ui_screenshot",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Use the drawn concept window labelled as a concept illustration."
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "No real Slotly product capture was supplied. The drawn window is a concept illustration. Supply a screen recording if you want the real product shown."
+      }
+     ],
+     "visual_purpose": "Shows the single gesture of choosing one slot. It is the only scene with an interactive window and cursor, and it is quiet and ordered next to S01.",
+     "visual": {
+      "block": "ui_demo",
+      "window_title": "Pick a time",
+      "sidebar": [
+       "Calendar",
+       "Bookings"
+      ],
+      "rows": [
+       {
+        "label": "Tuesday morning",
+        "tag": "Open",
+        "state": "open"
+       },
+       {
+        "label": "Thursday afternoon",
+        "tag": "Open",
+        "state": "selected"
+       },
+       {
+        "label": "Friday morning",
+        "tag": "Open",
+        "state": "open"
+       }
+      ],
+      "cursor_target": 1,
+      "confirm_text": "Booked",
+      "camera": "static",
+      "reveal": "wipe_right",
+      "backdrop": "grid"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C03"
+     ],
+     "shot": {
+      "shot_size": "close_up",
+      "camera_motion": "static",
+      "visual_action": "A drawn calendar window wipes in with a few open slots. A cursor moves to one slot, selects it, and a confirmation appears."
+     },
+     "overlay": {
+      "text": "One calm calendar.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "C03 is illustrative only. No on-screen text may assert that the product works this way or that it gets results.",
+      "No times as digits and no figures in the rows."
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "purpose": "Reassure: state the approved compatibility fact with layered calendar cards.",
+     "start_time": 10,
+     "end_time": 14,
+     "duration_seconds": 4,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Drawn cards with typeset text names for Google Calendar and Outlook. These are not their logos.",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [],
+     "visual_purpose": "Shows that Slotly sits on top of the calendars owners already use. It is the only scene built from stacked cards with depth.",
+     "visual": {
+      "block": "layered_cards",
+      "cards": [
+       {
+        "title": "Google Calendar",
+        "detail": "Works with Slotly"
+       },
+       {
+        "title": "Outlook",
+        "detail": "Works with Slotly"
+       }
+      ],
+      "depth": "subtle",
+      "camera": "pull_out",
+      "reveal": "wipe_up",
+      "backdrop": "gradient"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C02"
+     ],
+     "shot": {
+      "shot_size": "wide",
+      "camera_motion": "pull_out",
+      "visual_action": "Two layered cards slide into place with gentle parallax, one for Google Calendar and one for Outlook. The camera pulls out slowly."
+     },
+     "overlay": {
+      "text": "Works with Google Calendar and Outlook.",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "crossfade",
+     "constraints": [
+      "Text names only. Do not draw third-party logos.",
+      "The wording must stay within approved fact F02."
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "purpose": "Conclusion: hold still on one action, starting the free 14-day trial.",
+     "start_time": 14,
+     "end_time": 20,
+     "duration_seconds": 6,
+     "voiceover": null,
+     "production_method": "graphics",
+     "required_assets": [
+      {
+       "need": "Typeset Slotly wordmark, drawn as text and not as a logo",
+       "kind": "logo",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": true,
+       "fallback": "Keep the typeset wordmark."
+      },
+      {
+       "need": "Drawn end card with button",
+       "kind": "graphics",
+       "availability": "generate_graphics",
+       "asset_id": null,
+       "placeholder": false,
+       "fallback": null
+      }
+     ],
+     "unresolved": [
+      {
+       "kind": "placeholder",
+       "note": "No logo file was supplied. The typeset Slotly wordmark is a stand-in. Supply a logo if you want the real mark."
+      }
+     ],
+     "visual_purpose": "Closes on one held action with a single button. It is the only still, centred scene and the calmest in the film.",
+     "visual": {
+      "block": "end_card",
+      "wordmark": "Slotly",
+      "button": "Start free trial",
+      "subline": "Free for 14 days",
+      "camera": "static",
+      "reveal": "none",
+      "backdrop": "flat"
+     },
+     "asset_ids": [],
+     "source_in_seconds": 0,
+     "claim_ids": [
+      "C01"
+     ],
+     "shot": {
+      "shot_size": "medium",
+      "camera_motion": "static",
+      "visual_action": "A centred end card settles and holds with the typeset Slotly wordmark, the headline, a single button and a short subline."
+     },
+     "overlay": {
+      "text": "Start your free 14-day trial",
+      "safe_area": "platform_safe"
+     },
+     "audio_cues": [],
+     "transition_out": "dip_to_black",
+     "constraints": [
+      "Hold still long enough to read.",
+      "Only one call to action.",
+      "The trial claim must match approved fact F01."
+     ]
+    }
+   ]
+  },
+  "editPlan": {
+   "project_id": "proj_6b94e323b6db",
+   "version": 1,
+   "uses": [
+    {
+     "use_id": "U01",
+     "scene_id": "S01",
+     "recipe_id": "scene-composition",
+     "params": {},
+     "rationale": "S01 has a message_thread visual block and no footage, so scene-composition draws the whole scene, including the slow push-in and the overlay. Duration is 5s, inside the recipe's 2-12s range."
+    },
+    {
+     "use_id": "U02",
+     "scene_id": "S01",
+     "recipe_id": "crossfade",
+     "params": {
+      "duration_s": 0.6
+     },
+     "rationale": "The storyboard asks for a crossfade out of the noisy hook into the calm turn. 0.6s is the default and is well under half of the 5s scene."
+    },
+    {
+     "use_id": "U03",
+     "scene_id": "S02",
+     "recipe_id": "scene-composition",
+     "params": {},
+     "rationale": "S02 has a ui_demo visual block (calendar window, cursor, confirmation). scene-composition draws it with no parameters. Duration is 5s, inside range."
+    },
+    {
+     "use_id": "U04",
+     "scene_id": "S02",
+     "recipe_id": "crossfade",
+     "params": {
+      "duration_s": 0.8
+     },
+     "rationale": "A slightly longer soft blend into the reassurance scene suits the calm mood. 0.8s is under half of the 5s scene."
+    },
+    {
+     "use_id": "U05",
+     "scene_id": "S03",
+     "recipe_id": "scene-composition",
+     "params": {},
+     "rationale": "S03 has a layered_cards visual block with parallax and a pull-out, so scene-composition draws it. The overlay is the approved compatibility line. Duration is 4s, inside range."
+    },
+    {
+     "use_id": "U06",
+     "scene_id": "S03",
+     "recipe_id": "crossfade",
+     "params": {
+      "duration_s": 0.6
+     },
+     "rationale": "The storyboard asks for a crossfade into the end card. 0.6s is the default and is under half of the 4s scene."
+    },
+    {
+     "use_id": "U07",
+     "scene_id": "S04",
+     "recipe_id": "scene-composition",
+     "params": {},
+     "rationale": "S04 has an end_card visual block, so scene-composition draws the held end card with the wordmark, headline, button and subline. The end-card-cta recipes are not used, because a visual_block scene takes only scene-composition. Duration is 6s, inside range. S04 is the final scene, so no dip-to-black is planned. That recipe is only required on non-final scenes, and there is no following scene to dip into. The storyboard's dip_to_black on S04 is therefore not planned, and the final fade needs a decision if it is wanted."
+    }
+   ]
+  },
+  "escalation": null,
+  "gate": null,
+  "versions": {
+   "storyboard": 1,
+   "edit_plan": 1
+  },
+  "hashes": {
+   "storyboard": "bd839b2049b6e5355119cf18658a159c0a6a6515c78fa8e45a299e3bf531bb5d",
+   "edit_plan": "b9f4de508923ab700d01c25ce915bf091f4e6b7caeb12dc9ea8edc34868fdd23"
+  },
+  "approvals": [
+   {
+    "stage": "storyboard",
+    "plan_version": 1,
+    "storyboard_version": 1,
+    "plan_hash": "bd839b2049b6e5355119cf18658a159c0a6a6515c78fa8e45a299e3bf531bb5d",
+    "evidence_hash": "2c0c95f28e9c88a26e3fe8cf606adbade43c5b6b07ce1d1d9ebf5e5c91577fef",
+    "decision": "approved",
+    "notes": "",
+    "decided_at": "2026-10-30T06:56:46.850Z"
+   },
+   {
+    "stage": "edit_plan",
+    "plan_version": 1,
+    "storyboard_version": 1,
+    "plan_hash": "b9f4de508923ab700d01c25ce915bf091f4e6b7caeb12dc9ea8edc34868fdd23",
+    "evidence_hash": "2c0c95f28e9c88a26e3fe8cf606adbade43c5b6b07ce1d1d9ebf5e5c91577fef",
+    "decision": "approved",
+    "notes": "",
+    "decided_at": "2026-10-30T06:56:57.795Z"
+   }
+  ],
+  "revisions": {
+   "used": {
+    "storyboard": 0,
+    "edit_plan": 0
+   },
+   "max": 2
+  },
+  "renderable": {
+   "ok": true,
+   "reasons": []
+  },
+  "citations": [
+   "claims-discipline",
+   "hook-first-seconds",
+   "single-clear-cta",
+   "F01",
+   "F02",
+   "reframing-limits",
+   "axis-180-rule",
+   "cut-on-motion",
+   "shot-size-progression",
+   "audio-ducking-loudness",
+   "cut-priority-murch",
+   "j-and-l-cuts",
+   "bullet-list",
+   "crossfade",
+   "dip-to-black",
+   "directional-wipe",
+   "end-card-cta",
+   "end-card-cta-hyperframes",
+   "hard-cut",
+   "scene-composition",
+   "stat-callout",
+   "text-card-fade",
+   "text-fade-up",
+   "text-fade-up-hyperframes",
+   "text-slide-remotion",
+   "title-subtitle"
+  ],
+  "skillsUsed": [
+   "video-director",
+   "cinematography",
+   "commercial-strategy",
+   "creative-direction",
+   "editing-director",
+   "motion-graphics",
+   "sound-design"
+  ],
+  "referencesUsed": [
+   "commercial-strategy/structures.md",
+   "commercial-strategy/claims-register.md",
+   "creative-direction/visual-blocks.md",
+   "cinematography/footage-limits.md",
+   "editing-director/edit-operations.md",
+   "motion-graphics/safe-areas.md",
+   "sound-design/loudness.md"
+  ],
+  "trace": [
+   "intake: ready",
+   "analyse_assets: 0 asset(s), 0 with uncertainty",
+   "treatment: 4 beats, 4 claims (2 unsupported)",
+   "storyboard: version 1, 4 scenes in 1 attempt(s)",
+   "storyboard_gate: approved version 1",
+   "edit_plan: version 1, 7 recipe uses in 1 attempt(s)",
+   "edit_plan_gate: approved version 1"
+  ],
+  "notes": []
+ },
+ "editor": {
+  "status": 200,
+  "st": "ready",
+  "conflicts": [],
+  "revisions": []
+ },
+ "render_plan": {
+  "run_id": "6b94e323b6db-1793343355664",
+  "renderer_available": true,
+  "editor": {
+   "status": "ready",
+   "validation": {
+    "ok": true,
+    "issues": []
+   },
+   "conflicts": [],
+   "revision_requests": [],
+   "operations": 7,
+   "rendered": false
+  },
+  "renderer": {
+   "selected": null,
+   "needed": [
+    "remotion",
+    "ffmpeg"
+   ],
+   "composition_required": true,
+   "registered": [
+    "ffmpeg",
+    "remotion",
+    "hyperframes"
+   ]
+  },
+  "plan": {
+   "state": "planning",
+   "purpose": "preview",
+   "operations": [
+    {
+     "operation_id": "E01",
+     "scene_id": "S01",
+     "note": null,
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E02",
+     "scene_id": "S01",
+     "note": null,
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E03",
+     "scene_id": "S02",
+     "note": null,
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E04",
+     "scene_id": "S02",
+     "note": null,
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E05",
+     "scene_id": "S03",
+     "note": null,
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "renderer": "remotion",
+     "supported": true
+    },
+    {
+     "operation_id": "E06",
+     "scene_id": "S03",
+     "note": null,
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "renderer": "ffmpeg",
+     "supported": true
+    },
+    {
+     "operation_id": "E07",
+     "scene_id": "S04",
+     "note": null,
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "renderer": "remotion",
+     "supported": true
+    }
+   ],
+   "supported": 7,
+   "unsupported": 0,
+   "notes": [
+    "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E02: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E04: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "preview render: it may use draft recipes and is not a production video",
+    "S01: drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+    "S01: the approved shot size (medium) and visual action (\"A booking thread is already in progress. Messages stack up â€¦\") describe the content; the renderer does not change or check them",
+    "S02: drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+    "S02: the approved shot size (close up) and visual action (\"A drawn calendar window wipes in with a few open slots. A câ€¦\") describe the content; the renderer does not change or check them",
+    "S02: the product screen is a drawn concept illustration, not the real product (\"Drawn calendar window with open slots, cursor and confirmati\")",
+    "S03: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+    "S03: the approved shot size (wide) and visual action (\"Two layered cards slide into place with gentle parallax, onâ€¦\") describe the content; the renderer does not change or check them",
+    "S04: drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+    "S04: the approved shot size (medium) and visual action (\"A centred end card settles and holds with the typeset Slotlâ€¦\") describe the content; the renderer does not change or check them",
+    "S04: the brand mark is a typeset wordmark, not a logo (\"Typeset Slotly wordmark, drawn as text and not as a logo\")"
+   ]
+  },
+  "coverage": {
+   "complete": false,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "represented": false,
+     "missing": [
+      "its crossfade transition is not rendered (a hard cut would be used)"
+     ],
+     "labelled": [
+      "drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+      "the approved shot size (medium) and visual action (\"A booking thread is already in progress. Messages stack up â€¦\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S02",
+     "represented": false,
+     "missing": [
+      "its crossfade transition is not rendered (a hard cut would be used)"
+     ],
+     "labelled": [
+      "drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+      "the approved shot size (close up) and visual action (\"A drawn calendar window wipes in with a few open slots. A câ€¦\") describe the content; the renderer does not change or check them",
+      "the product screen is a drawn concept illustration, not the real product (\"Drawn calendar window with open slots, cursor and confirmati\")"
+     ]
+    },
+    {
+     "scene_id": "S03",
+     "represented": false,
+     "missing": [
+      "its crossfade transition is not rendered (a hard cut would be used)"
+     ],
+     "labelled": [
+      "drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+      "the approved shot size (wide) and visual action (\"Two layered cards slide into place with gentle parallax, onâ€¦\") describe the content; the renderer does not change or check them"
+     ]
+    },
+    {
+     "scene_id": "S04",
+     "represented": true,
+     "missing": [],
+     "labelled": [
+      "drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+      "the approved shot size (medium) and visual action (\"A centred end card settles and holds with the typeset Slotlâ€¦\") describe the content; the renderer does not change or check them",
+      "the brand mark is a typeset wordmark, not a logo (\"Typeset Slotly wordmark, drawn as text and not as a logo\")"
+     ]
+    }
+   ]
+  },
+  "capability": [
+   {
+    "operation_id": "E01",
+    "scene_id": "S01",
+    "recipe_id": "scene-composition",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/scene-composition",
+    "reason": "remotion/scene-composition is a built-in template of remotion",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/scene-composition is a built-in template of remotion"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E02",
+    "scene_id": "S01",
+    "recipe_id": "crossfade",
+    "status": "validated_available",
+    "selected_engine": "ffmpeg",
+    "selected_template": "ffmpeg/xfade-fade",
+    "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "usable",
+      "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E03",
+    "scene_id": "S02",
+    "recipe_id": "scene-composition",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/scene-composition",
+    "reason": "remotion/scene-composition is a built-in template of remotion",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/scene-composition is a built-in template of remotion"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E04",
+    "scene_id": "S02",
+    "recipe_id": "crossfade",
+    "status": "validated_available",
+    "selected_engine": "ffmpeg",
+    "selected_template": "ffmpeg/xfade-fade",
+    "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "usable",
+      "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E05",
+    "scene_id": "S03",
+    "recipe_id": "scene-composition",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/scene-composition",
+    "reason": "remotion/scene-composition is a built-in template of remotion",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/scene-composition is a built-in template of remotion"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E06",
+    "scene_id": "S03",
+    "recipe_id": "crossfade",
+    "status": "validated_available",
+    "selected_engine": "ffmpeg",
+    "selected_template": "ffmpeg/xfade-fade",
+    "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "usable",
+      "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "not_implemented",
+      "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   },
+   {
+    "operation_id": "E07",
+    "scene_id": "S04",
+    "recipe_id": "scene-composition",
+    "status": "validated_available",
+    "selected_engine": "remotion",
+    "selected_template": "remotion/scene-composition",
+    "reason": "remotion/scene-composition is a built-in template of remotion",
+    "engines": [
+     {
+      "engine": "ffmpeg",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+     },
+     {
+      "engine": "remotion",
+      "verdict": "usable",
+      "reason": "remotion/scene-composition is a built-in template of remotion"
+     },
+     {
+      "engine": "hyperframes",
+      "verdict": "not_permitted",
+      "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+     }
+    ]
+   }
+  ],
+  "eligible": false,
+  "assembly": {
+   "ok": true,
+   "complete": true,
+   "scenes": [
+    {
+     "scene_id": "S01",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": []
+    },
+    {
+     "scene_id": "S02",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": []
+    },
+    {
+     "scene_id": "S03",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": []
+    },
+    {
+     "scene_id": "S04",
+     "engine": "remotion",
+     "renderable": true,
+     "reason": null,
+     "unmet": []
+    }
+   ],
+   "transitions": [
+    {
+     "after_scene": "S01",
+     "template": "ffmpeg/xfade-fade",
+     "applied": true,
+     "reason": "applied by the FFmpeg assembler"
+    },
+    {
+     "after_scene": "S02",
+     "template": "ffmpeg/xfade-fade",
+     "applied": true,
+     "reason": "applied by the FFmpeg assembler"
+    },
+    {
+     "after_scene": "S03",
+     "template": "ffmpeg/xfade-fade",
+     "applied": true,
+     "reason": "applied by the FFmpeg assembler"
+    }
+   ],
+   "omitted": [],
+   "label": "A complete preview can be assembled from the scene clips."
+  },
+  "can_render": true,
+  "blockers": [
+   "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+   "S01: its crossfade transition is not rendered (a hard cut would be used)",
+   "S02: its crossfade transition is not rendered (a hard cut would be used)",
+   "S03: its crossfade transition is not rendered (a hard cut would be used)",
+   "operation E02: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E02: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S01: it has 2 composition operations; one is supported per scene",
+   "operation E04: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E04: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S02: it has 2 composition operations; one is supported per scene",
+   "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+   "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+   "scene S03: it has 2 composition operations; one is supported per scene"
+  ],
+  "production": {
+   "ready": false,
+   "blockers": [
+    "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E02: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E04: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+    "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+    "handoff is not production-ready: recipe crossfade is draft: no review evidence",
+    "handoff is not production-ready: recipe scene-composition is draft: no review evidence",
+    "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+    "S01: its crossfade transition is not rendered (a hard cut would be used)",
+    "S02: its crossfade transition is not rendered (a hard cut would be used)",
+    "S03: its crossfade transition is not rendered (a hard cut would be used)",
+    "operation E02: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E02: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S01: it has 2 composition operations; one is supported per scene",
+    "operation E04: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E04: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S02: it has 2 composition operations; one is supported per scene",
+    "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S03: it has 2 composition operations; one is supported per scene"
+   ]
+  },
+  "needs": {
+   "aspect_ratio": "16:9",
+   "duration_s": 20,
+   "supported_output": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "audio_codec": null
+   },
+   "you_provide": [
+    "width",
+    "height",
+    "fps"
+   ]
+  },
+  "label": "No preview can be made yet. Nothing here is rendered, and no partial video is offered."
+ },
+ "render": {
+  "status": 200,
+  "body": {
+   "kind": "complete",
+   "learning": null,
+   "delivery": {
+    "format": "digikon.delivery-report",
+    "format_version": 1,
+    "delivery_id": "dl_c48b42768df74995",
+    "render_id": "rn_06dd99537a414db8",
+    "kind": "complete",
+    "purpose": "preview",
+    "handoff_content_hash": "4f57bd4d8258525a3ed53284ff8cc7ee329b2efd6462e25e38171e09d8e6d7e6",
+    "states": {
+     "plan_created": true,
+     "plan_approved": true,
+     "scenes_total": 4,
+     "scenes_rendered": 4,
+     "scenes_content_validated": 4,
+     "final_video_validated": true,
+     "final_delivery_ready": false
+    },
+    "final_delivery_blockers": [
+     "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+    ],
+    "label": "COMPLETE PREVIEW: every approved scene and operation is present and verified, but it is a preview of draft recipes, not a final deliverable.",
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "start_s": 0,
+      "duration_s": 5,
+      "frames": 150,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E01",
+        "recipe_id": "scene-composition",
+        "template": "remotion/scene-composition",
+        "operation_type": "render_graphics_scene",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/scene-composition is a built-in template of remotion"
+       },
+       {
+        "operation_id": "E02",
+        "recipe_id": "crossfade",
+        "template": "ffmpeg/xfade-fade",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.7)",
+        "frame 65 of the final video matches the clip (difference 1.1)",
+        "frame 131 of the final video matches the clip (difference 1.3)",
+        "the ffmpeg/xfade-fade transition really blends (middle frame 15.1 from the scene and 15.0 from the next)"
+       ],
+       "limitations": [
+        "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+       ]
+      },
+      "clip_sha256": "21c25824e3820e8bf631f7fcebc59778fd7d3ff36df6d3f0ab6e276ec0cb1dcb"
+     },
+     {
+      "scene_id": "S02",
+      "start_s": 5,
+      "duration_s": 5,
+      "frames": 150,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E03",
+        "recipe_id": "scene-composition",
+        "template": "remotion/scene-composition",
+        "operation_type": "render_graphics_scene",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/scene-composition is a built-in template of remotion"
+       },
+       {
+        "operation_id": "E04",
+        "recipe_id": "crossfade",
+        "template": "ffmpeg/xfade-fade",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.7)",
+        "frame 62 of the final video matches the clip (difference 0.9)",
+        "frame 125 of the final video matches the clip (difference 1.0)",
+        "the ffmpeg/xfade-fade transition really blends (middle frame 6.3 from the scene and 6.0 from the next)"
+       ],
+       "limitations": [
+        "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+       ]
+      },
+      "clip_sha256": "a804d1fc65b31e182a77ea0be3d89b4ce5a309e83cee22bc471806ad6131921c"
+     },
+     {
+      "scene_id": "S03",
+      "start_s": 10,
+      "duration_s": 4,
+      "frames": 120,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E05",
+        "recipe_id": "scene-composition",
+        "template": "remotion/scene-composition",
+        "operation_type": "render_graphics_scene",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/scene-composition is a built-in template of remotion"
+       },
+       {
+        "operation_id": "E06",
+        "recipe_id": "crossfade",
+        "template": "ffmpeg/xfade-fade",
+        "operation_type": "concat",
+        "status": "validated_available",
+        "engine": "ffmpeg",
+        "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.7)",
+        "frame 50 of the final video matches the clip (difference 1.0)",
+        "frame 101 of the final video matches the clip (difference 1.0)",
+        "the ffmpeg/xfade-fade transition really blends (middle frame 7.8 from the scene and 8.4 from the next)"
+       ],
+       "limitations": [
+        "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+       ]
+      },
+      "clip_sha256": "c7a60c849b839e4ccdc072f45d07d26dd0e0ac7a65bbeddd9ddd7f96f9b98739"
+     },
+     {
+      "scene_id": "S04",
+      "start_s": 14,
+      "duration_s": 6,
+      "frames": 180,
+      "status": "rendered_and_verified",
+      "engine": "remotion",
+      "operations": [
+       {
+        "operation_id": "E07",
+        "recipe_id": "scene-composition",
+        "template": "remotion/scene-composition",
+        "operation_type": "render_graphics_scene",
+        "status": "validated_available",
+        "engine": "remotion",
+        "reason": "remotion/scene-composition is a built-in template of remotion"
+       }
+      ],
+      "unmet": [],
+      "omitted_reason": null,
+      "content": {
+       "engine_checked": true,
+       "end_to_end_checked": true,
+       "checks": [
+        "frame 0 of the final video matches the clip (difference 0.7)",
+        "frame 89 of the final video matches the clip (difference 0.9)",
+        "frame 179 of the final video matches the clip (difference 0.9)"
+       ],
+       "limitations": [
+        "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+       ]
+      },
+      "clip_sha256": "0ad2309c78c7b773e8efd94c2ff173ba4cc97e062b8bdd4b28bdb352b2f885e9"
+     }
+    ],
+    "transitions": [
+     {
+      "after_scene": "S01",
+      "operation_id": "E02",
+      "template": "ffmpeg/xfade-fade",
+      "status": "applied",
+      "reason": "applied by the FFmpeg assembler"
+     },
+     {
+      "after_scene": "S02",
+      "operation_id": "E04",
+      "template": "ffmpeg/xfade-fade",
+      "status": "applied",
+      "reason": "applied by the FFmpeg assembler"
+     },
+     {
+      "after_scene": "S03",
+      "operation_id": "E06",
+      "template": "ffmpeg/xfade-fade",
+      "status": "applied",
+      "reason": "applied by the FFmpeg assembler"
+     }
+    ],
+    "omitted_operations": [],
+    "engines_used": [
+     "remotion"
+    ],
+    "assembly": {
+     "tool": "ffmpeg",
+     "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+     "lossy_encodes": 2,
+     "known_differences": [
+      "each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)",
+      "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2",
+      "scene clips are h264 intermediates, not lossless"
+     ]
+    },
+    "output": {
+     "path": "out/rn_06dd99537a414db8.mp4",
+     "bytes": 1073580,
+     "sha256": "cdfce098198a032c29f0502a4ed0200d42a012c71e37bc3ea578a8ee667503b1",
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration_s": 20,
+     "frames": 600,
+     "video_codec": "h264",
+     "audio_tracks": 0,
+     "video_url": "/api/sessions/6b94e323b6db/deliveries/dl_c48b42768df74995/video"
+    },
+    "limitations": [
+     "only the first, middle and last clean frame of each scene are compared with its clip",
+     "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR",
+     "audio is not produced in this phase"
+    ],
+    "created_at": "2026-10-30T06:58:36.542Z",
+    "status": "complete_preview"
+   },
+   "quality": {
+    "technical": {
+     "ok": true,
+     "evidence": [
+      "1280x720 at 30 fps, 20s, h264, sha256 cdfce098198a"
+     ]
+    },
+    "plan_compliance": {
+     "ok": true,
+     "problems": [],
+     "evidence": [
+      "4 scenes, in the approved order",
+      "engines: remotion",
+      "final video validated: true"
+     ]
+    },
+    "visual": {
+     "findings": [
+      {
+       "finding_id": "VQ01",
+       "scene_id": "S03",
+       "severity": "major",
+       "category": "visual",
+       "evidence_ref": "last frame of S03: 2.1% differs from the background",
+       "description": "S03 is almost empty at its end.",
+       "suggested_fix": "Add content or give the scene a stronger visual.",
+       "status": "open"
+      },
+      {
+       "finding_id": "VQ02",
+       "scene_id": "S03",
+       "severity": "major",
+       "category": "visual",
+       "evidence_ref": "S02 and S03 last frames differ by 2.4 of 255 in layout",
+       "description": "S03 looks like S02 (remotion/scene-composition+ffmpeg/xfade-fade then remotion/scene-composition+ffmpeg/xfade-fade): the film repeats one layout.",
+       "suggested_fix": "Give the scene a different kind of picture or composition.",
+       "status": "open"
+      }
+     ],
+     "measures": [
+      {
+       "scene_id": "S01",
+       "coverage": 0.15986689814814814,
+       "motion": 21.937692901234566,
+       "end_motion": 21.99172132201646,
+       "background": "#f4f4ec",
+       "signature": [
+        242.13140277777782,
+        242.1203819444445,
+        242.17220138888888,
+        242.1358541666667,
+        242.1236666666667,
+        242.12811805555555,
+        241.99756944444437,
+        241.99655555555552,
+        242.02083333333323,
+        242.00879861111096,
+        242.08295138888877,
+        241.93818055555545,
+        242.1358541666667,
+        242.1236666666667,
+        242.12811805555555,
+        242.17220138888888,
+        242.1391388888888,
+        242.11709722222213,
+        242.17220138888888,
+        242.11709722222213,
+        242.12038194444443,
+        242.12811805555546,
+        241.21812499999993,
+        236.42542361111114,
+        236.17759027777797,
+        235.6130208333335,
+        235.73868055555573,
+        228.1414652777775,
+        228.2436111111109,
+        228.77859722222198,
+        228.7129722222219,
+        234.1246944444441,
+        241.0517847222223,
+        239.6204375000001,
+        242.19424305555555,
+        242.16118055555555,
+        242.1754861111111,
+        242.16118055555555,
+        242.076298611111,
+        241.36170833333335,
+        241.52447916666674,
+        241.6335347222222,
+        239.9409861111109,
+        218.26853472222206,
+        217.17995833333313,
+        212.36384722222166,
+        209.82031944444392,
+        218.62290972222192,
+        236.33540277777774,
+        231.70752777777776,
+        230.32863888888875,
+        230.91468055555555,
+        237.80599305555558,
+        242.1358541666667,
+        241.40670833333343,
+        235.28377083333382,
+        232.7052777777782,
+        237.8274722222228,
+        240.86957638888947,
+        241.93323611111146,
+        239.61642361111092,
+        239.1269652777779,
+        238.2580277777779,
+        239.6395555555557,
+        236.77241666666654,
+        231.07527777777764,
+        231.30479166666652,
+        234.7076597222223,
+        242.13797222222217,
+        242.1093611111111,
+        241.42443055555557,
+        239.83272222222215,
+        239.80386805555554,
+        240.4034166666667,
+        239.14003472222208,
+        216.0861180555552,
+        218.65286805555536,
+        219.75097916666653,
+        219.74923611111092,
+        225.31724305555542,
+        236.63045138888887,
+        229.72836111111104,
+        236.82331944444428,
+        238.52254861111098,
+        242.10162499999993,
+        242.12483333333319,
+        241.86357638888876,
+        240.834680555556,
+        240.20171527777842,
+        238.72422222222283,
+        239.7807638888894,
+        225.2832986111108,
+        224.5909999999997,
+        220.03620138888851,
+        217.27854861111064,
+        225.18913194444414,
+        238.64294444444445,
+        233.80514583333328,
+        235.18013194444444,
+        233.45054166666665,
+        241.70054861111112,
+        242.16118055555555,
+        241.1392152777777,
+        235.435631944445,
+        237.57097222222262,
+        240.54607638888942,
+        237.26553472222247,
+        231.3278055555553,
+        233.45703472222192,
+        235.48597916666662,
+        237.41989583333327,
+        240.5033680555554,
+        242.13140277777777,
+        242.1060763888889,
+        242.17220138888888,
+        242.11709722222224,
+        242.12038194444443,
+        242.11709722222224,
+        241.88615972222226,
+        240.04397222222235,
+        240.41541666666672,
+        240.84125000000006,
+        226.2447430555554,
+        217.54277777777767,
+        216.7258263888888,
+        213.19714583333294,
+        211.8624374999996,
+        218.66609027777747,
+        242.13913888888888,
+        242.12811805555555,
+        242.17220138888888,
+        242.14687500000002,
+        242.13140277777777,
+        242.12811805555555,
+        242.17220138888888,
+        242.13140277777777,
+        242.13140277777777,
+        242.13913888888888,
+        239.94646527777786,
+        235.30165972222227,
+        233.2405486111112,
+        231.2230277777777,
+        229.18626388888873,
+        233.37906249999995
+       ],
+       "coverage_at_1s": 0.07566550925925926
+      },
+      {
+       "scene_id": "S02",
+       "coverage": 0.026813271604938273,
+       "motion": 7.875787680041152,
+       "end_motion": 6.195617926954733,
+       "background": "#f4f4ec",
+       "signature": [
+        242.13585416666663,
+        242.05870833333333,
+        242.0697291666667,
+        242.05870833333327,
+        242.0697291666667,
+        242.02564583333321,
+        242.06972916666666,
+        242.15789583333333,
+        242.16891666666666,
+        242.12483333333324,
+        242.05870833333333,
+        242.05870833333327,
+        242.05870833333336,
+        242.02564583333333,
+        242.05870833333333,
+        242.0476875,
+        242.19095833333333,
+        242.20197916666666,
+        242.20197916666666,
+        242.213,
+        242.213,
+        242.20197916666666,
+        242.1799375,
+        242.20197916666666,
+        242.213,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.1799375,
+        242.1799375,
+        242.1027916666667,
+        242.19095833333327,
+        242.19095833333327,
+        242.15789583333333,
+        241.65634027777756,
+        241.00607638888908,
+        240.9522013888892,
+        240.96561111111143,
+        240.94519444444475,
+        241.15780555555537,
+        241.2246805555554,
+        241.22743055555546,
+        241.26793055555547,
+        241.4567986111109,
+        241.11010416666664,
+        240.24249305555557,
+        242.14687499999997,
+        242.13955555555555,
+        242.14687500000002,
+        242.20197916666666,
+        239.96459027777772,
+        238.7020763888891,
+        239.2102083333333,
+        240.44824305555565,
+        239.668659722222,
+        240.21682638888868,
+        240.9443819444439,
+        241.31531249999932,
+        241.17661805555568,
+        239.74416666666664,
+        239.42052083333334,
+        233.24490972222222,
+        235.44175694444442,
+        235.0145694444446,
+        242.1027916666667,
+        242.04768750000005,
+        239.58595138888884,
+        241.281618055556,
+        241.89367361111167,
+        232.56997222222228,
+        230.9171388888886,
+        229.50641666666647,
+        229.52296527777753,
+        228.8651388888888,
+        232.84363194444435,
+        239.1979097222222,
+        239.41742361111108,
+        233.33534722222223,
+        234.49697222222227,
+        237.27429861111108,
+        242.1578958333333,
+        242.213,
+        239.8664583333332,
+        239.84972916666675,
+        239.53019444444467,
+        238.4937708333337,
+        236.7472916666669,
+        236.2063194444447,
+        238.4716527777781,
+        238.5007013888893,
+        238.77265972222256,
+        239.5027638888888,
+        242.1358541666667,
+        242.20197916666666,
+        242.13585416666663,
+        242.11381249999997,
+        242.06972916666666,
+        242.1799375,
+        241.47072916666684,
+        239.3223402777777,
+        238.9691111111111,
+        238.47834027777768,
+        232.37723611111096,
+        231.23506944444424,
+        237.99512499999977,
+        238.65713888888877,
+        239.30765972222238,
+        241.26058333333353,
+        242.19095833333333,
+        242.1799375,
+        242.20197916666666,
+        242.1799375,
+        242.20197916666666,
+        242.20197916666666,
+        242.20197916666666,
+        242.19095833333333,
+        242.15789583333333,
+        242.14687500000002,
+        242.16891666666666,
+        242.09177083333336,
+        242.213,
+        242.13585416666663,
+        242.19095833333333,
+        242.20197916666666,
+        242.14687500000002,
+        242.19095833333333,
+        242.1358541666667,
+        242.14687500000002,
+        242.14687500000002,
+        242.16891666666666,
+        242.19095833333333,
+        241.03608333333335,
+        240.89587500000002,
+        242.02756944444445,
+        242.08075000000002,
+        242.04768750000005,
+        242.1027916666667,
+        242.1358541666667,
+        242.20197916666666,
+        242.20197916666666
+       ],
+       "coverage_at_1s": 0.0814525462962963
+      },
+      {
+       "scene_id": "S03",
+       "coverage": 0.020881558641975308,
+       "motion": 12.70825295781893,
+       "end_motion": 12.70825295781893,
+       "background": "#f4f4ec",
+       "signature": [
+        242.213,
+        242.213,
+        241.7252777777776,
+        241.46494444444386,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        240.58735416666616,
+        239.87099999999944,
+        238.5436249999994,
+        237.82122222222156,
+        236.79158333333368,
+        236.42961111111163,
+        236.3483888888892,
+        236.66486111111166,
+        237.64761111111045,
+        242.213,
+        242.213,
+        241.7181944444443,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        240.49918749999946,
+        239.87099999999944,
+        238.19988888888827,
+        237.5920555555549,
+        236.61500000000058,
+        235.9679999999995,
+        235.90194444444373,
+        236.49000000000058,
+        237.37944444444403,
+        241.35050000000007,
+        240.26102083333333,
+        241.71940277777765,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.43595833333276,
+        240.23302777777724,
+        239.6487777777772,
+        238.2161527777772,
+        237.4363333333327,
+        236.56656944444492,
+        236.29411111111165,
+        236.1823888888895,
+        236.61108333333394,
+        237.51958333333266,
+        238.63072222222206,
+        233.76565972222227,
+        234.85468055555535,
+        232.35980555555523,
+        238.78697916666613,
+        241.45799999999943,
+        240.75161111111058,
+        239.98346527777778,
+        238.5835694444445,
+        237.82600694444469,
+        240.6610069444449,
+        241.15630555555612,
+        236.43030555555575,
+        236.72469444444434,
+        237.07976388888815,
+        237.93233333333268,
+        238.18651388888873,
+        232.82215277777777,
+        231.46962499999992,
+        240.89063888888847,
+        241.45799999999943,
+        240.9871944444439,
+        240.62777777777723,
+        239.67729166666655,
+        239.37924305555532,
+        238.82541666666646,
+        238.1815833333337,
+        239.18779166666707,
+        240.27544444444507,
+        240.39041666666728,
+        238.45784027777816,
+        237.87222222222175,
+        238.73010416666648,
+        230.387597222222,
+        230.8811319444443,
+        235.20395138888853,
+        233.3827013888883,
+        239.70665972222164,
+        241.3588124999994,
+        240.41811805555483,
+        239.859527777777,
+        237.79213194444395,
+        240.499694444445,
+        240.00194444444526,
+        241.3761388888896,
+        241.44558333333407,
+        241.08648611111155,
+        238.23505555555514,
+        240.67427083333334,
+        236.61211111111112,
+        236.73896527777777,
+        240.27247222222235,
+        241.4071666666662,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        240.57346527777716,
+        237.88140972222175,
+        237.24161111111076,
+        237.20768055555516,
+        237.1720138888885,
+        237.72545138888847,
+        239.96068055555486,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        241.5794027777777,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.1934999999994,
+        240.99512499999935,
+        240.8628749999993,
+        241.0612499999994,
+        241.4139166666661,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.1358541666667,
+        241.408361111111,
+        241.4459097222217,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943,
+        241.45799999999943
+       ],
+       "coverage_at_1s": 0.26731288580246915
+      },
+      {
+       "scene_id": "S04",
+       "coverage": 0.07354359567901235,
+       "motion": 4.960471322016461,
+       "end_motion": 0.0018164866255144033,
+       "background": "#f4f4ec",
+       "signature": [
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        235.84792361111099,
+        237.56988888888878,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        219.78005555555546,
+        236.58789583333316,
+        236.97243055555535,
+        239.5468541666665,
+        232.24659722222208,
+        235.36003472222203,
+        239.82156944444432,
+        224.8110833333332,
+        234.8221249999998,
+        238.89752777777767,
+        242.13868749999997,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        189.3944791666666,
+        181.296673611111,
+        197.49954166666666,
+        186.0482847222221,
+        198.0328055555554,
+        183.7712083333332,
+        203.4186319444443,
+        197.8847847222221,
+        196.74296527777767,
+        174.2059236111111,
+        242.12272222222222,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        183.89704861111105,
+        184.10403472222214,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        241.99104166666655,
+        205.33364583333338,
+        188.22079166666674,
+        187.7030069444446,
+        205.165638888889,
+        241.97507638888888,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        241.13176388888886,
+        170.8056458333334,
+        162.37679861111118,
+        162.76902083333334,
+        171.16679861111123,
+        241.1619583333334,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.20197916666666,
+        241.0189861111112,
+        230.65951388888885,
+        230.56184027777772,
+        241.01188888888893,
+        242.19095833333333,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213,
+        242.213
+       ],
+       "coverage_at_1s": 0.031491126543209874
+      }
+     ],
+     "checks": [
+      {
+       "name": "every scene is a rendered picture",
+       "outcome": "passed",
+       "evidence": "4 of 4 scenes rendered"
+      },
+      {
+       "name": "no blank or crowded scene",
+       "outcome": "failed",
+       "evidence": "coverage per scene: S01 16%, S02 3%, S03 2%, S04 7%"
+      },
+      {
+       "name": "planned motion is visible",
+       "outcome": "passed",
+       "evidence": "largest frame step per scene: S01 21.9, S02 7.9, S03 12.7, S04 5.0"
+      },
+      {
+       "name": "neighbouring scenes look different",
+       "outcome": "failed",
+       "evidence": "layout distance between neighbours: 5, 2, 10 (flagged below 5)"
+      },
+      {
+       "name": "scenes share one palette",
+       "outcome": "passed",
+       "evidence": "backgrounds: S01 #f4f4ec, S02 #f4f4ec, S03 #f4f4ec, S04 #f4f4ec (approved #F6F3EC)"
+      },
+      {
+       "name": "the opening shows something within a second",
+       "outcome": "passed",
+       "evidence": "S01: 8% of the frame drawn at 1s"
+      },
+      {
+       "name": "the ending holds still",
+       "outcome": "passed",
+       "evidence": "S04: change over the last 0.6s 0.00 of 255"
+      }
+     ],
+     "not_checked": [
+      "Whether the hierarchy, composition and typography are good: only blank, crowded, static, repeated and off-palette scenes are measured.",
+      "Whether the text is spelled as approved, and whether any text is clipped inside a block: the render checks measure the frame edge only. Nothing here reads text.",
+      "Whether the concept, copy and pacing persuade the audience, and whether a transition looks right. Transitions are reported from the render's own record, not judged from frames.",
+      "Anything between the sampled frames: five frames per scene plus two near its end were read.",
+      "No vision model reviewed these frames. A person or a vision model should look at them (the contact sheet) before the film is called good."
+     ]
+    },
+    "tickets": [
+     {
+      "ticket_id": "T_VQ01",
+      "finding_id": "VQ01",
+      "scene_ids": [
+       "S03"
+      ],
+      "owner_skill": "motion-graphics",
+      "instruction": "Add content or give the scene a stronger visual.",
+      "attempt": 1,
+      "status": "open"
+     },
+     {
+      "ticket_id": "T_VQ02",
+      "finding_id": "VQ02",
+      "scene_ids": [
+       "S03"
+      ],
+      "owner_skill": "motion-graphics",
+      "instruction": "Give the scene a different kind of picture or composition.",
+      "attempt": 1,
+      "status": "open"
+     }
+    ],
+    "final_ready": false,
+    "blockers": [
+     "visual S03: S03 is almost empty at its end.",
+     "visual S03: S03 looks like S02 (remotion/scene-composition+ffmpeg/xfade-fade then remotion/scene-composition+ffmpeg/xfade-fade): the film repeats one layout.",
+     "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+    ]
+   },
+   "record": {
+    "schema_version": "1.0.0",
+    "render_id": "rn_06dd99537a414db8",
+    "purpose": "preview",
+    "handoff_id": "ho_4f57bd4d8258525a",
+    "handoff_content_hash": "4f57bd4d8258525a3ed53284ff8cc7ee329b2efd6462e25e38171e09d8e6d7e6",
+    "approved": {
+     "storyboard": {
+      "version": 1,
+      "hash": "bd839b2049b6e5355119cf18658a159c0a6a6515c78fa8e45a299e3bf531bb5d"
+     },
+     "edit_plan": {
+      "version": 1,
+      "hash": "b9f4de508923ab700d01c25ce915bf091f4e6b7caeb12dc9ea8edc34868fdd23"
+     }
+    },
+    "state": "rendered",
+    "settings": {
+     "aspect_ratio": "16:9",
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration_s": 20,
+     "container": "mp4",
+     "video_codec": "h264",
+     "audio_codec": null,
+     "source": {
+      "kind": "user_approved",
+      "reference": "entered in the console form (session 6b94e323b6db, run 6b94e323b6db-1793343355664)"
+     }
+    },
+    "operations": [
+     {
+      "operation_id": "E01",
+      "operation_type": "render_graphics_scene",
+      "recipe_id": "scene-composition",
+      "implementation_ref": "remotion/scene-composition",
+      "renderer": "remotion",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E02",
+      "operation_type": "concat",
+      "recipe_id": "crossfade",
+      "implementation_ref": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E03",
+      "operation_type": "render_graphics_scene",
+      "recipe_id": "scene-composition",
+      "implementation_ref": "remotion/scene-composition",
+      "renderer": "remotion",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E04",
+      "operation_type": "concat",
+      "recipe_id": "crossfade",
+      "implementation_ref": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E05",
+      "operation_type": "render_graphics_scene",
+      "recipe_id": "scene-composition",
+      "implementation_ref": "remotion/scene-composition",
+      "renderer": "remotion",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E06",
+      "operation_type": "concat",
+      "recipe_id": "crossfade",
+      "implementation_ref": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "production_executable": false
+     },
+     {
+      "operation_id": "E07",
+      "operation_type": "render_graphics_scene",
+      "recipe_id": "scene-composition",
+      "implementation_ref": "remotion/scene-composition",
+      "renderer": "remotion",
+      "production_executable": false
+     }
+    ],
+    "assets": [],
+    "audio_required": false,
+    "blockers": [],
+    "errors": [],
+    "output": {
+     "path": "out/rn_06dd99537a414db8.mp4",
+     "bytes": 1073580,
+     "sha256": "cdfce098198a032c29f0502a4ed0200d42a012c71e37bc3ea578a8ee667503b1",
+     "container": "mp4",
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration_s": 20,
+     "video_codec": "h264",
+     "audio_codec": null,
+     "audio_tracks": 0,
+     "validated_at": "2026-10-30T06:58:27.846Z",
+     "checks": [
+      "container=mp4 (probe format mov,mp4,m4a,3gp,3g2,mj2)",
+      "size=1280x720",
+      "fps=30",
+      "duration=20s (settings 20s)",
+      "video_codec=h264",
+      "audio_tracks=0 (as settings)",
+      "assembled from 4 scene clips by remotion and FFmpeg; every scene matches its clip"
+     ],
+     "video_url": "/api/sessions/6b94e323b6db/renders/rn_06dd99537a414db8/video"
+    },
+    "notes": [
+     "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E02: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E04: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "preview render: it may use draft recipes and is not a production video",
+     "S01: drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S01: the approved shot size (medium) and visual action (\"A booking thread is already in progress. Messages stack up â€¦\") describe the content; the renderer does not change or check them",
+     "S02: drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S02: the approved shot size (close up) and visual action (\"A drawn calendar window wipes in with a few open slots. A câ€¦\") describe the content; the renderer does not change or check them",
+     "S02: the product screen is a drawn concept illustration, not the real product (\"Drawn calendar window with open slots, cursor and confirmati\")",
+     "S03: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S03: the approved shot size (wide) and visual action (\"Two layered cards slide into place with gentle parallax, onâ€¦\") describe the content; the renderer does not change or check them",
+     "S04: drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S04: the approved shot size (medium) and visual action (\"A centred end card settles and holds with the typeset Slotlâ€¦\") describe the content; the renderer does not change or check them",
+     "S04: the brand mark is a typeset wordmark, not a logo (\"Typeset Slotly wordmark, drawn as text and not as a logo\")",
+     "assembled from scene clips (remotion); COMPLETE PREVIEW: every approved scene and operation is present and verified, but it is a preview of draft recipes, not a final deliverable."
+    ],
+    "created_at": "2026-10-30T06:56:58.669Z",
+    "started_at": "2026-10-30T06:58:36.550Z",
+    "finished_at": "2026-10-30T06:58:36.550Z"
+   },
+   "qa": {
+    "findings": [],
+    "passed": [
+     {
+      "check": "duration",
+      "evidence": "probe:duration=20 (plan 20)"
+     },
+     {
+      "check": "resolution",
+      "evidence": "probe:size=1280x720"
+     },
+     {
+      "check": "frame_rate",
+      "evidence": "probe:fps=30"
+     },
+     {
+      "check": "black_frames",
+      "evidence": "probe:blackdetect found 0 span(s), all intended"
+     },
+     {
+      "check": "frozen_frames",
+      "evidence": "probe:freezedetect found 4 span(s), all intended"
+     }
+    ],
+    "measurements": {
+     "duration_s": 20,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "audio_tracks": 0
+    }
+   },
+   "run_id": "6b94e323b6db-1793343355664",
+   "renderer_available": true,
+   "editor": {
+    "status": "ready",
+    "validation": {
+     "ok": true,
+     "issues": []
+    },
+    "conflicts": [],
+    "revision_requests": [],
+    "operations": 7,
+    "rendered": false
+   },
+   "renderer": {
+    "selected": null,
+    "needed": [
+     "remotion",
+     "ffmpeg"
+    ],
+    "composition_required": true,
+    "registered": [
+     "ffmpeg",
+     "remotion",
+     "hyperframes"
+    ]
+   },
+   "plan": {
+    "state": "planning",
+    "purpose": "preview",
+    "operations": [
+     {
+      "operation_id": "E01",
+      "scene_id": "S01",
+      "note": null,
+      "recipe_id": "scene-composition",
+      "template": "remotion/scene-composition",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E02",
+      "scene_id": "S01",
+      "note": null,
+      "recipe_id": "crossfade",
+      "template": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E03",
+      "scene_id": "S02",
+      "note": null,
+      "recipe_id": "scene-composition",
+      "template": "remotion/scene-composition",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E04",
+      "scene_id": "S02",
+      "note": null,
+      "recipe_id": "crossfade",
+      "template": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E05",
+      "scene_id": "S03",
+      "note": null,
+      "recipe_id": "scene-composition",
+      "template": "remotion/scene-composition",
+      "renderer": "remotion",
+      "supported": true
+     },
+     {
+      "operation_id": "E06",
+      "scene_id": "S03",
+      "note": null,
+      "recipe_id": "crossfade",
+      "template": "ffmpeg/xfade-fade",
+      "renderer": "ffmpeg",
+      "supported": true
+     },
+     {
+      "operation_id": "E07",
+      "scene_id": "S04",
+      "note": null,
+      "recipe_id": "scene-composition",
+      "template": "remotion/scene-composition",
+      "renderer": "remotion",
+      "supported": true
+     }
+    ],
+    "supported": 7,
+    "unsupported": 0,
+    "notes": [
+     "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E02: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E04: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "preview render: it may use draft recipes and is not a production video",
+     "S01: drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S01: the approved shot size (medium) and visual action (\"A booking thread is already in progress. Messages stack up â€¦\") describe the content; the renderer does not change or check them",
+     "S02: drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S02: the approved shot size (close up) and visual action (\"A drawn calendar window wipes in with a few open slots. A câ€¦\") describe the content; the renderer does not change or check them",
+     "S02: the product screen is a drawn concept illustration, not the real product (\"Drawn calendar window with open slots, cursor and confirmati\")",
+     "S03: drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S03: the approved shot size (wide) and visual action (\"Two layered cards slide into place with gentle parallax, onâ€¦\") describe the content; the renderer does not change or check them",
+     "S04: drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+     "S04: the approved shot size (medium) and visual action (\"A centred end card settles and holds with the typeset Slotlâ€¦\") describe the content; the renderer does not change or check them",
+     "S04: the brand mark is a typeset wordmark, not a logo (\"Typeset Slotly wordmark, drawn as text and not as a logo\")"
+    ]
+   },
+   "coverage": {
+    "complete": false,
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "represented": false,
+      "missing": [
+       "its crossfade transition is not rendered (a hard cut would be used)"
+      ],
+      "labelled": [
+       "drawn from the approved visual spec (message thread) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+       "the approved shot size (medium) and visual action (\"A booking thread is already in progress. Messages stack up â€¦\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S02",
+      "represented": false,
+      "missing": [
+       "its crossfade transition is not rendered (a hard cut would be used)"
+      ],
+      "labelled": [
+       "drawn from the approved visual spec (ui demo) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+       "the approved shot size (close up) and visual action (\"A drawn calendar window wipes in with a few open slots. A câ€¦\") describe the content; the renderer does not change or check them",
+       "the product screen is a drawn concept illustration, not the real product (\"Drawn calendar window with open slots, cursor and confirmati\")"
+      ]
+     },
+     {
+      "scene_id": "S03",
+      "represented": false,
+      "missing": [
+       "its crossfade transition is not rendered (a hard cut would be used)"
+      ],
+      "labelled": [
+       "drawn from the approved visual spec (layered cards) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+       "the approved shot size (wide) and visual action (\"Two layered cards slide into place with gentle parallax, onâ€¦\") describe the content; the renderer does not change or check them"
+      ]
+     },
+     {
+      "scene_id": "S04",
+      "represented": true,
+      "missing": [],
+      "labelled": [
+       "drawn from the approved visual spec (end card) in the film's approved palette; pictures of a product, a chart or a thread are concept illustrations, never real captures or measured data",
+       "the approved shot size (medium) and visual action (\"A centred end card settles and holds with the typeset Slotlâ€¦\") describe the content; the renderer does not change or check them",
+       "the brand mark is a typeset wordmark, not a logo (\"Typeset Slotly wordmark, drawn as text and not as a logo\")"
+      ]
+     }
+    ]
+   },
+   "capability": [
+    {
+     "operation_id": "E01",
+     "scene_id": "S01",
+     "recipe_id": "scene-composition",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/scene-composition",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/scene-composition is a built-in template of remotion"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E02",
+     "scene_id": "S01",
+     "recipe_id": "crossfade",
+     "status": "validated_available",
+     "selected_engine": "ffmpeg",
+     "selected_template": "ffmpeg/xfade-fade",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "usable",
+       "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E03",
+     "scene_id": "S02",
+     "recipe_id": "scene-composition",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/scene-composition",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/scene-composition is a built-in template of remotion"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E04",
+     "scene_id": "S02",
+     "recipe_id": "crossfade",
+     "status": "validated_available",
+     "selected_engine": "ffmpeg",
+     "selected_template": "ffmpeg/xfade-fade",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "usable",
+       "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E05",
+     "scene_id": "S03",
+     "recipe_id": "scene-composition",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/scene-composition",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/scene-composition is a built-in template of remotion"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E06",
+     "scene_id": "S03",
+     "recipe_id": "crossfade",
+     "status": "validated_available",
+     "selected_engine": "ffmpeg",
+     "selected_template": "ffmpeg/xfade-fade",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "usable",
+       "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "not_implemented",
+       "reason": "remotion has no validated template for crossfade and no engine family in this project can implement it"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe crossfade does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    },
+    {
+     "operation_id": "E07",
+     "scene_id": "S04",
+     "recipe_id": "scene-composition",
+     "status": "validated_available",
+     "selected_engine": "remotion",
+     "selected_template": "remotion/scene-composition",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "engines": [
+      {
+       "engine": "ffmpeg",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list ffmpeg as a compatible renderer, so ffmpeg is not used even if it could do something similar"
+      },
+      {
+       "engine": "remotion",
+       "verdict": "usable",
+       "reason": "remotion/scene-composition is a built-in template of remotion"
+      },
+      {
+       "engine": "hyperframes",
+       "verdict": "not_permitted",
+       "reason": "recipe scene-composition does not list hyperframes as a compatible renderer, so hyperframes is not used even if it could do something similar"
+      }
+     ]
+    }
+   ],
+   "eligible": false,
+   "assembly": {
+    "ok": true,
+    "complete": true,
+    "scenes": [
+     {
+      "scene_id": "S01",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": []
+     },
+     {
+      "scene_id": "S02",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": []
+     },
+     {
+      "scene_id": "S03",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": []
+     },
+     {
+      "scene_id": "S04",
+      "engine": "remotion",
+      "renderable": true,
+      "reason": null,
+      "unmet": []
+     }
+    ],
+    "transitions": [
+     {
+      "after_scene": "S01",
+      "template": "ffmpeg/xfade-fade",
+      "applied": true,
+      "reason": "applied by the FFmpeg assembler"
+     },
+     {
+      "after_scene": "S02",
+      "template": "ffmpeg/xfade-fade",
+      "applied": true,
+      "reason": "applied by the FFmpeg assembler"
+     },
+     {
+      "after_scene": "S03",
+      "template": "ffmpeg/xfade-fade",
+      "applied": true,
+      "reason": "applied by the FFmpeg assembler"
+     }
+    ],
+    "omitted": [],
+    "label": "A complete preview can be assembled from the scene clips."
+   },
+   "can_render": true,
+   "blockers": [
+    "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+    "S01: its crossfade transition is not rendered (a hard cut would be used)",
+    "S02: its crossfade transition is not rendered (a hard cut would be used)",
+    "S03: its crossfade transition is not rendered (a hard cut would be used)",
+    "operation E02: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E02: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S01: it has 2 composition operations; one is supported per scene",
+    "operation E04: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E04: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S02: it has 2 composition operations; one is supported per scene",
+    "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+    "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+    "scene S03: it has 2 composition operations; one is supported per scene"
+   ],
+   "production": {
+    "ready": false,
+    "blockers": [
+     "E01: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E02: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E03: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E04: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E05: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "E06: recipe crossfade is draft: no review evidence; it may be used for planning and tests, not production",
+     "E07: recipe scene-composition is draft: no review evidence; it may be used for planning and tests, not production",
+     "handoff is not production-ready: recipe crossfade is draft: no review evidence",
+     "handoff is not production-ready: recipe scene-composition is draft: no review evidence",
+     "the operations need more than one renderer (remotion, ffmpeg); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)",
+     "S01: its crossfade transition is not rendered (a hard cut would be used)",
+     "S02: its crossfade transition is not rendered (a hard cut would be used)",
+     "S03: its crossfade transition is not rendered (a hard cut would be used)",
+     "operation E02: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+     "operation E02: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+     "scene S01: it has 2 composition operations; one is supported per scene",
+     "operation E04: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+     "operation E04: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+     "scene S02: it has 2 composition operations; one is supported per scene",
+     "operation E06: ffmpeg/xfade-fade cannot be combined with remotion/scene-composition in one scene",
+     "operation E06: remotion/scene-composition takes no parameters; the scene's approved visual spec carries them",
+     "scene S03: it has 2 composition operations; one is supported per scene"
+    ]
+   },
+   "needs": {
+    "aspect_ratio": "16:9",
+    "duration_s": 20,
+    "supported_output": {
+     "container": "mp4",
+     "video_codec": "h264",
+     "audio_codec": null
+    },
+    "you_provide": [
+     "width",
+     "height",
+     "fps"
+    ]
+   },
+   "label": "No preview can be made yet. Nothing here is rendered, and no partial video is offered."
+  }
+ }
+}
