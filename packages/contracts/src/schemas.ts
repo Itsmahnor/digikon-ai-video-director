@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SceneVisual } from "./visual.js";
+import { SceneAssetRef } from "./assets.js";
 
 export const ShotSize = z.enum([
   "extreme_wide", "wide", "medium", "close_up", "macro_close_up",
@@ -92,6 +93,8 @@ export const Scene = z.object({
   /** What the scene draws, as data: one of the supported visual blocks. Approved with the storyboard like everything else on the scene. */
   visual: SceneVisual.nullable().default(null),
   asset_ids: z.array(z.string()).default([]),
+  /** How each uploaded picture is used in this scene. Absent on older plans, so their approval hashes do not change. Every id here is also in asset_ids. */
+  asset_refs: z.array(SceneAssetRef).max(6).optional(),
   /** Offset into the source video where this scene starts, in seconds. */
   source_in_seconds: z.number().nonnegative().default(0),
   /** Claims from the treatment's claims register that this scene states or implies. */

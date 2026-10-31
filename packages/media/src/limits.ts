@@ -15,7 +15,7 @@ export const MEDIA_LIMITS = {
 export const ALLOWED_EXTENSIONS = {
   video: [".mp4", ".mov", ".m4v", ".webm", ".mkv"],
   audio: [".mp3", ".wav", ".m4a", ".aac", ".ogg", ".opus", ".flac", ".webm"],
-  image: [".png", ".jpg", ".jpeg", ".webp"],
+  image: [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".avif"],
 } as const;
 
 export const ALL_EXTENSIONS: readonly string[] = [

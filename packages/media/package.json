@@ -6,5 +6,5 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": { "typecheck": "tsc --noEmit -p ." },
-  "dependencies": { "@digikon/contracts": "*", "zod": "^3.23.8" }
+  "dependencies": { "@digikon/contracts": "*", "@huggingface/transformers": "^4.3.1", "sharp": "^0.35.5", "zod": "^3.23.8" }
 }

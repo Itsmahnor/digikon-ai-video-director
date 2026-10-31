@@ -11,18 +11,18 @@ import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { ApprovalSubmission, BrandFact, VisualReview, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
+import { ApprovalSubmission, AssetUsage, BrandFact, CATEGORY_LABELS, ImageCategory, VisualReview, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
   Command, HandoffRefusedError, matchAssetsToScenes, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
   type DirectorStateType, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, COMPOSITION_TEMPLATE, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, COMPOSITION_TEMPLATE, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
-import { ALL_EXTENSIONS, MEDIA_LIMITS, analyseMedia, buildAssetNotes, measureImage, probeFile } from "@digikon/media";
+import { ALL_EXTENSIONS, AssetRegistry, MEDIA_LIMITS, analyseContent, analyseMedia, buildAssetNotes, manifestEntry, measureImage, notesWithAnalysis, probeFile, understandAsset, type OcrEngine, type VisionModel } from "@digikon/media";
 import type { Doc, Retriever } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { routeRequest } from "@digikon/router";
@@ -50,6 +50,10 @@ export interface AppContext {
   renderFont?: string | null;
   /** The capability registry root (for example `capabilities`; records live under `registry/<engine>`). Absent: none are loaded. */
   capabilitiesDir?: string | null;
+  /** The local vision models. Null: pictures are measured and listed, and their analysis says it could not run. */
+  vision?: VisionModel | null;
+  /** The local OCR engines. Empty: the analysis says text was not read. */
+  ocr?: readonly OcrEngine[];
 }
 
 type Graph = ReturnType<typeof buildDirectorGraph>;
@@ -98,6 +102,14 @@ const ReviewBody = z.object({
   reviewed_by: z.enum(["user", "assistant"]),
   method: z.string().trim().min(1).max(300),
 });
+/** What a user can say about a picture. Omitted fields stay as they are; null clears one. */
+const CorrectionBody = z.object({
+  description: z.string().trim().max(500).nullable().optional(),
+  category: ImageCategory.nullable().optional(),
+  usage: AssetUsage.optional(),
+  /** The user says this is a real capture of their product, so it is shown without a concept label. */
+  genuine_product_ui: z.boolean().nullable().optional(),
+}).strict();
 const DirectBody = z.object({ facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]) });
 
 class HttpError extends Error {
@@ -111,6 +123,8 @@ export function createApp(ctx: AppContext) {
   let llmProblem: { code: string; message: string } | null = null;
   const noteLlm = (e: { code: string; message: string } | null) => { llmProblem = e && ['llm_billing', 'llm_auth', 'llm_model'].includes(e.code) ? { code: e.code, message: e.message } : llmProblem; };
 
+  const assets = new AssetRegistry(join(ctx.storageDir, "assets"));
+  const understanding = () => ({ registry: assets, vision: ctx.vision ?? null, ocr: ctx.ocr ?? [] });
   const session = (id: string): Session => {
     const s = ID.test(id) ? sessions.get(id) : undefined;
     if (!s) throw new HttpError(404, "no_session", "That session does not exist. Refresh the page to start a new one.");
@@ -203,7 +217,9 @@ export function createApp(ctx: AppContext) {
       const imgJob = (async () => {
         try {
           const m = asset.width && asset.height ? await measureImage(asset.uri, { width: asset.width, height: asset.height }) : null;
-          if (still()) s.analysis.set(asset.asset_id, { status: "done", notes: withReview(s, buildAssetNotes(asset, null, null, m)), transcript: null, note: m ? null : "The picture could not be measured." });
+          const known = await understandAsset(understanding(), { session_id: s.id, project_id: `proj_${s.id}` }, asset, m);
+          const notes = withReview(s, buildAssetNotes(asset, null, null, m));
+          if (still()) s.analysis.set(asset.asset_id, { status: "done", notes: known ? notesWithAnalysis(notes, known) : notes, transcript: null, note: m ? null : "The picture could not be measured." });
         } catch (e) {
           console.error(e);
           if (still()) s.analysis.set(asset.asset_id, { status: "failed", notes: withReview(s, buildAssetNotes(asset, null)), transcript: null, note: "The picture could not be measured, so only its size is known." });
@@ -285,12 +301,16 @@ export function createApp(ctx: AppContext) {
       }
       const assetId = `asset_${randomUUID().slice(0, 8)}`;
       const path = join(s.dir, "uploads", `${assetId}${ext}`);
+      // the same bytes twice in one project is one picture; another project may hold them too, with its own record
       // Hash while writing, so the content hash costs no extra read. It is checked again before any handoff.
       const hash = createHash("sha256");
       const tee = new Transform({ transform(chunk: Buffer, _enc, done) { hash.update(chunk); done(null, chunk); } });
       await pipeline(Readable.fromWeb(file.stream() as never), tee, createWriteStream(path));
+      const sha = hash.digest("hex");
+      const twin = s.assets.concat(added).find((a) => a.metadata?.["sha256"] === sha);
+      if (twin) { await rm(path, { force: true }); rejected.push({ name, issues: [{ code: "duplicate", message: `This is the same file as ${String(twin.metadata?.["original_name"] ?? twin.asset_id)}, which is already in this project.` }] }); continue; }
       const probed = await probeFile(path, { assetId, originalName: name });
-      if (probed.ok) added.push({ ...probed.asset, metadata: { ...probed.asset.metadata, sha256: hash.digest("hex") } });
+      if (probed.ok) added.push({ ...probed.asset, metadata: { ...probed.asset.metadata, sha256: sha } });
       else { await rm(path, { force: true }); rejected.push({ name, issues: probed.issues }); }
     }
     s.assets.push(...added);
@@ -307,6 +327,7 @@ export function createApp(ctx: AppContext) {
     s.assets = s.assets.filter((x) => x.asset_id !== assetId);
     s.analysis.delete(assetId);
     s.route = null;
+    assets.removeLink(s.id, assetId);
     await rm(a.uri, { force: true });
     return c.json({ assets: s.assets });
   });
@@ -402,6 +423,110 @@ export function createApp(ctx: AppContext) {
     const base = cur?.notes ?? buildAssetNotes(a, null);
     s.analysis.set(assetId, { status: cur?.status ?? "done", notes: withReview(s, base), transcript: null, note: cur?.note ?? null });
     return c.json({ asset_id: assetId, review, summary: summary(s, assetId) });
+  });
+
+  // ---------- the asset gallery ----------
+  /** The project's picture by id, in this project only: another project's picture is simply not found here. */
+  const pictureIn = (s: Session, assetId: string): Asset => {
+    const a = ASSET_ID.test(assetId) ? s.assets.find((x) => x.asset_id === assetId) : undefined;
+    if (!a) throw new HttpError(404, "no_asset", "That file is not in this project.");
+    if (a.media_type !== "image") throw new HttpError(409, "not_an_image", "Only pictures have this.");
+    return a;
+  };
+  /** Brings a project's pictures back after a restart, from the registry and the files on disk. Only for a project that is not already open. */
+  const restoreUploads = async (id: string): Promise<Session | null> => {
+    if (!ID.test(id)) return null;
+    const open = sessions.get(id);
+    if (open) return open;
+    const links = assets.linksOf(id);
+    const dir = join(ctx.storageDir, "sessions", id);
+    if (!links.length || !existsSync(dir)) return null;
+    const s: Session = { id, dir, assets: [], turns: [], route: null, facts: [], analysis: new Map(), pending: new Map() };
+    for (const l of links) {
+      const probed = await probeFile(l.original_path, { assetId: l.asset_id, originalName: l.original_filename }).catch(() => null);
+      if (!probed?.ok) continue;
+      const asset = { ...probed.asset, metadata: { ...probed.asset.metadata, sha256: l.content_id } };
+      s.assets.push(asset);
+      const known = await assets.resolve(id, l.asset_id);
+      const m = asset.width && asset.height ? await measureImage(asset.uri, { width: asset.width, height: asset.height }).catch(() => null) : null;
+      const notes = withReview(s, buildAssetNotes(asset, null, null, m));
+      s.analysis.set(l.asset_id, { status: "done", notes: known ? notesWithAnalysis(notes, known) : notes, transcript: null, note: null });
+    }
+    sessions.set(id, s);
+    return s;
+  };
+  /** Which scenes of the current run place each picture, and whether that plan has been approved. */
+  const storyboardUse = async (s: Session) => {
+    const use = new Map<string, string[]>();
+    let approved = false;
+    if (!s.graph || !s.threadId) return { use, approved };
+    const st = (await s.graph.getState({ configurable: { thread_id: s.threadId } }).catch(() => null))?.values as DirectorStateType | undefined;
+    for (const sc of st?.scenePlan?.scenes ?? []) for (const id of sc.asset_ids) use.set(id, [...(use.get(id) ?? []), sc.scene_id]);
+    approved = !!st?.approvals?.some((r) => r.stage === "storyboard" && r.decision === "approved" && r.plan_version === st.scenePlan?.version);
+    return { use, approved };
+  };
+
+  app.get("/api/sessions/:id/gallery", async (c) => {
+    const s = (await restoreUploads(c.req.param("id"))) ?? session(c.req.param("id"));
+    const { use, approved } = await storyboardUse(s);
+    const items = await Promise.all(s.assets.filter((a) => a.media_type === "image").map(async (a) => {
+      const reg = await assets.resolve(s.id, a.asset_id);
+      const t = reg?.content.technical ?? null, an = reg?.content.analysis ?? null;
+      const scenes = use.get(a.asset_id) ?? [];
+      const inFlight = s.pending.has(a.asset_id) || an?.status === "running" || an?.status === "pending";
+      const m = reg ? manifestEntry(reg) : null;
+      const stages = ["uploaded", ...(an?.status === "analyzed" || an?.status === "partial" ? ["analyzed"] : []), ...(m?.categories.some((x) => x.category !== "other_unknown") ? ["classified"] : []), ...(reg ? ["available_to_director"] : []), ...(scenes.length ? ["assigned_to_storyboard"] : []), ...(scenes.length && approved ? ["approved"] : [])];
+      return {
+        asset_id: a.asset_id, session_id: s.id, project_id: reg?.project_id ?? `proj_${s.id}`, original_filename: String(a.metadata?.["original_name"] ?? a.asset_id), thumbnail_url: reg?.content.thumbnail_path ? `/api/sessions/${s.id}/assets/${a.asset_id}/thumbnail` : null,
+        status: inFlight ? "running" : an?.status ?? "pending", availability: reg?.availability ?? "available", error: an?.error ?? null, retryable: an?.retryable ?? false,
+        categories: (reg?.effective_categories ?? []).map((x) => ({ ...x, label: CATEGORY_LABELS[x.category] })), description: reg?.effective_description ?? null,
+        width: t?.width ?? a.width, height: t?.height ?? a.height, aspect_ratio: t?.aspect_ratio ?? null, format: t?.format ?? null, transparent: t ? t.transparent_share > 0.01 : null,
+        visible_text: an?.visual?.ocr.lines ?? [], ocr_status: an?.visual?.ocr.status ?? null, dominant_colours: (an?.visual?.dominant_colours ?? []).slice(0, 4).map((x) => x.hex),
+        model: an?.model ?? null, evidence: an?.evidence ?? [], user: reg?.user ?? null, genuine_product_ui: a.genuine_product_ui, storyboard_usage: scenes, stages, used_in_projects: reg ? assets.projectsUsing(reg.content_id).length : 1,
+      };
+    }));
+    return c.json({ session_id: s.id, items });
+  });
+
+  app.get("/api/sessions/:id/assets/:assetId/thumbnail", async (c) => {
+    const s = (await restoreUploads(c.req.param("id"))) ?? session(c.req.param("id"));
+    const a = pictureIn(s, c.req.param("assetId"));
+    const link = assets.getLink(s.id, a.asset_id);
+    const path = link ? assets.content(link.content_id)?.thumbnail_path : null;
+    if (!path || !existsSync(path)) throw new HttpError(404, "no_thumbnail", "This picture has no thumbnail yet.");
+    return c.body(readFileSync(path), 200, { "content-type": "image/png", "cache-control": "no-store" });
+  });
+
+  const applyCorrection = async (s: Session, asset: Asset) => {
+    const reg = await assets.resolve(s.id, asset.asset_id);
+    const cur = s.analysis.get(asset.asset_id);
+    if (reg && cur?.notes) s.analysis.set(asset.asset_id, { ...cur, notes: notesWithAnalysis({ ...cur.notes, uncertain: cur.notes.uncertain.filter((u) => !reg || !/^(Analysis |The classifier|The file is)/.test(u)) }, reg) });
+  };
+
+  /** What the user says about a picture. It outranks the model, stays in this project, and only a later Director run reads it. */
+  app.post("/api/sessions/:id/assets/:assetId/correction", async (c) => {
+    const s = (await restoreUploads(c.req.param("id"))) ?? session(c.req.param("id"));
+    const a = pictureIn(s, c.req.param("assetId"));
+    const body = CorrectionBody.parse(await c.req.json().catch(() => ({})));
+    const { genuine_product_ui, ...input } = body;
+    const patch = Object.fromEntries(Object.entries(input).filter(([, v]) => v !== undefined));
+    assets.setUserInput(s.id, a.asset_id, patch);
+    if (genuine_product_ui !== undefined) s.assets = s.assets.map((x) => (x.asset_id === a.asset_id ? { ...x, genuine_product_ui } : x));
+    await applyCorrection(s, s.assets.find((x) => x.asset_id === a.asset_id)!);
+    s.route = null;
+    return c.json({ ok: true, user: assets.getLink(s.id, a.asset_id)?.user ?? null });
+  });
+
+  /** Runs the analysis again. Used after a failure, or when the user asks. The file itself is not touched. */
+  app.post("/api/sessions/:id/assets/:assetId/reanalyse", async (c) => {
+    const s = (await restoreUploads(c.req.param("id"))) ?? session(c.req.param("id"));
+    const a = pictureIn(s, c.req.param("assetId"));
+    const link = assets.getLink(s.id, a.asset_id);
+    if (!link) throw new HttpError(409, "not_registered", "This picture is not in the asset registry yet.");
+    const m = a.width && a.height ? await measureImage(a.uri, { width: a.width, height: a.height }).catch(() => null) : null;
+    await analyseContent(understanding(), link.content_id, a.uri, m, { force: true });
+    await applyCorrection(s, a);
+    return c.json({ ok: true, status: assets.content(link.content_id)?.analysis.status ?? "failed" });
   });
 
   /**
@@ -598,7 +723,7 @@ export function createApp(ctx: AppContext) {
     // Learned capabilities (validated, hash-checked files in the store) are given to FFmpeg every time, so a capability learned in one project is available in the next.
     const reg = loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes });
     const learned = reg.transitions("ffmpeg"), remotionLearned = reg.composed("remotion"), hyperframesLearned = reg.composed("hyperframes");
-    for (const make of [(o: { fontFile: string; outputRoot: string }) => createFfmpegAdapter({ ...o, learned }), (o: { fontFile: string; outputRoot: string }) => createRemotionAdapter({ ...o, learned: remotionLearned }), (o: { fontFile: string; outputRoot: string }) => createHyperframesAdapter({ ...o, learned: hyperframesLearned })]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
+    for (const make of [(o: { fontFile: string; outputRoot: string }) => createFfmpegAdapter({ ...o, learned }), (o: { fontFile: string; outputRoot: string }) => createRemotionAdapter({ ...o, learned: remotionLearned }), (o: { fontFile: string; outputRoot: string }) => createHyperframesStageAdapter({ ...o, learned: hyperframesLearned })]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
     return adapters.length ? { registry: new AdapterRegistry(adapters), available: true } : { registry: NO_ADAPTERS, available: false };
   };
   const availableRenderers = () => (ctx.ffmpegOk && ctx.renderFont ? registryFor(tmpdir()).registry.renderers() : []);
@@ -615,7 +740,7 @@ export function createApp(ctx: AppContext) {
     await mkdir(dirs.out, { recursive: true });
     const { registry, available } = registryFor(dirs.out);
     const settings = settingsIn ? { ...settingsIn, source: { kind: "user_approved", reference: `entered in the console form (session ${s.id}, run ${runId})` } } : undefined;
-    const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true };
+    const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, assetFiles: (id: string, role: string) => assets.renderFile(s.id, id, role) };
     const planned = planRender({ editor_output: stored.output, handoff, settings, purpose: "preview" }, base);
     if (!planned.ok) throw new HandoffRefusedError(planned.reasons.map((r) => scrub(r, scrubRoots(s))));
     const production = planRender({ editor_output: stored.output, handoff, settings, purpose: "production" }, base);

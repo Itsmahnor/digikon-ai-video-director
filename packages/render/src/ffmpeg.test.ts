@@ -152,7 +152,7 @@ describe.skipIf(skipReal(!!font))("what the adapter supports and refuses", () =>
     expect(a.renderer).toBe("ffmpeg");
     expect(a.templates).toEqual({
       [TEXT_CARD_TEMPLATE]: ["render_graphics_scene"], "ffmpeg/title-subtitle": ["render_graphics_scene"], "ffmpeg/bullet-list": ["render_graphics_scene"],
-      "ffmpeg/stat-callout": ["render_graphics_scene"], "ffmpeg/image-scene": ["render_graphics_scene"], "ffmpeg/xfade-fade": ["concat"], "ffmpeg/concat-cut": ["concat"], "ffmpeg/match-cut": ["concat"], "ffmpeg/clip-play": ["trim_clip"],
+      "ffmpeg/stat-callout": ["render_graphics_scene"], "ffmpeg/image-scene": ["render_graphics_scene"], "ffmpeg/xfade-fade": ["concat"], "ffmpeg/concat-cut": ["concat"], "ffmpeg/match-cut": ["concat"], "ffmpeg/clip-play": ["trim_clip"], "ffmpeg/asset-stage": ["render_graphics_scene"],
     });
     const r = new AdapterRegistry([a]);
     expect(r.template("ffmpeg/text-card")).toEqual({ renderer: "ffmpeg" });

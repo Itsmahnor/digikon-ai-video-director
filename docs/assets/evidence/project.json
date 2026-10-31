@@ -1,0 +1,63 @@
+{
+    "facts":  [
+                  "DigiKon Solutions makes Kinetic.OPS.",
+                  "Kinetic.OPS tracks clients, retainers and renewals in one dashboard."
+              ],
+    "corrections":  [
+                        {
+                            "body":  {
+                                         "usage":  "reference_only",
+                                         "description":  "This is a reference design. Do not use it directly."
+                                     },
+                            "name":  "style-reference.jpg"
+                        },
+                        {
+                            "body":  {
+                                         "usage":  "must_use",
+                                         "description":  "This is our official company logo."
+                                     },
+                            "name":  "logo.png"
+                        },
+                        {
+                            "body":  {
+                                         "description":  "This is the actual dashboard that must appear.",
+                                         "usage":  "must_use",
+                                         "genuine_product_ui":  true
+                                     },
+                            "name":  "clients-screen.png"
+                        }
+                    ],
+    "files":  [
+                  {
+                      "name":  "logo.png",
+                      "path":  "D:/digikon-ai-video-director/storage/sessions/9e162fb04248/uploads/asset_eaacf677.png"
+                  },
+                  {
+                      "name":  "clients-screen.png",
+                      "path":  "D:/digikon-ai-video-director/storage/sessions/c8dfa837a962/uploads/asset_a1565d58.png"
+                  },
+                  {
+                      "name":  "camera.jpg",
+                      "path":  "D:/digikon-ai-video-director/storage/fixtures/assets/product-b.jpg"
+                  },
+                  {
+                      "name":  "team.jpg",
+                      "path":  "D:/digikon-ai-video-director/storage/fixtures/assets/team-a.jpg"
+                  },
+                  {
+                      "name":  "style-reference.jpg",
+                      "path":  "D:/digikon-ai-video-director/storage/fixtures/assets/product-a.jpg"
+                  }
+              ],
+    "text":  "A 30 second YouTube video for DigiKon Solutions announcing Kinetic.OPS, a client operations dashboard for camera rental shops. Calm, confident, modern. Audience: owners of camera rental shops. Goal: book a demo. Use the DigiKon visual identity: Deep Teal #03171D as the background and Green #81D870 as the accent. Our company logo must open and close the film. The Kinetic.OPS dashboard screenshot must appear and be the centrepiece. Show the camera as what these shops rent out, and our team photo for credibility. The call to action is the words Book a demo, with no web address. On-screen text is only the product name Kinetic.OPS, these two approved facts word for word (DigiKon Solutions makes Kinetic.OPS. / Kinetic.OPS tracks clients, retainers and renewals in one dashboard.), and that call to action. No legal text or disclaimer is needed. No voiceover, no music, no footage. 16:9.",
+    "settings":  {
+                     "fps":  30,
+                     "aspect_ratio":  "16:9",
+                     "video_codec":  "h264",
+                     "duration_s":  30,
+                     "width":  1280,
+                     "height":  720,
+                     "container":  "mp4",
+                     "audio_codec":  null
+                 }
+}

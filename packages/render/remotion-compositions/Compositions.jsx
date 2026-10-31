@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AbsoluteFill, Sequence, cancelRender, continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Img, Sequence, cancelRender, continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // The scene-composition template. Every number here was planned and checked beforehand (packages/render/src/composition.ts); this only
 // draws them. A scene is a pure function of the frame: nothing reads a file, the network or the clock.
@@ -317,7 +317,7 @@ const EndCard = ({ scene, p }) => {
   const f = h ? h.font_px : scene.sizes.big, b = scene.sizes.body, s = scene.sizes.small;
   const btn = p(0.5, 0.2);
   return (
-    <div style={{ position: "absolute", left: 0, top: 0, width: scene.width, height: scene.height, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", ...typeStyle(scene) }}>
+    <div style={{ position: "absolute", left: 0, top: scene.stack_top ?? 0, width: scene.width, height: scene.height - (scene.stack_top ?? 0), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", ...typeStyle(scene) }}>
       {v.wordmark ? <div style={{ fontSize: s * 1.15, letterSpacing: s * 0.22, color: pal.muted, textTransform: "uppercase", marginBottom: f * 0.5, opacity: p(0, 0.15), whiteSpace: "pre" }}>{v.wordmark}</div> : null}
       {h ? h.lines.map((l, i) => { const q = p(0.08 + i * 0.07, 0.2); return <div key={i} style={{ overflow: "hidden", lineHeight: 1.12, fontSize: f, whiteSpace: "pre" }}><div style={{ transform: `translateY(${(1 - q) * 105}%)` }}>{l}</div></div>; }) : null}
       <div style={{ marginTop: f * 0.7, padding: `${b * 0.7}px ${b * 1.8}px`, borderRadius: b * 2, background: pal.accent, color: onColor(pal.accent), fontSize: b, fontWeight: 700, opacity: clamp(btn * 2), transform: `scale(${0.8 + 0.2 * btn})`, whiteSpace: "pre", boxShadow: `0 ${b * 0.5}px ${b * 1.4}px ${rgba(pal.accent, 0.35)}` }}>{v.button}</div>
@@ -348,7 +348,33 @@ const HeldWord = ({ scene, frame, fps, cam }) => {
   );
 };
 
-const BLOCKS = { message_thread: MessageThread, ui_demo: UiDemo, process_flow: ProcessFlow, data_chart: DataChart, kinetic_type: KineticType, layered_cards: LayeredCards, end_card: EndCard };
+// An uploaded picture, drawn exactly where packages/render/src/asset-layers.ts planned it. The file is shown as it is: never recoloured, stretched or redrawn.
+const assetRect = (l, frame) => { const t = l.move_frames > 0 ? outCubic(clamp(frame / l.move_frames)) : 1; return { x: lerp(l.from.x, l.to.x, t), y: lerp(l.from.y, l.to.y, t), w: lerp(l.from.w, l.to.w, t), h: lerp(l.from.h, l.to.h, t) }; };
+
+const AssetLayer = ({ layer: l, frame, scene }) => {
+  const r = assetRect(l, frame), pal = scene.palette;
+  const opacity = l.fade_frames > 0 ? clamp(frame / l.fade_frames) : 1;
+  const edge = Math.max(2, Math.min(scene.width, scene.height) * 0.004);
+  const dx = r.x - l.to.x, dy = r.y - l.to.y;
+  return (
+    <div style={{ position: "absolute", left: 0, top: 0, width: scene.width, height: scene.height, opacity, zIndex: 10 + l.z }}>
+      {l.plate ? <div style={{ position: "absolute", left: l.plate.box.x + dx, top: l.plate.box.y + dy, width: l.plate.box.w, height: l.plate.box.h, borderRadius: l.plate.radius, background: l.plate.colour }} /> : null}
+      {l.frame === "browser" ? (
+        <div style={{ position: "absolute", left: l.clip.x - edge, top: l.clip.y - l.chrome_h - edge, width: l.clip.w + 2 * edge, height: l.clip.h + l.chrome_h + 2 * edge, boxSizing: "border-box", borderRadius: l.chrome_h * 0.35, background: pal.surface, border: `${edge}px solid ${rgba(pal.text, 0.2)}` }}>
+          {[0, 1, 2].map((i) => <div key={i} style={{ position: "absolute", left: l.chrome_h * (0.4 + i * 0.5), top: l.chrome_h * 0.34, width: l.chrome_h * 0.3, height: l.chrome_h * 0.3, borderRadius: "50%", background: rgba(pal.text, 0.35) }} />)}
+        </div>
+      ) : null}
+      {l.frame === "device" ? <div style={{ position: "absolute", left: l.clip.x - 3 * edge, top: l.clip.y - 3 * edge, width: l.clip.w + 6 * edge, height: l.clip.h + 6 * edge, borderRadius: 6 * edge, background: "#0b0f19" }} /> : null}
+      <div style={{ position: "absolute", left: l.clip.x, top: l.clip.y, width: l.clip.w, height: l.clip.h, overflow: "hidden" }}>
+        <Img src={staticFile(l.file)} style={{ position: "absolute", left: r.x - l.clip.x, top: r.y - l.clip.y, width: r.w, height: r.h, maxWidth: "none" }} />
+      </div>
+    </div>
+  );
+};
+
+const AssetStage = () => null;
+
+const BLOCKS = { message_thread: MessageThread, ui_demo: UiDemo, process_flow: ProcessFlow, data_chart: DataChart, kinetic_type: KineticType, layered_cards: LayeredCards, end_card: EndCard, asset_stage: AssetStage };
 
 const Scene = ({ scene, fps }) => {
   const frame = useCurrentFrame();
@@ -383,7 +409,8 @@ const Scene = ({ scene, fps }) => {
           <Block scene={scene} p={p} lin={lin} frame={frame} fps={fps} />
           {scene.badge && v.block === "ui_demo" ? <div style={{ position: "absolute", left: scene.content.x, top: scene.content.y + scene.content.h - scene.sizes.small * 1.6, fontSize: scene.sizes.small * 0.95, color: pal.muted, fontFamily: `${FAMILY}, sans-serif`, letterSpacing: 0.4, opacity: p(0.1, 0.2) }}>{scene.badge}</div> : null}
         </AbsoluteFill>
-        {showHeadline ? <Headline scene={scene} p={p} /> : null}
+        {(scene.asset_layers ?? []).map((l, i) => <AssetLayer key={i} layer={l} frame={frame} scene={scene} />)}
+        {showHeadline ? <div style={{ position: "absolute", left: 0, top: 0, width: scene.width, height: scene.height, zIndex: 40 }}>{scene.headline_scrim ? <div style={{ position: "absolute", left: scene.headline_scrim.x, top: scene.headline_scrim.y, width: scene.headline_scrim.w, height: scene.headline_scrim.h, background: rgba(pal.background, 0.84) }} /> : null}<Headline scene={scene} p={p} /></div> : null}
       </AbsoluteFill>
       {scene.held ? <HeldWord scene={scene} frame={frame} fps={fps} cam={{ s: camS, tx: camTx }} /> : null}
     </AbsoluteFill>

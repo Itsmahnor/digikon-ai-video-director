@@ -1,5 +1,6 @@
+import { FFMPEG_ASSET_TEMPLATE, planStage, renderFfmpegStage, stageLayers, usesStage } from "./asset-stage.js";
 import { execFile, execFileSync } from "node:child_process";
-import { copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
@@ -9,6 +10,7 @@ import type { LearnedTransition } from "./learned-types.js";
 import { hasInvalidControl, normaliseText, wrapText } from "./text.js";
 
 const run = promisify(execFile);
+const FONT_SIGNATURES = ["\u0000\u0001\u0000\u0000", "OTTO", "true", "ttcf"];
 
 /** The original template, kept under its own name for callers that refer to it. */
 export const TEXT_CARD_TEMPLATE = "ffmpeg/text-card";
@@ -456,18 +458,32 @@ export function createFfmpegAdapter(opts: FfmpegAdapterOptions): RenderAdapter {
 
   return {
     renderer: "ffmpeg",
-    templates: Object.fromEntries(Object.entries(templatesWith(opts.learned)).map(([ref, t]) => [ref, [t.type]])),
-    capabilities: ffmpegCapabilities(opts.learned),
+    templates: { ...Object.fromEntries(Object.entries(templatesWith(opts.learned)).map(([ref, t]) => [ref, [t.type]])), [FFMPEG_ASSET_TEMPLATE]: ["render_graphics_scene"] },
+    capabilities: { ...ffmpegCapabilities(opts.learned), image_templates: [...FFMPEG_CAPABILITIES.image_templates, FFMPEG_ASSET_TEMPLATE], drawn_templates: [FFMPEG_ASSET_TEMPLATE] },
     check(job) {
+      if (usesStage(job, FFMPEG_ASSET_TEMPLATE)) { const s = planStage(job, FFMPEG_ASSET_TEMPLATE, { outputRoot: opts.outputRoot }); return s.ok ? [] : s.issues; }
       const p = planScenes(job, opts);
       return p.ok ? [] : p.issues;
     },
+    assetLayers(job) {
+      if (!usesStage(job, FFMPEG_ASSET_TEMPLATE)) return [];
+      const s = planStage(job, FFMPEG_ASSET_TEMPLATE, { outputRoot: opts.outputRoot });
+      return s.ok ? stageLayers(s.scenes) : [];
+    },
     async render(job) {
+      if (usesStage(job, FFMPEG_ASSET_TEMPLATE)) {
+        const s = planStage(job, FFMPEG_ASSET_TEMPLATE, { outputRoot: opts.outputRoot });
+        if (!s.ok) throw new Error(`rejected before ffmpeg ran: ${s.issues.join("; ")}`);
+        await renderFfmpegStage(job, s.scenes, s.total_frames, opts);
+        return { notes: ["ffmpeg overlaid the uploaded pictures on their own alpha channel"] };
+      }
       const plan = planScenes(job, opts);
       if (!plan.ok) throw new Error(`rejected before ffmpeg ran: ${plan.issues.join("; ")}`);
       const { width, height, fps } = job.settings;
       const dir = await mkdtemp(join(opts.workRoot ?? tmpdir(), "scene-render-"));
       try {
+        // FFmpeg quietly falls back to another font when it cannot read this one, and text must never be drawn in a font the adapter was not given
+        if (!FONT_SIGNATURES.includes((await readFile(opts.fontFile)).subarray(0, 4).toString("latin1"))) throw new Error("the font file is not a readable font");
         await copyFile(opts.fontFile, join(dir, "font.ttf"));
         await Promise.all(sceneTextFiles(plan.scenes).map((f) => writeFile(join(dir, f.name), f.content, "utf8")));
         await Promise.all(plan.scenes.flatMap((sc, i) => (sc.image ? [copyFile(sc.image.uri, join(dir, `img${i}${sc.image.ext}`))] : [])));

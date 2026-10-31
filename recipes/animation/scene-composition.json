@@ -11,6 +11,6 @@
   "intents": ["drawn graphics scene", "product ui demo animation", "message thread hook", "process diagram", "animated chart", "kinetic typography", "layered cards parallax", "end card button", "graphics led scene"],
   "parameters": [],
   "constraints": { "min_duration_s": 2, "max_duration_s": 12, "max_uses_per_film": null, "energy": "medium" },
-  "compatibility": { "renderers": ["remotion"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["none"] },
+  "compatibility": { "renderers": ["remotion"], "aspect_ratios": ["16:9", "9:16", "1:1"], "media_types": ["none", "image"] },
   "implementation_ref": "remotion/scene-composition"
 }

@@ -16,7 +16,7 @@ export const EXAMPLE_ART_DIRECTION: ArtDirection = {
   narrative: { opening: "Show the pain at once, in the audience's own inbox.", development: "Show the one change: pick a slot and it is booked.", conclusion: "Invite one action and hold still on it." },
 };
 
-export const EXAMPLE_VISUALS: Record<SceneVisual["block"], { visual: SceneVisual; overlay_text: string | null; creative_use: string; limitations: string[] }> = {
+export const EXAMPLE_VISUALS: Record<Exclude<SceneVisual["block"], "asset_stage">, { visual: SceneVisual; overlay_text: string | null; creative_use: string; limitations: string[] }> = {
   message_thread: {
     visual: { block: "message_thread", mode: "pile_up", camera: "push_in", reveal: "none", backdrop: "dots", messages: [{ from: "them", text: "Does Tuesday work?" }, { from: "you", text: "Tuesday is full" }, { from: "them", text: "Can we do Thursday?" }, { from: "you", text: "Thursday after 3?" }, { from: "them", text: "Actually, Friday?" }] },
     overlay_text: null,

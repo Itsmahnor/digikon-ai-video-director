@@ -38,7 +38,7 @@ const fps = (r?: string) => {
   return n && d ? Math.round((n / d) * 100) / 100 : null;
 };
 
-const IMAGE_CODECS = new Set(["png", "mjpeg", "webp", "bmp", "gif"]);
+const IMAGE_CODECS = new Set(["png", "mjpeg", "webp", "bmp", "gif", "tiff", "av1"]);
 
 /**
  * Probes a file with ffprobe and returns an Asset, or every reason it cannot be used.

@@ -8,7 +8,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p ."
   },
-  "dependencies": {
+  "dependencies": { "sharp": "^0.35.5",
     "@digikon/contracts": "*",
     "@digikon/director": "*",
     "@digikon/qa": "*",

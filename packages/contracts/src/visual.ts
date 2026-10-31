@@ -76,8 +76,11 @@ export type ArtDirection = z.infer<typeof ArtDirection>;
 
 // ---------- scene visual spec ----------
 
-export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card"] as const;
+export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card", "asset_stage"] as const;
 export type VisualBlock = (typeof VISUAL_BLOCKS)[number];
+/** The blocks drawn entirely from data. asset_stage is not one: it needs uploaded pictures, so it is validated against real files, not example specs. */
+export type DrawnBlock = Exclude<VisualBlock, "asset_stage">;
+export const DRAWN_BLOCKS = VISUAL_BLOCKS.filter((b): b is DrawnBlock => b !== "asset_stage");
 
 const Common = {
   /** A drawn camera over the whole composition. */
@@ -147,7 +150,18 @@ export const EndCard = z.object({
   ...Common,
 });
 
-export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard]);
+/**
+ * A scene built from uploaded pictures: the scene's asset_refs say what goes where, and the overlay text is its headline. The pictures carry their own motion
+ * (each ref's animation), so there is no whole-frame camera or reveal: a moved or masked frame could not be checked against the uploaded file.
+ */
+export const AssetStage = z.object({
+  block: z.literal("asset_stage"),
+  camera: z.literal("static").default("static"),
+  reveal: z.literal("none").default("none"),
+  backdrop: Common.backdrop,
+});
+
+export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard, AssetStage]);
 export type SceneVisual = z.infer<typeof SceneVisual>;
 
 /** Every string a visual shows, for checks that read the text (claims, characters). */
@@ -160,6 +174,7 @@ export function visualTexts(v: SceneVisual): string[] {
     case "kinetic_type": return [];
     case "layered_cards": return v.cards.flatMap((c) => [c.title, ...(c.detail ? [c.detail] : [])]);
     case "end_card": return [...(v.wordmark ? [v.wordmark] : []), v.button, ...(v.subline ? [v.subline] : [])];
+    case "asset_stage": return [];
   }
 }
 
@@ -173,7 +188,7 @@ export interface VisualIssue { scene_id: string; code: string; message: string }
  * not judged by rules it was never given). Adjacent scenes may not repeat a block, and a block may not carry more than a third of a film.
  */
 export function creativeIssues(
-  scenes: readonly { scene_id: string; visual_purpose: string | null; visual: SceneVisual | null; overlay: { text: string } | null; claim_ids: string[]; asset_ids: string[] }[],
+  scenes: readonly { scene_id: string; visual_purpose: string | null; visual: SceneVisual | null; overlay: { text: string } | null; claim_ids: string[]; asset_ids: string[]; asset_refs?: readonly { asset_id: string }[] }[],
   art: ArtDirection | null,
 ): VisualIssue[] {
   if (!art) return [];
@@ -189,9 +204,12 @@ export function creativeIssues(
     }
     // a scene built from supplied footage or pictures is shown by its media recipes; every other scene is drawn and needs a visual
     if (!s.visual) { if (s.asset_ids.length === 0) issues.push({ scene_id: s.scene_id, code: "no_visual", message: "give the scene a structured visual (one of: " + VISUAL_BLOCKS.join(", ") + ")" }); return; }
-    if (s.asset_ids.length) issues.push({ scene_id: s.scene_id, code: "visual_with_assets", message: "a scene with supplied media is shown by its media recipes and cannot also be drawn; remove the visual or the asset" });
+    const placed = new Set((s.asset_refs ?? []).map((r) => r.asset_id));
+    if (s.asset_ids.some((id) => !placed.has(id))) issues.push({ scene_id: s.scene_id, code: "visual_with_assets", message: "a drawn scene can only carry pictures placed in asset_refs; add an asset_refs entry for each asset, or remove the visual or the asset" });
+    if (s.visual.block === "asset_stage" && placed.size === 0) issues.push({ scene_id: s.scene_id, code: "asset_stage_empty", message: "asset_stage draws the scene's asset_refs, and there are none" });
     const prev = scenes[i - 1]?.visual;
-    if (prev && prev.block === s.visual.block) issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
+    // a run of pictures is a sequence, not a repeated layout: each shows a different file, so the block itself does not make them alike
+    if (prev && prev.block === s.visual.block && s.visual.block !== "asset_stage") issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
     if (s.visual.block === "kinetic_type" && !s.overlay) issues.push({ scene_id: s.scene_id, code: "kinetic_without_text", message: "kinetic_type animates the scene's overlay text, so the scene needs overlay text" });
     if (s.visual.block === "ui_demo" && s.visual.cursor_target !== null && s.visual.cursor_target >= s.visual.rows.length) issues.push({ scene_id: s.scene_id, code: "cursor_out_of_range", message: `cursor_target ${s.visual.cursor_target} is not a row (there are ${s.visual.rows.length})` });
     if (s.visual.block === "layered_cards" && s.visual.held) {
@@ -213,7 +231,7 @@ export function creativeIssues(
   if (scenes.length >= 4) {
     const counts = new Map<string, number>();
     for (const s of scenes) if (s.visual) counts.set(s.visual.block, (counts.get(s.visual.block) ?? 0) + 1);
-    for (const [block, n] of counts) if (n > Math.ceil(scenes.length / 3)) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than a third of a film` });
+    for (const [block, n] of counts) if (block !== "asset_stage" && n > Math.ceil(scenes.length / 3)) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than a third of a film` });
   }
   return issues;
 }

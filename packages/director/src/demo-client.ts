@@ -116,7 +116,7 @@ export class DemoClient implements LlmClient {
       ? [{ need: "Supplied footage", kind: "footage", availability: "supplied", asset_id: v.asset_ids[0] }]
       : [{ need: graphics, kind: "graphics", availability: "generate_graphics" }];
     const hookVideo = withVideo(hook);
-    return {
+    return this.placePictures({
       scenes: [
         { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Open on the idea in words" } : {}), ...(hookVideo.asset_ids.length || !this.opts.creative ? {} : { visual: { block: "kinetic_type", style: "word_pop", emphasis_word: 1, camera: "push_in", reveal: "none", backdrop: "gradient" } }), duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
         ...middleScenes.map((d, i) => {
@@ -127,7 +127,27 @@ export class DemoClient implements LlmClient {
         }),
         { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on one action, held still", visual: { block: "end_card", wordmark: null, button: "Order today", subline: null, camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
       ],
-    };
+    }, user);
+  }
+
+  /** Canned placement for the demo: each usable picture takes over a scene, a logo the opening one. What reaches the scene is only what the manifest listed. */
+  private placePictures(plan: { scenes: Record<string, unknown>[] }, user: string) {
+    const block = /## Asset manifest[^\n]*\n([\s\S]*?)\n\n## /.exec(user)?.[1];
+    if (!block || !this.opts.creative) return plan;
+    const manifest = JSON.parse(block) as { asset_id: string; usage: string; categories: { category: string }[]; caveats: string[] }[];
+    const isLogo = (m: (typeof manifest)[number]) => /logo/.test(m.categories[0]?.category ?? "");
+    const usable = manifest.filter((m) => (m.usage === "auto" || m.usage === "must_use" || m.usage === "optional") && (m.caveats.length === 0 || m.usage === "must_use")).sort((a, b) => Number(isLogo(b)) - Number(isLogo(a)));
+    usable.slice(0, plan.scenes.length).forEach((m, i) => {
+      const logo = isLogo(m), scene = plan.scenes[i]!;
+      const screen = /screenshot|dashboard/.test(m.categories[0]?.category ?? "");
+      Object.assign(scene, {
+        visual: { block: "asset_stage", backdrop: "flat" }, asset_ids: [m.asset_id], source_in_seconds: 0, overlay: null, claim_ids: [], visual_purpose: `Shows picture ${i + 1} of the upload: ${m.categories[0]?.category ?? "unknown"}`,
+        required_assets: [{ need: logo ? "The uploaded logo" : "The uploaded picture", kind: logo ? "logo" : screen ? "ui_screenshot" : "image", availability: "supplied", asset_id: m.asset_id }],
+        asset_refs: [{ asset_id: m.asset_id, role: logo ? "logo" : screen ? "screen" : "hero", placement: "center", scale: logo ? 0.6 : 1, fit: "contain", crop: null, layer: 1, animation: logo ? "scale_in" : "fade_in", frame: screen ? "browser" : "none", mandatory: m.usage === "must_use", reason: "It is the most relevant supplied picture for this beat." }],
+        shot: { shot_size: "medium", camera_motion: "static", visual_action: "The uploaded picture, shown as supplied" },
+      });
+    });
+    return plan;
   }
   private editPlan(user: string) {
     const scenes = JSON.parse(/## Scenes\n([\s\S]*?)\n\n## /.exec(user)![1]!) as { scene_id: string; overlay: unknown; media: string[]; duration_seconds: number; visual_block?: string | null }[];

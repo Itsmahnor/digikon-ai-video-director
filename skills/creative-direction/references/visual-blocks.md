@@ -10,4 +10,6 @@ Each scene's `visual` is one of these blocks. Fields shown with their limits; ev
 - **layered_cards**: `cards` 2-4 of {title <=24, detail <=36 or null}; `depth` subtle or strong. Use for: layers or parts of a whole, with parallax. The last card is the front.
 - **end_card**: `wordmark` <=24 or null (typeset text, not a logo); `button` <=24; `subline` <=40 or null. The overlay text is its headline. Use for: the closing action, held still.
 
-Limits: one typeface file; no supplied images or footage inside a block (a supplied image uses its own recipes); no audio; one block per scene and one engine per scene.
+- **asset_stage**: `backdrop` only. Draws the scene's `asset_refs`, the uploaded pictures; camera and reveal are fixed (the pictures carry their own animation). Use for: anything the user supplied a real picture of: a logo, a product, a screen, a team. May repeat across neighbouring scenes. Always preferred over a drawn concept when a real picture exists.
+
+Limits: one typeface file; no supplied footage inside a block; any other block may carry one small picture through `asset_refs`, in a corner or along the top; no audio; one block per scene and one engine per scene.

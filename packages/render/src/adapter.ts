@@ -1,4 +1,6 @@
-import type { EditorOperation, Renderer, RenderSettings } from "@digikon/contracts";
+import type { EditorOperation, Renderer, RenderSettings, SceneAssetRef } from "@digikon/contracts";
+import type { AssetLayer, ResolvedAssetFile } from "./asset-layers.js";
+import type { Box } from "./composition.js";
 import type { RendererRegistry } from "@digikon/director";
 
 type OperationType = EditorOperation["operation_type"];
@@ -19,6 +21,8 @@ export interface RenderJob {
   concept_asset_ids: string[];
   /** The approved visual spec of each scene that has one, with the scene's approved overlay text, by scene_id. Data only. */
   scene_visuals?: Record<string, { visual: unknown; overlay_text: string | null; visual_purpose: string | null }>;
+  /** The pictures each scene places, by scene_id: the approved references, and each one's file as the registry resolved it. */
+  scene_assets?: Record<string, { refs: SceneAssetRef[]; files: Record<string, ResolvedAssetFile> }>;
   /** The approved art direction of the film, when the treatment has one. */
   art_direction?: unknown;
   /** The only path the adapter may write. It does not exist when the job starts. */
@@ -43,6 +47,8 @@ export interface RenderAdapter {
    * so an unsupported scene is reported while planning instead of failing at render time.
    */
   check?(job: Omit<RenderJob, "signal">): string[];
+  /** Exactly what this adapter draws for each scene's uploaded pictures, so the finished film can be compared with those files. */
+  assetLayers?(job: Omit<RenderJob, "signal">): { scene_id: string; layers: AssetLayer[]; occluders: { box: Box }[] }[];
 }
 
 /** The adapters that exist. It is also the Editor's RendererRegistry, so the Editor and the renderer agree on what can run. */

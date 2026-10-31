@@ -11,6 +11,7 @@ import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, planWebScenes, type WebTemplate } from "./web-scenes.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
 import { loadFontMeter } from "./font-metrics.js";
+import type { AssetLayer } from "./asset-layers.js";
 import { verifyCompositionScenes } from "./composition-verify.js";
 
 /** Every template this adapter implements. A reference that is not here is refused, whatever the recipe says. */
@@ -22,7 +23,7 @@ export const REMOTION_TEMPLATES: Readonly<Record<string, WebTemplate>> = {
 const COMPOSITION_TYPES = { [COMPOSITION_TEMPLATE]: ["render_graphics_scene"] as const };
 
 /** What this adapter can show beyond plain graphics, in the form the coverage check takes. No transitions, clips or audio are built. */
-export const REMOTION_CAPABILITIES = { image_templates: ["remotion/image-caption"], video_templates: [], transition_templates: {}, drawn_templates: [COMPOSITION_TEMPLATE] } as const;
+export const REMOTION_CAPABILITIES = { image_templates: ["remotion/image-caption", COMPOSITION_TEMPLATE], video_templates: [], transition_templates: {}, drawn_templates: [COMPOSITION_TEMPLATE] } as const;
 
 /**
  * What this adapter can show, including the learned templates it was given: camera moves (by the storyboard motion they carry out), the
@@ -98,6 +99,11 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
       const p = plan(job);
       return p.kind === "issues" ? p.issues : [];
     },
+    assetLayers(job) {
+      const p = plan(job);
+      if (p.kind !== "composition") return [];
+      return p.plan.scenes.map((sc) => ({ scene_id: sc.scene_id, layers: sc.asset_layers, occluders: [...(sc.headline_scrim ? [{ box: sc.headline_scrim }] : []), ...(sc.headline && sc.visual.block === "asset_stage" ? [{ box: sc.headline.box }] : [])] }));
+    },
     async render(job) {
       const planned = plan(job);
       if (planned.kind === "issues") throw new Error(`rejected before remotion ran: ${planned.issues.join("; ")}`);
@@ -109,10 +115,11 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         const publicDir = join(dir, "public");
         await mkdir(publicDir);
         await copyFile(opts.fontFile, join(publicDir, "font.ttf"));
-        const scenes = await Promise.all((plan2.scenes as { image: null | { ext: string; uri: string }; logo?: null | { ext: string; uri: string } }[]).map(async (sc, i) => {
+        const scenes = await Promise.all((plan2.scenes as unknown as { image: null | { ext: string; uri: string }; logo?: null | { ext: string; uri: string }; asset_layers?: AssetLayer[] }[]).map(async (sc, i) => {
           let out: Record<string, unknown> = sc;
           if (sc.image) { const file = `img${i}${sc.image.ext}`; await copyFile(sc.image.uri, join(publicDir, file)); out = { ...out, image: { ...sc.image, uri: undefined, file } }; }
           if (sc.logo) { const file = `logo${i}${sc.logo.ext}`; await copyFile(sc.logo.uri, join(publicDir, file)); out = { ...out, logo: { ...sc.logo, uri: undefined, file } }; }
+          if (sc.asset_layers?.length) out = { ...out, asset_layers: await Promise.all(sc.asset_layers.map(async (l, k) => { const file = `asset${i}_${k}${extname(l.source)}`; await copyFile(l.source, join(publicDir, file)); return { ...l, source: undefined, file }; })) };
           return out;
         }));
         const { bundle } = await import("@remotion/bundler");

@@ -350,7 +350,7 @@ describe.skipIf(skipReal(can))("renderer selection from the approved plan", () =
     const p = planFor(T[r], T_SETTINGS, [r]);
     const sel = selectRenderer(p.record);
     expect(sel).toMatchObject({ selected: r, needed: [r], composition_required: false, unsupported: [] });
-    expect(sel.capabilities.image_templates).toEqual([`${r}/image-caption`]);
+    expect(sel.capabilities.image_templates).toContain(`${r}/image-caption`);
     expect(sel.capabilities.transition_templates).toEqual({});
     expect(previewCoverage(T[r].handoff, T[r].output, p.record, sel.capabilities).complete).toBe(true);
     const pi = planFor(I[r], I_SETTINGS, [r]);

@@ -6,12 +6,13 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { z } from "zod";
-import { DirectorHandoff, EditorOutput, RenderRecord, RenderSettings, type EditorOperation, type RenderOutput } from "@digikon/contracts";
+import { AssetValidationReport, DirectorHandoff, EditorOutput, RenderRecord, RenderSettings, type EditorOperation, type RenderOutput } from "@digikon/contracts";
 import { diagnoseOperations, type Engine, type OperationStatus } from "./capabilities.js";
 import { previewCoverage, type RenderCapabilities } from "./coverage.js";
 import { ffmpegCapabilities } from "./ffmpeg.js";
 import type { RenderAdapter, RenderJob } from "./adapter.js";
 import { jobVisuals } from "./composition.js";
+import { validateRenderedAssets } from "./asset-validation.js";
 import { validateOutput } from "./output.js";
 import { planRender, type RenderDeps, type RenderInput } from "./render.js";
 import { RENDERER_CAPABILITIES } from "./select.js";
@@ -91,6 +92,8 @@ export const DeliveryReport = z.object({
   assembly: z.object({ tool: z.literal("ffmpeg"), ffmpeg_version: z.string(), lossy_encodes: z.number().int(), known_differences: z.array(z.string()) }),
   output: z.object({ path: z.string(), bytes: z.number(), sha256: z.string(), width: z.number(), height: z.number(), fps: z.number(), duration_s: z.number(), frames: z.number().int(), video_codec: z.string(), audio_tracks: z.number().int() }).nullable(),
   limitations: z.array(z.string()),
+  /** Each approved picture looked for in the finished film. Absent when the plan placed none. */
+  asset_validation: AssetValidationReport.nullable().optional(),
   created_at: z.string().datetime(),
 });
 export type DeliveryReport = z.infer<typeof DeliveryReport>;
@@ -208,7 +211,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
           templates: Object.fromEntries(visual.map((o) => [o.operation_id, recOps.get(o.operation_id)!.implementation_ref])),
           assets: base.plan?.job.assets.filter((a) => used.has(a.asset_id)) ?? h.assets.filter((a) => used.has(a.asset_id)).map((a) => ({ asset_id: a.asset_id, media_type: a.media_type, uri: a.uri })),
           clips: [], asset_info: Object.fromEntries(h.assets.filter((a) => used.has(a.asset_id)).map((a) => [a.asset_id, { duration: a.duration, width: a.width, height: a.height, audio_tracks: a.audio_tracks }])),
-          concept_asset_ids: base.plan?.job.concept_asset_ids.filter((id) => used.has(id)) ?? [], ...jobVisuals(h), output_path: join(deps.outputRoot, "clips", `${render_id}.mp4`),
+          concept_asset_ids: base.plan?.job.concept_asset_ids.filter((id) => used.has(id)) ?? [], ...jobVisuals(h, deps.assetFiles), output_path: join(deps.outputRoot, "clips", `${render_id}.mp4`),
         };
         const issues = adapter.check?.(job) ?? [];
         if (issues.length) sp.reason = `the ${engine} adapter refuses this scene: ${issues.join("; ")}`;
@@ -426,6 +429,17 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
     }
     if (problems.length) { await rm(finalPath, { force: true }); return { kind: "failed", errors: problems, report: null }; }
 
+    // 4b. every approved picture, looked for in the finished film's frames
+    const uses = plan.handoff.storyboard.scenes.flatMap((s) => (s.asset_refs ?? []).map((r) => ({ scene_id: s.scene_id, asset_id: r.asset_id, role: r.role, mandatory: r.mandatory })));
+    const manifestOf = new Map(plan.handoff.asset_notes.flatMap((n) => (n.image_manifest ? [[n.asset_id, n.image_manifest] as const] : [])));
+    const asset_validation = uses.length ? await validateRenderedAssets(finalPath, W, H, uses, scenes.map((s) => {
+      const placed = s.job && !clips.get(s.scene_id)!.placeholder ? (s.adapter?.assetLayers?.(s.job) ?? []).find((p) => p.scene_id === s.scene_id) : undefined;
+      return { scene_id: s.scene_id, from_frame: s.from_frame, frames: s.frames, rendered: !clips.get(s.scene_id)!.placeholder, reason: s.reason, layers: placed?.layers ?? [], occluders: placed?.occluders ?? [] };
+    }), { ffmpegPath: ffmpeg, stagesBefore: (id) => {
+      const m = manifestOf.get(id);
+      return ["uploaded", ...(m && (m.analysis_status === "analyzed" || m.analysis_status === "partial") ? ["analyzed" as const] : []), ...(m?.categories.some((c) => c.category !== "other_unknown") ? ["classified" as const] : []), ...(m ? ["available_to_director" as const] : [])];
+    } }) : null;
+
     // 5. the report: every stage on its own
     const ffv = execFileSync(ffmpeg, ["-version"], { encoding: "utf8", windowsHide: true }).split(/\r?\n/)[0]!.trim();
     const engines = [...new Set(scenes.map((s) => s.engine).filter((e): e is Engine => !!e))];
@@ -464,6 +478,7 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       assembly: { tool: "ffmpeg" as const, ffmpeg_version: ffv, lossy_encodes: 2, known_differences: ["each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)", "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2", "scene clips are h264 intermediates, not lossless"] },
       output: { path: finalPath, bytes: output.bytes, sha256: output.sha256, width: output.width, height: output.height, fps: output.fps, duration_s: output.duration_s, frames: finalFrames, video_codec: output.video_codec, audio_tracks: output.audio_tracks },
       limitations: ["only the first, middle and last clean frame of each scene are compared with its clip", "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR", "audio is not produced in this phase"],
+      asset_validation,
       created_at: now().toISOString(),
     };
     const draftReport: DeliveryReport = DeliveryReport.parse(baseReport);
@@ -477,7 +492,7 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       omitted: omittedAll.filter((o) => !isTransition.has(o.operation_id)),
       transitions_not_applied: transitions.filter((t) => !t.applied).map((t) => ({ after_scene: t.after_scene, template: t.template, reason: t.reason })),
       audio_required: plan.base.record.audio_required,
-      visual, plan_problems: planDifferences(draftReport, plan.handoff),
+      visual, plan_problems: [...planDifferences(draftReport, plan.handoff), ...(asset_validation?.failures ?? [])],
       recipes: { draft, preview_only: plan.purpose !== "production", blockers: plan.purpose === "production" ? plan.base.record.blockers : [] },
     });
     const report: DeliveryReport = DeliveryReport.parse({ ...baseReport, kind: decision.complete ? "complete" : "partial", states: { ...baseReport.states, final_delivery_ready: decision.final }, decision, label: decision.label, final_delivery_blockers: decision.blockers });

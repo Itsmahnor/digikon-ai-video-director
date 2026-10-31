@@ -1,0 +1,47 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+                             {
+                                 "kind":  "requires_asset",
+                                 "message":  "needs an uploaded picture on the scene"
+                             }
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "asset-stage-hyperframes",
+    "type":  "animation",
+    "operation_type":  "render_graphics_scene",
+    "title":  "Uploaded pictures with HyperFrames",
+    "purpose":  "Places uploaded pictures on the scene with HyperFrames, keeping their alpha channel. Draws a fade, a slide up or a scale in.",
+    "intents":  [
+                    "show uploaded image",
+                    "uploaded picture hyperframes"
+                ],
+    "parameters":  [
+
+                   ],
+    "constraints":  {
+                        "min_duration_s":  2,
+                        "max_duration_s":  12,
+                        "max_uses_per_film":  null,
+                        "energy":  "medium"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "hyperframes"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "image"
+                                          ]
+                      },
+    "implementation_ref":  "hyperframes/asset-stage"
+}

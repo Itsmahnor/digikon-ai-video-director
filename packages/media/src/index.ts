@@ -2,3 +2,8 @@ export * from "./limits.js";
 export * from "./probe.js";
 export * from "./analysis.js";
 export * from "./image.js";
+export * from "./inspect.js";
+export * from "./ocr.js";
+export * from "./vision.js";
+export * from "./asset-registry.js";
+export * from "./understand.js";

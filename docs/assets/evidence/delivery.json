@@ -1,0 +1,684 @@
+{
+ "format": "digikon.delivery-report",
+ "format_version": 1,
+ "delivery_id": "dl_8c33eb2248334bfb",
+ "render_id": "rn_ccb45db46ed64cb5",
+ "kind": "complete",
+ "purpose": "preview",
+ "handoff_content_hash": "5614ea7670f5ed9fdbea7cc24982786cf2bde24bf04f358e3ae5d15066a77b8f",
+ "states": {
+  "plan_created": true,
+  "plan_approved": true,
+  "scenes_total": 6,
+  "scenes_rendered": 6,
+  "scenes_content_validated": 6,
+  "final_video_validated": true,
+  "final_delivery_ready": false
+ },
+ "decision": {
+  "status": "complete_preview",
+  "label": "COMPLETE PREVIEW: every approved scene and operation is present, but it is not final delivery (open: recipe review and production eligibility).",
+  "final": false,
+  "complete": true,
+  "file_valid": true,
+  "criteria": [
+   {
+    "id": "scene_render",
+    "title": "Scene render completion",
+    "ok": true,
+    "detail": "6 of 6 scenes were rendered by an engine",
+    "blockers": []
+   },
+   {
+    "id": "required_operations",
+    "title": "Required operation completion",
+    "ok": true,
+    "detail": "every approved operation and transition is carried out",
+    "blockers": []
+   },
+   {
+    "id": "content_validation",
+    "title": "Content validation",
+    "ok": true,
+    "detail": "every scene's content was checked by its engine and against the final video",
+    "blockers": []
+   },
+   {
+    "id": "visual_validation",
+    "title": "Visual validation",
+    "ok": true,
+    "detail": "no critical or major visual problem was measured",
+    "blockers": []
+   },
+   {
+    "id": "plan_compliance",
+    "title": "Approved-plan compliance",
+    "ok": true,
+    "detail": "the film matches the approved plan: scenes, order, timing, templates and engines",
+    "blockers": []
+   },
+   {
+    "id": "recipe_review",
+    "title": "Recipe review and production eligibility",
+    "ok": false,
+    "detail": "recipes used are drafts that no person has reviewed",
+    "blockers": [
+     "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+    ]
+   }
+  ],
+  "blockers": [
+   "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+  ]
+ },
+ "final_delivery_blockers": [
+  "every recipe used is still a draft, so this is a preview and production rendering stays blocked"
+ ],
+ "label": "COMPLETE PREVIEW: every approved scene and operation is present, but it is not final delivery (open: recipe review and production eligibility).",
+ "scenes": [
+  {
+   "scene_id": "S01",
+   "start_s": 0,
+   "duration_s": 5,
+   "frames": 150,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E01",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    },
+    {
+     "operation_id": "E02",
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "operation_type": "concat",
+     "status": "validated_available",
+     "engine": "ffmpeg",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": null,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 0.9)",
+     "frame 65 of the final video matches the clip (difference 1.0)",
+     "frame 131 of the final video matches the clip (difference 1.0)",
+     "the ffmpeg/xfade-fade (fade) transition is in the finished video: the middle frame is 0.8 from the average of the two pictures, 26.4 from the first and 25.8 from the next"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "1fccb9bcffe9bc731a229a082ad4496a76a0808bfed2f92a348d583b1352bde1"
+  },
+  {
+   "scene_id": "S02",
+   "start_s": 5,
+   "duration_s": 3,
+   "frames": 90,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E03",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    },
+    {
+     "operation_id": "E04",
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "operation_type": "concat",
+     "status": "validated_available",
+     "engine": "ffmpeg",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": null,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 1.3)",
+     "frame 35 of the final video matches the clip (difference 1.0)",
+     "frame 71 of the final video matches the clip (difference 1.0)",
+     "the ffmpeg/xfade-fade (fade) transition is in the finished video: the middle frame is 0.8 from the average of the two pictures, 7.8 from the first and 7.4 from the next"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "12d3d8396af394e438bdd5d9bd3204e2ebab9ee8c86f7ae76bcced1f1f520195"
+  },
+  {
+   "scene_id": "S03",
+   "start_s": 8,
+   "duration_s": 6,
+   "frames": 180,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E05",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    },
+    {
+     "operation_id": "E06",
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "operation_type": "concat",
+     "status": "validated_available",
+     "engine": "ffmpeg",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": null,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 1.4)",
+     "frame 80 of the final video matches the clip (difference 1.5)",
+     "frame 161 of the final video matches the clip (difference 1.5)",
+     "the ffmpeg/xfade-fade (fade) transition is in the finished video: the two pictures differ by only 5.4 of 255 here, so a dissolve looks the same as a cut (nothing to tell apart)"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "b53183040e859fe31f6f2f429bf2e1d077590c1f432ee5fc48cb45d517892b81"
+  },
+  {
+   "scene_id": "S04",
+   "start_s": 14,
+   "duration_s": 5,
+   "frames": 150,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E07",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    },
+    {
+     "operation_id": "E08",
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "operation_type": "concat",
+     "status": "validated_available",
+     "engine": "ffmpeg",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": null,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 1.3)",
+     "frame 65 of the final video matches the clip (difference 1.4)",
+     "frame 131 of the final video matches the clip (difference 1.3)",
+     "the ffmpeg/xfade-fade (fade) transition is in the finished video: the middle frame is 1.0 from the average of the two pictures, 56.7 from the first and 56.3 from the next"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "d8a3cade080fcae31a2a7dedd09d4906bca7d35c085302166dddcba9dfd65318"
+  },
+  {
+   "scene_id": "S05",
+   "start_s": 19,
+   "duration_s": 5,
+   "frames": 150,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E09",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    },
+    {
+     "operation_id": "E10",
+     "recipe_id": "crossfade",
+     "template": "ffmpeg/xfade-fade",
+     "operation_type": "concat",
+     "status": "validated_available",
+     "engine": "ffmpeg",
+     "reason": "ffmpeg/xfade-fade is a built-in template of ffmpeg",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": null,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 1.3)",
+     "frame 65 of the final video matches the clip (difference 1.6)",
+     "frame 131 of the final video matches the clip (difference 1.6)",
+     "the ffmpeg/xfade-fade (fade) transition is in the finished video: the middle frame is 1.3 from the average of the two pictures, 12.0 from the first and 11.7 from the next"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "ddeb04069244d26b78bcfd11c50281e6710f593d74cd0a998c1a069a3cad0c07"
+  },
+  {
+   "scene_id": "S06",
+   "start_s": 24,
+   "duration_s": 6,
+   "frames": 180,
+   "status": "rendered_and_verified",
+   "engine": "remotion",
+   "operations": [
+    {
+     "operation_id": "E11",
+     "recipe_id": "scene-composition",
+     "template": "remotion/scene-composition",
+     "operation_type": "render_graphics_scene",
+     "status": "validated_available",
+     "engine": "remotion",
+     "reason": "remotion/scene-composition is a built-in template of remotion",
+     "readiness": {
+      "registered": true,
+      "validated_in_isolation": false,
+      "validation_basis": "built_in",
+      "compatible_with_scene": true,
+      "rendered_with_scene_inputs": true,
+      "validated_in_final": true,
+      "missing": null
+     }
+    }
+   ],
+   "unmet": [],
+   "omitted_reason": null,
+   "content": {
+    "engine_checked": true,
+    "end_to_end_checked": true,
+    "checks": [
+     "frame 0 of the final video matches the clip (difference 1.3)",
+     "frame 89 of the final video matches the clip (difference 1.4)",
+     "frame 179 of the final video matches the clip (difference 1.4)"
+    ],
+    "limitations": [
+     "Compositions were measured on six frames of each scene: background colour, how much is drawn, the frame edge, headline ink and movement. Text was not read back by OCR and its spelling was not compared against the plan."
+    ]
+   },
+   "clip_sha256": "29aa38fa24d09cef6923cd3e67eff81a7bfca82ec058d0f74a5d03f2374666cd"
+  }
+ ],
+ "transitions": [
+  {
+   "after_scene": "S01",
+   "operation_id": "E02",
+   "template": "ffmpeg/xfade-fade",
+   "status": "applied",
+   "reason": "applied by the FFmpeg assembler",
+   "check": "the middle frame is 0.8 from the average of the two pictures, 26.4 from the first and 25.8 from the next",
+   "duration_s": 0.6
+  },
+  {
+   "after_scene": "S02",
+   "operation_id": "E04",
+   "template": "ffmpeg/xfade-fade",
+   "status": "applied",
+   "reason": "applied by the FFmpeg assembler",
+   "check": "the middle frame is 0.8 from the average of the two pictures, 7.8 from the first and 7.4 from the next",
+   "duration_s": 0.6
+  },
+  {
+   "after_scene": "S03",
+   "operation_id": "E06",
+   "template": "ffmpeg/xfade-fade",
+   "status": "applied",
+   "reason": "applied by the FFmpeg assembler",
+   "check": "the two pictures differ by only 5.4 of 255 here, so a dissolve looks the same as a cut (nothing to tell apart)",
+   "duration_s": 0.6
+  },
+  {
+   "after_scene": "S04",
+   "operation_id": "E08",
+   "template": "ffmpeg/xfade-fade",
+   "status": "applied",
+   "reason": "applied by the FFmpeg assembler",
+   "check": "the middle frame is 1.0 from the average of the two pictures, 56.7 from the first and 56.3 from the next",
+   "duration_s": 0.6
+  },
+  {
+   "after_scene": "S05",
+   "operation_id": "E10",
+   "template": "ffmpeg/xfade-fade",
+   "status": "applied",
+   "reason": "applied by the FFmpeg assembler",
+   "check": "the middle frame is 1.3 from the average of the two pictures, 12.0 from the first and 11.7 from the next",
+   "duration_s": 0.6
+  }
+ ],
+ "omitted_operations": [],
+ "engines_used": [
+  "remotion"
+ ],
+ "assembly": {
+  "tool": "ffmpeg",
+  "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "lossy_encodes": 2,
+  "known_differences": [
+   "each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)",
+   "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2",
+   "scene clips are h264 intermediates, not lossless"
+  ]
+ },
+ "output": {
+  "path": "out/rn_ccb45db46ed64cb5.mp4",
+  "bytes": 2035753,
+  "sha256": "d10055064ee81157da6d33ba33c73bb42019898a17d4f3b462b8737664fa6c6f",
+  "width": 1280,
+  "height": 720,
+  "fps": 30,
+  "duration_s": 30,
+  "frames": 900,
+  "video_codec": "h264",
+  "audio_tracks": 0,
+  "video_url": "/api/sessions/31ea97189740/deliveries/dl_8c33eb2248334bfb/video"
+ },
+ "limitations": [
+  "only the first, middle and last clean frame of each scene are compared with its clip",
+  "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR",
+  "audio is not produced in this phase"
+ ],
+ "asset_validation": {
+  "checks": [
+   {
+    "asset_id": "asset_3fcf9bba",
+    "scene_id": "S01",
+    "mandatory": false,
+    "role": "product",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "original",
+    "sha256": "5cea799202f118ec8e577ac7bb4f15b284076347616116a040bccd348bcca932",
+    "match_score": 0.995,
+    "frames_checked": [
+     89,
+     107,
+     125
+    ],
+    "verdict": "visible",
+    "failure": null
+   },
+   {
+    "asset_id": "asset_2ac344d5",
+    "scene_id": "S01",
+    "mandatory": true,
+    "role": "logo",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "trimmed",
+    "sha256": "d0445f634f000c34e4e4e85560cccdfbc2c6cdfbcc1d683e039a04fb32964105",
+    "match_score": 0.987,
+    "frames_checked": [
+     89,
+     107,
+     125
+    ],
+    "verdict": "visible",
+    "failure": null
+   },
+   {
+    "asset_id": "asset_e954c4eb",
+    "scene_id": "S03",
+    "mandatory": true,
+    "role": "screen",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "original",
+    "sha256": "5088f74a8e61c7fea7f6afe00a328e6673f8df3ce7a6a65c3101f423c6520f37",
+    "match_score": 0.981,
+    "frames_checked": [
+     347,
+     369,
+     390
+    ],
+    "verdict": "visible",
+    "failure": null
+   },
+   {
+    "asset_id": "asset_e954c4eb",
+    "scene_id": "S04",
+    "mandatory": true,
+    "role": "screen",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "original",
+    "sha256": "5088f74a8e61c7fea7f6afe00a328e6673f8df3ce7a6a65c3101f423c6520f37",
+    "match_score": 0.905,
+    "frames_checked": [
+     509,
+     527,
+     545
+    ],
+    "verdict": "visible",
+    "failure": null
+   },
+   {
+    "asset_id": "asset_ab5bc031",
+    "scene_id": "S05",
+    "mandatory": false,
+    "role": "team",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "original",
+    "sha256": "e6dbaead1a3dc3d38f7fe50cf5028172aa41695a954b694b22b7cd5152bf1382",
+    "match_score": 0.997,
+    "frames_checked": [
+     659,
+     677,
+     695
+    ],
+    "verdict": "visible",
+    "failure": null
+   },
+   {
+    "asset_id": "asset_2ac344d5",
+    "scene_id": "S06",
+    "mandatory": true,
+    "role": "logo",
+    "stages": [
+     "uploaded",
+     "analyzed",
+     "classified",
+     "available_to_director",
+     "assigned_to_storyboard",
+     "approved",
+     "resolved_by_renderer",
+     "rendered",
+     "visually_validated"
+    ],
+    "resolved_file": "trimmed",
+    "sha256": "d0445f634f000c34e4e4e85560cccdfbc2c6cdfbcc1d683e039a04fb32964105",
+    "match_score": 0.946,
+    "frames_checked": [
+     827,
+     849,
+     870
+    ],
+    "verdict": "visible",
+    "failure": null
+   }
+  ],
+  "failures": [],
+  "limitations": [
+   "Each use is compared with its file on three frames of the scene's hold, by correlation and colour difference. This proves the pixels are there, not that the composition is good."
+  ]
+ },
+ "created_at": "2026-10-31T08:03:55.445Z",
+ "status": "complete_preview"
+}

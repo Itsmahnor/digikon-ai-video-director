@@ -140,7 +140,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
 
   const g = new StateGraph(DirectorState)
     .addNode("intake", async (s: DirectorStateType) => {
-      const { out, skills, references, citations } = await intakeNode(deps, s.project, s.assets);
+      const { out, skills, references, citations } = await intakeNode(deps, s.project, s.assets, s.notes ?? []);
       return {
         intakeResult: out, skillsUsed: skills, referencesUsed: references, citations,
         status: out.status === "ready" ? ("running" as const) : ("needs_clarification" as const),
@@ -152,7 +152,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       return { notes, skillsUsed: ["cinematography"], trace: [`analyse_assets: ${notes.length} asset(s), ${notes.filter((n) => n.uncertain.length).length} with uncertainty`] };
     })
     .addNode("treatment", async (s: DirectorStateType) => {
-      const { treatment, skills, references, citations } = await treatmentNode(deps, s.project, s.facts ?? []);
+      const { treatment, skills, references, citations } = await treatmentNode(deps, s.project, s.facts ?? [], s.notes ?? []);
       const unsupported = treatment.claims.filter((c) => c.brand_fact_id === null).length;
       return { treatmentDoc: treatment, skillsUsed: skills, referencesUsed: references, citations, trace: [`treatment: ${treatment.beats.length} beats, ${treatment.claims.length} claims (${unsupported} unsupported)`] };
     })

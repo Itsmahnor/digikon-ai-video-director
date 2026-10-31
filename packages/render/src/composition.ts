@@ -1,5 +1,6 @@
 import { basename, isAbsolute, relative, resolve } from "node:path";
-import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, contrastRatio, type Palette } from "@digikon/contracts";
+import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, contrastRatio, type Palette, type SceneAssetRef } from "@digikon/contracts";
+import { planLayers, type AssetFileResolver, type AssetLayer, type ResolvedAssetFile } from "./asset-layers.js";
 import type { RenderJob } from "./adapter.js";
 import { hasInvalidControl, normaliseText, wrapText } from "./text.js";
 import { ESTIMATE_METER, type TextMeter } from "./font-metrics.js";
@@ -52,6 +53,12 @@ export interface CompositionScene {
   /** A match cut into this scene: the previous scene's emphasised word, held as that scene ends, then carried into a card title. */
   held: null | { text: string; from_scene: string; card: number; font_px: number; x: number; y: number; bar: Box; hold_frames: number; move_frames: number };
   layout: null | { kind: "steps"; strategy: StepsLayout["strategy"]; steps: StepsLayout } | { kind: "window"; window: WindowLayout };
+  /** Uploaded pictures in this scene, back to front. */
+  asset_layers: AssetLayer[];
+  /** Where an end card's stack of words starts, when a picture sits above it. */
+  stack_top: number;
+  /** A panel behind the headline when a picture fills the frame, so the text stays legible. */
+  headline_scrim: Box | null;
 }
 export type CompositionPlan = { ok: true; scenes: CompositionScene[]; total_frames: number } | { ok: false; issues: string[] };
 
@@ -59,6 +66,8 @@ export interface CompositionPlanOptions {
   outputRoot: string;
   /** Measures text with the real font. Without it widths are estimated, generously. */
   meter?: TextMeter;
+  /** The template being planned for, when another engine lays out a scene with this planner. */
+  template?: string;
 }
 
 const wrapCount = (text: string, widthPx: number, fontPx: number, upper: boolean) => wrapText(text, Math.max(3, Math.floor(widthPx / (fontPx * CHAR_W * (upper ? 1.12 : 1)))));
@@ -80,6 +89,7 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
 export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: CompositionPlanOptions): CompositionPlan {
   const issues: string[] = [];
   const s = job.settings;
+  const template = opts.template ?? COMPOSITION_TEMPLATE;
   if (s.container !== "mp4" || s.video_codec !== "h264") issues.push(`the remotion adapter writes mp4 with h264, not ${s.container} with ${s.video_codec}`);
   if (s.audio_codec !== null) issues.push("the remotion adapter writes no audio; the settings ask for an audio track");
   if (!(s.fps > 0 && s.fps <= MAX_FPS)) issues.push(`the frame rate ${s.fps} is outside 1 to ${MAX_FPS}`);
@@ -103,7 +113,7 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
     const before = issues.length;
     const at = `scene ${sceneId}`;
     for (const o of ops) {
-      if (job.templates[o.operation_id] !== COMPOSITION_TEMPLATE) issues.push(`operation ${o.operation_id}: ${job.templates[o.operation_id] ?? "(none)"} cannot be combined with ${COMPOSITION_TEMPLATE} in one scene`);
+      if (job.templates[o.operation_id] !== template) issues.push(`operation ${o.operation_id}: ${job.templates[o.operation_id] ?? "(none)"} cannot be combined with ${template} in one scene`);
       else if (o.operation_type !== "render_graphics_scene") issues.push(`operation ${o.operation_id}: ${COMPOSITION_TEMPLATE} implements render_graphics_scene operations, not ${o.operation_type}`);
       if (o.audio_cues.length) issues.push(`operation ${o.operation_id}: audio cues cannot be produced and are not dropped silently`);
       if (Object.keys(o.parameters).length) issues.push(`operation ${o.operation_id}: ${COMPOSITION_TEMPLATE} takes no parameters; the scene's approved visual spec carries them`);
@@ -142,7 +152,10 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
     };
     const wrapAt = (text: string, widthPx: number, px: number): string[] => wrapMeasured(text, meter, px, widthPx, style, true).lines;
     const hasHeadlineArea = !!headlineText && visual.block !== "kinetic_type" && visual.block !== "end_card";
-    const ar = areas(s.width, s.height, hasHeadlineArea);
+    const placed = job.scene_assets?.[sceneId];
+    // a wide picture gets the width of the frame and the headline goes above it: a screen beside a text column is too small to read
+    const stageTop = visual.block === "asset_stage" && hasHeadlineArea && s.width > s.height && !!placed?.refs.some((r) => { const f = placed.files[r.asset_id]; return r.role !== "logo" && r.placement !== "full_frame" && !!f && f.width / f.height >= 1.3; });
+    const ar = areas(s.width, s.height, hasHeadlineArea, stageTop ? "top" : "side");
     const lines: Record<string, string[]> = {};
     let headline: CompositionScene["headline"] = null;
     let layout: CompositionScene["layout"] = null;
@@ -174,6 +187,7 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
     if (!adaptive) {
       const h = placeHeadline(ar);
       if (h.issue) issues.push(h.issue); else headline = h.headline;
+      if (stageTop) box = tighten(ar, headline).content;
     }
     switch (visual.block) {
       case "message_thread": {
@@ -296,6 +310,9 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
         }
         break;
       }
+      case "asset_stage":
+        // the pictures are the scene: they are laid out below, in the area the headline leaves
+        break;
       case "end_card": {
         const m = Math.round(short * 0.07), bw = s.width - 2 * m;
         const f = headlineText ? fitPx([headlineText], bw * 0.9, Math.round(short * (portrait ? 0.1 : 0.115) * scaleMult), minPx, portrait ? 4 : 3) : sizes.big;
@@ -314,11 +331,29 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
     // colour and legibility of what is drawn, from the palette itself
     if (contrastRatio(palette.text, palette.background) < 4.5) issues.push(`${at}: the palette's text colour is not legible on its background`);
 
+    if (visual.block === "asset_stage" && !placed?.refs.length) issues.push(`${at}: asset_stage has no pictures to show`);
+    const stage = visual.block === "asset_stage" ? box : { x: Math.round(short * 0.05), y: Math.round(short * 0.05), w: s.width - 2 * Math.round(short * 0.05), h: s.height - 2 * Math.round(short * 0.05) };
+    // what a corner picture must keep clear of: the words, wherever this block puts them. An end card moves its words down to make room under a picture at the top.
+    const keepClear: Box[] = visual.block !== "asset_stage" && visual.block !== "end_card" && headline ? [headline.box] : [];
+    const planned = placed ? planLayers(placed.refs, placed.files, { width: s.width, height: s.height, fps: s.fps, frames, region: stage, background: palette.background, overlay: visual.block !== "asset_stage", motionSpeed: SPEED[direction?.motion_language.feel ?? "precise"], keepClear }) : { layers: [], issues: [] };
+    for (const m of planned.issues) issues.push(`${at}: ${m}`);
+    let stack_top = 0;
+    if (visual.block === "end_card" && planned.layers.length) {
+      const f = headline?.font_px ?? sizes.big, b = sizes.body, sm = sizes.small;
+      const stack = (headline ? headline.lines.length * f * 1.12 : 0) + f * 0.7 + b * 2.7 + (visual.wordmark ? sm * 1.4 + f * 0.5 : 0) + (visual.subline ? b * 0.9 + sm * 2.8 : 0);
+      const gap = Math.round(short * 0.05);
+      stack_top = Math.ceil(Math.max(...planned.layers.filter((l) => l.clip.y + l.clip.h / 2 < s.height / 2).map((l) => (l.plate ? l.plate.box.y + l.plate.box.h : l.clip.y + l.clip.h)), 0)) + gap;
+      if (stack_top <= gap) stack_top = 0;
+      const box2 = { x: 0, y: stack_top + (s.height - stack_top - stack) / 2, w: s.width, h: stack };
+      if (stack > s.height - stack_top - gap) issues.push(`${at}: the end card's text does not fit under its picture; make the picture smaller`);
+      else if (planned.layers.some((l) => l.clip.y + l.clip.h / 2 >= s.height / 2 && l.clip.y < box2.y + box2.h && box2.y < l.clip.y + l.clip.h && l.clip.x < s.width * 0.75 && l.clip.x + l.clip.w > s.width * 0.25)) issues.push(`${at}: a picture would cover the end card's text; put it in a corner or along the top`);
+    }
+
     if (issues.length === before) {
       const motion = { speed: SPEED[direction?.motion_language.feel ?? "precise"], easing: direction?.motion_language.easing ?? "ease_out", feel: direction?.motion_language.feel ?? "precise" } as const;
       scenes.push({
         kind: "composition", scene_id: sceneId, operation_ids: ops.map((o) => o.operation_id), from_frame: cursorFrame, frames, width: s.width, height: s.height, portrait, palette,
-        type: { bold, upper }, motion: { ...motion }, headline, content: box, sizes, lines, visual, layout, held,
+        type: { bold, upper }, motion: { ...motion }, headline, content: box, sizes, lines, visual, layout, held, asset_layers: planned.layers, stack_top, headline_scrim: headline && planned.layers.some((l) => l.clip.w >= s.width * 0.9 && l.clip.h >= s.height * 0.9) ? { x: headline.box.x - Math.round(short * 0.03), y: headline.box.y - Math.round(short * 0.03), w: headline.box.w + Math.round(short * 0.06), h: Math.ceil(headline.lines.length * headline.font_px * 1.3 + short * 0.06) } : null,
         badge: visual.block === "ui_demo" ? COMPOSITION_BADGE_UI : visual.block === "data_chart" ? COMPOSITION_BADGE_CHART : null,
       });
     }
@@ -335,10 +370,17 @@ export const drawnCameraMotion = (v: SceneVisual): string => STORYBOARD_CAMERA[v
 export const numberOrNull = num;
 
 /** The approved visual specs and art direction of a handoff, in the form a render job carries them. Only scenes that have a spec appear. */
-export function jobVisuals(h: { storyboard: { scenes: readonly { scene_id: string; visual: unknown; visual_purpose: string | null; overlay: { text: string } | null }[] }; treatment: { art_direction: unknown } }): Pick<RenderJob, "scene_visuals" | "art_direction"> {
+export function jobVisuals(h: { storyboard: { scenes: readonly { scene_id: string; visual: unknown; visual_purpose: string | null; overlay: { text: string } | null; asset_refs?: readonly SceneAssetRef[] }[] }; treatment: { art_direction: unknown } }, resolve?: AssetFileResolver): Pick<RenderJob, "scene_visuals" | "art_direction" | "scene_assets"> {
   const scene_visuals: NonNullable<RenderJob["scene_visuals"]> = {};
   for (const s of h.storyboard.scenes) if (s.visual) scene_visuals[s.scene_id] = { visual: s.visual, overlay_text: s.overlay?.text ?? null, visual_purpose: s.visual_purpose };
-  return { scene_visuals, art_direction: h.treatment.art_direction ?? null };
+  const scene_assets: NonNullable<RenderJob["scene_assets"]> = {};
+  for (const s of h.storyboard.scenes) {
+    if (!s.asset_refs?.length) continue;
+    const files: Record<string, ResolvedAssetFile> = {};
+    for (const r of s.asset_refs) { const f = resolve?.(r.asset_id, r.role); if (f) files[r.asset_id] = f; }
+    scene_assets[s.scene_id] = { refs: [...s.asset_refs], files };
+  }
+  return { scene_visuals, art_direction: h.treatment.art_direction ?? null, scene_assets };
 }
 
 

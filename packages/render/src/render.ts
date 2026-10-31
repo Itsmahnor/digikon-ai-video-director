@@ -22,6 +22,8 @@ export interface RenderDeps {
   adapters: AdapterRegistry;
   /** Folder the adapters write into. A render's file is `<render_id>.<container>` here and must not exist beforehand. */
   outputRoot: string;
+  /** Finds a picture's real file through the asset registry, by id and only within this project. Absent: scenes that place pictures are refused. */
+  assetFiles?: import("./asset-layers.js").AssetFileResolver;
   /** When set, the handoff is verified against the approvals stored for its run, not only against itself. */
   store?: RunStore;
   files?: AssetFiles;
@@ -180,7 +182,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   // It is asked whenever the settings are valid and every operation has a renderer, even if other blockers exist, so all reasons are reported together.
   const askable = settings !== null && operations.every((o) => o.renderer !== null);
   const adapter = askable ? deps.adapters.adapterFor(operations[0]!.implementation_ref) : null;
-  const job = askable ? { render_id, settings: settings!, operations: out.operations, templates: Object.fromEntries(operations.map((o) => [o.operation_id, o.implementation_ref])), clips, asset_info, assets: assets.map(({ present: _p, ...a }) => a), concept_asset_ids, ...jobVisuals(h), output_path: join(deps.outputRoot, `${render_id}.${settings!.container}`) } : null;
+  const job = askable ? { render_id, settings: settings!, operations: out.operations, templates: Object.fromEntries(operations.map((o) => [o.operation_id, o.implementation_ref])), clips, asset_info, assets: assets.map(({ present: _p, ...a }) => a), concept_asset_ids, ...jobVisuals(h, deps.assetFiles), output_path: join(deps.outputRoot, `${render_id}.${settings!.container}`) } : null;
   if (job && adapter?.check) blockers.push(...adapter.check(job));
 
   const executable = blockers.length === 0 && settings !== null && !!job && !!adapter;

@@ -70,6 +70,8 @@ export async function verifyCompositionScenes(video: string, scenes: readonly Co
     if (frames.some((f) => f.length < width * height * 3)) { problems.push(`${at}: its frames are missing from the output`); continue; }
     const m = measureFrames(frames, sc);
     measures.push(m);
+    // a scene of uploaded pictures is judged by comparing its frames with those files (asset-validation.ts), not by what a drawn scene should look like
+    if (sc.visual.block === "asset_stage") continue;
     const bg = rgb(sc.palette.background);
     // the bottom-left corner: a gradient glows at the top right, so this one stays on the plain background
     const ci = (Math.round(height * 0.97) * width + Math.round(width * 0.03)) * 3;

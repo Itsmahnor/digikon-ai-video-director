@@ -141,8 +141,74 @@ async function refreshAnalysis() {
     const s = await api(`/api/sessions/${state.sid}`);
     state.analysis = Object.fromEntries(s.analysis.map((a) => [a.asset_id, a]));
     renderAssets();
-    if (s.analysis.some((a) => a.status === "running")) analysisTimer = setTimeout(refreshAnalysis, 1500);
+    const g = await refreshGallery();
+    if (s.analysis.some((a) => a.status === "running") || g.some((i) => i.status === "running")) analysisTimer = setTimeout(refreshAnalysis, 1500);
   } catch { /* session may be gone */ }
+}
+
+// ---------- the asset gallery ----------
+const CATEGORIES = [["brand_logo", "Brand logo"], ["company_logo", "Company logo"], ["product_photo", "Product photograph"], ["person_or_team_photo", "Person or team photograph"], ["website_screenshot", "Website screenshot"], ["app_screenshot", "Application screenshot"], ["dashboard_ui", "Dashboard or software UI"], ["icon_symbol", "Icon or symbol"], ["illustration", "Illustration"], ["background_texture", "Background or texture"], ["marketing_graphic", "Marketing graphic"], ["document_infographic", "Document or infographic"], ["other_unknown", "Other / unknown"]];
+const USAGES = [["auto", "Director decides"], ["must_use", "Must appear"], ["optional", "Optional"], ["reference_only", "Reference only, do not show"], ["do_not_use", "Do not use"]];
+const CONTEXT = [
+  { label: "Our official logo", body: { category: "company_logo", description: "This is our official company logo.", usage: "must_use" } },
+  { label: "The product we advertise", body: { category: "product_photo", description: "This is the product we are advertising." } },
+  { label: "Reference only", body: { description: "This is a reference design. Do not use it directly.", usage: "reference_only" } },
+  { label: "The real dashboard", body: { category: "dashboard_ui", description: "This is the actual dashboard that must appear.", usage: "must_use", genuine_product_ui: true } },
+];
+const STATUS_TEXT = { pending: "Waiting", running: "Analysing", analyzed: "Analysed", partial: "Partly analysed", failed: "Analysis failed", unsupported: "Not usable" };
+
+const pictureName = (id) => (state.gallery ?? []).find((i) => i.asset_id === id)?.original_filename ?? id;
+
+async function refreshGallery() {
+  if (!state.sid) return [];
+  const r = await api(`/api/sessions/${state.sid}/gallery`);
+  state.gallery = r.items;
+  renderGallery();
+  return r.items;
+}
+function galleryCard(i) {
+  const top = i.categories[0];
+  const type = top ? `${top.label}${top.source === "user" ? " (your correction)" : ` (${Math.round(top.confidence * 100)}%)`}` : "Not known";
+  const others = i.categories.slice(1).filter((c) => c.category !== "other_unknown").map((c) => c.label).join(", ");
+  const desc = i.description ?? (i.status === "running" ? "Looking at this picture..." : "No description. The analysis did not produce one, so please describe this picture.");
+  const uncertain = i.status !== "running" && (!top || top.category === "other_unknown" || (top.source !== "user" && top.confidence < 0.35));
+  return `<article class="g-card" data-id="${i.asset_id}">
+    <div class="g-thumb">${i.thumbnail_url ? `<img src="${i.thumbnail_url}" alt="${esc(i.description ?? i.original_filename)}" loading="lazy">` : `<span>No preview</span>`}</div>
+    <div class="g-body">
+      <div class="g-name" title="${esc(i.original_filename)}">${esc(i.original_filename)}</div>
+      <dl>
+        <dt>Detected type</dt><dd>${esc(type)}${others ? `<small> also: ${esc(others)}</small>` : ""}</dd>
+        <dt>Description</dt><dd>${esc(desc)}</dd>
+        ${i.visible_text.length ? `<dt>Visible text</dt><dd>${esc(i.visible_text.slice(0, 5).join(" / "))}</dd>` : ""}
+        <dt>Dimensions</dt><dd>${i.width ?? "?"} &times; ${i.height ?? "?"}</dd>
+        <dt>Transparency</dt><dd>${i.transparent === null ? "Not known" : i.transparent ? "Yes" : "No"}</dd>
+        <dt>Status</dt><dd><span class="chip ${i.status === "analyzed" ? "ok" : i.status === "running" || i.status === "partial" ? "warn" : "bad"}">${STATUS_TEXT[i.status] ?? esc(i.status)}</span>${i.availability !== "available" ? ` <span class="chip bad">${esc(i.availability.replaceAll("_", " "))}</span>` : ""}</dd>
+        <dt>Project</dt><dd><code>${esc(i.session_id)}</code>${i.used_in_projects > 1 ? ` <small>analysis shared with ${i.used_in_projects - 1} other project(s)</small>` : ""}</dd>
+        <dt>Storyboard usage</dt><dd>${i.storyboard_usage.length ? esc(i.storyboard_usage.join(", ")) : "Not used yet"}</dd>
+      </dl>
+      ${i.error ? `<p class="g-error">${esc(i.error)}</p>` : ""}
+      ${uncertain ? `<p class="g-ask">I am not sure what this is. Please tell me below.</p>` : ""}
+      <details class="g-fix"><summary>Correct or add context</summary>
+        <div class="g-chips">${CONTEXT.map((c, n) => `<button class="ghost" data-action="asset-context" data-id="${i.asset_id}" data-n="${n}">${esc(c.label)}</button>`).join("")}</div>
+        <label>Type<select data-field="category"><option value="">Keep detected type</option>${CATEGORIES.map(([v, l]) => `<option value="${v}" ${i.user?.category === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label>How to use it<select data-field="usage">${USAGES.map(([v, l]) => `<option value="${v}" ${(i.user?.usage ?? "auto") === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label>In your words<textarea data-field="description" rows="2" maxlength="500" placeholder="What is this picture?">${esc(i.user?.description ?? "")}</textarea></label>
+        <div class="row"><button class="primary sm" data-action="asset-save" data-id="${i.asset_id}">Save</button>${i.retryable || i.status === "failed" ? `<button class="ghost" data-action="asset-retry" data-id="${i.asset_id}">Analyse again</button>` : ""}</div>
+      </details>
+    </div>
+  </article>`;
+}
+function renderGallery() {
+  const items = state.gallery ?? [];
+  const el = $("#gallery");
+  if (!el) return;
+  el.innerHTML = items.length ? `<h3>What I see in your images</h3><div class="g-grid">${items.map(galleryCard).join("")}</div>` : "";
+}
+async function saveAsset(id, body) {
+  await api(`/api/sessions/${state.sid}/assets/${id}/correction`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  state.route = null;
+  await refreshGallery();
+  toast("Saved. The Director will use this on the next plan.", "ok");
 }
 async function uploadFiles(files) {
   if (!files.length) return;
@@ -481,6 +547,7 @@ function results(res) {
           ${s.overlay ? `<div class="overlay-txt">${esc(s.overlay.text)}</div>` : ""}
           ${s.voiceover ? `<div class="sub">Voiceover: "${esc(s.voiceover)}"</div>` : ""}
           ${(s.required_assets ?? []).length ? `<div class="chips">${s.production_method ? `<span class="chip">${esc(s.production_method.replaceAll("_", " "))}</span>` : ""}${s.required_assets.map((r) => `<span class="chip ${{ supplied: "ok", generate_graphics: r.placeholder ? "warn" : "ok", needs_external: "bad", missing_blocking: "bad" }[r.availability]}" title="${esc(r.fallback ?? "")}">${esc(r.need)}: ${esc(r.placeholder ? "placeholder graphic" : r.availability.replaceAll("_", " "))}</span>`).join("")}</div>` : ""}
+          ${(s.asset_refs ?? []).map((r) => `<div class="sub"><span class="chip ${r.mandatory ? "ok" : ""}">${r.mandatory ? "must appear" : "optional"}</span> ${esc(pictureName(r.asset_id))} as ${esc(r.role)}, ${esc(r.placement.replaceAll("_", " "))}, ${esc(r.animation.replaceAll("_", " "))}: ${esc(r.reason)}</div>`).join("")}
           ${(s.unresolved ?? []).map((u) => `<div class="notice info" style="margin:6px 0 0">${esc(u.kind.replace("_", " "))}: ${esc(u.note)}</div>`).join("")}
           <div class="chips">${s.asset_ids.length ? s.asset_ids.map((a) => `<span class="chip">${esc(assetName(a))}${s.source_in_seconds ? ` @${fmtDur(s.source_in_seconds)}` : ""}</span>`).join("") : '<span class="chip warn">graphics only</span>'}${s.claim_ids.map((c) => `<span class="chip ok">claim ${esc(c)}</span>`).join("")}<span class="chip">then ${esc(s.transition_out.replaceAll("_", " "))}</span></div></div>`).join("")}`;
     },
@@ -633,6 +700,7 @@ function deliveryHtml(x) {
     ${dec ? `<table style="margin:10px 0"><thead><tr><th>Delivery criterion</th><th>Result</th><th>Why</th></tr></thead><tbody>${criteria}</tbody></table>` : ""}
     <table><thead><tr><th>Scene</th><th>Engine</th><th>Status</th><th>Missing or unmet</th></tr></thead><tbody>${d.scenes.map((s) => `<tr><td>${esc(s.scene_id)}</td><td>${s.engine ? esc(s.engine) : "-"}</td><td>${s.status === "placeholder" ? '<span class="chip bad">placeholder, not rendered</span>' : s.status === "rendered_and_verified" ? '<span class="chip ok">rendered, content checked</span>' : '<span class="chip warn">rendered, non-blank only</span>'}</td><td>${[s.omitted_reason, ...s.unmet].filter(Boolean).map((m) => `<div>${esc(m)}</div>`).join("") || "-"}</td></tr>`).join("")}</tbody></table>
     ${d.transitions.length ? `<table style="margin-top:10px"><thead><tr><th>Transition after</th><th>Template</th><th>In the video</th><th>What the frames showed</th></tr></thead><tbody>${d.transitions.map((t) => `<tr><td>${esc(t.after_scene)}</td><td class="mono">${esc(t.template)}</td><td>${t.status === "applied" ? '<span class="chip ok">applied</span>' : '<span class="chip bad">not applied</span>'}</td><td>${esc(t.check ?? t.reason)}</td></tr>`).join("")}</tbody></table>` : ""}
+    ${d.asset_validation?.checks.length ? `<table style="margin-top:10px"><thead><tr><th>Scene</th><th>Picture</th><th>Found in the finished video</th><th>Detail</th></tr></thead><tbody>${d.asset_validation.checks.map((c) => `<tr><td>${esc(c.scene_id)}</td><td>${esc(pictureName(c.asset_id))}${c.mandatory ? ' <span class="chip">must appear</span>' : ""}</td><td>${c.verdict === "visible" ? '<span class="chip ok">visible</span>' : `<span class="chip bad">${esc(c.verdict.replaceAll("_", " "))}</span>`}</td><td>${esc(c.failure ?? `matched the uploaded file at ${Math.round((c.match_score ?? 0) * 100)}% on real frames`)}</td></tr>`).join("")}</tbody></table>` : ""}
     ${d.omitted_operations.length ? `<div class="notice bad" style="margin-top:10px"><b>Operations not shown</b>${d.omitted_operations.map((m) => `<div>${esc(m.scene_id)} ${esc(m.recipe_id)} (${esc(m.status)}): ${esc(m.reason)}</div>`).join("")}</div>` : ""}
     ${status !== "final_delivery_ready" ? `<div class="notice warn" style="margin-top:10px"><b>Why this is not final delivery</b>${d.final_delivery_blockers.map((b) => `<div>${esc(b)}</div>`).join("")}</div>` : ""}
     ${o ? `<dl class="kv" style="margin-top:10px"><dt>Duration</dt><dd>${fmtDur(o.duration_s)} (measured, ${o.frames} frames)</dd><dt>Size</dt><dd>${o.width} x ${o.height} at ${o.fps} fps</dd><dt>File</dt><dd>${kb(o.bytes)} <span class="mono hint">sha256 ${esc(o.sha256.slice(0, 12))}</span> <span class="mono hint">${esc(o.path)}</span></dd><dt>Engines</dt><dd>${d.engines_used.map(esc).join(", ")}</dd></dl>` : ""}`;
@@ -662,6 +730,16 @@ document.addEventListener("click", async (e) => {
   if (a === "render-plan") return renderStep("plan");
   if (a === "render-go") return renderStep("render");
   if (a === "fill-test") { const r = rstate(), z = sizeFor(r.view?.needs.aspect_ratio, 640); Object.assign(r.settings, { width: String(z.width), height: String(z.height), fps: "30" }); return renderStep("plan"); }
+  if (a === "asset-context") { try { await saveAsset(el.dataset.id, CONTEXT[Number(el.dataset.n)].body); } catch (er) { fail(er); } return; }
+  if (a === "asset-save") {
+    const card = el.closest(".g-card"), read = (f) => card.querySelector(`[data-field="${f}"]`).value;
+    try { await saveAsset(el.dataset.id, { category: read("category") || null, usage: read("usage"), description: read("description").trim() || null }); } catch (er) { fail(er); }
+    return;
+  }
+  if (a === "asset-retry") {
+    try { el.disabled = true; await api(`/api/sessions/${state.sid}/assets/${el.dataset.id}/reanalyse`, { method: "POST" }); await refreshGallery(); } catch (er) { fail(er); }
+    return;
+  }
   if (a === "remove-asset") {
     try { const r = await api(`/api/sessions/${state.sid}/assets/${el.dataset.id}`, { method: "DELETE" }); state.assets = r.assets; state.route = null; state.run = null; delete state.transcripts[el.dataset.id]; delete state.analysis[el.dataset.id]; renderAll(); } catch (er) { fail(er); }
   } else if (a === "view-transcript") {

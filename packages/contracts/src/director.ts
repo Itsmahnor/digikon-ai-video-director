@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { QAFinding } from "./schemas.js";
 import { ArtDirection } from "./visual.js";
+import { AssetManifestEntry } from "./assets.js";
 
 /** Time range inside a source asset, in seconds. */
 const Range = z
@@ -58,6 +59,8 @@ export const AssetNotes = z.object({
   image_measure: ImageMeasure.nullable().default(null),
   /** For a picture: what a reviewer says it shows. */
   visual_review: VisualReview.nullable().default(null),
+  /** For a picture: what the local vision pass and the user established. Absent on older notes, so their approval hashes do not change. */
+  image_manifest: AssetManifestEntry.optional(),
 });
 export const BrandFact = z.object({
   fact_id: z.string().min(1),

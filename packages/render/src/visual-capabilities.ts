@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { VISUAL_BLOCKS, type EditorOperation, type VisualBlock } from "@digikon/contracts";
+import { DRAWN_BLOCKS, type EditorOperation, type DrawnBlock } from "@digikon/contracts";
 import { createRemotionAdapter } from "./remotion.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
 import { EXAMPLE_ART_DIRECTION, EXAMPLE_VISUALS } from "./composition-examples.js";
@@ -65,7 +65,7 @@ export const VisualCapabilityRecord = z.object({
   capability_version: z.string(),
   engine: z.literal("remotion"),
   template: z.literal(COMPOSITION_TEMPLATE),
-  block: z.enum(VISUAL_BLOCKS),
+  block: z.enum(DRAWN_BLOCKS as [DrawnBlock, ...DrawnBlock[]]),
   creative_use: z.string(),
   example: z.unknown(),
   limitations: z.array(z.string()),
@@ -85,7 +85,7 @@ export const visualDir = (root: string) => join(root, "visual");
 const fileOf = (root: string, block: string) => join(visualDir(root), `${block}.json`);
 
 export interface VisualCapabilityState {
-  block: VisualBlock;
+  block: DrawnBlock;
   record: VisualCapabilityRecord | null;
   /** Usable only when validated, intact, and validated against the code as it is now. */
   usable: boolean;
@@ -94,7 +94,7 @@ export interface VisualCapabilityState {
 
 export function loadVisualCapabilities(root: string | null | undefined): VisualCapabilityState[] {
   const now = compositionFingerprint();
-  return VISUAL_BLOCKS.map((block): VisualCapabilityState => {
+  return DRAWN_BLOCKS.map((block): VisualCapabilityState => {
     const f = root ? fileOf(root, block) : null;
     if (!f || !existsSync(f)) return { block, record: null, usable: false, reason: "no validation record exists for this block" };
     try {
@@ -114,18 +114,18 @@ const GENERAL_LIMITS = [
   "No audio, no supplied images or footage inside a block, one typeface file, one block per scene.",
 ];
 
-export interface ValidateOptions { root: string; fontFile: string; sizes?: readonly (readonly [number, number])[]; workRoot?: string; blocks?: readonly VisualBlock[] }
+export interface ValidateOptions { root: string; fontFile: string; sizes?: readonly (readonly [number, number])[]; workRoot?: string; blocks?: readonly DrawnBlock[] }
 
 /** Renders the example film of every block at each size with the real adapter, and stores the result. A failure is recorded as a failure, never as a pass. */
 export async function validateVisualCapabilities(opts: ValidateOptions): Promise<VisualCapabilityState[]> {
   const sizes = opts.sizes ?? [[960, 540], [540, 960]];
-  const blocks = opts.blocks ?? VISUAL_BLOCKS;
+  const blocks = opts.blocks ?? DRAWN_BLOCKS;
   const tmp = mkdtempSync(join(opts.workRoot ?? tmpdir(), "visual-cap-"));
   const outputRoot = join(tmp, "out");
   mkdirSync(outputRoot);
   const fp = compositionFingerprint();
   const adapter = createRemotionAdapter({ fontFile: opts.fontFile, outputRoot, workRoot: tmp });
-  const per = new Map<VisualBlock, { inputs: z.infer<typeof Validation>["inputs"]; renders: z.infer<typeof Validation>["renders"]; checks: string[]; measures: z.infer<typeof Validation>["measures"]; failure: string | null }>();
+  const per = new Map<DrawnBlock, { inputs: z.infer<typeof Validation>["inputs"]; renders: z.infer<typeof Validation>["renders"]; checks: string[]; measures: z.infer<typeof Validation>["measures"]; failure: string | null }>();
   for (const b of blocks) per.set(b, { inputs: [], renders: [], checks: [], measures: [], failure: null });
   try {
     for (const [w, h] of sizes) {

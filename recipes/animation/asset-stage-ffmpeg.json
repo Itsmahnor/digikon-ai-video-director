@@ -1,0 +1,47 @@
+{
+    "version":  "0.1.0",
+    "validation_rules":  [
+                             {
+                                 "kind":  "requires_asset",
+                                 "message":  "needs an uploaded picture on the scene"
+                             }
+                         ],
+    "source":  {
+                   "origin":  "original",
+                   "url":  null,
+                   "license":  "Digikon original"
+               },
+    "status":  "draft",
+    "recipe_id":  "asset-stage-ffmpeg",
+    "type":  "animation",
+    "operation_type":  "render_graphics_scene",
+    "title":  "Uploaded pictures with FFmpeg overlays",
+    "purpose":  "Places uploaded pictures on the scene with FFmpeg overlays, keeping their alpha channel. Draws no motion beyond a fade or a slide up.",
+    "intents":  [
+                    "show uploaded image",
+                    "uploaded picture ffmpeg"
+                ],
+    "parameters":  [
+
+                   ],
+    "constraints":  {
+                        "min_duration_s":  2,
+                        "max_duration_s":  12,
+                        "max_uses_per_film":  null,
+                        "energy":  "medium"
+                    },
+    "compatibility":  {
+                          "renderers":  [
+                                            "ffmpeg"
+                                        ],
+                          "aspect_ratios":  [
+                                                "16:9",
+                                                "9:16",
+                                                "1:1"
+                                            ],
+                          "media_types":  [
+                                              "image"
+                                          ]
+                      },
+    "implementation_ref":  "ffmpeg/asset-stage"
+}
