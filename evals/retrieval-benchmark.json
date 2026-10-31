@@ -1,0 +1,605 @@
+{
+  "_readme": "Step 2B benchmark extension. These queries are ADDED to the 21 seed queries in evals/retrieval.json (left untouched). kind: retrieval = at least one real document is relevant; negative = nothing in the corpus is a suitable answer, so an empty result is correct; missing_knowledge = a legitimate question whose answer SHOULD exist but the collection holds no such document (reported as a corpus gap, excluded from quality metrics). expect = relevant document ids (all must be found for full recall). equivalent = interchangeable substitutes, e.g. the same recipe implemented by another renderer. filter = RetrieveFilter passed to the retriever (shot_recipes default to include_draft:true because every recipe is draft today). Every id in expect/equivalent must exist in the corpus; the runner fails otherwise.",
+  "queries": [
+    {
+      "id": "dp-01",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "direct"
+      ],
+      "query": "what is the 180 degree rule",
+      "expect": [
+        "axis-180-rule"
+      ],
+      "why": "Document is titled 'The 180-degree rule'."
+    },
+    {
+      "id": "dp-02",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keeping left and right consistent between two shots of the same action",
+      "expect": [
+        "axis-180-rule"
+      ],
+      "why": "Describes the screen-direction continuity the rule protects, without naming the rule."
+    },
+    {
+      "id": "dp-03",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "which goal wins when two editing aims conflict",
+      "expect": [
+        "cut-priority-murch"
+      ],
+      "why": "The Murch note ranks cut goals and says to serve the higher one."
+    },
+    {
+      "id": "dp-04",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase",
+        "transition_camera"
+      ],
+      "query": "hide the edit inside a movement so the cut feels smooth",
+      "expect": [
+        "cut-on-motion"
+      ],
+      "why": "Cut-on-motion note: a cut hidden inside a movement feels smoother."
+    },
+    {
+      "id": "dp-05",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "direct",
+        "motion_graphics"
+      ],
+      "query": "keep captions inside the safe area and easy to read",
+      "expect": [
+        "text-legibility"
+      ],
+      "why": "Text-legibility note covers line length, hold time and safe area."
+    },
+    {
+      "id": "dp-06",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "should two adjacent shots be nearly the same size",
+      "expect": [
+        "shot-size-progression"
+      ],
+      "why": "Note says two adjacent shots of nearly the same size look like a mistake."
+    },
+    {
+      "id": "dp-07",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter"
+      ],
+      "query": "cut transition shot framing",
+      "filter": {
+        "topics": [
+          "cinematography"
+        ]
+      },
+      "expect": [
+        "axis-180-rule",
+        "reframing-limits",
+        "shot-size-progression"
+      ],
+      "why": "The three notes carrying the cinematography topic; the filter must exclude editing notes such as cut-on-motion."
+    },
+    {
+      "id": "dp-08",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "close-up wide shot size variety",
+      "filter": {
+        "min_grade": "A"
+      },
+      "expect": [],
+      "why": "The only note on shot size (shot-size-progression) is grade B, so min_grade A must leave nothing suitable."
+    },
+    {
+      "id": "ap-01",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "problem and solution structure for a short vertical ad",
+      "expect": [
+        "problem-agitate-solution"
+      ],
+      "why": "Note describes problem, agitate, solution for short vertical ads."
+    },
+    {
+      "id": "ap-02",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "ad outline for a food product showcase: attention, interest, desire, action",
+      "expect": [
+        "aida-structure"
+      ],
+      "why": "AIDA note suits product showcases such as food."
+    },
+    {
+      "id": "ap-03",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "open on the most striking real view of the product instead of a logo",
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "why": "Hook note says open on the most striking real view, not a logo."
+    },
+    {
+      "id": "ap-04",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "brand_product"
+      ],
+      "query": "price and health effect statements need approved facts",
+      "filter": {
+        "topics": [
+          "claims"
+        ]
+      },
+      "expect": [
+        "claims-discipline"
+      ],
+      "why": "Claims-discipline is the only note tagged claims and covers prices and health effects."
+    },
+    {
+      "id": "sr-01",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "paraphrase"
+      ],
+      "query": "pause that marks the end of a chapter",
+      "expect": [
+        "dip-to-black"
+      ],
+      "why": "dip-to-black is for a chapter break or the end."
+    },
+    {
+      "id": "sr-02",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "direct"
+      ],
+      "query": "cut between two scenes that share a shape",
+      "expect": [
+        "match-cut"
+      ],
+      "why": "match-cut is a cut between scenes that share a shape, position or movement."
+    },
+    {
+      "id": "sr-03",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "semantic"
+      ],
+      "query": "camera drifts toward the subject to build tension",
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "slow-push-in is a gradual zoom toward the subject for quiet tension; the HyperFrames variant is the same behaviour."
+    },
+    {
+      "id": "sr-04",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "template_discovery"
+      ],
+      "query": "slow zoom in with the HyperFrames renderer",
+      "expect": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "The query names the renderer, so only the HyperFrames variant is correct."
+    },
+    {
+      "id": "sr-05",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "one large number with a label for a statistic",
+      "expect": [
+        "stat-callout"
+      ],
+      "why": "stat-callout shows one large figure with a label."
+    },
+    {
+      "id": "sr-06",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "key points that appear one after another as a list",
+      "expect": [
+        "bullet-list"
+      ],
+      "why": "bullet-list is a heading with short items that appear in sequence."
+    },
+    {
+      "id": "sr-07",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics",
+        "template_discovery"
+      ],
+      "query": "animated chart and product interface demo with a cursor",
+      "expect": [
+        "scene-composition"
+      ],
+      "why": "scene-composition draws UI demos with a cursor and illustrative charts."
+    },
+    {
+      "id": "sr-08",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "name tag that slides in near the bottom of the frame",
+      "expect": [
+        "lower-third-slide"
+      ],
+      "why": "lower-third-slide slides a name or label in near the bottom."
+    },
+    {
+      "id": "sr-09",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "template_discovery"
+      ],
+      "query": "play the supplied footage with text over it",
+      "expect": [
+        "clip-play-caption"
+      ],
+      "why": "clip-play-caption plays the clip with the overlay text as a caption."
+    },
+    {
+      "id": "sr-10",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "tight crop on the label texture of the product",
+      "expect": [
+        "crop-to-detail"
+      ],
+      "why": "crop-to-detail reframes to a detail such as texture or a label."
+    },
+    {
+      "id": "sr-11",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative",
+        "transition_camera"
+      ],
+      "query": "energetic reveal of the new feature with impact",
+      "expect": [
+        "punch-in-emphasis",
+        "directional-wipe"
+      ],
+      "why": "Both are high-energy: punch-in lands on a key feature, the wipe suits product reveals."
+    },
+    {
+      "id": "sr-12",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative",
+        "brand_product"
+      ],
+      "query": "calm closing scene where the logo appears and viewers read the call to action",
+      "expect": [
+        "end-card-cta",
+        "logo-reveal"
+      ],
+      "equivalent": [
+        "end-card-cta-hyperframes"
+      ],
+      "why": "End card holds the call to action; logo-reveal shows the brand mark at sign off."
+    },
+    {
+      "id": "sr-13",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "transition_camera"
+      ],
+      "query": "energetic change between scenes",
+      "filter": {
+        "recipe_type": "transition",
+        "energy": "high"
+      },
+      "expect": [
+        "directional-wipe"
+      ],
+      "why": "directional-wipe is the only high-energy transition."
+    },
+    {
+      "id": "sr-14",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "transition_camera"
+      ],
+      "query": "zoom",
+      "filter": {
+        "recipe_type": "camera_move",
+        "duration_s": 1.0,
+        "aspect_ratio": "9:16"
+      },
+      "expect": [
+        "punch-in-emphasis"
+      ],
+      "why": "At a 1.0s scene only punch-in-emphasis (min 0.8s) is allowed; the other camera moves need at least 1.5s."
+    },
+    {
+      "id": "sr-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "motion_graphics"
+      ],
+      "query": "big figure result",
+      "filter": {
+        "recipe_type": "animation",
+        "media": []
+      },
+      "expect": [
+        "stat-callout"
+      ],
+      "why": "stat-callout is the graphics-only recipe for a figure; media [] keeps graphics-only scenes."
+    },
+    {
+      "id": "sr-16",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "slow zoom in",
+      "filter": {
+        "include_draft": true,
+        "implemented_only": true
+      },
+      "expect": [],
+      "why": "No recipe doc carries recipe_implemented in this corpus, so implemented_only must return nothing."
+    },
+    {
+      "id": "sr-17",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "slow zoom in",
+      "filter": {
+        "include_draft": false
+      },
+      "expect": [],
+      "why": "Production default: every recipe is draft, so nothing is retrievable without include_draft."
+    },
+    {
+      "id": "ps-01",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "safe area for captions on TikTok",
+      "expect": [],
+      "why": "platform_specs holds only a README; no verified spec exists."
+    },
+    {
+      "id": "ps-02",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "maximum video length for Instagram Reels",
+      "expect": [],
+      "why": "No verified platform spec exists."
+    },
+    {
+      "id": "ps-03",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "loudness target for YouTube Shorts",
+      "expect": [],
+      "why": "No verified platform spec exists; audio-ducking-loudness in directing_principles only covers EBU R 128 broadcast."
+    },
+    {
+      "id": "bp-01",
+      "collection": "brand_product_facts",
+      "kind": "missing_knowledge",
+      "tags": [
+        "brand_product",
+        "metadata_filter"
+      ],
+      "query": "does the product contain added sugar",
+      "filter": {
+        "project_id": "eval-project"
+      },
+      "expect": [],
+      "why": "Brand facts are created per project at runtime; the corpus holds none."
+    },
+    {
+      "id": "bp-02",
+      "collection": "brand_product_facts",
+      "kind": "missing_knowledge",
+      "tags": [
+        "brand_product"
+      ],
+      "query": "brand colours and logo usage rules",
+      "filter": {
+        "project_id": "eval-project"
+      },
+      "expect": [],
+      "why": "No brand facts exist in the corpus."
+    },
+    {
+      "id": "ae-01",
+      "collection": "approved_examples",
+      "kind": "missing_knowledge",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "approved storyboard for a coffee reel",
+      "expect": [],
+      "why": "approved_examples has no documents."
+    },
+    {
+      "id": "ae-02",
+      "collection": "approved_examples",
+      "kind": "missing_knowledge",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "previously approved ad that performed well",
+      "expect": [],
+      "why": "approved_examples has no documents."
+    },
+    {
+      "id": "ng-01",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "how to color grade footage with LUTs",
+      "expect": [],
+      "why": "No note covers color grading; 'footage' appears in other notes, so BM25 may still return noise."
+    },
+    {
+      "id": "ng-02",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "quarterly tax filing deadlines",
+      "expect": [],
+      "why": "Entirely out of domain."
+    },
+    {
+      "id": "ng-03",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "render a photorealistic video of a dragon",
+      "expect": [],
+      "why": "No recipe generates new footage (reframing-limits: 'We do not shoot new footage'); 'video' appears in many recipes."
+    },
+    {
+      "id": "ng-04",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "quantum computing hardware benchmarks",
+      "expect": [],
+      "why": "Entirely out of domain."
+    },
+    {
+      "id": "dp-09",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "avoid pixelation when enlarging low-resolution clips",
+      "expect": [
+        "reframing-limits"
+      ],
+      "why": "Reframing-limits explains that every zoom crops the source and costs resolution; the query uses different terms (pixelation, enlarging)."
+    },
+    {
+      "id": "sr-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "semantic",
+        "transition_camera"
+      ],
+      "query": "dolly in on the bottle",
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "A dolly-in is a gradual move toward the subject; slow-push-in is the matching recipe but never uses the word dolly."
+    },
+    {
+      "id": "sr-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "voiceover must stay audible over the background track",
+      "expect": [
+        "music-bed-duck"
+      ],
+      "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track)."
+    }
+  ]
+}

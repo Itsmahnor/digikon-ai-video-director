@@ -18,6 +18,7 @@
     "capabilities": "tsx packages/render/src/learn-cli.ts",
     "capabilities:visual": "tsx scripts/validate-visual-capabilities.mts",
     "eval:live": "tsx packages/evals/src/cli.ts --live",
+    "eval:retrieval": "tsx packages/evals/src/retrieval-cli.ts",
     "console:demo": "tsx apps/console/src/server.ts --demo",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",

@@ -1,0 +1,3367 @@
+{
+  "retriever": {
+    "name": "KeywordRetriever",
+    "algorithm": "BM25 (title x2 + text)",
+    "k1": 1.5,
+    "b": 0.75,
+    "tokenizer": "lowercase, split on non-alphanumerics, stop-word removal, suffix stripping (ing/ed/es/s)"
+  },
+  "corpus": {
+    "total_docs": 54,
+    "fingerprint": "d1d36f86bb3091e7",
+    "per_collection": {
+      "directing_principles": {
+        "docs": 9,
+        "ids": [
+          "audio-ducking-loudness",
+          "axis-180-rule",
+          "cut-on-motion",
+          "cut-priority-murch",
+          "j-and-l-cuts",
+          "motion-purpose-easing",
+          "reframing-limits",
+          "shot-size-progression",
+          "text-legibility"
+        ]
+      },
+      "ad_playbooks": {
+        "docs": 5,
+        "ids": [
+          "aida-structure",
+          "claims-discipline",
+          "hook-first-seconds",
+          "problem-agitate-solution",
+          "single-clear-cta"
+        ]
+      },
+      "platform_specs": {
+        "docs": 0,
+        "ids": [],
+        "note": "Only a README exists; no verified spec has been added, and unverified specs are never retrievable."
+      },
+      "shot_recipes": {
+        "docs": 40,
+        "ids": [
+          "asset-stage-ffmpeg",
+          "asset-stage-hyperframes",
+          "bullet-list",
+          "clip-play",
+          "clip-play-caption",
+          "crop-to-detail",
+          "crossfade",
+          "dip-to-black",
+          "directional-wipe",
+          "end-card-cta",
+          "end-card-cta-hyperframes",
+          "hard-cut",
+          "image-caption-hyperframes",
+          "image-caption-remotion",
+          "image-scene",
+          "j-cut-audio-lead",
+          "logo-reveal",
+          "loudness-normalise",
+          "lower-third-slide",
+          "match-cut",
+          "music-bed-duck",
+          "pan-reframe",
+          "pan-reframe-hyperframes",
+          "pull-out-reveal",
+          "pull-out-reveal-hyperframes",
+          "punch-in-emphasis",
+          "scene-composition",
+          "sfx-hit-on-cut",
+          "slow-push-in",
+          "slow-push-in-hyperframes",
+          "stat-callout",
+          "static-hold",
+          "text-card-fade",
+          "text-fade-hyperframes",
+          "text-fade-up",
+          "text-fade-up-hyperframes",
+          "text-slide-remotion",
+          "text-word-stagger",
+          "text-word-stagger-hyperframes",
+          "title-subtitle"
+        ],
+        "note": "40 of 40 recipes are draft, so production retrieval (no include_draft) returns none; recipe_implemented is not set in this corpus."
+      },
+      "brand_product_facts": {
+        "docs": 0,
+        "ids": [],
+        "note": "Facts are created per project at runtime (brandFactDocs) and are not part of the shared corpus."
+      },
+      "approved_examples": {
+        "docs": 0,
+        "ids": [],
+        "note": "No approved examples exist yet."
+      }
+    }
+  },
+  "benchmark": {
+    "total_queries": 64,
+    "by_kind": {
+      "retrieval": 50,
+      "negative": 7,
+      "missing_knowledge": 7
+    },
+    "by_collection": {
+      "shot_recipes": {
+        "retrieval": 32,
+        "negative": 4,
+        "missing_knowledge": 0
+      },
+      "ad_playbooks": {
+        "retrieval": 7,
+        "negative": 1,
+        "missing_knowledge": 0
+      },
+      "directing_principles": {
+        "retrieval": 11,
+        "negative": 2,
+        "missing_knowledge": 0
+      },
+      "platform_specs": {
+        "retrieval": 0,
+        "negative": 0,
+        "missing_knowledge": 3
+      },
+      "brand_product_facts": {
+        "retrieval": 0,
+        "negative": 0,
+        "missing_knowledge": 2
+      },
+      "approved_examples": {
+        "retrieval": 0,
+        "negative": 0,
+        "missing_knowledge": 2
+      }
+    },
+    "by_tag": {
+      "seed": 21,
+      "direct": 3,
+      "paraphrase": 4,
+      "semantic": 6,
+      "transition_camera": 8,
+      "motion_graphics": 6,
+      "scene_creative": 7,
+      "metadata_filter": 9,
+      "negative": 7,
+      "brand_product": 4,
+      "template_discovery": 3,
+      "platform": 3
+    }
+  },
+  "metrics": {
+    "overall": {
+      "queries": 50,
+      "p_at_1": 0.92,
+      "recall_at_3": 0.94,
+      "mrr": 0.935,
+      "ndcg_at_3": 0.9326,
+      "negative": {
+        "queries": 7,
+        "empty_correct": 5,
+        "accuracy": 0.7143
+      }
+    },
+    "per_collection": {
+      "directing_principles": {
+        "queries": 11,
+        "p_at_1": 0.9091,
+        "recall_at_3": 1,
+        "mrr": 0.9545,
+        "ndcg_at_3": 0.9664,
+        "negative": {
+          "queries": 2,
+          "empty_correct": 1,
+          "accuracy": 0.5
+        },
+        "missing_knowledge": {
+          "queries": 0,
+          "returned_empty": 0
+        }
+      },
+      "ad_playbooks": {
+        "queries": 7,
+        "p_at_1": 0.8571,
+        "recall_at_3": 0.8571,
+        "mrr": 0.8929,
+        "ndcg_at_3": 0.8571,
+        "negative": {
+          "queries": 1,
+          "empty_correct": 1,
+          "accuracy": 1
+        },
+        "missing_knowledge": {
+          "queries": 0,
+          "returned_empty": 0
+        }
+      },
+      "platform_specs": {
+        "queries": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "negative": {
+          "queries": 0,
+          "empty_correct": 0,
+          "accuracy": null
+        },
+        "missing_knowledge": {
+          "queries": 3,
+          "returned_empty": 3
+        }
+      },
+      "shot_recipes": {
+        "queries": 32,
+        "p_at_1": 0.9375,
+        "recall_at_3": 0.9375,
+        "mrr": 0.9375,
+        "ndcg_at_3": 0.9375,
+        "negative": {
+          "queries": 4,
+          "empty_correct": 3,
+          "accuracy": 0.75
+        },
+        "missing_knowledge": {
+          "queries": 0,
+          "returned_empty": 0
+        }
+      },
+      "brand_product_facts": {
+        "queries": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "negative": {
+          "queries": 0,
+          "empty_correct": 0,
+          "accuracy": null
+        },
+        "missing_knowledge": {
+          "queries": 2,
+          "returned_empty": 2
+        }
+      },
+      "approved_examples": {
+        "queries": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "negative": {
+          "queries": 0,
+          "empty_correct": 0,
+          "accuracy": null
+        },
+        "missing_knowledge": {
+          "queries": 2,
+          "returned_empty": 2
+        }
+      }
+    }
+  },
+  "failures": {
+    "genuine_retrieval_failures": [
+      {
+        "id": "seed-18",
+        "collection": "ad_playbooks",
+        "kind": "retrieval",
+        "tags": [
+          "seed"
+        ],
+        "query": "can we say the product is healthy without a source",
+        "filter": {},
+        "expect": [
+          "claims-discipline"
+        ],
+        "equivalent": [],
+        "why": "Seed query from evals/retrieval.json (unchanged).",
+        "returned": [
+          {
+            "id": "aida-structure",
+            "score": 5.261
+          },
+          {
+            "id": "problem-agitate-solution",
+            "score": 4.339
+          },
+          {
+            "id": "single-clear-cta",
+            "score": 2.798
+          },
+          {
+            "id": "claims-discipline",
+            "score": 1.335
+          },
+          {
+            "id": "hook-first-seconds",
+            "score": 1.031
+          }
+        ],
+        "best_relevant_rank": 4,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.25,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 4 behind aida-structure"
+      },
+      {
+        "id": "dp-04",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase",
+          "transition_camera"
+        ],
+        "query": "hide the edit inside a movement so the cut feels smooth",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Cut-on-motion note: a cut hidden inside a movement feels smoother.",
+        "returned": [
+          {
+            "id": "cut-priority-murch",
+            "score": 13.506
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 12.904
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 4.78
+          },
+          {
+            "id": "text-legibility",
+            "score": 4.461
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 3.948
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+      },
+      {
+        "id": "sr-18",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "semantic",
+          "transition_camera"
+        ],
+        "query": "dolly in on the bottle",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "slow-push-in"
+        ],
+        "equivalent": [
+          "slow-push-in-hyperframes"
+        ],
+        "why": "A dolly-in is a gradual move toward the subject; slow-push-in is the matching recipe but never uses the word dolly.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "no_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "sr-19",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "semantic"
+        ],
+        "query": "voiceover must stay audible over the background track",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "music-bed-duck"
+        ],
+        "equivalent": [],
+        "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track).",
+        "returned": [
+          {
+            "id": "stat-callout",
+            "score": 2.342
+          },
+          {
+            "id": "bullet-list",
+            "score": 2.274
+          },
+          {
+            "id": "text-card-fade",
+            "score": 2.267
+          },
+          {
+            "id": "text-fade-hyperframes",
+            "score": 2.17
+          },
+          {
+            "id": "text-slide-remotion",
+            "score": 2.102
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      }
+    ],
+    "wrong_top_result": [
+      {
+        "id": "seed-18",
+        "collection": "ad_playbooks",
+        "kind": "retrieval",
+        "tags": [
+          "seed"
+        ],
+        "query": "can we say the product is healthy without a source",
+        "filter": {},
+        "expect": [
+          "claims-discipline"
+        ],
+        "equivalent": [],
+        "why": "Seed query from evals/retrieval.json (unchanged).",
+        "returned": [
+          {
+            "id": "aida-structure",
+            "score": 5.261
+          },
+          {
+            "id": "problem-agitate-solution",
+            "score": 4.339
+          },
+          {
+            "id": "single-clear-cta",
+            "score": 2.798
+          },
+          {
+            "id": "claims-discipline",
+            "score": 1.335
+          },
+          {
+            "id": "hook-first-seconds",
+            "score": 1.031
+          }
+        ],
+        "best_relevant_rank": 4,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.25,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 4 behind aida-structure"
+      },
+      {
+        "id": "dp-04",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase",
+          "transition_camera"
+        ],
+        "query": "hide the edit inside a movement so the cut feels smooth",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Cut-on-motion note: a cut hidden inside a movement feels smoother.",
+        "returned": [
+          {
+            "id": "cut-priority-murch",
+            "score": 13.506
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 12.904
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 4.78
+          },
+          {
+            "id": "text-legibility",
+            "score": 4.461
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 3.948
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+      },
+      {
+        "id": "sr-19",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "semantic"
+        ],
+        "query": "voiceover must stay audible over the background track",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "music-bed-duck"
+        ],
+        "equivalent": [],
+        "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track).",
+        "returned": [
+          {
+            "id": "stat-callout",
+            "score": 2.342
+          },
+          {
+            "id": "bullet-list",
+            "score": 2.274
+          },
+          {
+            "id": "text-card-fade",
+            "score": 2.267
+          },
+          {
+            "id": "text-fade-hyperframes",
+            "score": 2.17
+          },
+          {
+            "id": "text-slide-remotion",
+            "score": 2.102
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      }
+    ],
+    "no_relevant_result": [
+      {
+        "id": "sr-18",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "semantic",
+          "transition_camera"
+        ],
+        "query": "dolly in on the bottle",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "slow-push-in"
+        ],
+        "equivalent": [
+          "slow-push-in-hyperframes"
+        ],
+        "why": "A dolly-in is a gradual move toward the subject; slow-push-in is the matching recipe but never uses the word dolly.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "no_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "sr-19",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "semantic"
+        ],
+        "query": "voiceover must stay audible over the background track",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "music-bed-duck"
+        ],
+        "equivalent": [],
+        "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track).",
+        "returned": [
+          {
+            "id": "stat-callout",
+            "score": 2.342
+          },
+          {
+            "id": "bullet-list",
+            "score": 2.274
+          },
+          {
+            "id": "text-card-fade",
+            "score": 2.267
+          },
+          {
+            "id": "text-fade-hyperframes",
+            "score": 2.17
+          },
+          {
+            "id": "text-slide-remotion",
+            "score": 2.102
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      }
+    ],
+    "negative_queries_that_returned_results": [
+      {
+        "id": "ng-01",
+        "collection": "directing_principles",
+        "kind": "negative",
+        "tags": [
+          "negative"
+        ],
+        "query": "how to color grade footage with LUTs",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "No note covers color grading; 'footage' appears in other notes, so BM25 may still return noise.",
+        "returned": [
+          {
+            "id": "reframing-limits",
+            "score": 2.814
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 1.596
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 1.462
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "negative_returned_noise",
+        "returned_empty": false
+      },
+      {
+        "id": "ng-03",
+        "collection": "shot_recipes",
+        "kind": "negative",
+        "tags": [
+          "negative"
+        ],
+        "query": "render a photorealistic video of a dragon",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [],
+        "equivalent": [],
+        "why": "No recipe generates new footage (reframing-limits: 'We do not shoot new footage'); 'video' appears in many recipes.",
+        "returned": [
+          {
+            "id": "clip-play",
+            "score": 6.457
+          },
+          {
+            "id": "clip-play-caption",
+            "score": 6.315
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "negative_returned_noise",
+        "returned_empty": false
+      }
+    ]
+  },
+  "missing_knowledge": {
+    "empty_collections": [
+      "platform_specs",
+      "brand_product_facts",
+      "approved_examples"
+    ],
+    "queries": [
+      {
+        "id": "ps-01",
+        "collection": "platform_specs",
+        "kind": "missing_knowledge",
+        "tags": [
+          "platform"
+        ],
+        "query": "safe area for captions on TikTok",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "platform_specs holds only a README; no verified spec exists.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "ps-02",
+        "collection": "platform_specs",
+        "kind": "missing_knowledge",
+        "tags": [
+          "platform"
+        ],
+        "query": "maximum video length for Instagram Reels",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "No verified platform spec exists.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "ps-03",
+        "collection": "platform_specs",
+        "kind": "missing_knowledge",
+        "tags": [
+          "platform"
+        ],
+        "query": "loudness target for YouTube Shorts",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "No verified platform spec exists; audio-ducking-loudness in directing_principles only covers EBU R 128 broadcast.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "bp-01",
+        "collection": "brand_product_facts",
+        "kind": "missing_knowledge",
+        "tags": [
+          "brand_product",
+          "metadata_filter"
+        ],
+        "query": "does the product contain added sugar",
+        "filter": {
+          "project_id": "eval-project"
+        },
+        "expect": [],
+        "equivalent": [],
+        "why": "Brand facts are created per project at runtime; the corpus holds none.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "bp-02",
+        "collection": "brand_product_facts",
+        "kind": "missing_knowledge",
+        "tags": [
+          "brand_product"
+        ],
+        "query": "brand colours and logo usage rules",
+        "filter": {
+          "project_id": "eval-project"
+        },
+        "expect": [],
+        "equivalent": [],
+        "why": "No brand facts exist in the corpus.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "ae-01",
+        "collection": "approved_examples",
+        "kind": "missing_knowledge",
+        "tags": [
+          "scene_creative"
+        ],
+        "query": "approved storyboard for a coffee reel",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "approved_examples has no documents.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      },
+      {
+        "id": "ae-02",
+        "collection": "approved_examples",
+        "kind": "missing_knowledge",
+        "tags": [
+          "scene_creative"
+        ],
+        "query": "previously approved ad that performed well",
+        "filter": {},
+        "expect": [],
+        "equivalent": [],
+        "why": "approved_examples has no documents.",
+        "returned": [],
+        "best_relevant_rank": null,
+        "outcome": "missing_knowledge_empty",
+        "returned_empty": true
+      }
+    ],
+    "notes": [
+      "missing_knowledge queries are legitimate questions the system should be able to answer; the corpus has no document for them. They are excluded from P@1, Recall@3, MRR and nDCG@3 and are not retrieval failures.",
+      "Returning an empty result for them is correct behaviour today; the fix is to author and verify the documents, not to change retrieval."
+    ]
+  },
+  "limitations": [
+    "No relevance threshold: 2 of 7 negative queries still returned documents (ng-01, ng-03) because any shared term gives a positive BM25 score. Production needs a score floor or a reranker to say \"nothing suitable\".",
+    "Vocabulary mismatch: 2 retrieval queries share no stemmed term with their relevant document (sr-18, sr-19). Only dense retrieval can recover these.",
+    "Outranking: 2 retrieval queries had a relevant document that shares terms with the query but ranked below a wrong one (seed-18, dp-04).",
+    "Recipe titles are indexed twice and 'Used for' phrases are keyword lists, so queries phrased like those lists succeed while paraphrases depend on shared stems.",
+    "Renderer variants (-hyperframes, -remotion) duplicate their base recipe text, so a plain query cannot distinguish them; the benchmark treats them as equivalent unless the query names the renderer.",
+    "The tokenizer is English-only suffix stripping with no synonyms, so 'dissolve' will not match 'crossfade' unless the document lists it.",
+    "3 of 6 collections are empty (platform_specs, brand_product_facts, approved_examples), so retrieval quality there cannot be measured yet."
+  ],
+  "queries": [
+    {
+      "id": "seed-01",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "zoom out slowly to show the whole bottle",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "pull-out-reveal"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "pull-out-reveal",
+          "score": 12.852
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 11.1
+        },
+        {
+          "id": "slow-push-in",
+          "score": 3.197
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.117
+        },
+        {
+          "id": "dip-to-black",
+          "score": 3.033
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-02",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "gentle zoom toward the product for a premium feel",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "slow-push-in",
+          "score": 19.005
+        },
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 15.929
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 3.932
+        },
+        {
+          "id": "crossfade",
+          "score": 3.518
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 3.304
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-03",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "fast zoom to emphasise the key feature",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "punch-in-emphasis"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "punch-in-emphasis",
+          "score": 17.092
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 4.955
+        },
+        {
+          "id": "slow-push-in",
+          "score": 3.197
+        },
+        {
+          "id": "text-word-stagger",
+          "score": 3.136
+        },
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 2.773
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-04",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "slide the frame across the product",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "pan-reframe"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "pan-reframe",
+          "score": 11.144
+        },
+        {
+          "id": "pan-reframe-hyperframes",
+          "score": 9.507
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 4.338
+        },
+        {
+          "id": "static-hold",
+          "score": 4.186
+        },
+        {
+          "id": "directional-wipe",
+          "score": 3.67
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-05",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "dissolve softly into the next scene",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "crossfade"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "crossfade",
+          "score": 12.748
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 8.261
+        },
+        {
+          "id": "logo-reveal",
+          "score": 4.364
+        },
+        {
+          "id": "match-cut",
+          "score": 3.905
+        },
+        {
+          "id": "directional-wipe",
+          "score": 2.79
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-06",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "fade to black before the final scene",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "dip-to-black"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "dip-to-black",
+          "score": 17.179
+        },
+        {
+          "id": "loudness-normalise",
+          "score": 6.291
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 4.942
+        },
+        {
+          "id": "text-card-fade",
+          "score": 4.254
+        },
+        {
+          "id": "text-fade-hyperframes",
+          "score": 4.142
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-07",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "graphic wipe to the next scene",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "directional-wipe"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "directional-wipe",
+          "score": 12.769
+        },
+        {
+          "id": "match-cut",
+          "score": 5.47
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 4.942
+        },
+        {
+          "id": "crossfade",
+          "score": 4.201
+        },
+        {
+          "id": "scene-composition",
+          "score": 3.927
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-08",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "sound from the next scene starts before we see it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "j-cut-audio-lead"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "j-cut-audio-lead",
+          "score": 10.54
+        },
+        {
+          "id": "clip-play",
+          "score": 4.688
+        },
+        {
+          "id": "loudness-normalise",
+          "score": 4.665
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 4.574
+        },
+        {
+          "id": "crossfade",
+          "score": 4.201
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-09",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "headline fades in with a small rise",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "text-fade-up"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "text-fade-up",
+          "score": 5.828
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 4.778
+        },
+        {
+          "id": "title-subtitle",
+          "score": 2.683
+        },
+        {
+          "id": "text-card-fade",
+          "score": 2.445
+        },
+        {
+          "id": "text-fade-hyperframes",
+          "score": 2.339
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-10",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "words appear one at a time for rhythm",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "text-word-stagger"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "text-word-stagger",
+          "score": 12.473
+        },
+        {
+          "id": "text-word-stagger-hyperframes",
+          "score": 10.938
+        },
+        {
+          "id": "bullet-list",
+          "score": 5.719
+        },
+        {
+          "id": "stat-callout",
+          "score": 3.182
+        },
+        {
+          "id": "text-fade-up",
+          "score": 2.653
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-11",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "closing screen with the call to action",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "end-card-cta"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "end-card-cta",
+          "score": 14.934
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 13.299
+        },
+        {
+          "id": "text-fade-up",
+          "score": 1.707
+        },
+        {
+          "id": "match-cut",
+          "score": 1.664
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 1.4
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-12",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "show the brand logo at the end",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "logo-reveal"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "logo-reveal",
+          "score": 12.149
+        },
+        {
+          "id": "end-card-cta",
+          "score": 6.737
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 5.85
+        },
+        {
+          "id": "dip-to-black",
+          "score": 3.758
+        },
+        {
+          "id": "scene-composition",
+          "score": 2.199
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-13",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "lower the music while someone talks",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "music-bed-duck"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "music-bed-duck",
+          "score": 9.474
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 3.949
+        },
+        {
+          "id": "text-fade-up",
+          "score": 3.174
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 2.711
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 2.602
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-14",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "whoosh sound when the scene changes",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "sfx-hit-on-cut"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "sfx-hit-on-cut",
+          "score": 8.127
+        },
+        {
+          "id": "clip-play",
+          "score": 4.463
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 4.356
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.622
+        },
+        {
+          "id": "match-cut",
+          "score": 3.333
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "match the final mix to a loudness target",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "loudness-normalise"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "loudness-normalise",
+          "score": 23.049
+        },
+        {
+          "id": "match-cut",
+          "score": 5.475
+        },
+        {
+          "id": "dip-to-black",
+          "score": 3.033
+        },
+        {
+          "id": "end-card-cta",
+          "score": 2.85
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 2.342
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-16",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "what should the first scene of an ad show",
+      "filter": {},
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "hook-first-seconds",
+          "score": 9.354
+        },
+        {
+          "id": "claims-discipline",
+          "score": 3.546
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 1.522
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-17",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "how many calls to action at the end",
+      "filter": {},
+      "expect": [
+        "single-clear-cta"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "single-clear-cta",
+          "score": 10.161
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 4.489
+        },
+        {
+          "id": "aida-structure",
+          "score": 3.177
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-18",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "can we say the product is healthy without a source",
+      "filter": {},
+      "expect": [
+        "claims-discipline"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "aida-structure",
+          "score": 5.261
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 4.339
+        },
+        {
+          "id": "single-clear-cta",
+          "score": 2.798
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.335
+        },
+        {
+          "id": "hook-first-seconds",
+          "score": 1.031
+        }
+      ],
+      "best_relevant_rank": 4,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0.25,
+        "ndcg_at_3": 0
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 4 behind aida-structure"
+    },
+    {
+      "id": "seed-19",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "audio continues over the next picture",
+      "filter": {},
+      "expect": [
+        "j-and-l-cuts"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "j-and-l-cuts",
+          "score": 13.756
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-20",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "what is the loudness target for broadcast",
+      "filter": {},
+      "expect": [
+        "audio-ducking-loudness"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "audio-ducking-loudness",
+          "score": 14.557
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 4.631
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 2.303
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "seed-21",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "seed"
+      ],
+      "query": "what is lost when we crop supplied footage",
+      "filter": {},
+      "expect": [
+        "reframing-limits"
+      ],
+      "equivalent": [],
+      "why": "Seed query from evals/retrieval.json (unchanged).",
+      "returned": [
+        {
+          "id": "reframing-limits",
+          "score": 12.046
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 4.993
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 4.631
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 3.864
+        },
+        {
+          "id": "text-legibility",
+          "score": 1.68
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-01",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "direct"
+      ],
+      "query": "what is the 180 degree rule",
+      "filter": {},
+      "expect": [
+        "axis-180-rule"
+      ],
+      "equivalent": [],
+      "why": "Document is titled 'The 180-degree rule'.",
+      "returned": [
+        {
+          "id": "axis-180-rule",
+          "score": 13.857
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 4.631
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 4.606
+        },
+        {
+          "id": "reframing-limits",
+          "score": 2.387
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-02",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keeping left and right consistent between two shots of the same action",
+      "filter": {},
+      "expect": [
+        "axis-180-rule"
+      ],
+      "equivalent": [],
+      "why": "Describes the screen-direction continuity the rule protects, without naming the rule.",
+      "returned": [
+        {
+          "id": "axis-180-rule",
+          "score": 22.25
+        },
+        {
+          "id": "shot-size-progression",
+          "score": 10.193
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 3.619
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 2.953
+        },
+        {
+          "id": "reframing-limits",
+          "score": 2.836
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-03",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "which goal wins when two editing aims conflict",
+      "filter": {},
+      "expect": [
+        "cut-priority-murch"
+      ],
+      "equivalent": [],
+      "why": "The Murch note ranks cut goals and says to serve the higher one.",
+      "returned": [
+        {
+          "id": "cut-priority-murch",
+          "score": 12.695
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 6.701
+        },
+        {
+          "id": "shot-size-progression",
+          "score": 1.901
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.759
+        },
+        {
+          "id": "text-legibility",
+          "score": 1.68
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-04",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase",
+        "transition_camera"
+      ],
+      "query": "hide the edit inside a movement so the cut feels smooth",
+      "filter": {},
+      "expect": [
+        "cut-on-motion"
+      ],
+      "equivalent": [],
+      "why": "Cut-on-motion note: a cut hidden inside a movement feels smoother.",
+      "returned": [
+        {
+          "id": "cut-priority-murch",
+          "score": 13.506
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 12.904
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 4.78
+        },
+        {
+          "id": "text-legibility",
+          "score": 4.461
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 3.948
+        }
+      ],
+      "best_relevant_rank": 2,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.5,
+        "ndcg_at_3": 0.6309297535714575
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+    },
+    {
+      "id": "dp-05",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "direct",
+        "motion_graphics"
+      ],
+      "query": "keep captions inside the safe area and easy to read",
+      "filter": {},
+      "expect": [
+        "text-legibility"
+      ],
+      "equivalent": [],
+      "why": "Text-legibility note covers line length, hold time and safe area.",
+      "returned": [
+        {
+          "id": "text-legibility",
+          "score": 14.181
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 4.471
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 2.029
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.759
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 1.354
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-06",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "should two adjacent shots be nearly the same size",
+      "filter": {},
+      "expect": [
+        "shot-size-progression"
+      ],
+      "equivalent": [],
+      "why": "Note says two adjacent shots of nearly the same size look like a mistake.",
+      "returned": [
+        {
+          "id": "shot-size-progression",
+          "score": 18.476
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 9.459
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 4.388
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 3.969
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.759
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-07",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter"
+      ],
+      "query": "cut transition shot framing",
+      "filter": {
+        "topics": [
+          "cinematography"
+        ]
+      },
+      "expect": [
+        "axis-180-rule",
+        "reframing-limits",
+        "shot-size-progression"
+      ],
+      "equivalent": [],
+      "why": "The three notes carrying the cinematography topic; the filter must exclude editing notes such as cut-on-motion.",
+      "returned": [
+        {
+          "id": "shot-size-progression",
+          "score": 3.676
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 3.049
+        },
+        {
+          "id": "reframing-limits",
+          "score": 1.618
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "dp-08",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "close-up wide shot size variety",
+      "filter": {
+        "min_grade": "A"
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "The only note on shot size (shot-size-progression) is grade B, so min_grade A must leave nothing suitable.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ap-01",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "problem and solution structure for a short vertical ad",
+      "filter": {},
+      "expect": [
+        "problem-agitate-solution"
+      ],
+      "equivalent": [],
+      "why": "Note describes problem, agitate, solution for short vertical ads.",
+      "returned": [
+        {
+          "id": "problem-agitate-solution",
+          "score": 21.783
+        },
+        {
+          "id": "aida-structure",
+          "score": 7.745
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "ap-02",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "ad outline for a food product showcase: attention, interest, desire, action",
+      "filter": {},
+      "expect": [
+        "aida-structure"
+      ],
+      "equivalent": [],
+      "why": "AIDA note suits product showcases such as food.",
+      "returned": [
+        {
+          "id": "aida-structure",
+          "score": 26.824
+        },
+        {
+          "id": "single-clear-cta",
+          "score": 3.613
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 3.427
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.335
+        },
+        {
+          "id": "hook-first-seconds",
+          "score": 1.031
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "ap-03",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "open on the most striking real view of the product instead of a logo",
+      "filter": {},
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "equivalent": [],
+      "why": "Hook note says open on the most striking real view, not a logo.",
+      "returned": [
+        {
+          "id": "hook-first-seconds",
+          "score": 20.666
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 4.339
+        },
+        {
+          "id": "aida-structure",
+          "score": 1.521
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.335
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "ap-04",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "brand_product"
+      ],
+      "query": "price and health effect statements need approved facts",
+      "filter": {
+        "topics": [
+          "claims"
+        ]
+      },
+      "expect": [
+        "claims-discipline"
+      ],
+      "equivalent": [],
+      "why": "Claims-discipline is the only note tagged claims and covers prices and health effects.",
+      "returned": [
+        {
+          "id": "claims-discipline",
+          "score": 12.779
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-01",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "paraphrase"
+      ],
+      "query": "pause that marks the end of a chapter",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "dip-to-black"
+      ],
+      "equivalent": [],
+      "why": "dip-to-black is for a chapter break or the end.",
+      "returned": [
+        {
+          "id": "dip-to-black",
+          "score": 17.033
+        },
+        {
+          "id": "end-card-cta",
+          "score": 4.116
+        },
+        {
+          "id": "logo-reveal",
+          "score": 4.086
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 3.696
+        },
+        {
+          "id": "scene-composition",
+          "score": 2.199
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-02",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "direct"
+      ],
+      "query": "cut between two scenes that share a shape",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "match-cut"
+      ],
+      "equivalent": [],
+      "why": "match-cut is a cut between scenes that share a shape, position or movement.",
+      "returned": [
+        {
+          "id": "match-cut",
+          "score": 18.186
+        },
+        {
+          "id": "hard-cut",
+          "score": 9.908
+        },
+        {
+          "id": "sfx-hit-on-cut",
+          "score": 3.796
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.739
+        },
+        {
+          "id": "bullet-list",
+          "score": 1.81
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-03",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "transition_camera",
+        "semantic"
+      ],
+      "query": "camera drifts toward the subject to build tension",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "slow-push-in is a gradual zoom toward the subject for quiet tension; the HyperFrames variant is the same behaviour.",
+      "returned": [
+        {
+          "id": "slow-push-in",
+          "score": 17.824
+        },
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 15.027
+        },
+        {
+          "id": "pan-reframe",
+          "score": 2.024
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 2.024
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 1.999
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-04",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "template_discovery"
+      ],
+      "query": "slow zoom in with the HyperFrames renderer",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "slow-push-in-hyperframes"
+      ],
+      "equivalent": [],
+      "why": "The query names the renderer, so only the HyperFrames variant is correct.",
+      "returned": [
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 12.905
+        },
+        {
+          "id": "slow-push-in",
+          "score": 8.215
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 7.454
+        },
+        {
+          "id": "pan-reframe-hyperframes",
+          "score": 5.572
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 5.572
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-05",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "one large number with a label for a statistic",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "stat-callout"
+      ],
+      "equivalent": [],
+      "why": "stat-callout shows one large figure with a label.",
+      "returned": [
+        {
+          "id": "stat-callout",
+          "score": 18.121
+        },
+        {
+          "id": "crop-to-detail",
+          "score": 5.699
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 4.345
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.136
+        },
+        {
+          "id": "title-subtitle",
+          "score": 3.011
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-06",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "key points that appear one after another as a list",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "bullet-list"
+      ],
+      "equivalent": [],
+      "why": "bullet-list is a heading with short items that appear in sequence.",
+      "returned": [
+        {
+          "id": "bullet-list",
+          "score": 21.214
+        },
+        {
+          "id": "text-word-stagger",
+          "score": 11.157
+        },
+        {
+          "id": "text-word-stagger-hyperframes",
+          "score": 9.34
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.602
+        },
+        {
+          "id": "stat-callout",
+          "score": 3.339
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-07",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics",
+        "template_discovery"
+      ],
+      "query": "animated chart and product interface demo with a cursor",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "scene-composition"
+      ],
+      "equivalent": [],
+      "why": "scene-composition draws UI demos with a cursor and illustrative charts.",
+      "returned": [
+        {
+          "id": "scene-composition",
+          "score": 11.623
+        },
+        {
+          "id": "image-caption-remotion",
+          "score": 3.512
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 2.711
+        },
+        {
+          "id": "static-hold",
+          "score": 1.664
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 1.636
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-08",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "motion_graphics"
+      ],
+      "query": "name tag that slides in near the bottom of the frame",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "lower-third-slide"
+      ],
+      "equivalent": [],
+      "why": "lower-third-slide slides a name or label in near the bottom.",
+      "returned": [
+        {
+          "id": "lower-third-slide",
+          "score": 19.743
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 4.486
+        },
+        {
+          "id": "sfx-hit-on-cut",
+          "score": 3.062
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 3.042
+        },
+        {
+          "id": "static-hold",
+          "score": 2.522
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-09",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "template_discovery"
+      ],
+      "query": "play the supplied footage with text over it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "clip-play-caption"
+      ],
+      "equivalent": [],
+      "why": "clip-play-caption plays the clip with the overlay text as a caption.",
+      "returned": [
+        {
+          "id": "clip-play-caption",
+          "score": 12.591
+        },
+        {
+          "id": "clip-play",
+          "score": 11.324
+        },
+        {
+          "id": "text-card-fade",
+          "score": 6.168
+        },
+        {
+          "id": "text-fade-hyperframes",
+          "score": 5.847
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 5.814
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-10",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "tight crop on the label texture of the product",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "crop-to-detail"
+      ],
+      "equivalent": [],
+      "why": "crop-to-detail reframes to a detail such as texture or a label.",
+      "returned": [
+        {
+          "id": "crop-to-detail",
+          "score": 15.353
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 5.54
+        },
+        {
+          "id": "stat-callout",
+          "score": 4.856
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 4.52
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 3.787
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-11",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative",
+        "transition_camera"
+      ],
+      "query": "energetic reveal of the new feature with impact",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "punch-in-emphasis",
+        "directional-wipe"
+      ],
+      "equivalent": [],
+      "why": "Both are high-energy: punch-in lands on a key feature, the wipe suits product reveals.",
+      "returned": [
+        {
+          "id": "directional-wipe",
+          "score": 8.092
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 7.972
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 4.955
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 3.612
+        },
+        {
+          "id": "logo-reveal",
+          "score": 3.446
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-12",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_creative",
+        "brand_product"
+      ],
+      "query": "calm closing scene where the logo appears and viewers read the call to action",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "end-card-cta",
+        "logo-reveal"
+      ],
+      "equivalent": [
+        "end-card-cta-hyperframes"
+      ],
+      "why": "End card holds the call to action; logo-reveal shows the brand mark at sign off.",
+      "returned": [
+        {
+          "id": "end-card-cta",
+          "score": 15.516
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 13.777
+        },
+        {
+          "id": "static-hold",
+          "score": 9.805
+        },
+        {
+          "id": "logo-reveal",
+          "score": 6.105
+        },
+        {
+          "id": "crossfade",
+          "score": 5.208
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-13",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "transition_camera"
+      ],
+      "query": "energetic change between scenes",
+      "filter": {
+        "include_draft": true,
+        "recipe_type": "transition",
+        "energy": "high"
+      },
+      "expect": [
+        "directional-wipe"
+      ],
+      "equivalent": [],
+      "why": "directional-wipe is the only high-energy transition.",
+      "returned": [
+        {
+          "id": "directional-wipe",
+          "score": 8.078
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-14",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "transition_camera"
+      ],
+      "query": "zoom",
+      "filter": {
+        "include_draft": true,
+        "recipe_type": "camera_move",
+        "duration_s": 1,
+        "aspect_ratio": "9:16"
+      },
+      "expect": [
+        "punch-in-emphasis"
+      ],
+      "equivalent": [],
+      "why": "At a 1.0s scene only punch-in-emphasis (min 0.8s) is allowed; the other camera moves need at least 1.5s.",
+      "returned": [
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.117
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "metadata_filter",
+        "motion_graphics"
+      ],
+      "query": "big figure result",
+      "filter": {
+        "include_draft": true,
+        "recipe_type": "animation",
+        "media": []
+      },
+      "expect": [
+        "stat-callout"
+      ],
+      "equivalent": [],
+      "why": "stat-callout is the graphics-only recipe for a figure; media [] keeps graphics-only scenes.",
+      "returned": [
+        {
+          "id": "stat-callout",
+          "score": 12.988
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-16",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "slow zoom in",
+      "filter": {
+        "include_draft": true,
+        "implemented_only": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No recipe doc carries recipe_implemented in this corpus, so implemented_only must return nothing.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "sr-17",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "metadata_filter",
+        "negative"
+      ],
+      "query": "slow zoom in",
+      "filter": {
+        "include_draft": false
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "Production default: every recipe is draft, so nothing is retrievable without include_draft.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ps-01",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "safe area for captions on TikTok",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "platform_specs holds only a README; no verified spec exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "ps-02",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "maximum video length for Instagram Reels",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No verified platform spec exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "ps-03",
+      "collection": "platform_specs",
+      "kind": "missing_knowledge",
+      "tags": [
+        "platform"
+      ],
+      "query": "loudness target for YouTube Shorts",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No verified platform spec exists; audio-ducking-loudness in directing_principles only covers EBU R 128 broadcast.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "bp-01",
+      "collection": "brand_product_facts",
+      "kind": "missing_knowledge",
+      "tags": [
+        "brand_product",
+        "metadata_filter"
+      ],
+      "query": "does the product contain added sugar",
+      "filter": {
+        "project_id": "eval-project"
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "Brand facts are created per project at runtime; the corpus holds none.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "bp-02",
+      "collection": "brand_product_facts",
+      "kind": "missing_knowledge",
+      "tags": [
+        "brand_product"
+      ],
+      "query": "brand colours and logo usage rules",
+      "filter": {
+        "project_id": "eval-project"
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No brand facts exist in the corpus.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "ae-01",
+      "collection": "approved_examples",
+      "kind": "missing_knowledge",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "approved storyboard for a coffee reel",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "approved_examples has no documents.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "ae-02",
+      "collection": "approved_examples",
+      "kind": "missing_knowledge",
+      "tags": [
+        "scene_creative"
+      ],
+      "query": "previously approved ad that performed well",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "approved_examples has no documents.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "missing_knowledge_empty",
+      "returned_empty": true
+    },
+    {
+      "id": "ng-01",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "how to color grade footage with LUTs",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No note covers color grading; 'footage' appears in other notes, so BM25 may still return noise.",
+      "returned": [
+        {
+          "id": "reframing-limits",
+          "score": 2.814
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 1.596
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.462
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "negative_returned_noise",
+      "returned_empty": false
+    },
+    {
+      "id": "ng-02",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "quarterly tax filing deadlines",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "Entirely out of domain.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ng-03",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "render a photorealistic video of a dragon",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No recipe generates new footage (reframing-limits: 'We do not shoot new footage'); 'video' appears in many recipes.",
+      "returned": [
+        {
+          "id": "clip-play",
+          "score": 6.457
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 6.315
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "negative_returned_noise",
+      "returned_empty": false
+    },
+    {
+      "id": "ng-04",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative"
+      ],
+      "query": "quantum computing hardware benchmarks",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "Entirely out of domain.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "dp-09",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "avoid pixelation when enlarging low-resolution clips",
+      "filter": {},
+      "expect": [
+        "reframing-limits"
+      ],
+      "equivalent": [],
+      "why": "Reframing-limits explains that every zoom crops the source and costs resolution; the query uses different terms (pixelation, enlarging).",
+      "returned": [
+        {
+          "id": "reframing-limits",
+          "score": 3.979
+        },
+        {
+          "id": "audio-ducking-loudness",
+          "score": 3.272
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 1.8
+        },
+        {
+          "id": "text-legibility",
+          "score": 1.68
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 1.561
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sr-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "semantic",
+        "transition_camera"
+      ],
+      "query": "dolly in on the bottle",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "A dolly-in is a gradual move toward the subject; slow-push-in is the matching recipe but never uses the word dolly.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "no_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0,
+        "ndcg_at_3": 0
+      },
+      "cause": "vocabulary_mismatch",
+      "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    },
+    {
+      "id": "sr-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "semantic"
+      ],
+      "query": "voiceover must stay audible over the background track",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "music-bed-duck"
+      ],
+      "equivalent": [],
+      "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track).",
+      "returned": [
+        {
+          "id": "stat-callout",
+          "score": 2.342
+        },
+        {
+          "id": "bullet-list",
+          "score": 2.274
+        },
+        {
+          "id": "text-card-fade",
+          "score": 2.267
+        },
+        {
+          "id": "text-fade-hyperframes",
+          "score": 2.17
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 2.102
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0,
+        "ndcg_at_3": 0
+      },
+      "cause": "vocabulary_mismatch",
+      "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    }
+  ]
+}
