@@ -6,7 +6,7 @@ import { serve } from "@hono/node-server";
 import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
-import { FFMPEG_TEMPLATES, HYPERFRAMES_TEMPLATES, REMOTION_TEMPLATES, implementedRecipeIds, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
+import { loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
 import { LocalVision, availableOcr } from "@digikon/media";
 import { WhisperEngine } from "@digikon/speech";
 import { createApp, type WhisperStatus } from "./app.js";
@@ -34,8 +34,9 @@ for (const problem of migration.problems) console.warn(`Not migrated: ${problem}
 const learned = loadCapabilityRegistry(capabilitiesDir, { recipes: library });
 for (const problem of learned.problems) console.warn(`Ignored capability record: ${problem}`);
 for (const u of learned.unusable.filter((x) => x.record.status === "validated")) console.warn(`Capability ${u.record.capability_id} is not usable here: ${u.reason}`);
-const implemented = implementedRecipeIds(recipes, [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES), ...learned.usable.map((r) => r.template)]);
-const retriever = new KeywordRetriever([...recipeDocs(recipes, { implemented }), ...knowledge]);
+// Which recipes can be carried out is not decided here: the console asks the capability registry per request (see `retrieverFor`), so nothing fixed at start-up can go stale.
+const retrieverFor = (implemented?: ReadonlySet<string>) => new KeywordRetriever([...recipeDocs(recipes, implemented ? { implemented } : {}), ...knowledge]);
+const retriever = retrieverFor();
 const skills = new SkillLibrary(join(repoRoot, "skills"));
 
 const speech = new WhisperEngine({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") });
@@ -50,7 +51,7 @@ const renderFont = [process.env.RENDER_FONT_FILE ? resolve(repoRoot, process.env
 if (!renderFont) console.warn("No font file found for preview renders. Set RENDER_FONT_FILE to a .ttf file to enable them.");
 
 const app = createApp({
-  llm, demo, speech, whisper: () => whisper, skills, retriever, knowledge, recipes: library, ffmpegOk,
+  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, knowledge, recipes: library, ffmpegOk,
   vision: new LocalVision({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") }), ocr: await availableOcr(),
   editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir,
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),

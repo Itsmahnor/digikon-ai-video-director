@@ -382,3 +382,41 @@ describe("a tampered Editor result is still caught by the Director's check", () 
     expect(bad((ops) => { ops[0]!.caption = { text: "Too many tabs!", start_s: 0, end_s: 4 }; }).issues).toContain("operation E01: caption text is not the approved overlay text for S01");
   });
 });
+
+describe("the Editor's clip operations: fade_in_s belongs to the caption recipe only", () => {
+  /** The explainer handoff with S01 and S02 both carrying a supplied clip and approved overlay text, and a clip recipe used on each. */
+  async function clipHandoff(recipeS01: string, recipeS02: string) {
+    const t = await approved("e-clip");
+    const h = structuredClone(t.handoff);
+    h.assets.push(Asset.parse({ asset_id: "asset_clip", uri: "clip.mp4", media_type: "video", duration: 20, width: 1280, height: 720 }));
+    for (const id of ["S01", "S02"]) h.storyboard.scenes.find((s) => s.scene_id === id)!.asset_ids = ["asset_clip"];
+    h.edit_plan.uses = [
+      { use_id: "U01", scene_id: "S01", recipe_id: recipeS01, params: {}, rationale: "footage" },
+      { use_id: "U02", scene_id: "S02", recipe_id: recipeS02, params: {}, rationale: "footage" },
+    ];
+    const f = await planEditorWork(h, t.editor);
+    return { h, f, op: (id: string) => f.operations.find((o) => o.target_scene_id === id)! };
+  }
+
+  it("a plain clip gets no caption and no fade_in_s, even on a scene that has overlay text", async () => {
+    const { op, h } = await clipHandoff("clip-play", "clip-play-caption");
+    expect(h.storyboard.scenes.find((s) => s.scene_id === "S01")!.overlay).not.toBeNull();
+    expect(op("S01").recipe_id).toBe("clip-play");
+    expect(op("S01").caption).toBeNull();
+    expect(Object.keys(op("S01").parameters).sort()).toEqual(["background", "fit", "source_audio"]);
+  });
+  it("a captioned clip gets the approved text and a resolved fade_in_s (the recipe default when the plan omits it)", async () => {
+    const { op, h } = await clipHandoff("clip-play", "clip-play-caption");
+    expect(op("S02").caption).toMatchObject({ text: h.storyboard.scenes.find((s) => s.scene_id === "S02")!.overlay!.text });
+    expect(op("S02").parameters["fade_in_s"]).toBe(0.5);
+    expect(Object.keys(op("S02").parameters).sort()).toEqual(["background", "fade_in_s", "fit", "source_audio"]);
+  });
+  it("the caption and fade_in_s travel together: no operation has one without the other", async () => {
+    const { f } = await clipHandoff("clip-play-caption", "clip-play");
+    for (const o of f.operations) expect(o.caption !== null).toBe("fade_in_s" in o.parameters);
+  });
+  it("overlay text on a scene whose clip recipe shows none is reported, not silently dropped", async () => {
+    const { f } = await clipHandoff("clip-play", "clip-play");
+    expect(f.revision_requests.map((r) => r.scene_ids).flat()).toEqual(expect.arrayContaining(["S01", "S02"]));
+  });
+});

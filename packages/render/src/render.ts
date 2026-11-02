@@ -15,6 +15,8 @@ import { AdapterRegistry, type RenderAdapter, type RenderJob } from "./adapter.j
 import { alternativeImplementation, diagnoseOperations, loadCapabilityRegistry, type LoadedRegistry, type OperationDiagnosis } from "./capabilities.js";
 import { previewCoverage } from "./coverage.js";
 import { selectRenderer } from "./select.js";
+import { conceptAssetIdsOf } from "./scene-job.js";
+import { selectionProblems, type ApprovedSelection } from "./selection-integrity.js";
 import { validateOutput } from "./output.js";
 
 export interface RenderDeps {
@@ -42,6 +44,11 @@ export interface RenderInput {
   /** Output settings. Never defaulted: leave out what is not decided and the render stays in planning. */
   settings?: unknown;
   purpose?: RenderPurpose;
+  /**
+   * The implementation and engine the approved production plan selected for each operation. When given, a renderer choice that differs from it (an alternative
+   * implementation, another engine) is a blocker, not a substitution. Absent only where no production plan exists (the workflow without a ProductionPort).
+   */
+  approved_selection?: readonly ApprovedSelection[];
 }
 
 /** Everything the adapter needs, and the snapshot that was verified. Only an `executable` record has one. */
@@ -123,6 +130,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
     }
     return { operation_id: op.operation_id, operation_type: op.operation_type, recipe_id: op.recipe_id, implementation_ref: recipe.implementation_ref, renderer, production_executable: ex.production_executable };
   });
+  if (input.approved_selection) blockers.push(...selectionProblems(input.approved_selection, operations));
   if (purpose === "production") blockers.push(...h.readiness.blockers.map((b) => `handoff is not production-ready: ${b}`));
   else notes.push("preview render: it may use draft recipes and is not a production video");
   const renderers = new Set(operations.map((o) => o.renderer).filter((r): r is Renderer => !!r));
@@ -169,9 +177,8 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   for (const a of assets) if (!a.present) blockers.push(`asset ${a.asset_id} is not on disk (${a.uri})`);
 
   const render_id = `rn_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
-  // Product screens the plan shows without the user declaring them genuine captures: the renderer must label them as a concept.
-  const byId = new Map(h.assets.map((a) => [a.asset_id, a]));
-  const concept_asset_ids = [...new Set(h.storyboard.scenes.flatMap((sc) => sc.required_assets.filter((r) => r.kind === "ui_screenshot" && r.availability === "supplied" && r.asset_id && byId.get(r.asset_id)?.genuine_product_ui !== true).map((r) => r.asset_id!)))];
+  // Product screens the plan shows without the user declaring them genuine captures: the renderer must label them as a concept. One definition, shared with assembly and the pre-flight.
+  const concept_asset_ids = conceptAssetIdsOf(h);
 
   // The approved source start of each clip (the storyboard's source_in_seconds) and what was measured about every asset when it was approved.
   const sceneById = new Map(h.storyboard.scenes.map((sc) => [sc.scene_id, sc]));

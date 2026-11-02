@@ -80,6 +80,15 @@ const KNOWLEDGE_QUERY: Record<EditorOperation["operation_type"], string> = {
   trim_clip: "shot continuity cut on motion sequencing",
 };
 
+/**
+ * What the deterministic Editor reads: the project, the storyboard, the Director's edit plan, the assets those scenes use, the asset blockers and the two constraints it
+ * retrieves guidance for. A `DirectorHandoff` satisfies it, so the post-approval path is unchanged; a plan that is not yet approved can be compiled from the same fields.
+ */
+export type EditorSource = Pick<DirectorHandoff, "project" | "storyboard" | "edit_plan" | "assets"> & {
+  asset_feasibility: Pick<DirectorHandoff["asset_feasibility"], "blockers">;
+  constraints: Pick<DirectorHandoff["constraints"], "platform" | "aspect_ratio">;
+};
+
 export interface EditorFindings {
   operations: EditorOperation[];
   conflicts: EditorConflict[];
@@ -94,7 +103,7 @@ export interface EditorFindings {
  * The deterministic part of the Editor: operations, conflicts and revision requests from the handoff alone, plus Editor-scoped
  * retrieval. It does not verify the handoff (runEditor does) and does not look at any file.
  */
-export async function planEditorWork(h: DirectorHandoff, deps: Pick<EditorDeps, "recipes" | "retriever">): Promise<EditorFindings> {
+export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "recipes" | "retriever">): Promise<EditorFindings> {
   const scenes = new Map(h.storyboard.scenes.map((s) => [s.scene_id, s]));
   const assets = new Map(h.assets.map((a) => [a.asset_id, a]));
   const conflicts: EditorConflict[] = [];

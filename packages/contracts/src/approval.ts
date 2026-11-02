@@ -32,6 +32,23 @@ export const ApprovalSubmission = z
   .refine((s) => s.decision !== "revision_requested" || s.notes.trim().length > 0, { message: "a revision request needs notes saying what to change", path: ["notes"] });
 export type ApprovalSubmission = z.infer<typeof ApprovalSubmission>;
 
+/**
+ * What a Gate 2 approval says about the production implementation behind the plan the user approved. Internal: never shown to the user. The five content hashes are
+ * recomputed from the plans, never trusted; `binding_hash` covers them and the Director edit-plan hash, so none can change alone.
+ */
+const ProductionBindingBody = z.object({
+  binding_version: z.literal(1),
+  edit_plan_hash: Sha256,
+  production_selection_hash: Sha256,
+  production_plan_hash: Sha256,
+  compiled_hash: Sha256,
+  preflight_result_hash: Sha256,
+  relevant_capabilities_hash: Sha256,
+});
+export const productionBindingHash = (b: z.infer<typeof ProductionBindingBody>): string => hashCanonical({ stage: "production_approval", ...b });
+export const ProductionBinding = ProductionBindingBody.extend({ binding_hash: Sha256 }).refine(({ binding_hash, ...b }) => productionBindingHash(b) === binding_hash, { message: "the production binding does not match its hash" });
+export type ProductionBinding = z.infer<typeof ProductionBinding>;
+
 /** One recorded decision. Approval of this record authorises exactly the plan whose hash it carries, and nothing else. */
 export const ApprovalRecord = z
   .object({
@@ -46,12 +63,18 @@ export const ApprovalRecord = z
      * but a record without it cannot authorise a render or a handoff.
      */
     evidence_hash: Sha256.optional(),
+    /** Gate 1 only: the run was made with production planning, so its Gate 2 approval must carry a production binding. Absent on older runs. */
+    production_required: z.literal(true).optional(),
+    /** Gate 2, approved only: the production implementation this approval covers. Absent on older runs and on runs without production planning. */
+    production_binding: ProductionBinding.optional(),
     decision: ReviewDecision,
     notes: Notes,
     decided_at: z.string().datetime(),
   })
   .refine((r) => r.stage !== "storyboard" || r.storyboard_version === r.plan_version, { message: "a storyboard record must carry its own version", path: ["storyboard_version"] })
-  .refine((r) => r.decision !== "revision_requested" || r.notes.trim().length > 0, { message: "a revision request needs notes", path: ["notes"] });
+  .refine((r) => r.decision !== "revision_requested" || r.notes.trim().length > 0, { message: "a revision request needs notes", path: ["notes"] })
+  .refine((r) => !r.production_binding || (r.stage === "edit_plan" && r.decision === "approved" && r.production_binding.edit_plan_hash === r.plan_hash), { message: "a production binding belongs to an approved edit-plan decision and must name its plan hash", path: ["production_binding"] })
+  .refine((r) => !r.production_required || r.stage === "storyboard", { message: "production_required is recorded at the storyboard gate", path: ["production_required"] });
 export type ApprovalRecord = z.infer<typeof ApprovalRecord>;
 
 // ---------- canonical serialisation and hashes ----------

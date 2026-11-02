@@ -1,9 +1,10 @@
 import { z } from "zod";
 import {
-  ApprovalRecord, ApprovalStage, Asset, AssetNotes, BrandFact, EditPlan, Escalation, Project, ScenePlan, Treatment, canonicalJson,
+  AdvisoryReport, ApprovalRecord, ApprovalStage, Asset, AssetNotes, BrandFact, CompiledEditPlan, EditPlan, Escalation, ProductionDecisionPlan, Project, ScenePlan, Treatment, canonicalJson,
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
-import { checkRenderable, currentEditPlan, currentEvidenceHash, currentStoryboard } from "./approvals.js";
+import { PRODUCTION_REASON, checkRenderable, currentEditPlan, currentEvidenceHash, currentStoryboard } from "./approvals.js";
+import { verifyProductionIntegrity } from "./production/integrity.js";
 import { DIRECTOR_GRAPH_VERSION, type DirectorStateType, type buildDirectorGraph } from "./graph.js";
 import { assetFileProblems, type AssetFiles } from "./handoff.js";
 import { IntakeOut, editIssues, planIssues } from "./nodes.js";
@@ -25,6 +26,10 @@ export const PersistedDirectorState = z
     treatmentDoc: Treatment.nullable(),
     scenePlan: ScenePlan.nullable(),
     editPlan: EditPlan.nullable(),
+    /** Added with production planning. Absent in checkpoints written before it existed, which stay readable. */
+    advisory: AdvisoryReport.nullable().optional(),
+    productionPlan: ProductionDecisionPlan.nullable().optional(),
+    compiledPlan: CompiledEditPlan.nullable().optional(),
     escalation: Escalation.nullable(),
     status: z.enum(["awaiting_approval", "approved", "escalated"]),
     gate: ApprovalStage.nullable(),
@@ -63,7 +68,7 @@ export type DirectorCheckpoint = z.infer<typeof DirectorCheckpoint>;
 export function checkpointOf(s: DirectorStateType, ids: { session_id: string; run_id: string }, now = new Date()): DirectorCheckpoint {
   const state = PersistedDirectorState.parse({
     project: s.project, assets: s.assets, facts: s.facts ?? [], notes: s.notes ?? [], intakeResult: s.intakeResult ?? null,
-    treatmentDoc: s.treatmentDoc ?? null, scenePlan: s.scenePlan ?? null, editPlan: s.editPlan ?? null, escalation: s.escalation ?? null,
+    treatmentDoc: s.treatmentDoc ?? null, scenePlan: s.scenePlan ?? null, editPlan: s.editPlan ?? null, advisory: s.advisory ?? null, productionPlan: s.productionPlan ?? null, compiledPlan: s.compiledPlan ?? null, escalation: s.escalation ?? null,
     status: s.status, gate: s.gate ?? null, approvals: s.approvals ?? [], revisions: s.revisions,
     skillsUsed: s.skillsUsed ?? [], referencesUsed: s.referencesUsed ?? [], citations: s.citations ?? [], trace: s.trace ?? [],
   });
@@ -118,6 +123,11 @@ export function resumeProblems(cp: DirectorCheckpoint, store: RunStore, ctx: Res
         else if (sbRec.evidence_hash !== ev) reasons.push("the assets or approved facts changed after the storyboard was approved (evidence hash mismatch)");
       }
       const ep = currentEditPlan(s)!;
+      // Waiting at gate 2 with production planning: the plans shown must be intact and be those of this storyboard and edit plan. A run made without it (no flag on its
+      // storyboard approval) has none, as before; plans that are present are verified either way.
+      const production = sbRec?.decision === "approved" && !!sbRec.production_required;
+      if (production && (!s.productionPlan || !s.compiledPlan)) reasons.push(`${PRODUCTION_REASON}: the production plans are missing`);
+      else if (s.productionPlan || s.compiledPlan) reasons.push(...verifyProductionIntegrity(s.productionPlan, s.compiledPlan, { storyboard: sb, edit_plan: ep }).map((r) => `${PRODUCTION_REASON}: ${r}`));
       const epRec = latest(records, "edit_plan");
       if (epRec?.decision === "approved" && epRec.plan_version === ep.version) reasons.push(`edit plan version ${ep.version} was already approved, so this checkpoint is out of date`);
     }

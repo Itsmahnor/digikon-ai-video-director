@@ -10,3 +10,4 @@ export * from "./resume.js";
 export * from "./editor-agent.js";
 export * from "./demo-client.js";
 export * from "./asset-match.js";
+export * from "./production/index.js";

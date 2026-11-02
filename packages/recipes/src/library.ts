@@ -46,6 +46,11 @@ export class RecipeLibrary {
     return this.byId.get(id);
   }
 
+  /** Every recipe whatever its status. For the capability registry, which must account for all of them. */
+  all(): Recipe[] {
+    return [...this.byId.values()];
+  }
+
   isAvailable(r: Recipe): boolean {
     return this.minStatus === "draft" || r.status === "reviewed";
   }

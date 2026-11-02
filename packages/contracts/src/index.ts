@@ -11,3 +11,6 @@ export * from "./approval.js";
 export * from "./handoff.js";
 export * from "./editor.js";
 export * from "./render.js";
+export * from "./capability.js";
+export * from "./capability-query.js";
+export * from "./production.js";

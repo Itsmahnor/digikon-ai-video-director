@@ -4,6 +4,7 @@ import {
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { editIssues, planIssues } from "./nodes.js";
+import { verifyProductionBinding, verifyProductionIntegrity } from "./production/integrity.js";
 
 /** The part of the Director state that approvals and the render guard look at. */
 export interface ApprovalState {
@@ -14,6 +15,9 @@ export interface ApprovalState {
   treatmentDoc?: Treatment | null;
   scenePlan?: ScenePlan | null;
   editPlan?: EditPlan | null;
+  /** The internal production plans behind the edit plan. Read as untrusted: each is parsed and recomputed. Absent on runs made without production planning. */
+  productionPlan?: unknown;
+  compiledPlan?: unknown;
   /** Everything ever decided, oldest first. Read as untrusted: each entry is re-validated. */
   approvals?: readonly unknown[];
   gate?: ApprovalStage | null;
@@ -55,6 +59,9 @@ function parseRecords(raw: readonly unknown[] = []): { records: ApprovalRecord[]
 }
 const latestFor = (records: ApprovalRecord[], stage: ApprovalStage) => [...records].reverse().find((r) => r.stage === stage) ?? null;
 
+/** Prefix of every reason that concerns the internal production plans, so a user-facing layer can say it in ordinary words without repeating the details. */
+export const PRODUCTION_REASON = "production integrity";
+
 export type RenderCheck =
   | { ok: true; storyboard: { version: number; hash: string }; edit_plan: { version: number; hash: string } }
   | { ok: false; reasons: string[] };
@@ -90,6 +97,19 @@ export function checkRenderable(s: ApprovalState, ctx: { recipes: RecipeLibrary 
     if (epRec.plan_version !== ep.version) reasons.push(`the approval is for edit plan version ${epRec.plan_version}, but the current edit plan is version ${ep.version}`);
     else if (epRec.storyboard_version !== sb.version) reasons.push(`the edit plan was approved on storyboard version ${epRec.storyboard_version}, but the current storyboard is version ${sb.version}`);
     else if (epRec.plan_hash !== ep.hash) reasons.push("the edit plan, or the storyboard it was built on, changed after approval (hash mismatch)");
+  }
+
+  // The production implementation the edit-plan approval covers. A run made with production planning (its storyboard approval says so) must carry the plans and a binding
+  // that still match them; a binding that is present is always verified. Runs made without production planning are checked as before.
+  if (sb && ep && epRec?.decision === "approved") {
+    const required = sbRec?.decision === "approved" && !!sbRec.production_required;
+    if (required || epRec.production_binding) {
+      if (!s.productionPlan || !s.compiledPlan) reasons.push(`${PRODUCTION_REASON}: the production plans are missing`);
+      else {
+        reasons.push(...verifyProductionIntegrity(s.productionPlan, s.compiledPlan, { storyboard: sb, edit_plan: ep }).map((r) => `${PRODUCTION_REASON}: ${r}`));
+        reasons.push(...verifyProductionBinding(epRec, s.productionPlan, s.compiledPlan).map((r) => `${PRODUCTION_REASON}: ${r}`));
+      }
+    }
   }
 
   if (sbRec && epRec && records.lastIndexOf(epRec) < records.lastIndexOf(sbRec)) reasons.push("the edit plan was approved before the storyboard");

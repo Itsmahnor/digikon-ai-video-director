@@ -11,14 +11,14 @@ import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { z, ZodError } from "zod";
-import { ApprovalSubmission, AssetUsage, BrandFact, CATEGORY_LABELS, ImageCategory, VisualReview, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
+import { ApprovalSubmission, RenderSettings, AssetUsage, BrandFact, CATEGORY_LABELS, ImageCategory, VisualReview, RUNTIME_TOLERANCE_S, Turn, assetFeasibility, auditClaims, type Asset, type AssetNotes, type DirectorHandoff, type RenderRecord, type RouteResult, type Transcript } from "@digikon/contracts";
 import {
   Command, HandoffRefusedError, matchAssetsToScenes, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
-  type DirectorStateType, type LlmClient, type SkillLibrary,
+  type DirectorStateType, type ProductionPort, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, COMPOSITION_TEMPLATE, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
@@ -38,6 +38,11 @@ export interface AppContext {
   whisper: () => WhisperStatus;
   skills: SkillLibrary;
   retriever: Retriever;
+  /**
+   * Builds a retriever whose recipe documents are labelled with which recipes can be carried out. When set (with `capabilitiesDir`), the labels come from the capability
+   * registry as it is now, and the retriever is rebuilt whenever the registry snapshot hash changes, instead of using a list fixed at start-up.
+   */
+  retrieverFor?: (implemented: ReadonlySet<string>) => Retriever;
   /** The knowledge notes behind the retriever. Used only to name the sources in the Editor handoff; optional. */
   knowledge?: readonly Doc[];
   recipes: RecipeLibrary;
@@ -56,6 +61,7 @@ export interface AppContext {
   ocr?: readonly OcrEngine[];
 }
 
+import { PLAIN_CANNOT_PRODUCE, PLAIN_PLAN_CHANGED, plainEscalation, plainReasons, publicApprovals } from "./public-view.js";
 type Graph = ReturnType<typeof buildDirectorGraph>;
 /** Measurements and speech for one uploaded file. Built in the background after upload. */
 interface AssetAnalysis {
@@ -156,7 +162,7 @@ export function createApp(ctx: AppContext) {
   app.onError((err, c) => {
     if (err instanceof HttpError) return c.json({ error: err.code, message: err.message }, err.status);
     if (err instanceof StaleApprovalError) return c.json({ error: "stale_approval", message: err.message }, 409);
-    if (err instanceof HandoffRefusedError) return c.json({ error: "handoff_refused", message: err.message, reasons: err.reasons }, 409);
+    if (err instanceof HandoffRefusedError) { const reasons = plainReasons(err.reasons); return c.json({ error: "handoff_refused", message: `The handoff to the Editor is refused: ${reasons.join("; ")}`, reasons }, 409); }
     if (err instanceof PersistenceError) {
       console.error(err.message);
       return c.json({ error: "not_saved", message: "The decision could not be saved to disk, so it was not applied. Check free disk space and try again." }, 503);
@@ -566,7 +572,7 @@ export function createApp(ctx: AppContext) {
     s.facts = body.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "entered in the console" }));
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: ctx.retriever, recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     const project = request.project;
@@ -623,7 +629,7 @@ export function createApp(ctx: AppContext) {
       const state = await s.graph.invoke(new Command({ resume: sub }), config);
       llmProblem = null;
       const record = buildRunRecord(state, { model: llm.model, skills: ctx.skills, library: ctx.recipes });
-      return c.json({ state: summarise(state, ctx), record, checkpoint: saveCheckpoint(s, state) });
+      return c.json({ state: summarise(state, ctx), record: { ...record, approvals: publicApprovals(record.approvals) }, checkpoint: saveCheckpoint(s, state) });
     } finally {
       s.deciding = false;
     }
@@ -661,11 +667,11 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: ctx.retriever, recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);
-      return c.json({ error: "cannot_resume", message: "This run cannot be resumed safely. Start a new run from the same files.", reasons: r.reasons }, 409);
+      return c.json({ error: "cannot_resume", message: "This run cannot be resumed safely. Start a new run from the same files.", reasons: plainReasons(r.reasons) }, 409);
     }
     const st = r.state;
     const analysis = new Map(st.notes.map((n) => [n.asset_id, { status: "done" as const, notes: n, transcript: null, note: null }]));
@@ -717,15 +723,38 @@ export function createApp(ctx: AppContext) {
   };
   const scrubRoots = (s: Session) => [s.dir, ctx.storageDir];
   const registryFor = (out: string): { registry: AdapterRegistry; available: boolean } => {
-    if (!ctx.ffmpegOk || !ctx.renderFont) return { registry: NO_ADAPTERS, available: false };
     // Every renderer that can run on this machine is registered; one that cannot (for example no browser) is simply absent, and a plan that needs it is blocked.
-    const adapters: RenderAdapter[] = [];
-    // Learned capabilities (validated, hash-checked files in the store) are given to FFmpeg every time, so a capability learned in one project is available in the next.
-    const reg = loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes });
-    const learned = reg.transitions("ffmpeg"), remotionLearned = reg.composed("remotion"), hyperframesLearned = reg.composed("hyperframes");
-    for (const make of [(o: { fontFile: string; outputRoot: string }) => createFfmpegAdapter({ ...o, learned }), (o: { fontFile: string; outputRoot: string }) => createRemotionAdapter({ ...o, learned: remotionLearned }), (o: { fontFile: string; outputRoot: string }) => createHyperframesStageAdapter({ ...o, learned: hyperframesLearned })]) { try { adapters.push(make({ fontFile: ctx.renderFont, outputRoot: out })); } catch { /* not available here */ } }
-    return adapters.length ? { registry: new AdapterRegistry(adapters), available: true } : { registry: NO_ADAPTERS, available: false };
+    const built = buildAdapterRegistry({ ffmpegOk: ctx.ffmpegOk, fontFile: ctx.renderFont, outputRoot: out, capabilitiesDir: ctx.capabilitiesDir, recipes: ctx.recipes });
+    return { registry: built.registry, available: built.available };
   };
+  /**
+   * The capability registry as it is right now: the recipes, the learned and visual records on disk, and what the live adapters register. Built fresh on every call (nothing
+   * is kept between calls), so a change in any of them shows up at once and the snapshot hash changes with it.
+   */
+  const liveCapabilities = (): { registry: CapabilityRegistry; engines: ReturnType<AdapterRegistry["renderers"]>; adapters: AdapterRegistry; failures: { engine: "ffmpeg" | "remotion" | "hyperframes"; reason: string }[] } => {
+    const built = buildAdapterRegistry({ ffmpegOk: ctx.ffmpegOk, fontFile: ctx.renderFont, outputRoot: tmpdir(), capabilitiesDir: ctx.capabilitiesDir, recipes: ctx.recipes });
+    const registry = CapabilityRegistry.from({ recipes: ctx.recipes.all(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), visual: loadVisualCapabilities(ctx.capabilitiesDir), implementations: implementationsOf(built.registry), adapter_failures: built.failures });
+    return { registry, engines: built.registry.renderers(), adapters: built.registry, failures: built.failures };
+  };
+  /**
+   * What the Director is given to make production decisions: the registry as data, the engines that exist, and the renderer's own pre-flight (the same planners final assembly
+   * runs). The Director never imports the render package; it sees only this. Set only when a capabilities folder is configured.
+   */
+  const productionPortFor = (sessionId: string): ProductionPort | undefined => ctx.capabilitiesDir ? {
+    capabilities: () => { const l = liveCapabilities(); return { snapshot: l.registry.snapshot, available_engines: l.engines }; },
+    preflight: (req) => { const l = liveCapabilities(); return runAdapterPreflight(req, { adapters: l.adapters, outputRoot: tmpdir(), assetFiles: (id, role) => assets.renderFile(sessionId, id, role) }); },
+  } : undefined;
+  let liveIndex: { hash: string; retriever: Retriever } | null = null;
+  const currentRetriever = (): Retriever => {
+    if (!ctx.retrieverFor || !ctx.capabilitiesDir) return ctx.retriever;
+    const { registry } = liveCapabilities();
+    if (liveIndex?.hash !== registry.snapshot.snapshot_hash) {
+      const implemented = new Set(registry.atLeast("executable").filter((c) => c.variant_of === null && c.recipe_id).map((c) => c.recipe_id!));
+      liveIndex = { hash: registry.snapshot.snapshot_hash, retriever: ctx.retrieverFor(implemented) };
+    }
+    return liveIndex.retriever;
+  };
+  const liveRetriever: Retriever = { retrieve: (q) => currentRetriever().retrieve(q), get: (id, c, fl) => currentRetriever().get(id, c, fl) };
   const availableRenderers = () => (ctx.ffmpegOk && ctx.renderFont ? registryFor(tmpdir()).registry.renderers() : []);
 
   /** Everything a render decision rests on, recomputed from the stored approvals, the stored Editor result and the settings given. */
@@ -741,25 +770,58 @@ export function createApp(ctx: AppContext) {
     const { registry, available } = registryFor(dirs.out);
     const settings = settingsIn ? { ...settingsIn, source: { kind: "user_approved", reference: `entered in the console form (session ${s.id}, run ${runId})` } } : undefined;
     const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, assetFiles: (id: string, role: string) => assets.renderFile(s.id, id, role) };
-    const planned = planRender({ editor_output: stored.output, handoff, settings, purpose: "preview" }, base);
+    // What Gate 2 approved, checked against what is about to run: the approval binding, the plans' integrity, the registry as it is now and the Editor's operations. A run approved
+    // without production planning is not bound and is planned as before. The approved selection goes into render planning, so the renderer cannot choose another implementation.
+    const st = (await s.graph!.getState({ configurable: { thread_id: runId } })).values as DirectorStateType;
+    const stored_approvals = new RunStore(s.dir).loadApprovals(runId);
+    const gate: ProductionGate = stored_approvals.problems.length
+      ? { bound: true, ok: false, reasons: stored_approvals.problems, approved_selection: [] }
+      : verifyProductionForRender({
+        records: stored_approvals.records, productionPlan: st.productionPlan, compiledPlan: st.compiledPlan, refs: currentStoryboard(st) && currentEditPlan(st) ? { storyboard: currentStoryboard(st)!, edit_plan: currentEditPlan(st)! } : null,
+        scenePlan: st.scenePlan ?? null, editPlan: st.editPlan ?? null, assets: st.assets, aspect_ratio: st.project.aspect_ratio, editorOperations: stored.output.operations, live: (() => { try { return productionPortFor(s.id)?.capabilities() ?? null; } catch { return null; } })(),
+      });
+    const approved_selection = gate.bound ? gate.approved_selection : undefined;
+    const planned = planRender({ editor_output: stored.output, handoff, settings, purpose: "preview", approved_selection }, base);
     if (!planned.ok) throw new HandoffRefusedError(planned.reasons.map((r) => scrub(r, scrubRoots(s))));
-    const production = planRender({ editor_output: stored.output, handoff, settings, purpose: "production" }, base);
+    const production = planRender({ editor_output: stored.output, handoff, settings, purpose: "production", approved_selection }, base);
     const selection = selectRenderer(planned.record, registry);
     const coverage = previewCoverage(handoff, stored.output, planned.record, selection.capabilities);
-    const eligible = planned.record.state === "executable" && coverage.complete && !!planned.plan;
+    const eligible = planned.record.state === "executable" && coverage.complete && !!planned.plan && (!gate.bound || (gate.ok && planned.record.blockers.length === 0));
     // The multi-engine path: scene by scene, each by its own engine, assembled by FFmpeg. Planned from the same approvals; it changes nothing approved.
     // A template counts as validated on its own only with a current validation record for the block a scene draws with it (read once here, not per operation).
     const visualRecords = loadVisualCapabilities(ctx.capabilitiesDir);
     const isolation = (template: string, block: string | null) => template === COMPOSITION_TEMPLATE && !!block && visualRecords.some((v) => v.block === block && v.usable);
     const assembleDeps: AssembleDeps | null = available && ctx.renderFont ? { ...base, fontFile: ctx.renderFont, isolation } : null;
     let assembly: AssemblePlanResult | null = null;
-    try { assembly = assembleDeps ? planAssembly({ editor_output: stored.output, handoff, settings, purpose: "preview" }, assembleDeps) : null; } catch (e) { console.error(e instanceof Error ? e.message : e); }
-    return { runId, handoff, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps };
+    try { assembly = assembleDeps ? planAssembly({ editor_output: stored.output, handoff, settings, purpose: "preview", approved_selection }, assembleDeps) : null; } catch (e) { console.error(e instanceof Error ? e.message : e); }
+    // Bound runs: planned again at the real output settings, and anything final assembly cannot carry out as approved stops the render (no placeholder, no other implementation).
+    const production_gate = { bound: gate.bound, integrity: !gate.bound || gate.ok, settings: true, reasons: gate.bound ? [...gate.reasons] : ([] as string[]) };
+    if (gate.bound && gate.ok) {
+      const parsed = RenderSettings.safeParse(settings);
+      if (!parsed.success) production_gate.reasons.push("no valid output settings to plan against");
+      else {
+        production_gate.reasons.push(...replanAtActualSettings({ plan: st.productionPlan, compiled: st.compiledPlan, storyboard: st.scenePlan!, assets: st.assets, art_direction: st.treatmentDoc?.art_direction ?? null, aspect_ratio: st.project.aspect_ratio, settings: parsed.data, adapters: registry, outputRoot: dirs.out, assetFiles: base.assetFiles }));
+        if (assembly?.ok) production_gate.reasons.push(...renderTimeProblems(assembly.plan));
+        else production_gate.reasons.push("final assembly could not be planned");
+      }
+      production_gate.settings = production_gate.reasons.length === 0;
+    }
+    return { runId, handoff, production_gate, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps };
+  };
+
+  /** A bound run whose approved implementation cannot be rendered as approved: nothing starts. The details go to the log; the user gets one ordinary sentence. */
+  const productionRefusal = (p: Awaited<ReturnType<typeof prepare>>) => {
+    const g = p.production_gate;
+    if (!g.bound || (g.integrity && g.settings)) return null;
+    console.error(`render refused (production): ${g.reasons.join(" | ")}`);
+    return g.integrity
+      ? { error: "cannot_produce_as_approved", message: PLAIN_CANNOT_PRODUCE }
+      : { error: "plan_changed", message: PLAIN_PLAN_CHANGED };
   };
 
   const assemblyView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
     if (!p.assembly) return null;
-    if (!p.assembly.ok) return { ok: false as const, reasons: p.assembly.reasons.map((r) => scrub(r, scrubRoots(s))) };
+    if (!p.assembly.ok) return { ok: false as const, reasons: plainReasons(p.assembly.reasons.map((r) => scrub(r, scrubRoots(s)))) };
     const a = p.assembly.plan;
     return {
       ok: true as const, complete: a.complete,
@@ -787,7 +849,9 @@ export function createApp(ctx: AppContext) {
     const typeOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.operation_type]));
     const prodBlockers: string[] = p.production.ok ? p.production.record.blockers : [];
     const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, note: typeOf.get(o.operation_id) === "mix_audio" ? "audio is not part of this phase: it is reported as unresolved and keeps the film from being complete or final" : null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, supported: o.renderer !== null }));
-    const blockers = [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s)));
+    const blockers = plainReasons([...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s))));
+    const refused = productionRefusal(p);
+    if (refused) blockers.push(refused.message);
     return {
       run_id: p.runId,
       renderer_available: p.available,
@@ -825,7 +889,7 @@ export function createApp(ctx: AppContext) {
     const s = session(c.req.param("id"));
     if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
     const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
-    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: ctx.retriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true });
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true });
     if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
     saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
     return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });
@@ -852,6 +916,8 @@ export function createApp(ctx: AppContext) {
     s.rendering = true;
     try {
       let p = await prepare(s, body.settings);
+      const refusedFirst = productionRefusal(p);
+      if (refusedFirst) return c.json(refusedFirst, 409);
       let learning: { attempted: unknown[]; not_learnable: unknown[] } | null = null;
       // Generation first: a capability nothing can run yet is learned (a real render that passes its checks), not treated as a reason to stop.
       if (!p.eligible && ctx.capabilitiesDir && ctx.renderFont && ctx.ffmpegOk) {
@@ -867,6 +933,8 @@ export function createApp(ctx: AppContext) {
           if (gaps.length) p = await prepare(s, body.settings);
         }
       }
+      const refusedAfter = productionRefusal(p);
+      if (refusedAfter) return c.json(refusedAfter, 409);
       const view = planView(s, p);
       if (!p.eligible || !p.planned.plan) {
         const a = p.assembly;
@@ -1017,13 +1085,13 @@ function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipe
     claimsAudit: d.treatmentDoc ? auditClaims(d.treatmentDoc.claims, scenes, d.facts ?? []) : [],
     assetFeasibility: d.scenePlan ? assetFeasibility(d.scenePlan, d.assets) : null,
     status: s["status"], intake: s["intakeResult"] ?? null, treatment: s["treatmentDoc"] ?? null,
-    scenePlan: s["scenePlan"] ?? null, editPlan: s["editPlan"] ?? null, escalation: s["escalation"] ?? null,
+    scenePlan: s["scenePlan"] ?? null, editPlan: s["editPlan"] ?? null, escalation: plainEscalation(s["escalation"] as Parameters<typeof plainEscalation>[0]),
     gate: s["gate"] ?? null,
     versions: { storyboard: sb?.version ?? null, edit_plan: ep?.version ?? null },
     hashes: { storyboard: sb?.hash ?? null, edit_plan: ep?.hash ?? null },
-    approvals: s["approvals"] ?? [],
+    approvals: publicApprovals((s["approvals"] ?? []) as Parameters<typeof publicApprovals>[0]),
     revisions: { used: s["revisions"] ?? { storyboard: 0, edit_plan: 0 }, max: MAX_REVISIONS },
-    renderable: check.ok ? { ok: true, reasons: [] as string[] } : { ok: false, reasons: check.reasons },
+    renderable: check.ok ? { ok: true, reasons: [] as string[] } : { ok: false, reasons: plainReasons(check.reasons) },
     citations: s["citations"] ?? [], skillsUsed: s["skillsUsed"] ?? [], referencesUsed: s["referencesUsed"] ?? [], trace: s["trace"] ?? [], notes: s["notes"] ?? [],
   };
 }

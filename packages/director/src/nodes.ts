@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
+  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, assetFeasibility, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
   type Asset, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
 } from "@digikon/contracts";
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
@@ -8,6 +8,8 @@ import { KeywordRetriever, brandFactDocs, type Collection, type Hit, type Retrie
 import type { LlmClient } from "./llm.js";
 import type { ApprovalLog } from "./store.js";
 import type { SkillLibrary, Step } from "./skills.js";
+import { candidateRecipeIds } from "./production/plan.js";
+import type { ProductionOutcome, ProductionPort } from "./production/compile.js"; // a type only: compile.ts depends on this file, so it is loaded when first used (below)
 
 export interface Deps {
   llm: LlmClient;
@@ -16,6 +18,11 @@ export interface Deps {
   recipes: RecipeLibrary;
   /** Durable record of every gate decision. When set, a decision only takes effect once it has been written. */
   approvalLog?: ApprovalLog;
+  /**
+   * Production intelligence, supplied by the console from the live capability registry and the renderer's planners. When set, the model is offered only recipes the registry
+   * says can run, and the edit plan is turned into a production decision plan, compiled and pre-flighted before it can reach Gate 2. The Director never imports the render package.
+   */
+  production?: ProductionPort;
   /** A new treatment must carry art direction (the default). Only fixtures that predate it switch this off. */
   requireArtDirection?: boolean;
 }
@@ -68,12 +75,12 @@ export function formatRecipe(r: Recipe): string {
  */
 export async function generateWithRepair<T>(opts: {
   attempt: (previous: { value: T; issues: string[] } | null) => Promise<T>;
-  check: (value: T) => string[];
+  check: (value: T) => string[] | Promise<string[]>;
 }): Promise<{ value: T; issues: string[]; attempts: number }> {
   let previous: { value: T; issues: string[] } | null = null;
   for (let n = 1; n <= MAX_ATTEMPTS; n++) {
     const value = await opts.attempt(previous);
-    const issues = opts.check(value);
+    const issues = await opts.check(value);
     if (issues.length === 0) return { value, issues, attempts: n };
     previous = { value, issues };
   }
@@ -275,16 +282,33 @@ export function planHasAudio(plan: ScenePlan, assets: Asset[]): boolean {
 export async function candidateRecipes(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan): Promise<Recipe[]> {
   const include_draft = deps.recipes.minStatus === "draft";
   const found = new Map<string, Recipe>();
-  const add = (hits: Hit[]) => { for (const h of hits) { const r = deps.recipes.get(h.doc.id); if (r && deps.recipes.isAvailable(r)) found.set(r.recipe_id, r); } };
+  // With production intelligence, only recipes whose capability the live registry says can carry the operation out for this scene are candidates at all.
+  const live = deps.production?.capabilities();
+  const OPS = ["trim_clip", "overlay_text", "render_graphics_scene", "concat", "mix_audio"] as const;
+  const allowedCache = new Map<string, Set<string>>();
+  const allowedFor = (scene: ScenePlan["scenes"][number]): Set<string> | null => {
+    if (!live) return null;
+    let set = allowedCache.get(scene.scene_id);
+    if (!set) {
+      set = new Set(OPS.flatMap((op) => candidateRecipeIds(live.snapshot, scene, op, { assets, aspect_ratio: project.aspect_ratio, available_engines: live.available_engines })));
+      allowedCache.set(scene.scene_id, set);
+    }
+    return set;
+  };
+  const allowedAnywhere = (): Set<string> | null => (live ? new Set(plan.scenes.flatMap((s) => [...allowedFor(s)!])) : null);
+  const add = (hits: Hit[], scene?: ScenePlan["scenes"][number]) => {
+    const allowed = scene ? allowedFor(scene) : allowedAnywhere();
+    for (const h of hits) { const r = deps.recipes.get(h.doc.id); if (r && deps.recipes.isAvailable(r) && (!allowed || allowed.has(r.recipe_id))) found.set(r.recipe_id, r); }
+  };
   for (const s of plan.scenes) {
     const media = mediaOf(s, assets);
     const base = { aspect_ratio: project.aspect_ratio, duration_s: s.duration_seconds, media, include_draft };
-    add(await retrieve(deps, "shot_recipes", `${s.purpose} ${s.transition_out} transition`, 3, { ...base, recipe_type: "transition" }, 900));
-    add(await retrieve(deps, "shot_recipes", `${s.shot.camera_motion} ${s.shot.visual_action}`, 3, { ...base, recipe_type: "camera_move" }, 900));
-    if (s.overlay) add(await retrieve(deps, "shot_recipes", `${s.overlay.text} ${s.purpose} on-screen text`, 3, { ...base, recipe_type: "animation" }, 900));
+    add(await retrieve(deps, "shot_recipes", `${s.purpose} ${s.transition_out} transition`, 3, { ...base, recipe_type: "transition" }, 900), s);
+    add(await retrieve(deps, "shot_recipes", `${s.shot.camera_motion} ${s.shot.visual_action}`, 3, { ...base, recipe_type: "camera_move" }, 900), s);
+    if (s.overlay) add(await retrieve(deps, "shot_recipes", `${s.overlay.text} ${s.purpose} on-screen text`, 3, { ...base, recipe_type: "animation" }, 900), s);
   }
   // A scene with a structured visual is drawn by the scene-composition recipe: it is always a candidate when one exists.
-  if (plan.scenes.some((s) => s.visual)) { const r = deps.recipes.get(COMPOSITION_RECIPE); if (r && deps.recipes.isAvailable(r)) found.set(r.recipe_id, r); }
+  if (plan.scenes.some((s) => s.visual && (!live || allowedFor(s)!.has(COMPOSITION_RECIPE)))) { const r = deps.recipes.get(COMPOSITION_RECIPE); if (r && deps.recipes.isAvailable(r)) found.set(r.recipe_id, r); }
   // Sound recipes only make sense when the approved storyboard has something to mix. A brief with no voiceover, music, sound
   // effects or audio assets must never be offered (and so never receive) an audio operation such as loudness-normalise.
   if (planHasAudio(plan, assets)) {
@@ -330,7 +354,7 @@ export function editIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "re
   return issues;
 }
 
-export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1, revision?: Revision<EditPlan>) {
+export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1, revision?: Revision<EditPlan>, treatment?: Treatment) {
   const { system, skills, references } = deps.skills.systemFor("edit_plan");
   const candidates = await candidateRecipes(deps, project, assets, plan);
   if (candidates.length === 0) {
@@ -353,6 +377,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     ...(revision ? [revisionSection("edit plan", revision)] : []),
   ].join("\n\n");
 
+  let production: ProductionOutcome | null = null;
   const result = await generateWithRepair<EditPlan>({
     attempt: async (prev) => {
       const out = await deps.llm.generate({ name: "edit_plan", system, user: base + repairNote(prev), schema: EditPlanOut });
@@ -363,9 +388,33 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
       if (rec && deps.recipes.isAvailable(rec)) for (const s of plan.scenes) if (s.visual && !uses.some((u) => u.scene_id === s.scene_id && u.recipe_id === COMPOSITION_RECIPE)) uses.push({ use_id: `U${String(++n).padStart(2, "0")}`, scene_id: s.scene_id, recipe_id: COMPOSITION_RECIPE, params: {}, rationale: `Draws the scene from its approved ${s.visual.block.replaceAll("_", " ")} visual: ${s.visual_purpose ?? s.purpose}`.slice(0, 280) });
       return EditPlan.parse({ project_id: project.project_id, version, uses });
     },
-    check: (edit) => [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project)],
+    check: async (edit) => {
+      production = null;
+      const issues = [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project)];
+      // Only a valid Director plan is turned into a production plan; the model is shown every production problem so it can repair its plan or the run escalates.
+      if (!deps.production) return issues;
+      // Fail closed: with a ProductionPort configured, an edit plan without the approved treatment cannot be production-checked, so it cannot pass as if it had been.
+      if (!treatment) return [...issues, "production - the approved treatment is missing, so the production plan cannot be built or validated"];
+      if (issues.length) return issues;
+      production = await produceFor(deps, project, assets, plan, edit, treatment);
+      const found = production as ProductionOutcome;
+      // never trust an empty blocker list on its own: a plan that is not ready is a blocker even if no line says why
+      return found.ready || found.blockers.length ? found.blockers.map((b) => `production - ${b}`) : ["production - the production plan is not ready and gave no reason"];
+    },
   });
-  return { ...result, skills, references, citations: [...principles.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
+  return { ...result, production: production as ProductionOutcome | null, skills, references, citations: [...principles.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
+}
+
+/**
+ * Production planning for one Director edit plan, the same call whether the edit-plan step or the approval gate asks for it: decide against the live registry, compile,
+ * and run the renderer's pre-flight. The registry is read fresh each time. Deterministic: the same plans and registry give the same hashes.
+ */
+export async function produceFor(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, edit: EditPlan, treatment: Treatment): Promise<ProductionOutcome> {
+  const { produceProduction } = await import("./production/compile.js");
+  return produceProduction({
+    source: { project: (({ owner_id: _o, ...p }) => p)(project), storyboard: plan, edit_plan: edit, assets, asset_feasibility: { blockers: assetFeasibility(plan, assets).blockers }, constraints: { platform: project.platform, aspect_ratio: project.aspect_ratio } },
+    scenePlan: plan, storyboard: { version: plan.version, hash: storyboardHash(treatment, plan) }, editPlan: edit, assets, art_direction: treatment.art_direction ?? null,
+  }, deps.production!, { recipes: deps.recipes, retriever: deps.retriever });
 }
 
 export function escalationFor(stage: string, issues: string[], tried: string[]): Escalation {

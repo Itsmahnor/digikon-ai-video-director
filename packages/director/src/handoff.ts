@@ -1,6 +1,6 @@
 import {
   ApprovalRecord, DirectorHandoff, EditorOutput, HANDOFF_SCHEMA_VERSION, assetFeasibility, auditClaims, canonicalJson, handoffContentHash, verifyHandoffIntegrity,
-  type ApprovalStage, type Asset, type AssetFeasibility, type BrandFact, type ClaimAuditEntry, type EditPlan, type ProvenanceEntry, type Project, type Readiness, type RequiredOperation,
+  type ApprovalStage, type Asset, type AssetFeasibility, type EditorOperation, type BrandFact, type ClaimAuditEntry, type EditPlan, type ProvenanceEntry, type Project, type Readiness, type RequiredOperation,
 } from "@digikon/contracts";
 import { createHash } from "node:crypto";
 import { closeSync, openSync, readSync, statSync } from "node:fs";
@@ -9,6 +9,7 @@ import { AGENT_SCOPES, type Doc } from "@digikon/rag";
 import { recipeReadiness, resolveParams, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
 import { checkRenderable, type ApprovalState } from "./approvals.js";
 import { editIssues, planIssues } from "./nodes.js";
+import type { EditorSource } from "./editor-agent.js";
 import type { SkillLibrary } from "./skills.js";
 
 /** The Director state a handoff is built from. Everything else in the graph state stays inside the Director. */
@@ -328,30 +329,30 @@ export function checkEditorOutput(raw: unknown, handoff: DirectorHandoff, ctx: {
   return { ok: issues.length === 0, issues, requires_reapproval: o.revision_requests.length > 0 || drift };
 }
 
-/** Every way an already-parsed Editor output departs from the handoff. The Editor agent runs this on its own output before it states `validation`. */
-export function editorOutputIssues(o: EditorOutput, handoff: DirectorHandoff, ctx: { recipes: RecipeLibrary }): { issues: string[]; drift: boolean } {
+/**
+ * Every way a set of Editor operations departs from the plans they carry out: each operation traces to an approved use, scene, asset and time; parameters are the
+ * recipe's resolved ones (a difference without a revision request is drift); and the same validator the Director used still passes. It needs no handoff, so the
+ * Editor can run it on a compiled plan before Gate 2 and on a finished output afterwards, with identical rules.
+ */
+export function operationIssues(
+  operations: readonly EditorOperation[],
+  source: Pick<EditorSource, "project" | "storyboard" | "edit_plan" | "assets">,
+  ctx: { recipes: RecipeLibrary },
+  about: { revisedScenes: ReadonlySet<string>; reportedUseIds: ReadonlySet<string> },
+): { issues: string[]; drift: boolean } {
   const issues: string[] = [];
-  if (o.handoff_id !== handoff.handoff_id || o.handoff_content_hash !== handoff.content_hash) issues.push("the result was made from a different handoff");
-  if (canonicalJson(o.approved) !== canonicalJson(handoff.approved)) issues.push("the result names different approved plan versions or hashes than the handoff");
-
-  const scenes = new Map(handoff.storyboard.scenes.map((s) => [s.scene_id, s]));
-  const uses = new Map(handoff.edit_plan.uses.map((u) => [u.use_id, u]));
-  const revisedScenes = new Set(o.revision_requests.flatMap((r) => r.scene_ids));
+  const scenes = new Map(source.storyboard.scenes.map((s) => [s.scene_id, s]));
+  const uses = new Map(source.edit_plan.uses.map((u) => [u.use_id, u]));
   let drift = false;
 
   const opIds = new Set<string>(), perUse = new Map<string, number>();
-  for (const op of o.operations) {
+  for (const op of operations) {
     if (opIds.has(op.operation_id)) issues.push(`operation ${op.operation_id}: operation_id is used more than once`);
     opIds.add(op.operation_id);
     perUse.set(op.source_use_id, (perUse.get(op.source_use_id) ?? 0) + 1);
   }
   for (const [id, n] of perUse) if (n > 1) issues.push(`approved recipe use ${id} is implemented by more than one operation`);
-  o.provenance.retrievals.forEach((r, i) => {
-    if (r.agent !== "editor") issues.push(`retrieval ${i + 1} was made as ${r.agent}, not the editor`);
-    if (!AGENT_SCOPES.editor.collections.includes(r.collection as never)) issues.push(`retrieval ${i + 1} read ${r.collection}, which is outside the Editor's scope`);
-  });
-
-  for (const op of o.operations) {
+  for (const op of operations) {
     const at = `operation ${op.operation_id}`;
     const scene = scenes.get(op.target_scene_id);
     const use = uses.get(op.source_use_id);
@@ -365,7 +366,7 @@ export function editorOutputIssues(o: EditorOutput, handoff: DirectorHandoff, ct
       if (recipe.version !== op.recipe_version) issues.push(`${at}: recipe ${op.recipe_id} is version ${recipe.version}, not ${op.recipe_version}`);
       if (canonicalJson(op.parameters) !== canonicalJson(resolveParams(recipe, use.params))) {
         drift = true;
-        if (!revisedScenes.has(scene.scene_id)) issues.push(`${at}: parameters differ from the approved ${op.source_use_id} without a revision request`);
+        if (!about.revisedScenes.has(scene.scene_id)) issues.push(`${at}: parameters differ from the approved ${op.source_use_id} without a revision request`);
       }
     }
     for (const a of op.asset_ids) if (!scene.asset_ids.includes(a)) issues.push(`${at}: asset ${a} is not approved for ${scene.scene_id}`);
@@ -374,14 +375,30 @@ export function editorOutputIssues(o: EditorOutput, handoff: DirectorHandoff, ct
     if (op.caption && op.caption.text !== scene.overlay?.text) issues.push(`${at}: caption text is not the approved overlay text for ${scene.scene_id}`);
   }
 
-  const reported = new Set(o.conflicts.map((c) => c.use_id).filter((x): x is string => !!x));
-  const implemented = new Set(o.operations.map((op) => op.source_use_id));
+  const reported = new Set(about.reportedUseIds);
+  const implemented = new Set(operations.map((op) => op.source_use_id));
   for (const id of uses.keys()) if (!implemented.has(id) && !reported.has(id)) issues.push(`approved recipe use ${id} has no operation and no reported conflict`);
 
   // Parameter ranges and recipe rules still hold, checked with the same validator the Director used.
-  const asPlan = { ...handoff.edit_plan, uses: o.operations.map((op) => ({ use_id: op.operation_id, scene_id: op.target_scene_id, recipe_id: op.recipe_id, params: op.parameters as Record<string, number | string | boolean>, rationale: op.expected_result })) };
-  for (const i of validateEditPlan(asPlan, handoff.storyboard, ctx.recipes, projectOf(handoff.project), handoff.assets)) {
+  const asPlan = { ...source.edit_plan, uses: operations.map((op) => ({ use_id: op.operation_id, scene_id: op.target_scene_id, recipe_id: op.recipe_id, params: op.parameters as Record<string, number | string | boolean>, rationale: op.expected_result })) };
+  for (const i of validateEditPlan(asPlan, source.storyboard, ctx.recipes, projectOf(source.project), source.assets)) {
     if (i.code !== "max_uses" && i.code !== "duplicate_use") issues.push(`operation ${i.use_id}: ${i.code} - ${i.message}`);
   }
   return { issues, drift };
+}
+
+/** Every way an already-parsed Editor output departs from the handoff. The Editor agent runs this on its own output before it states `validation`. */
+export function editorOutputIssues(o: EditorOutput, handoff: DirectorHandoff, ctx: { recipes: RecipeLibrary }): { issues: string[]; drift: boolean } {
+  const issues: string[] = [];
+  if (o.handoff_id !== handoff.handoff_id || o.handoff_content_hash !== handoff.content_hash) issues.push("the result was made from a different handoff");
+  if (canonicalJson(o.approved) !== canonicalJson(handoff.approved)) issues.push("the result names different approved plan versions or hashes than the handoff");
+
+  o.provenance.retrievals.forEach((r, i) => {
+    if (r.agent !== "editor") issues.push(`retrieval ${i + 1} was made as ${r.agent}, not the editor`);
+    if (!AGENT_SCOPES.editor.collections.includes(r.collection as never)) issues.push(`retrieval ${i + 1} read ${r.collection}, which is outside the Editor's scope`);
+  });
+
+  const ops = operationIssues(o.operations, handoff, ctx, { revisedScenes: new Set(o.revision_requests.flatMap((r) => r.scene_ids)), reportedUseIds: new Set(o.conflicts.map((c) => c.use_id).filter((x): x is string => !!x)) });
+  issues.push(...ops.issues);
+  return { issues, drift: ops.drift };
 }

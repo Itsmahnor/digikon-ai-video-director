@@ -43,6 +43,12 @@ type Background = keyof typeof BACKGROUNDS;
 type Accent = keyof typeof ACCENTS;
 /** Parameter bounds. They mirror the recipes' own; the adapter does not rely on the recipe having been checked. */
 const RANGES = { fade_in_s: [0.2, 2], stagger_s: [0.2, 1], duration_s: [0.2, 1.5] } as const;
+/** Transition length bounds, per template. Each equals its recipe's duration_s range, so the adapter refuses what the recipe would. Any other crossfade template keeps the shared range. */
+const TRANSITION_DURATION: Readonly<Record<string, readonly [number, number]>> = {
+  "ffmpeg/xfade-fade": [0.2, 1.5], // crossfade
+  "ffmpeg/xfade-fadeblack": [0.3, 1.5], // dip-to-black
+  "ffmpeg/xfade-wipe": [0.2, 1.0], // directional-wipe
+};
 const ENUMS: Record<string, readonly string[]> = { background: Object.keys(BACKGROUNDS), accent: Object.keys(ACCENTS), fit: ["contain", "cover"], motion: ["none", "slow_zoom"], source_audio: ["keep", "drop"] };
 const PARAMS: Record<Kind, readonly string[]> = {
   "text-card": ["fade_in_s", "background"],
@@ -371,7 +377,8 @@ export function planScenes(job: Omit<RenderJob, "signal">, opts: Pick<FfmpegAdap
       xfade = mapped;
     }
     const d = num(op.parameters["duration_s"]);
-    if (d === null || d < RANGES.duration_s[0] || d > RANGES.duration_s[1]) { issues.push(`${at}: duration_s must be a number from ${RANGES.duration_s[0]} to ${RANGES.duration_s[1]}`); continue; }
+    const [dMin, dMax] = TRANSITION_DURATION[job.templates[op.operation_id] ?? ""] ?? RANGES.duration_s;
+    if (d === null || d < dMin || d > dMax) { issues.push(`${at}: duration_s must be a number from ${dMin} to ${dMax}`); continue; }
     const frames = Math.round(d * s.fps);
     const next = scenes[target.index + 1];
     if (frames < 1 || Math.abs(frames / s.fps - d) > 1e-6) issues.push(`${at}: ${d}s is not a whole number of frames at ${s.fps} fps`);

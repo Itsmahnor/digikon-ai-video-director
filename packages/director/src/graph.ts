@@ -1,11 +1,14 @@
 import { Annotation, Command, END, MemorySaver, START, StateGraph, interrupt } from "@langchain/langgraph";
 import {
-  ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE,
-  type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type EditPlan, type Escalation, type Project, type ReviewDecision, type ScenePlan, type Treatment,
+  ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE, productionBindingOf,
+  type AdvisoryReport, type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type CompiledEditPlan, type EditPlan, type Escalation, type ProductionDecisionPlan, type Project, type ReviewDecision, type ScenePlan, type Treatment,
 } from "@digikon/contracts";
 import { currentEditPlan, currentEvidenceHash, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
+import { adviseFeasibility } from "./production/advisory.js";
+import { verifyProductionIntegrity } from "./production/integrity.js";
+import { validateProductionPlan } from "./production/plan.js";
 import {
-  analyseAssets, editPlanNode, escalationFor, intakeNode, storyboardNode, treatmentNode,
+  analyseAssets, editPlanNode, escalationFor, intakeNode, produceFor, storyboardNode, treatmentNode,
   type Deps, type IntakeOut,
 } from "./nodes.js";
 
@@ -32,6 +35,11 @@ export const DirectorState = Annotation.Root({
   treatmentDoc: Annotation<Treatment | null>(),
   scenePlan: Annotation<ScenePlan | null>(),
   editPlan: Annotation<EditPlan | null>(),
+  /** Gate 1 advisory: can the storyboard's production requirements plausibly be met by what is live now? Selects nothing and approves nothing. Absent without a production port. */
+  advisory: Annotation<AdvisoryReport | null>(),
+  /** After Gate 1: the production decision plan for the edit plan, and its compiled operations. Shown at Gate 2 (a later stage binds them to the approval). Absent without a production port. */
+  productionPlan: Annotation<ProductionDecisionPlan | null>(),
+  compiledPlan: Annotation<CompiledEditPlan | null>(),
   escalation: Annotation<Escalation | null>(),
   status: Annotation<DirectorStatus>(),
   /** The gate waiting for a human decision, or null. */
@@ -90,6 +98,19 @@ function revisionEscalation(stage: ApprovalStage, history: string[]): Escalation
  * A change request at a gate goes back to the step that made the plan, which produces the next version and returns to the same gate.
  * Rendering, QA and export attach after gate 2 in later milestones, behind `assertRenderable`.
  */
+const latestApprovedStoryboard = (records: readonly ApprovalRecord[]) => [...records].reverse().find((r) => r.stage === "storyboard" && r.decision === "approved") ?? null;
+
+/** Said in ordinary words: the reviewer is never asked to solve an internal problem. */
+const cannotProduce = (why: string) => ({
+  escalation: {
+    what_failed: why, evidence: [] as string[],
+    what_was_tried: ["Your approved plans were kept exactly as they are."],
+    options_left: ["Ask for changes to the edit plan so another approach can be tried", "Add or replace material the plan depends on"],
+    decision_needed: "Would you like to change the plan, or provide different material?",
+  } satisfies Escalation,
+  gate: null, pendingRevision: null, status: "escalated" as const, trace: ["edit_plan_gate: the production plan could not be completed"],
+});
+
 export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver()) {
   const gateNode = (stage: ApprovalStage) => async (s: DirectorStateType) => {
     const cur = stage === "storyboard" ? currentStoryboard(s) : currentEditPlan(s);
@@ -102,6 +123,32 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       : d.storyboard_version !== undefined && d.storyboard_version !== s.scenePlan!.version ? `This decision assumes storyboard version ${d.storyboard_version}, but the storyboard is version ${s.scenePlan!.version}.`
       : null;
 
+    // The internal production implementation behind a Gate 2 proposal. The reviewer sees only the creative plan; this is kept in step with it. A proposal whose implementation
+    // changed (a capability changed, or the stored plans no longer hold together) is refreshed from the approved plans and shown again, never approved as it was.
+    const port = deps.production;
+    const needsProduction = stage === "edit_plan" && (!!port || (latestApprovedStoryboard(s.approvals)?.production_required ?? false));
+    if (needsProduction && !port) return cannotProduce("This project was set up to prepare its production plan automatically, but that service is not available now.");
+    let prod = { plan: s.productionPlan ?? null, compiled: s.compiledPlan ?? null };
+    const refs = () => ({ storyboard: currentStoryboard(s)!, edit_plan: cur });
+    /** Why the plans shown no longer hold: broken integrity, or capabilities that changed since they were made. Empty when they hold. */
+    const stalePlans = (): string[] => {
+      if (!prod.plan || !prod.compiled) return ["the production plans are missing"];
+      const live = port!.capabilities();
+      const planning = { scenePlan: s.scenePlan!, storyboard: refs().storyboard, editPlan: s.editPlan!, assets: s.assets, aspect_ratio: s.project.aspect_ratio, available_engines: live.available_engines };
+      return [...verifyProductionIntegrity(prod.plan, prod.compiled, refs()), ...validateProductionPlan(live.snapshot, planning, prod.plan).issues];
+    };
+    /** Prepares the production plans again from the approved plans. Null when they cannot be completed. */
+    const prepare = async () => {
+      if (!s.treatmentDoc || !s.editPlan) return null;
+      const o = await produceFor(deps, s.project, s.assets, s.scenePlan!, s.editPlan, s.treatmentDoc);
+      return o.ready ? { plan: o.plan, compiled: o.compiled } : null;
+    };
+    if (needsProduction && stalePlans().length) {
+      const fresh = await prepare();
+      if (!fresh) return cannotProduce("We prepared the production plan again from your approved storyboard and edit plan, and it could not be completed.");
+      prod = fresh;
+    }
+
     // Pauses the run and saves state. Resume with gateDecision(...). A decision that does not match this exact stage and version
     // is never applied: the gate pauses again, saying why, and nothing is recorded. (The console also answers such a decision with 409 before it gets here.)
     let refused: string | null = null;
@@ -110,22 +157,38 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const raw = interrupt({
         kind: `${stage}_approval`, stage, plan_version: cur.version, plan_hash: cur.hash,
         treatment: s.treatmentDoc, scenePlan: s.scenePlan, editPlan: stage === "edit_plan" ? s.editPlan : null,
+        advisory: stage === "storyboard" ? s.advisory ?? null : null, productionPlan: stage === "edit_plan" ? prod.plan : null, compiledPlan: stage === "edit_plan" ? prod.compiled : null,
         revisions_used: s.revisions[stage], max_revisions: MAX_REVISIONS, earlier_requests: earlier, refused_previous: refused,
         question: stage === "storyboard" ? "Approve this storyboard so the edit plan can be made?" : "Approve this edit plan?",
       });
       const parsed = ApprovalSubmission.safeParse(raw);
       refused = !parsed.success ? "The decision was malformed and was ignored." : staleReason(parsed.data);
-      if (parsed.success && !refused) { sub = parsed.data; break; }
+      if (!parsed.success || refused) continue;
+      if (needsProduction && parsed.data.decision === "approved") {
+        // The decision is for the proposal that was shown. If its implementation is no longer the one the plans describe today, the decision is not applied.
+        const fresh = await prepare();
+        const same = !stalePlans().length && !!fresh && productionBindingOf(fresh.plan, fresh.compiled).binding_hash === productionBindingOf(prod.plan!, prod.compiled!).binding_hash;
+        if (!same) {
+          if (!fresh) return cannotProduce("We prepared the production plan again from your approved storyboard and edit plan, and it could not be completed.");
+          prod = fresh;
+          refused = "This proposal was updated while you were reviewing it. Please look at it again before deciding.";
+          continue;
+        }
+      }
+      sub = parsed.data;
+      break;
     }
     const record = ApprovalRecord.parse({
       stage, plan_version: cur.version, storyboard_version: s.scenePlan!.version, plan_hash: cur.hash, evidence_hash: currentEvidenceHash(s)!,
+      ...(stage === "storyboard" && port ? { production_required: true as const } : {}),
+      ...(needsProduction && sub.decision === "approved" ? { production_binding: productionBindingOf(prod.plan!, prod.compiled!) } : {}),
       decision: sub.decision, notes: sub.notes.trim(), decided_at: new Date().toISOString(),
     });
     // Written before the decision takes effect. If the write fails this node throws, the graph stays paused at the gate,
     // and nothing is recorded in state either.
     deps.approvalLog?.append(record);
     if (sub.decision === "approved") {
-      return { approvals: [record], gate: null, pendingRevision: null, status: stage === "edit_plan" ? ("approved" as const) : ("running" as const), trace: [`${stage}_gate: approved version ${cur.version}`] };
+      return { approvals: [record], gate: null, pendingRevision: null, ...(needsProduction ? { productionPlan: prod.plan, compiledPlan: prod.compiled } : {}), status: stage === "edit_plan" ? ("approved" as const) : ("running" as const), trace: [`${stage}_gate: approved version ${cur.version}`] };
     }
     const used = s.revisions[stage];
     if (used >= MAX_REVISIONS) {
@@ -168,8 +231,11 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
           pendingRevision: null, gate: null, status: "escalated" as const, skillsUsed: r.skills, referencesUsed: r.references, citations: r.citations, trace: [`storyboard: escalated with ${r.issues.length} issue(s)`],
         };
       }
+      // Advisory only: what the storyboard requires, against what is live now. It selects no recipe or engine and never blocks the gate.
+      const live = deps.production?.capabilities();
+      const advisory = live ? adviseFeasibility(live.snapshot, { scenePlan: r.value, assets: s.assets, aspect_ratio: s.project.aspect_ratio, available_engines: live.available_engines }) : null;
       return {
-        scenePlan: r.value, editPlan: null, pendingRevision: null, gate: "storyboard" as const, status: "awaiting_approval" as const,
+        scenePlan: r.value, editPlan: null, advisory, productionPlan: null, compiledPlan: null, pendingRevision: null, gate: "storyboard" as const, status: "awaiting_approval" as const,
         skillsUsed: r.skills, referencesUsed: r.references, citations: r.citations,
         trace: [`storyboard: version ${version}, ${r.value.scenes.length} scenes in ${r.attempts} attempt(s)`],
       };
@@ -181,7 +247,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const rev = s.pendingRevision?.stage === "edit_plan" ? s.pendingRevision : null;
       const previous = s.editPlan;
       const version = rev && previous ? previous.version + 1 : 1;
-      const r = await editPlanNode(deps, s.project, s.assets, s.scenePlan!, version, rev && previous ? { notes: rev.notes, previous } : undefined);
+      const r = await editPlanNode(deps, s.project, s.assets, s.scenePlan!, version, rev && previous ? { notes: rev.notes, previous } : undefined, s.treatmentDoc ?? undefined);
       if ("escalation" in r && r.escalation) {
         return { escalation: r.escalation, pendingRevision: null, gate: null, status: "escalated" as const, skillsUsed: r.skills, referencesUsed: r.references, trace: ["edit_plan: escalated (no recipes available)"] };
       }
@@ -193,7 +259,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
         };
       }
       return {
-        editPlan: ok.value, pendingRevision: null, gate: "edit_plan" as const, status: "awaiting_approval" as const,
+        editPlan: ok.value, productionPlan: ok.production?.plan ?? null, compiledPlan: ok.production?.compiled ?? null, pendingRevision: null, gate: "edit_plan" as const, status: "awaiting_approval" as const,
         skillsUsed: ok.skills, referencesUsed: ok.references, citations: ok.citations,
         trace: [`edit_plan: version ${version}, ${ok.value.uses.length} recipe uses in ${ok.attempts} attempt(s)`],
       };

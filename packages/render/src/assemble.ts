@@ -15,6 +15,7 @@ import { jobVisuals } from "./composition.js";
 import { validateRenderedAssets } from "./asset-validation.js";
 import { validateOutput } from "./output.js";
 import { planRender, type RenderDeps, type RenderInput } from "./render.js";
+import { planSceneJob } from "./scene-job.js";
 import { RENDERER_CAPABILITIES } from "./select.js";
 import { rawFrame } from "./verify.js";
 import { wrapText } from "./text.js";
@@ -137,7 +138,7 @@ export interface AssemblyPlan {
 export type AssemblePlanResult = { ok: false; stage: "input" | "handoff" | "editor_output" | "settings"; reasons: string[] } | { ok: true; plan: AssemblyPlan };
 
 /** The blockers that stop everything, as opposed to those that only stop one scene. */
-const GLOBAL_BLOCKER = /^(no output settings|output settings|asset .* is not on disk|handoff is not production-ready)/;
+const GLOBAL_BLOCKER = /^(no output settings|output settings|asset .* is not on disk|handoff is not production-ready|approved production plan)/;
 
 /** The xfade transition an FFmpeg template stands for, from the built-in crossfade or a learned record. */
 function xfadeFor(template: string, params: Record<string, unknown>, learned: readonly { template: string; xfade: string | null; direction_map: Record<string, string> | null }[]): string | null {
@@ -193,31 +194,16 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
     const sp: ScenePlan = { scene_id: s.scene_id, index, start_s: s.start_time, duration_s: s.duration_seconds, frames, from_frame: from, renderable: false, engine: null, adapter: null, job: null, operations: states, unmet: [], reason: null };
     from += frames;
     for (const o of ops.filter((x) => x.operation_type === "mix_audio")) sp.unmet.push(`audio: ${o.recipe_id} (${o.operation_id}) cannot be produced yet; audio is not part of this phase`);
-    const unsupported = visual.filter((o) => recOps.get(o.operation_id)?.renderer == null);
-    const engines = new Set(visual.map((o) => recOps.get(o.operation_id)?.renderer).filter((x): x is Engine => !!x));
-    if (!visual.length) sp.reason = "no operation produces this scene's picture";
-    else if (unsupported.length) sp.reason = unsupported.map((o) => `${o.operation_id} (${o.recipe_id}) is ${diag.get(o.operation_id)?.status ?? "unsupported"}: ${diag.get(o.operation_id)?.reason ?? "no renderer can run it"}`).join("; ");
-    else if (engines.size > 1) sp.reason = `its operations need more than one engine (${[...engines].join(", ")}) inside one scene, and layering across engines is not supported`;
-    else {
-      const engine = [...engines][0]!;
-      const adapter = deps.adapters.adapterFor(recOps.get(visual[0]!.operation_id)!.implementation_ref);
-      if (!adapter) sp.reason = `no ${engine} adapter is registered for ${recOps.get(visual[0]!.operation_id)!.implementation_ref}`;
-      else {
-        const shift = (o: EditorOperation): EditorOperation => ({ ...o, timing: { start_s: Math.max(0, o.timing.start_s - s.start_time), duration_s: o.timing.duration_s }, ...(o.caption ? { caption: { ...o.caption, start_s: Math.max(0, o.caption.start_s - s.start_time), end_s: o.caption.end_s - s.start_time } } : {}) });
-        const render_id = `rn_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
-        const used = new Set(visual.flatMap((o) => o.asset_ids));
-        const job: Omit<RenderJob, "signal"> = {
-          render_id, settings: RenderSettings.parse({ ...settings, duration_s: s.duration_seconds }), operations: visual.map(shift),
-          templates: Object.fromEntries(visual.map((o) => [o.operation_id, recOps.get(o.operation_id)!.implementation_ref])),
-          assets: base.plan?.job.assets.filter((a) => used.has(a.asset_id)) ?? h.assets.filter((a) => used.has(a.asset_id)).map((a) => ({ asset_id: a.asset_id, media_type: a.media_type, uri: a.uri })),
-          clips: [], asset_info: Object.fromEntries(h.assets.filter((a) => used.has(a.asset_id)).map((a) => [a.asset_id, { duration: a.duration, width: a.width, height: a.height, audio_tracks: a.audio_tracks }])),
-          concept_asset_ids: base.plan?.job.concept_asset_ids.filter((id) => used.has(id)) ?? [], ...jobVisuals(h, deps.assetFiles), output_path: join(deps.outputRoot, "clips", `${render_id}.mp4`),
-        };
-        const issues = adapter.check?.(job) ?? [];
-        if (issues.length) sp.reason = `the ${engine} adapter refuses this scene: ${issues.join("; ")}`;
-        else { sp.renderable = true; sp.engine = engine; sp.adapter = adapter; sp.job = job; }
-        for (const st of sp.operations) if (st.operation_type !== "concat" && st.operation_type !== "mix_audio") { st.readiness.compatible_with_scene = issues.length === 0; if (issues.length) st.readiness.missing = `${recOps.get(st.operation_id)?.implementation_ref ?? st.template} is registered, but it cannot draw this scene: ${issues.join("; ")}`; }
-      }
+    // The scene's job is built and judged by the shared `planSceneJob`, the same code the pre-flight runs before approval.
+    const sel = planSceneJob({
+      scene: { scene_id: s.scene_id, start_time: s.start_time, duration_seconds: s.duration_seconds }, visual,
+      info: (o) => ({ template: recOps.get(o.operation_id)?.implementation_ref ?? "", renderer: (recOps.get(o.operation_id)?.renderer as Engine | null | undefined) ?? null, unsupported: `${o.operation_id} (${o.recipe_id}) is ${diag.get(o.operation_id)?.status ?? "unsupported"}: ${diag.get(o.operation_id)?.reason ?? "no renderer can run it"}` }),
+      adapters: deps.adapters, settings, handoff: h, resolvedAssets: base.plan?.job.assets, assetFiles: deps.assetFiles, outputRoot: deps.outputRoot,
+    });
+    if (sel.ok) { sp.renderable = true; sp.engine = sel.engine; sp.adapter = sel.adapter; sp.job = sel.job; } else sp.reason = sel.reason;
+    if (sel.ok || sel.kind === "refused") {
+      const issues = sel.ok ? [] : sel.issues;
+      for (const st of sp.operations) if (st.operation_type !== "concat" && st.operation_type !== "mix_audio") { st.readiness.compatible_with_scene = issues.length === 0; if (issues.length) st.readiness.missing = `${recOps.get(st.operation_id)?.implementation_ref ?? st.template} is registered, but it cannot draw this scene: ${issues.join("; ")}`; }
     }
     scenes.push(sp);
   }
