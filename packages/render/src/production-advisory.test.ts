@@ -59,7 +59,7 @@ describe("advisory feasibility looks at storyboard requirements only", () => {
 describe("registered is not producible", () => {
   it("with no live adapter nothing is producible, even though every capability is registered", () => {
     const none = build({ implementations: {}, adapter_failures: ALL.map((engine) => ({ engine, reason: "not here" })) });
-    expect(none.counts().registered).toBe(47);
+    expect(none.counts().registered).toBe(54);
     const r = adviseFeasibility(none, inp({ available_engines: [] }));
     expect(r.summary.producible).toBe(0);
     expect(r.summary.not_producible).toBeGreaterThan(0);
