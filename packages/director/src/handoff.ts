@@ -195,7 +195,8 @@ export function readinessOf(i: { operations: readonly RequiredOperation[]; feasi
   const warnings = [...i.feasibility.warnings];
   for (const e of i.audit) {
     if (e.status === "illustrative" && e.scene_ids.length) warnings.push(`${e.scene_ids.join(", ")} show claim ${e.claim_id} ("${e.text}") as an illustrative concept, not a verified product fact`);
-    if (e.status === "unsupported") warnings.push(`claim ${e.claim_id} is an unsupported factual claim${e.scene_ids.length ? ` shown in ${e.scene_ids.join(", ")}` : " and is not used in any scene"}. Safe alternative: ${e.safe_alternative}`);
+    // A claim no scene makes stays in the audit, where it can be read, but the film does not assert it: it is no warning about this film.
+    if (e.status === "unsupported" && e.scene_ids.length) warnings.push(`claim ${e.claim_id} is an unsupported factual claim shown in ${e.scene_ids.join(", ")}. Safe alternative: ${e.safe_alternative}`);
   }
   if (i.recipe_library_mode === "draft") warnings.push("the recipe library is in draft mode (development only)");
   return { production_ready: blockers.length === 0, blockers, warnings };

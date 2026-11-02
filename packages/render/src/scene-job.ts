@@ -66,7 +66,8 @@ export function planSceneJob(a: SceneJobArgs): SceneJobResult {
   const render_id = `rn_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
   const used = new Set(visual.flatMap((o) => o.asset_ids));
   const job: Omit<RenderJob, "signal"> = {
-    render_id, settings: RenderSettings.parse({ ...a.settings, duration_s: s.duration_seconds }), operations: visual.map(shift),
+    // a scene's clip is picture only: sound is laid under the finished film by the assembler
+    render_id, settings: RenderSettings.parse({ ...a.settings, duration_s: s.duration_seconds, audio_codec: null }), operations: visual.map(shift),
     templates: Object.fromEntries(visual.map((o) => [o.operation_id, infos.get(o.operation_id)!.template])),
     assets: a.resolvedAssets?.filter((x) => used.has(x.asset_id)).map((x) => ({ ...x })) ?? a.handoff.assets.filter((x) => used.has(x.asset_id)).map((x) => ({ asset_id: x.asset_id, media_type: x.media_type, uri: x.uri })),
     clips: [], asset_info: Object.fromEntries(a.handoff.assets.filter((x) => used.has(x.asset_id)).map((x) => [x.asset_id, { duration: x.duration, width: x.width, height: x.height, audio_tracks: x.audio_tracks }])),

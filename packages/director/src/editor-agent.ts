@@ -48,6 +48,8 @@ export interface EditorDeps {
   files?: AssetFiles;
   storageRoot?: string;
   requireContentHash?: boolean;
+  /** The renderer has an audio stage, which judges voiceover and audio cues itself (and refuses what it cannot make), so they are no conflict here. */
+  audio_production?: boolean;
 }
 
 export type EditorRun =
@@ -103,7 +105,7 @@ export interface EditorFindings {
  * The deterministic part of the Editor: operations, conflicts and revision requests from the handoff alone, plus Editor-scoped
  * retrieval. It does not verify the handoff (runEditor does) and does not look at any file.
  */
-export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "recipes" | "retriever">): Promise<EditorFindings> {
+export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "recipes" | "retriever" | "audio_production">): Promise<EditorFindings> {
   const scenes = new Map(h.storyboard.scenes.map((s) => [s.scene_id, s]));
   const assets = new Map(h.assets.map((a) => [a.asset_id, a]));
   const conflicts: EditorConflict[] = [];
@@ -148,10 +150,10 @@ export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "re
   // ----- things the plan asks for that the contract cannot produce -----
   const hasAudioAsset = h.assets.some((a) => a.media_type === "audio");
   for (const s of h.storyboard.scenes) {
-    if (s.voiceover) {
+    if (s.voiceover && !deps.audio_production) {
       conflict({ conflict_id: `K-${s.scene_id}-voiceover`, kind: "unsupported_operation", scene_id: s.scene_id, description: `${s.scene_id} has voiceover ("${short(s.voiceover)}"), but no operation or recipe produces voiceover audio or captions from it.`, evidence: ["scene.voiceover"] });
     }
-    if (s.audio_cues.length) {
+    if (s.audio_cues.length && !deps.audio_production) {
       const hasSoundUse = h.edit_plan.uses.some((u) => u.scene_id === s.scene_id && deps.recipes.get(u.recipe_id)?.type === "sound_cue");
       if (!hasSoundUse || !hasAudioAsset) {
         conflict({

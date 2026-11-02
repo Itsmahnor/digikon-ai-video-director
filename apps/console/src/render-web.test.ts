@@ -134,7 +134,10 @@ describe.skipIf(skipReal(can))("the console renders through the renderer the app
     expect(view.renderer).toMatchObject({ selected: null, composition_required: true });
     expect(view.renderer.needed.sort()).toEqual(["ffmpeg", "hyperframes", "remotion"]);
     expect(view.eligible).toBe(false);
-    expect(view.blockers.join(" ")).toContain("the operations need more than one renderer");
+    // mixed engines are how the film is made, so they are not reported as a reason it cannot be: the view speaks for the assembly
+    expect(view.renderer.execution).toBe("scene_assembly");
+    expect(view.blockers.join(" ")).not.toContain("the operations need more than one renderer");
+    expect(view.assembly.scenes.map((s: { engine: string }) => s.engine)).toEqual(["ffmpeg", "remotion", "hyperframes"]);
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
     const out = await body(res);
     expect(res.status, JSON.stringify(out.errors ?? out.message)).toBe(200);

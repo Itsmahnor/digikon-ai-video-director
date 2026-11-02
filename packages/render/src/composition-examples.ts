@@ -59,4 +59,46 @@ export const EXAMPLE_VISUALS: Record<Exclude<SceneVisual["block"], "asset_stage"
     creative_use: "Close on one action and hold still: a typeset name, a headline, a button and a small line.",
     limitations: ["The wordmark is typeset text, never a logo.", "The button is a drawn shape: it is not interactive and carries no URL.", "Animation completes early so the card holds still at the end."],
   },
+  title_plate: {
+    visual: { block: "title_plate", eyebrow: "A new collection", subline: "Autumn in the old quarter", plate: "hairline", camera: "push_in", reveal: "none", backdrop: "vignette" },
+    overlay_text: "The Long Evening",
+    creative_use: "Set one title alone on the frame, as a film or a campaign would: a reveal, a chapter, a name.",
+    limitations: ["The title is the approved overlay text, up to three lines on a wide frame.", "One eyebrow line and one subline at most.", "It says one thing; it is not a place for a list."],
+  },
+  quote_statement: {
+    visual: { block: "quote_statement", attribution: "Our founding belief", camera: "static", reveal: "none", backdrop: "paper" },
+    overlay_text: "Make fewer things, and make them to last a lifetime.",
+    creative_use: "Give a belief or a promise the weight of a sentence somebody means: a large mark, lines arriving one at a time.",
+    limitations: ["The quote is the approved overlay text and is never invented for a real person.", "The attribution is one short line, or none.", "Five lines at most on a wide frame."],
+  },
+  spec_callouts: {
+    visual: { block: "spec_callouts", form: "orb", style: "spotlight", camera: "static", reveal: "none", backdrop: "spotlight", notes: [{ label: "Hand-polished", detail: "Forty hours at the bench" }, { label: "Single origin", detail: "One valley, one season" }, { label: "Refillable", detail: "Made to be kept" }] },
+    overlay_text: "One object, considered.",
+    creative_use: "Draw out what matters about one subject on leader lines: an object in a spotlight, a blueprint of a device, a blackboard diagram of an idea.",
+    limitations: ["The form is abstract (orb, slab, column, ring): it stands for the subject and is never a picture of the real product.", "Two to five notes of at most 22 characters, with a short detail each.", "A detail shown as a fact needs an approved claim behind the scene."],
+  },
+  split_panels: {
+    visual: { block: "split_panels", axis: "columns", camera: "static", reveal: "none", backdrop: "flat", panels: [{ word: "Raw", note: "Unlined wool" }, { word: "Cut", note: "By hand" }, { word: "Worn", note: "Every day" }] },
+    overlay_text: "The autumn edit.",
+    creative_use: "Cut the frame into an editorial spread: panels slide in on a beat, each carrying one big word.",
+    limitations: ["Two to four panels, one word of at most 14 characters each.", "A portrait frame always stacks the panels.", "Colours come from the palette in a fixed order; images do not sit in panels yet."],
+  },
+  route_map: {
+    visual: { block: "route_map", shape: "coast", camera: "pan_right", reveal: "none", backdrop: "paper", stops: [{ label: "Lisbon", note: "Leave at first light" }, { label: "Sintra", note: "Into the hills" }, { label: "Cascais", note: "Back to the sea" }] },
+    overlay_text: "Three days on the Atlantic coast.",
+    creative_use: "Tell a journey as a line drawn across the frame, its stops arriving as the line reaches them.",
+    limitations: ["A drawn impression of a route: it is not real geography and shows no real map.", "Two to five stops of at most 20 characters.", "The line runs one way, with no branches."],
+  },
+  timeline_path: {
+    visual: { block: "timeline_path", camera: "static", reveal: "none", backdrop: "flat", marks: [{ when: "Then", label: "One workshop, two people" }, { when: "Now", label: "Twelve countries" }, { when: "Next", label: "Fully circular" }] },
+    overlay_text: "How we got here.",
+    creative_use: "Lay a history, a roadmap or the chapters of a story along one line.",
+    limitations: ["Two to five marks; a mark's date or word has at most 12 characters.", "A real date or figure needs an approved claim behind the scene.", "Runs across a wide frame and down a tall one."],
+  },
+  closing_signature: {
+    visual: { block: "closing_signature", wordmark: "Maison Vael", action: "Visit the atelier", subline: "By appointment", camera: "static", reveal: "none", backdrop: "vignette" },
+    overlay_text: "Made slowly.",
+    creative_use: "Close quietly: the name, a thin rule, one line to follow, for a film that should not end on a button.",
+    limitations: ["The wordmark is typeset text, never a logo.", "The action is text, not a button, and carries no URL.", "It holds still at the end."],
+  },
 };

@@ -1,4 +1,4 @@
-import type { CompositionScene } from "./composition.js";
+import { SELF_SET_TEXT, type CompositionScene } from "./composition.js";
 import { rawFrame, rgb, type FidelityOptions, type FidelityResult } from "./verify.js";
 
 /**
@@ -43,7 +43,7 @@ export function measureFrames(frames: readonly Buffer[], scene: CompositionScene
   let motion = 0;
   for (let k = 1; k < frames.length; k++) motion = Math.max(motion, mad(frames[k - 1]!, frames[k]!));
   let headline_ink: number | null = null;
-  if (scene.headline && scene.visual.block !== "kinetic_type" && scene.visual.block !== "end_card") {
+  if (scene.headline && !SELF_SET_TEXT.has(scene.visual.block)) {
     const b = scene.headline.box;
     let hi = 0, hn = 0;
     for (let y = Math.max(0, Math.round(b.y)); y < Math.min(height, Math.round(b.y + b.h)); y += 2) for (let x = Math.max(0, Math.round(b.x)); x < Math.min(width, Math.round(b.x + b.w)); x += 2) { hn++; if (dist(last, (y * width + x) * 3, bg) > 160) hi++; }
@@ -76,7 +76,8 @@ export async function verifyCompositionScenes(video: string, scenes: readonly Co
     // the bottom-left corner: a gradient glows at the top right, so this one stays on the plain background
     const ci = (Math.round(height * 0.97) * width + Math.round(width * 0.03)) * 3;
     if (dist(frames[0]!, ci, bg) > 110) problems.push(`${at}: the scene is not on its approved background colour ${sc.palette.background}`);
-    if (m.coverage < 0.025) problems.push(`${at}: almost nothing is drawn (${(m.coverage * 100).toFixed(1)}% of the last frame differs from the background)`);
+    // a title, a signature or a thin line of milestones is meant to be sparse: words and rules, with no panel or picture under them
+    if (m.coverage < (SELF_SET_TEXT.has(sc.visual.block) || sc.visual.block === "timeline_path" || sc.visual.block === "route_map" ? 0.008 : 0.025)) problems.push(`${at}: almost nothing is drawn (${(m.coverage * 100).toFixed(1)}% of the last frame differs from the background)`);
     if (m.coverage > 0.88) problems.push(`${at}: the frame is almost entirely covered (${(m.coverage * 100).toFixed(0)}%), so there is no hierarchy or breathing space`);
     if (m.edge_ink > 0.01) problems.push(`${at}: content reaches the frame edge (${(m.edge_ink * 100).toFixed(1)}% of the edge ring), which means something is clipped or off its margin`);
     if (m.motion < 0.4 || m.change < 0.8) problems.push(`${at}: the scene hardly moves (largest step ${m.motion.toFixed(2)}, start to end ${m.change.toFixed(2)} of 255), but it was planned as an animated composition`);

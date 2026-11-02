@@ -20,6 +20,11 @@ export interface ProductionPort {
    * by the render package. Anything the Director passes back as a result is re-checked by \`attachPreflight\`.
    */
   preflight(request: PreflightRequest): unknown;
+  /**
+   * What the machine's audio stage cannot make for this plan, as ordinary sentences. Requested sound that cannot be produced stops Gate 2 rather than being dropped.
+   * Absent: this system has no audio stage, and audio stays an open, reported requirement.
+   */
+  audio?(request: { scenePlan: ScenePlan; assets: readonly Asset[]; feel: NonNullable<Treatment["art_direction"]>["motion_language"]["feel"] | null }): string[];
 }
 
 export interface PreflightRequest {
@@ -36,7 +41,7 @@ export interface PreflightRequest {
   compiled_hash: string;
 }
 
-export interface CompileDeps { recipes: RecipeLibrary; retriever: Retriever; now?: () => Date }
+export interface CompileDeps { recipes: RecipeLibrary; retriever: Retriever; now?: () => Date; audio_production?: boolean }
 
 const isAudioOnly = (c: { kind: string; description: string }) => c.kind === "missing_information" && /lists audio cues/.test(c.description);
 
@@ -111,8 +116,9 @@ export async function produceProduction(input: ProductionInput, port: Production
   const { snapshot, available_engines } = port.capabilities();
   const planning: PlanningInput = { scenePlan: input.scenePlan, storyboard: input.storyboard, editPlan: input.editPlan, assets: input.assets, aspect_ratio: input.source.constraints.aspect_ratio, available_engines, ...(deps.now ? { now: deps.now } : {}) };
   let plan = generateProductionPlan(snapshot, planning);
-  const compiled = await compileProduction(input.source, plan, deps);
+  const compiled = await compileProduction(input.source, plan, { ...deps, audio_production: !!port.audio });
   const blockers: string[] = [];
+  blockers.push(...(port.audio?.({ scenePlan: input.scenePlan, assets: input.assets, feel: input.art_direction?.motion_language.feel ?? null }) ?? []));
 
   for (const d of plan.decisions.filter((x) => x.verdict !== "executable")) blockers.push(`${d.scene_id} (${d.use_id}): ${d.recipe_id} is ${d.verdict === "blocked" ? "blocked" : "only possible with a substitute"} [${d.reasons.join(", ")}]: ${d.details.join("; ")}${d.substitute ? `. Suggested substitute: ${d.substitute.capability_id}` : ""}`);
   for (const u of plan.unresolved.filter((x) => x.kind !== "audio")) blockers.push(`${u.scene_id}: ${u.detail} [${u.reason}]`);

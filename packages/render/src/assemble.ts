@@ -1,14 +1,15 @@
 import { execFile, execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, rmdirSync, writeFileSync } from "node:fs";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { z } from "zod";
 import { AssetValidationReport, DirectorHandoff, EditorOutput, RenderRecord, RenderSettings, type EditorOperation, type RenderOutput } from "@digikon/contracts";
+import { checkMixedAudio, mixAudio, planAudio, type AudioCheck, type AudioPlan } from "./audio.js";
 import { diagnoseOperations, type Engine, type OperationStatus } from "./capabilities.js";
-import { previewCoverage, type RenderCapabilities } from "./coverage.js";
+import { previewCoverage, type PreviewCoverage, type RenderCapabilities, type SceneCoverage } from "./coverage.js";
 import { ffmpegCapabilities } from "./ffmpeg.js";
 import type { RenderAdapter, RenderJob } from "./adapter.js";
 import { jobVisuals } from "./composition.js";
@@ -95,6 +96,8 @@ export const DeliveryReport = z.object({
   limitations: z.array(z.string()),
   /** Each approved picture looked for in the finished film. Absent when the plan placed none. */
   asset_validation: AssetValidationReport.nullable().optional(),
+  /** The film's sound as it was made and measured. Absent when the plan has none. */
+  audio: z.object({ tracks: z.array(z.string()), labels: z.array(z.string()), checks: z.array(z.string()) }).nullable().optional(),
   created_at: z.string().datetime(),
 });
 export type DeliveryReport = z.infer<typeof DeliveryReport>;
@@ -133,6 +136,24 @@ export interface AssemblyPlan {
   omitted: { operation_id: string; scene_id: string; recipe_id: string; status: string; reason: string }[];
   /** Requirements nothing here can carry out for any scene (audio): they keep the film from being complete. */
   complete: boolean;
+  /** What the assembled film shows, scene by scene, judged against the engine that draws each scene and the assembler's joins. */
+  coverage: PreviewCoverage;
+  /** The film's sound, when this machine has an audio stage. */
+  audio: AudioPlan | null;
+}
+
+/**
+ * Why this assembled film would not be complete, one line per reason. This is the truth about a plan that mixes engines: what one adapter could not do alone is not a problem
+ * here, and everything that really stops a scene, a join or the audio is listed. Empty only for a film that carries out every approved requirement.
+ */
+export function assemblyBlockers(a: Pick<AssemblyPlan, "scenes" | "omitted">): string[] {
+  const out: string[] = [];
+  for (const s of a.scenes) {
+    if (!s.renderable) out.push(`${s.scene_id}: ${s.reason ?? "it cannot be rendered"}`);
+    for (const u of s.unmet) out.push(`${s.scene_id}: ${u}`);
+  }
+  for (const o of a.omitted) if (!a.scenes.some((s) => s.scene_id === o.scene_id && (!s.renderable || s.unmet.some((u) => u.includes(o.operation_id))))) out.push(`${o.scene_id}: ${o.recipe_id} (${o.operation_id}) is left out: ${o.reason}`);
+  return [...new Set(out)];
 }
 
 export type AssemblePlanResult = { ok: false; stage: "input" | "handoff" | "editor_output" | "settings"; reasons: string[] } | { ok: true; plan: AssemblyPlan };
@@ -167,6 +188,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
   const assemblerCaps = ffmpegCapabilities(learnedT);
   const recOps = new Map(base.record.operations.map((o) => [o.operation_id, o]));
   const diag = new Map(base.diagnosis.map((d) => [d.operation_id, d]));
+  const audio = deps.audio ? planAudio({ scenes: h.storyboard.scenes, assets: h.assets, feel: h.treatment.art_direction?.motion_language.feel ?? null }, deps.audio) : null;
   const scenes: ScenePlan[] = [];
   let from = 0;
   const ordered = [...h.storyboard.scenes].sort((a, b) => a.start_time - b.start_time);
@@ -180,7 +202,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
       const d = diag.get(o.operation_id), r = recOps.get(o.operation_id);
       const template = r?.implementation_ref ?? "";
       // a join made where the clips meet belongs to the assembler, which is FFmpeg: it is registered whether or not a scene adapter lists it
-      const assemblerOwn = o.operation_type === "concat" && (template === "ffmpeg/concat-cut" || template === "ffmpeg/match-cut");
+      const assemblerOwn = (o.operation_type === "concat" && (template === "ffmpeg/concat-cut" || template === "ffmpeg/match-cut")) || (!!audio && o.operation_type === "mix_audio");
       const registered = assemblerOwn || r?.renderer != null;
       const basis = d?.engines.find((e) => e.verdict === "usable")?.implementation ?? "none";
       const readiness: Readiness = {
@@ -188,12 +210,13 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
         compatible_with_scene: null, rendered_with_scene_inputs: null, validated_in_final: null,
         missing: registered ? null : `no renderer has the template ${template || "(none)"} registered (registered here: ${registeredRenderers.join(", ") || "none"}). ${d?.reason ?? ""}`.trim(),
       };
-      if (assemblerOwn) return { operation_id: o.operation_id, recipe_id: o.recipe_id, template, operation_type: o.operation_type, status: "validated_available" as OperationStatus, engine: "ffmpeg" as Engine, reason: template === "ffmpeg/match-cut" ? "a match cut is a join made by the assembler, applied only when the two pictures match" : "a hard cut is the assembler's default join", readiness };
+      if (assemblerOwn) return { operation_id: o.operation_id, recipe_id: o.recipe_id, template, operation_type: o.operation_type, status: "validated_available" as OperationStatus, engine: "ffmpeg" as Engine, reason: o.operation_type === "mix_audio" ? "the assembler mixes the film's sound under the finished picture" : template === "ffmpeg/match-cut" ? "a match cut is a join made by the assembler, applied only when the two pictures match" : "a hard cut is the assembler's default join", readiness };
       return { operation_id: o.operation_id, recipe_id: o.recipe_id, template, operation_type: o.operation_type, status: d?.status ?? "blocked_with_reason", engine: (r?.renderer as Engine | null) ?? null, reason: d?.reason ?? "no diagnosis", readiness };
     });
     const sp: ScenePlan = { scene_id: s.scene_id, index, start_s: s.start_time, duration_s: s.duration_seconds, frames, from_frame: from, renderable: false, engine: null, adapter: null, job: null, operations: states, unmet: [], reason: null };
     from += frames;
-    for (const o of ops.filter((x) => x.operation_type === "mix_audio")) sp.unmet.push(`audio: ${o.recipe_id} (${o.operation_id}) cannot be produced yet; audio is not part of this phase`);
+    if (!audio) for (const o of ops.filter((x) => x.operation_type === "mix_audio")) sp.unmet.push(`audio: ${o.recipe_id} (${o.operation_id}) cannot be produced yet; audio is not part of this phase`);
+    for (const u of audio?.unresolved.filter((x) => x.scene_id === s.scene_id) ?? []) sp.unmet.push(`audio: ${u.detail}`);
     // The scene's job is built and judged by the shared `planSceneJob`, the same code the pre-flight runs before approval.
     const sel = planSceneJob({
       scene: { scene_id: s.scene_id, start_time: s.start_time, duration_seconds: s.duration_seconds }, visual,
@@ -212,7 +235,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
   // scene incomplete; a missing picture requirement means the scene cannot honestly be shown.
   const covBy = new Map<string, ReturnType<typeof previewCoverage>>();
   for (const e of new Set(scenes.map((x) => x.engine).filter((x): x is Engine => !!x))) {
-    const caps: RenderCapabilities = { ...((deps.adapters.adapterFor(scenes.find((x) => x.engine === e)!.operations.find((o) => o.engine === e)!.template)?.capabilities) ?? RENDERER_CAPABILITIES[e]), transition_templates: assemblerCaps.transition_templates };
+    const caps: RenderCapabilities = { ...((deps.adapters.adapterFor(scenes.find((x) => x.engine === e)!.operations.find((o) => o.engine === e)!.template)?.capabilities) ?? RENDERER_CAPABILITIES[e]), transition_templates: assemblerCaps.transition_templates, audio_stage: !!audio };
     covBy.set(e, previewCoverage(h, out, base.record, caps));
   }
   for (const sp of scenes) {
@@ -256,10 +279,16 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
 
   const omitted: AssemblyPlan["omitted"] = [];
   for (const sp of scenes) for (const o of sp.operations) if (!sp.renderable && o.operation_type !== "mix_audio" && o.operation_type !== "concat") omitted.push({ operation_id: o.operation_id, scene_id: sp.scene_id, recipe_id: o.recipe_id, status: o.status, reason: sp.reason ?? o.reason });
-  for (const sp of scenes) for (const o of sp.operations.filter((x) => x.operation_type === "mix_audio")) omitted.push({ operation_id: o.operation_id, scene_id: sp.scene_id, recipe_id: o.recipe_id, status: "blocked_with_reason", reason: "audio is not part of this phase and cannot be produced" });
+  if (!audio) for (const sp of scenes) for (const o of sp.operations.filter((x) => x.operation_type === "mix_audio")) omitted.push({ operation_id: o.operation_id, scene_id: sp.scene_id, recipe_id: o.recipe_id, status: "blocked_with_reason", reason: "audio is not part of this phase and cannot be produced" });
   for (const t of transitions.filter((x) => !x.applied)) omitted.push({ operation_id: t.operation_id, scene_id: t.after_scene, recipe_id: t.template, status: "blocked_with_reason", reason: t.reason });
-  const complete = scenes.length > 0 && scenes.every((s) => s.renderable && s.unmet.length === 0) && omitted.length === 0 && !base.record.audio_required;
-  return { ok: true, plan: { render_id: base.record.render_id, purpose: base.record.purpose, settings, handoff: h, editor_output: out, base, scenes, transitions, omitted, complete } };
+  const complete = scenes.length > 0 && scenes.every((s) => s.renderable && s.unmet.length === 0) && omitted.length === 0 && (audio ? audio.unresolved.length === 0 : !base.record.audio_required);
+  const coveredScenes = scenes.map((sp): SceneCoverage => {
+    const own = sp.engine ? covBy.get(sp.engine)?.scenes.find((x) => x.scene_id === sp.scene_id) : undefined;
+    const missing = [...new Set([...(sp.renderable ? [] : [sp.reason ?? "it cannot be rendered"]), ...sp.unmet])];
+    return { scene_id: sp.scene_id, represented: missing.length === 0, missing, labelled: own?.labelled ?? [] };
+  });
+  const coverage: PreviewCoverage = { complete: coveredScenes.every((x) => x.represented), scenes: coveredScenes };
+  return { ok: true, plan: { render_id: base.record.render_id, purpose: base.record.purpose, settings, handoff: h, editor_output: out, base, scenes, transitions, omitted, complete, coverage, audio } };
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -339,7 +368,7 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
     // 1. each scene, through its engine
     for (const sp of scenes) {
       const path = sp.job?.output_path ?? join(clipsDir, `rn_${randomUUID().replaceAll("-", "").slice(0, 16)}.mp4`);
-      const clipSettings = RenderSettings.parse({ ...settings, duration_s: sp.duration_s });
+      const clipSettings = RenderSettings.parse({ ...settings, duration_s: sp.duration_s, audio_codec: null });
       if (!sp.renderable || !sp.adapter || !sp.job) {
         await renderSlate(sp, sp.reason ?? "unsupported", deps, settings, path, work);
         clips.set(sp.scene_id, { path, sha256: null, placeholder: true });
@@ -376,7 +405,7 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
 
     // 3. the final file, measured
     const total = scenes.reduce((n, s) => n + s.frames, 0);
-    const final = await validateOutput(finalPath, RenderSettings.parse({ ...settings, duration_s: total / settings.fps }), false, now);
+    let final = await validateOutput(finalPath, RenderSettings.parse({ ...settings, duration_s: total / settings.fps, audio_codec: null }), false, now);
     if (!final.ok) { await rm(finalPath, { force: true }); return { kind: "failed", errors: final.issues.map((i) => `the final video: ${i}`), report: null }; }
     const finalFrames = await frameCount(finalPath, ffprobe);
     if (finalFrames !== total) { await rm(finalPath, { force: true }); return { kind: "failed", errors: [`the final video has ${finalFrames} frames, not the approved ${total}`], report: null }; }
@@ -426,6 +455,24 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       return ["uploaded", ...(m && (m.analysis_status === "analyzed" || m.analysis_status === "partial") ? ["analyzed" as const] : []), ...(m?.categories.some((c) => c.category !== "other_unknown") ? ["classified" as const] : []), ...(m ? ["available_to_director" as const] : [])];
     } }) : null;
 
+    // 4c. the sound: mixed under the checked picture without touching it, then measured in the finished file
+    let audioCheck: AudioCheck | null = null;
+    if (plan.audio && deps.audio && plan.audio.tracks.length) {
+      const mixed = join(work, "mixed.mp4");
+      const files = new Map(plan.base.record.assets.map((a) => [a.asset_id, a.uri]));
+      try { await mixAudio({ plan: plan.audio, video: finalPath, duration_s: total / settings.fps, out: mixed, work, caps: deps.audio, assetFile: (id) => files.get(id) ?? null, ffmpeg, signal }); }
+      catch (e) { await rm(finalPath, { force: true }); return { kind: "failed", errors: [`the sound could not be mixed: ${((e as { stderr?: string }).stderr || (e instanceof Error ? e.message : String(e))).trim().slice(0, 400)}`], report: null }; }
+      audioCheck = await checkMixedAudio(mixed, plan.audio, ffmpeg);
+      const withSound = await validateOutput(mixed, RenderSettings.parse({ ...settings, duration_s: total / settings.fps, audio_codec: settings.audio_codec ?? "aac" }), true, now);
+      const wrong = [...audioCheck.problems, ...(withSound.ok ? [] : withSound.issues)];
+      if (wrong.length || !withSound.ok) { await rm(finalPath, { force: true }); return { kind: "failed", errors: wrong.map((w) => `the sound: ${w}`), report: null }; }
+      await rm(finalPath, { force: true });
+      await copyFile(mixed, finalPath);
+      final = await validateOutput(finalPath, RenderSettings.parse({ ...settings, duration_s: total / settings.fps, audio_codec: settings.audio_codec ?? "aac" }), true, now);
+      if (!final.ok) { await rm(finalPath, { force: true }); return { kind: "failed", errors: final.issues.map((i) => `the final video: ${i}`), report: null }; }
+    }
+    const soundDone = !!plan.audio && plan.audio.unresolved.length === 0 && (audioCheck ? audioCheck.ok : plan.audio.tracks.length === 0);
+
     // 5. the report: every stage on its own
     const ffv = execFileSync(ffmpeg, ["-version"], { encoding: "utf8", windowsHide: true }).split(/\r?\n/)[0]!.trim();
     const engines = [...new Set(scenes.map((s) => s.engine).filter((e): e is Engine => !!e))];
@@ -463,8 +510,9 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       omitted_operations: omittedAll, engines_used: engines,
       assembly: { tool: "ffmpeg" as const, ffmpeg_version: ffv, lossy_encodes: 2, known_differences: ["each scene is encoded by its engine and then re-encoded once by the assembler, so frames differ from the clips by a small amount (allowed: 8 of 255 on average)", "HyperFrames draws backgrounds up to 3 levels darker than specified; Remotion and FFmpeg are within 2", "scene clips are h264 intermediates, not lossless"] },
       output: { path: finalPath, bytes: output.bytes, sha256: output.sha256, width: output.width, height: output.height, fps: output.fps, duration_s: output.duration_s, frames: finalFrames, video_codec: output.video_codec, audio_tracks: output.audio_tracks },
-      limitations: ["only the first, middle and last clean frame of each scene are compared with its clip", "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR", "audio is not produced in this phase"],
+      limitations: ["only the first, middle and last clean frame of each scene are compared with its clip", "text and layout inside a scene are verified by the engine that drew it, by pixel comparison and not OCR", plan.audio ? "the sound's levels are measured; nothing here judges how it sounds, and a person should listen to it" : "audio is not produced in this phase"],
       asset_validation,
+      audio: plan.audio?.tracks.length ? { tracks: plan.audio.tracks.map((t) => (t.kind === "sfx" ? `sfx ${t.sound} at ${t.at_s}s` : t.kind === "music" ? `music (${t.source})` : `narration in ${t.scene_id} (${t.source})`)), labels: plan.audio.labels, checks: audioCheck?.checks ?? [] } : null,
       created_at: now().toISOString(),
     };
     const draftReport: DeliveryReport = DeliveryReport.parse(baseReport);
@@ -477,12 +525,12 @@ export async function renderAssembly(plan: AssemblyPlan, deps: AssembleDeps, opt
       scenes: scenes.map((s) => { const r = draftReport.scenes.find((x) => x.scene_id === s.scene_id)!; return { scene_id: s.scene_id, rendered: r.status !== "placeholder", engine_content_checked: r.content.engine_checked, end_to_end_checked: r.content.end_to_end_checked, unmet: r.unmet.filter((u) => !u.startsWith("its transition (")) }; }),
       omitted: omittedAll.filter((o) => !isTransition.has(o.operation_id)),
       transitions_not_applied: transitions.filter((t) => !t.applied).map((t) => ({ after_scene: t.after_scene, template: t.template, reason: t.reason })),
-      audio_required: plan.base.record.audio_required,
+      audio_required: plan.base.record.audio_required && !soundDone,
       visual, plan_problems: [...planDifferences(draftReport, plan.handoff), ...(asset_validation?.failures ?? [])],
       recipes: { draft, preview_only: plan.purpose !== "production", blockers: plan.purpose === "production" ? plan.base.record.blockers : [] },
     });
     const report: DeliveryReport = DeliveryReport.parse({ ...baseReport, kind: decision.complete ? "complete" : "partial", states: { ...baseReport.states, final_delivery_ready: decision.final }, decision, label: decision.label, final_delivery_blockers: decision.blockers });
-    if (decision.complete && !plan.base.record.audio_required) {
+    if (decision.complete && (!plan.base.record.audio_required || soundDone)) {
       const record = RenderRecord.parse({ ...plan.base.record, state: "rendered", blockers: [], errors: [], output: { ...output, checks: [...output.checks, `assembled from ${scenes.length} scene clips by ${engines.join(", ")} and FFmpeg; every scene matches its clip`] }, notes: [...plan.base.record.notes, `assembled from scene clips (${engines.join(", ")}); ${report.label}`], started_at: now().toISOString(), finished_at: now().toISOString() });
       return { kind: "complete", record, report };
     }

@@ -17,6 +17,7 @@ export * from "./web-composed.js";
 export * from "./web-composed-verify.js";
 export * from "./capabilities-remotion.js";
 export * from "./assemble.js";
+export * from "./audio.js";
 export * from "./composition.js";
 export * from "./composition-verify.js";
 export * from "./composition-examples.js";

@@ -6,7 +6,7 @@ import { serve } from "@hono/node-server";
 import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
-import { loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
+import { detectAudio, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
 import { LocalVision, availableOcr } from "@digikon/media";
 import { WhisperEngine } from "@digikon/speech";
 import { createApp, type WhisperStatus } from "./app.js";
@@ -53,7 +53,7 @@ if (!renderFont) console.warn("No font file found for preview renders. Set RENDE
 const app = createApp({
   llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, knowledge, recipes: library, ffmpegOk,
   vision: new LocalVision({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") }), ocr: await availableOcr(),
-  editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir,
+  editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir, audio: detectAudio(),
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),
 });
 

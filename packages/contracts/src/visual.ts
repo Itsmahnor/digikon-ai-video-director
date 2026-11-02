@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { VISUAL_SYSTEMS, VISUAL_SYSTEM_IDS } from "./visual-systems.js";
 
 /**
  * Creative direction and the structured visual spec of a scene.
@@ -60,8 +61,12 @@ export const ArtDirection = z.object({
     weight: z.enum(["regular", "bold"]),
     scale: z.enum(["compact", "standard", "large"]),
     case: z.enum(["sentence", "upper"]),
+    /** The typeface family. Absent: the visual system's own. */
+    face: z.enum(["sans", "serif", "mono"]).optional(),
     rationale: Txt(200),
   }),
+  /** The way of making this film (see visual-systems.ts). Absent on a treatment written before systems existed. */
+  visual_system: z.enum(VISUAL_SYSTEM_IDS).optional(),
   /** Grid, spacing and where the eye goes first, described once so every scene follows it. */
   composition: Txt(300),
   motion_language: z.object({
@@ -76,7 +81,7 @@ export type ArtDirection = z.infer<typeof ArtDirection>;
 
 // ---------- scene visual spec ----------
 
-export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card", "asset_stage"] as const;
+export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card", "title_plate", "quote_statement", "spec_callouts", "split_panels", "route_map", "timeline_path", "closing_signature", "asset_stage"] as const;
 export type VisualBlock = (typeof VISUAL_BLOCKS)[number];
 /** The blocks drawn entirely from data. asset_stage is not one: it needs uploaded pictures, so it is validated against real files, not example specs. */
 export type DrawnBlock = Exclude<VisualBlock, "asset_stage">;
@@ -87,7 +92,7 @@ const Common = {
   camera: z.enum(["static", "push_in", "pull_out", "pan_left", "pan_right"]).default("static"),
   /** How the scene opens: a mask that uncovers it. */
   reveal: z.enum(["none", "wipe_right", "wipe_up", "iris"]).default("none"),
-  backdrop: z.enum(["flat", "gradient", "grid", "dots"]).default("flat"),
+  backdrop: z.enum(["flat", "gradient", "grid", "dots", "spotlight", "vignette", "paper"]).default("flat"),
 };
 
 export const MessageThread = z.object({
@@ -150,6 +155,61 @@ export const EndCard = z.object({
   ...Common,
 });
 
+/** One title alone on the frame, as a film or a campaign would set it. The overlay text is the title. */
+export const TitlePlate = z.object({
+  block: z.literal("title_plate"),
+  eyebrow: Txt(32).nullable().default(null),
+  subline: Txt(60).nullable().default(null),
+  /** bare: the words only; hairline: thin rules draw in around them; letterbox: cinema bars close in. */
+  plate: z.enum(["bare", "hairline", "letterbox"]).default("bare"),
+  ...Common,
+});
+/** A sentence set as something somebody means. The overlay text is the quote, and it is approved copy: a quote is never invented for a real person. */
+export const QuoteStatement = z.object({
+  block: z.literal("quote_statement"),
+  attribution: Txt(36).nullable().default(null),
+  ...Common,
+});
+/** One form with what matters about it drawn out on leader lines: an object in a spotlight, a blueprint, a blackboard diagram. */
+export const SpecCallouts = z.object({
+  block: z.literal("spec_callouts"),
+  /** An abstract drawn form. It stands for the subject and is never a picture of a real product. */
+  form: z.enum(["orb", "slab", "column", "ring"]),
+  style: z.enum(["spotlight", "blueprint", "chalk"]).default("spotlight"),
+  notes: z.array(z.object({ label: Txt(22), detail: Txt(32).nullable().default(null) })).min(2).max(5),
+  ...Common,
+});
+/** The frame cut into colour panels that slide in, one big word on each: an editorial spread. */
+export const SplitPanels = z.object({
+  block: z.literal("split_panels"),
+  panels: z.array(z.object({ word: Txt(14), note: Txt(24).nullable().default(null) })).min(2).max(4),
+  /** Which way the panels divide the frame. A portrait frame always stacks them. */
+  axis: z.enum(["columns", "rows"]).default("columns"),
+  ...Common,
+});
+/** A route that draws itself across the frame, with its stops. A drawn impression, not a map of real geography. */
+export const RouteMap = z.object({
+  block: z.literal("route_map"),
+  stops: z.array(z.object({ label: Txt(20), note: Txt(28).nullable().default(null) })).min(2).max(5),
+  shape: z.enum(["coast", "zigzag", "arc"]).default("coast"),
+  ...Common,
+});
+/** Moments along a line: a history, a roadmap, the chapters of a story. */
+export const TimelinePath = z.object({
+  block: z.literal("timeline_path"),
+  marks: z.array(z.object({ when: Txt(12), label: Txt(24) })).min(2).max(5),
+  ...Common,
+});
+/** A quiet close: the name, a thin rule, one line to follow. No button. */
+export const ClosingSignature = z.object({
+  block: z.literal("closing_signature"),
+  /** A typeset name. This is text, never a logo. */
+  wordmark: Txt(28).nullable().default(null),
+  action: Txt(36),
+  subline: Txt(48).nullable().default(null),
+  ...Common,
+});
+
 /**
  * A scene built from uploaded pictures: the scene's asset_refs say what goes where, and the overlay text is its headline. The pictures carry their own motion
  * (each ref's animation), so there is no whole-frame camera or reveal: a moved or masked frame could not be checked against the uploaded file.
@@ -161,7 +221,7 @@ export const AssetStage = z.object({
   backdrop: Common.backdrop,
 });
 
-export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard, AssetStage]);
+export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard, TitlePlate, QuoteStatement, SpecCallouts, SplitPanels, RouteMap, TimelinePath, ClosingSignature, AssetStage]);
 export type SceneVisual = z.infer<typeof SceneVisual>;
 
 /** Every string a visual shows, for checks that read the text (claims, characters). */
@@ -174,6 +234,13 @@ export function visualTexts(v: SceneVisual): string[] {
     case "kinetic_type": return [];
     case "layered_cards": return v.cards.flatMap((c) => [c.title, ...(c.detail ? [c.detail] : [])]);
     case "end_card": return [...(v.wordmark ? [v.wordmark] : []), v.button, ...(v.subline ? [v.subline] : [])];
+    case "title_plate": return [...(v.eyebrow ? [v.eyebrow] : []), ...(v.subline ? [v.subline] : [])];
+    case "quote_statement": return v.attribution ? [v.attribution] : [];
+    case "spec_callouts": return v.notes.flatMap((n) => [n.label, ...(n.detail ? [n.detail] : [])]);
+    case "split_panels": return v.panels.flatMap((p) => [p.word, ...(p.note ? [p.note] : [])]);
+    case "route_map": return v.stops.flatMap((p) => [p.label, ...(p.note ? [p.note] : [])]);
+    case "timeline_path": return v.marks.flatMap((m) => [m.when, m.label]);
+    case "closing_signature": return [...(v.wordmark ? [v.wordmark] : []), v.action, ...(v.subline ? [v.subline] : [])];
     case "asset_stage": return [];
   }
 }
@@ -193,6 +260,7 @@ export function creativeIssues(
 ): VisualIssue[] {
   if (!art) return [];
   const issues: VisualIssue[] = [];
+  const system = art.visual_system ? VISUAL_SYSTEMS[art.visual_system] : null;
   const seenPurpose = new Map<string, string>();
   scenes.forEach((s, i) => {
     if (!s.visual_purpose) issues.push({ scene_id: s.scene_id, code: "no_visual_purpose", message: "state what this scene's picture does that no other scene's does (visual_purpose)" });
@@ -211,6 +279,8 @@ export function creativeIssues(
     // a run of pictures is a sequence, not a repeated layout: each shows a different file, so the block itself does not make them alike
     if (prev && prev.block === s.visual.block && s.visual.block !== "asset_stage") issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
     if (s.visual.block === "kinetic_type" && !s.overlay) issues.push({ scene_id: s.scene_id, code: "kinetic_without_text", message: "kinetic_type animates the scene's overlay text, so the scene needs overlay text" });
+    if ((s.visual.block === "title_plate" || s.visual.block === "quote_statement") && !s.overlay) issues.push({ scene_id: s.scene_id, code: "type_without_text", message: `${s.visual.block} sets the scene's overlay text, so the scene needs overlay text` });
+    if (system && s.visual.block !== "asset_stage" && !system.blocks.includes(s.visual.block as DrawnBlock)) issues.push({ scene_id: s.scene_id, code: "off_system_block", message: `${s.visual.block} is not a picture the ${system.title} system uses (${system.blocks.join(", ")}); choose one of those, or change the visual system in the treatment` });
     if (s.visual.block === "ui_demo" && s.visual.cursor_target !== null && s.visual.cursor_target >= s.visual.rows.length) issues.push({ scene_id: s.scene_id, code: "cursor_out_of_range", message: `cursor_target ${s.visual.cursor_target} is not a row (there are ${s.visual.rows.length})` });
     if (s.visual.block === "layered_cards" && s.visual.held) {
       const h = s.visual.held, src = scenes[i - 1];
@@ -231,7 +301,9 @@ export function creativeIssues(
   if (scenes.length >= 4) {
     const counts = new Map<string, number>();
     for (const s of scenes) if (s.visual) counts.set(s.visual.block, (counts.get(s.visual.block) ?? 0) + 1);
-    for (const [block, n] of counts) if (block !== "asset_stage" && n > Math.ceil(scenes.length / 3)) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than a third of a film` });
+    // A system has a narrow vocabulary on purpose: a rhythm of one kind of picture is its language, so the rule is a half there, not the third that used to force every film through the same rotation.
+    const limit = system ? Math.ceil(scenes.length / 2) : Math.ceil(scenes.length / 3);
+    for (const [block, n] of counts) if (block !== "asset_stage" && n > limit) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than ${system ? "half" : "a third"} of a film` });
   }
   return issues;
 }

@@ -21,6 +21,29 @@ export interface PlanContext {
 
 const EPS = 1e-6;
 
+/** Wording that asserts a result, a ranking or a guarantee. Conditional, invitational or question wording does not assert one. */
+const ASSERTS = /\b(best|#1|number one|leading|top[- ]rated|award[- ]winning|guarante\w*|proven|fastest|cheapest|saves?|doubles?|triples?|boosts?|increases?|grows?|wins?|never miss\w*|instantly|automatically)\b/i;
+const QUALIFIED = /\b(may|might|can|could|imagine|what if|designed to|built to|made to|aims? to|try|explore|see how)\b|\?/i;
+const significant = (t: string) => new Set((t.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu) ?? []));
+
+/**
+ * Generation-time check of what a film actually says. A scene's on-screen words can make a claim without naming it, so: words that repeat an unsupported claim, or that assert a result
+ * with no approved claim behind the scene and no qualifying wording, go back for repair with the claim's safe alternative. Not applied to a plan that was already approved.
+ */
+export function claimWordingIssues(scenes: readonly { scene_id: string; overlay: { text: string } | null; claim_ids: string[] }[], claims: readonly Claim[], facts: readonly BrandFact[]): { scene_id: string; code: string; message: string }[] {
+  const unsupported = claims.filter((c) => classifyClaim(c, [...facts]).status === "unsupported");
+  const issues: { scene_id: string; code: string; message: string }[] = [];
+  for (const s of scenes) {
+    const text = s.overlay?.text;
+    if (!text || s.claim_ids.length || QUALIFIED.test(text)) continue;
+    const words = significant(text);
+    const hit = unsupported.find((c) => { const w = [...significant(c.text)]; return w.length >= 3 && w.filter((x) => words.has(x)).length / w.length >= 0.6; });
+    if (hit) issues.push({ scene_id: s.scene_id, code: "asserts_unsupported_claim", message: `the overlay "${text}" asserts ${hit.claim_id} ("${hit.text}"), which no approved fact supports. Use its safe alternative: ${hit.safe_alternative ?? "qualify the wording or ask a question"}` });
+    else if (ASSERTS.test(text)) issues.push({ scene_id: s.scene_id, code: "unsubstantiated_wording", message: `the overlay "${text}" states a result or a ranking with no approved claim behind the scene; tie it to a supported claim, or qualify it (for example "designed to", "can", or a question)` });
+  }
+  return issues;
+}
+
 /**
  * The timing contract: scenes are listed in start order, run back to back from 0 with no gap or overlap, each has a positive
  * duration, and together they last exactly the requested runtime (to within a twentieth of a second of rounding).

@@ -35,6 +35,8 @@ export interface RenderCapabilities {
   caption_timing_templates?: readonly string[];
   /** Templates that draw the scene from its approved visual spec: they draw its text, graphics, UI-style pictures and camera motion themselves. */
   drawn_templates?: readonly string[];
+  /** The assembler lays sound under the finished picture, so a scene's voiceover, audio cues and audio files are judged by the audio plan (`planAudio`), not here. */
+  audio_stage?: boolean;
 }
 
 /**
@@ -52,7 +54,7 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     const ops = output.operations.filter((o) => o.target_scene_id === s.scene_id);
     const sceneOps = ops.filter((o) => o.operation_type !== "concat");
     if (!sceneOps.length) missing.push("no operation covers this scene");
-    for (const o of ops) if (!supported.has(o.operation_id)) missing.push(`${o.operation_id} (${o.recipe_id}) has no renderer that can run it`);
+    for (const o of ops) if (!supported.has(o.operation_id) && !(caps.audio_stage && o.operation_type === "mix_audio")) missing.push(`${o.operation_id} (${o.recipe_id}) has no renderer that can run it`);
     const shown = sceneOps.filter((o) => supported.has(o.operation_id));
     // A scene drawn from its approved visual spec: the template draws the scene's text, its UI-style pictures and its camera itself.
     const drawn = !!s.visual && shown.some((o) => (caps.drawn_templates ?? []).includes(supported.get(o.operation_id)!.implementation_ref));
@@ -77,6 +79,7 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     for (const id of s.asset_ids) {
       const a = assets.get(id);
       if (!a) missing.push(`it uses ${id}, which is not in the approved assets`);
+      else if (a.media_type === "audio" && caps.audio_stage) continue;
       else if (a.media_type === "video" && videoOps.has(id)) {
         if (a.audio_tracks > 0 && videoOps.get(id)!.parameters["source_audio"] !== "drop") missing.push(`its clip (${id}) has an audio track, audio cannot be produced yet, and the plan does not say to drop it (source_audio)`);
       } else if (a.media_type !== "image") missing.push(`it uses supplied ${a.media_type} (${id}), which this renderer cannot show yet`);
@@ -89,6 +92,7 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
     if (motion !== "static" && !moved) missing.push(`the approved shot calls for camera motion (${s.shot.camera_motion.replaceAll("_", " ")}), but no renderer here has a camera-move template, so ${s.asset_ids.length ? "supplied media is shown unchanged" : "the scene would be shown static"}`);
     for (const r of s.required_assets) {
       if (r.kind === "graphics") continue;
+      if (r.kind === "audio" && caps.audio_stage && r.availability !== "needs_external" && r.availability !== "missing_blocking") continue;
       // a product screen, logo or picture that was not supplied is drawn as a labelled concept (a typeset wordmark for a logo) when the scene has a visual spec
       if (drawn && r.availability === "generate_graphics" && (r.kind === "ui_screenshot" || r.kind === "logo" || r.kind === "image")) { labelled.push(`${r.kind === "logo" ? "the brand mark is a typeset wordmark, not a logo" : r.kind === "ui_screenshot" ? "the product screen is a drawn concept illustration, not the real product" : "the picture is drawn graphics"} ("${r.need.slice(0, 60)}")`); continue; }
       const label = r.kind === "ui_screenshot" ? "a product screen" : r.kind === "logo" ? "a logo" : r.kind === "footage" ? "footage" : r.kind === "audio" ? "audio" : "an image";
@@ -97,8 +101,8 @@ export function previewCoverage(handoff: DirectorHandoff, output: EditorOutput, 
         if (r.kind === "ui_screenshot" && assets.get(r.asset_id)?.genuine_product_ui !== true) labelled.push(`${r.asset_id} is shown as a concept, not as the real product (it was not declared a genuine capture)`);
       } else missing.push(`it needs ${label} ("${r.need}"${r.placeholder ? ", currently a placeholder" : r.availability !== "supplied" ? `, ${r.availability.replaceAll("_", " ")}` : ""}) that this renderer cannot show`);
     }
-    if (s.voiceover) missing.push("it has voiceover, which cannot be produced yet");
-    if (s.audio_cues.length) missing.push(`it has audio cues (${s.audio_cues.join("; ")}), which cannot be produced yet`);
+    if (s.voiceover && !caps.audio_stage) missing.push("it has voiceover, which cannot be produced yet");
+    if (s.audio_cues.length && !caps.audio_stage) missing.push(`it has audio cues (${s.audio_cues.join("; ")}), which cannot be produced yet`);
     if (i < scenes.length - 1 && s.transition_out !== "cut") {
       const wanted = caps.transition_templates[s.transition_out] ?? [];
       const done = ops.some((o) => o.operation_type === "concat" && supported.has(o.operation_id) && wanted.includes(supported.get(o.operation_id)!.implementation_ref));

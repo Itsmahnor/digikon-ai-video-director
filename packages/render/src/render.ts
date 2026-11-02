@@ -12,6 +12,7 @@ import {
 import type { RecipeLibrary } from "@digikon/recipes";
 import { jobVisuals } from "./composition.js";
 import { AdapterRegistry, type RenderAdapter, type RenderJob } from "./adapter.js";
+import { planAudio, type AudioCapabilities } from "./audio.js";
 import { alternativeImplementation, diagnoseOperations, loadCapabilityRegistry, type LoadedRegistry, type OperationDiagnosis } from "./capabilities.js";
 import { previewCoverage } from "./coverage.js";
 import { selectRenderer } from "./select.js";
@@ -34,6 +35,8 @@ export interface RenderDeps {
   now?: () => Date;
   /** The shared capability registry. When a recipe's own template cannot run, an engine the recipe lists may run it through a validated record. */
   capabilities?: LoadedRegistry;
+  /** What this machine can make for the film's sound. Absent: no sound is produced, and a plan that asks for some stays incomplete. */
+  audio?: AudioCapabilities;
 }
 
 export interface RenderInput {
@@ -65,7 +68,12 @@ export interface ExecutablePlan {
 
 export type PlanResult =
   | { ok: false; stage: "input" | "handoff" | "editor_output"; reasons: string[] }
-  | { ok: true; record: RenderRecord; plan: ExecutablePlan | null; /** Per operation: which engines could run it, why, which was selected and its status. */ diagnosis: OperationDiagnosis[] };
+  | { ok: true; record: RenderRecord; plan: ExecutablePlan | null; /** Per operation: which engines could run it, why, which was selected and its status. */ diagnosis: OperationDiagnosis[];
+      /**
+       * The blockers that are only true of running every operation through ONE adapter (mixed engines, a join handed to a scene planner, a transition one engine cannot draw).
+       * They stop `executeRender`, but scene-by-scene assembly carries such a plan out, and judges those requirements itself: see `planAssembly` and `assemblyBlockers`.
+       */
+      single_run_blockers: string[] };
 
 const iso = (d: Date) => d.toISOString();
 
@@ -134,7 +142,9 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   if (purpose === "production") blockers.push(...h.readiness.blockers.map((b) => `handoff is not production-ready: ${b}`));
   else notes.push("preview render: it may use draft recipes and is not a production video");
   const renderers = new Set(operations.map((o) => o.renderer).filter((r): r is Renderer => !!r));
-  if (renderers.size > 1) blockers.push(`the operations need more than one renderer (${[...renderers].join(", ")}); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)`);
+  const singleRun = new Set<string>();
+  const single = (b: string) => { singleRun.add(b); if (!blockers.includes(b)) blockers.push(b); };
+  if (renderers.size > 1) single(`the operations need more than one renderer (${[...renderers].join(", ")}); one render run cannot mix them, so the preview is assembled scene by scene instead (see the assembly plan)`);
 
   // ----- coverage: every approved requirement must be carried out by the selected renderer, or it is a blocker naming the scene -----
   // This is the same check the console shows. It runs here so no caller can render a plan that leaves out an approved transition, camera move,
@@ -142,7 +152,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const selection = selectRenderer({ operations, blockers }, deps.adapters);
   const coverage = previewCoverage(h, out, { operations }, selection.capabilities);
   for (const sc of coverage.scenes) {
-    for (const m of sc.missing) { const b = `${sc.scene_id}: ${m}`; if (!blockers.includes(b)) blockers.push(b); }
+    for (const m of sc.missing) single(`${sc.scene_id}: ${m}`); // judged again per scene, against the engine that draws it, by assembly
     for (const l of sc.labelled) notes.push(`${sc.scene_id}: ${l}`);
   }
 
@@ -153,7 +163,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const soundSources = h.assets.filter((a) => a.audio_tracks > 0 || a.media_type === "audio");
   const allSoundDropped = soundSources.length > 0 && soundSources.every((a) => a.media_type === "video" && droppedSounds(a.asset_id));
   if (allSoundDropped) notes.push(`the sound of ${soundSources.map((a) => a.asset_id).join(", ")} is left out because the approved edit plan says so (source_audio drop); no audio is produced`);
-  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped) || audioOnly;
+  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped) || audioOnly || (!!deps.audio && planAudio({ scenes: h.storyboard.scenes, assets: h.assets }, deps.audio).required);
   if (audioOnly) notes.push(`approved audio cues cannot be produced (${out.conflicts.length} scene(s)): the film is an incomplete preview and cannot be final`);
   let settings: RenderSettings | null = null;
   if (input.settings === undefined || input.settings === null) {
@@ -190,7 +200,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const askable = settings !== null && operations.every((o) => o.renderer !== null);
   const adapter = askable ? deps.adapters.adapterFor(operations[0]!.implementation_ref) : null;
   const job = askable ? { render_id, settings: settings!, operations: out.operations, templates: Object.fromEntries(operations.map((o) => [o.operation_id, o.implementation_ref])), clips, asset_info, assets: assets.map(({ present: _p, ...a }) => a), concept_asset_ids, ...jobVisuals(h, deps.assetFiles), output_path: join(deps.outputRoot, `${render_id}.${settings!.container}`) } : null;
-  if (job && adapter?.check) blockers.push(...adapter.check(job));
+  if (job && adapter?.check) for (const b of adapter.check(job)) single(b); // the whole film through one adapter; assembly asks each scene's adapter about that scene's pictures only
 
   const executable = blockers.length === 0 && settings !== null && !!job && !!adapter;
   const record = RenderRecord.parse({
@@ -203,8 +213,9 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
     operations: out.operations, recipes: deps.recipes, registry,
     supports: (t, type) => deps.adapters.supports(t, type as never), engineOf: (t) => (deps.adapters.template(t)?.renderer as never) ?? null,
   });
-  if (!executable) return { ok: true, record, plan: null, diagnosis };
-  return { ok: true, record, plan: { record, adapter: adapter!, assets: h.assets, job: job!, handoff: h, editor_output: out }, diagnosis };
+  const single_run_blockers = [...singleRun];
+  if (!executable) return { ok: true, record, plan: null, diagnosis, single_run_blockers };
+  return { ok: true, record, plan: { record, adapter: adapter!, assets: h.assets, job: job!, handoff: h, editor_output: out }, diagnosis, single_run_blockers };
 }
 
 /**

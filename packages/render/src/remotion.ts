@@ -58,6 +58,10 @@ const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-proj
 /** The scene-composition template has its own Remotion project, so the evidence of the plain and composed scenes stays valid. */
 export const COMPOSITIONS_ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-compositions", "index.jsx");
 
+/** Typefaces that ship with the renderer (SIL Open Font License, see fonts/), [regular, bold]. The film's visual system chooses among them and the machine's own sans. */
+const FONTS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "fonts");
+const FACE_FILES = { serif: ["EBGaramond-400.woff2", "EBGaramond-700.woff2"], mono: ["JetBrainsMono-400.woff2", "JetBrainsMono-700.woff2"] } as const;
+
 /**
  * The Remotion adapter. It bundles the fixed React composition in `remotion-project/` together with the font and the supplied
  * images, then renders it on this machine with `@remotion/renderer` in an already-installed Chrome. The composition receives
@@ -115,6 +119,7 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         const publicDir = join(dir, "public");
         await mkdir(publicDir);
         await copyFile(opts.fontFile, join(publicDir, "font.ttf"));
+        for (const f of Object.values(FACE_FILES).flat()) await copyFile(join(FONTS_DIR, f), join(publicDir, f));
         const scenes = await Promise.all((plan2.scenes as unknown as { image: null | { ext: string; uri: string }; logo?: null | { ext: string; uri: string }; asset_layers?: AssetLayer[] }[]).map(async (sc, i) => {
           let out: Record<string, unknown> = sc;
           if (sc.image) { const file = `img${i}${sc.image.ext}`; await copyFile(sc.image.uri, join(publicDir, file)); out = { ...out, image: { ...sc.image, uri: undefined, file } }; }
@@ -125,7 +130,7 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
         const { bundle } = await import("@remotion/bundler");
         const { renderMedia, selectComposition, makeCancelSignal } = await import("@remotion/renderer");
         const serveUrl = await bundle({ entryPoint: planned.kind === "composition" ? COMPOSITIONS_ENTRY : ENTRY, outDir: join(dir, "bundle"), publicDir });
-        const inputProps = { width, height, fps, total_frames: plan2.total_frames, font: "font.ttf", badge: CONCEPT_BADGE, scenes };
+        const inputProps = { width, height, fps, total_frames: plan2.total_frames, font: "font.ttf", faces: FACE_FILES, badge: CONCEPT_BADGE, scenes };
         const compId = planned.kind === "composition" ? "Compositions" : "Scenes";
         // "chrome-for-testing" is Remotion's mode for a full browser (headless=new); its default mode targets chrome-headless-shell, which is not installed
         const common = { browserExecutable: chrome, chromeMode: "chrome-for-testing" as const, logLevel: "error" as const, chromiumOptions: { gl: "angle" as const } };

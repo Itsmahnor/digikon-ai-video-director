@@ -18,7 +18,7 @@ import {
   type DirectorStateType, type ProductionPort, type LlmClient, type SkillLibrary,
 } from "@digikon/director";
 import {
-  AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, planAssembly, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
+  AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
@@ -53,6 +53,8 @@ export interface AppContext {
   editorSkills?: SkillLibrary;
   /** The font the FFmpeg scene adapter draws with. Null or missing: no renderer is available, and the console says so. */
   renderFont?: string | null;
+  /** What this machine can make for a film's sound. Absent: no audio stage, and requested sound stays an open, reported requirement. */
+  audio?: AudioCapabilities;
   /** The capability registry root (for example `capabilities`; records live under `registry/<engine>`). Absent: none are loaded. */
   capabilitiesDir?: string | null;
   /** The local vision models. Null: pictures are measured and listed, and their analysis says it could not run. */
@@ -743,6 +745,7 @@ export function createApp(ctx: AppContext) {
   const productionPortFor = (sessionId: string): ProductionPort | undefined => ctx.capabilitiesDir ? {
     capabilities: () => { const l = liveCapabilities(); return { snapshot: l.registry.snapshot, available_engines: l.engines }; },
     preflight: (req) => { const l = liveCapabilities(); return runAdapterPreflight(req, { adapters: l.adapters, outputRoot: tmpdir(), assetFiles: (id, role) => assets.renderFile(sessionId, id, role) }); },
+    ...(ctx.audio ? { audio: (req: { scenePlan: { scenes: readonly Parameters<typeof planAudio>[0]["scenes"][number][] }; assets: readonly Asset[]; feel: Parameters<typeof planAudio>[0]["feel"] }) => planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.feel }, ctx.audio!).unresolved.map((u) => `${u.scene_id}: ${u.detail}`) } : {}),
   } : undefined;
   let liveIndex: { hash: string; retriever: Retriever } | null = null;
   const currentRetriever = (): Retriever => {
@@ -769,7 +772,7 @@ export function createApp(ctx: AppContext) {
     await mkdir(dirs.out, { recursive: true });
     const { registry, available } = registryFor(dirs.out);
     const settings = settingsIn ? { ...settingsIn, source: { kind: "user_approved", reference: `entered in the console form (session ${s.id}, run ${runId})` } } : undefined;
-    const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, assetFiles: (id: string, role: string) => assets.renderFile(s.id, id, role) };
+    const base = { recipes: ctx.recipes, adapters: registry, capabilities: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), ...(ctx.audio ? { audio: ctx.audio } : {}), outputRoot: dirs.out, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, assetFiles: (id: string, role: string) => assets.renderFile(s.id, id, role) };
     // What Gate 2 approved, checked against what is about to run: the approval binding, the plans' integrity, the registry as it is now and the Editor's operations. A run approved
     // without production planning is not bound and is planned as before. The approved selection goes into render planning, so the renderer cannot choose another implementation.
     const st = (await s.graph!.getState({ configurable: { thread_id: runId } })).values as DirectorStateType;
@@ -806,7 +809,15 @@ export function createApp(ctx: AppContext) {
       }
       production_gate.settings = production_gate.reasons.length === 0;
     }
-    return { runId, handoff, production_gate, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps };
+    // Where each approved choice stands on the readiness ladder. Being in the registry is not being ready: `reviewed` and `production` need a person's review, and a render never promotes anything.
+    const snapshot = (() => { try { return productionPortFor(s.id)?.capabilities().snapshot ?? null; } catch { return null; } })();
+    const decisions = (st.productionPlan?.decisions ?? []) as { use_id: string; scene_id: string; recipe_id: string; engine: string | null; readiness: string | null; variant: { capability_id: string } | null; limitations: string[] }[];
+    const ladder = decisions.map((d) => {
+      const variant = d.variant ? snapshot?.capabilities.find((c) => c.capability_id === d.variant!.capability_id) : null;
+      const readiness = variant?.status ?? d.readiness;
+      return { use_id: d.use_id, scene_id: d.scene_id, recipe_id: d.recipe_id, capability: d.variant?.capability_id ?? d.recipe_id, engine: d.engine, readiness, production_ready: readiness === "production", limitations: d.limitations };
+    });
+    return { runId, handoff, production_gate, dirs, editor: stored.output, planned: planned as Extract<PlanResult, { ok: true }>, production, coverage, selection, registered: registry.renderers(), eligible, available, assembly, assembleDeps, ladder };
   };
 
   /** A bound run whose approved implementation cannot be rendered as approved: nothing starts. The details go to the log; the user gets one ordinary sentence. */
@@ -847,18 +858,23 @@ export function createApp(ctx: AppContext) {
   const planView = (s: Session, p: Awaited<ReturnType<typeof prepare>>) => {
     const sceneOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.target_scene_id]));
     const typeOf = new Map(p.editor.operations.map((o) => [o.operation_id, o.operation_type]));
-    const prodBlockers: string[] = p.production.ok ? p.production.record.blockers : [];
+    // Scene-by-scene assembly is how a film is made, so a plannable assembly is the truth about it: what one adapter could not do alone (mixed engines, a join, a transition) is no blocker.
+    const assembled = p.assembly?.ok && !p.eligible ? p.assembly.plan : null; // an eligible one-engine film is rendered in one run, and is judged as that
+    const singleRun = new Set(p.production.ok ? p.production.single_run_blockers : []);
+    const prodBlockers: string[] = p.production.ok ? p.production.record.blockers.filter((b) => !(assembled && singleRun.has(b))) : [];
     const ops = p.planned.record.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sceneOf.get(o.operation_id) ?? null, note: typeOf.get(o.operation_id) === "mix_audio" ? "audio is not part of this phase: it is reported as unresolved and keeps the film from being complete or final" : null, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, supported: o.renderer !== null }));
-    const blockers = plainReasons([...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])].map((b) => scrub(b, scrubRoots(s))));
+    const coverage = assembled ? assembled.coverage : p.coverage;
+    const previewSingle = new Set(p.planned.ok ? p.planned.single_run_blockers : []);
+    const blockers = plainReasons((assembled ? [...new Set([...p.planned.record.blockers.filter((b) => !previewSingle.has(b)), ...assemblyBlockers(assembled)])] : [...new Set([...p.planned.record.blockers, ...p.coverage.scenes.flatMap((x) => x.missing.map((m) => `${x.scene_id}: ${m}`))])]).map((b) => scrub(b, scrubRoots(s))));
     const refused = productionRefusal(p);
     if (refused) blockers.push(refused.message);
     return {
       run_id: p.runId,
       renderer_available: p.available,
       editor: { status: p.editor.status, validation: p.editor.validation, conflicts: p.editor.conflicts, revision_requests: p.editor.revision_requests, operations: p.editor.operations.length, rendered: p.editor.execution.rendered },
-      renderer: { selected: p.selection.selected, needed: p.selection.needed, composition_required: p.selection.composition_required, registered: p.registered },
+      renderer: { selected: p.selection.selected, needed: p.selection.needed, composition_required: p.selection.composition_required, registered: p.registered, execution: assembled ? "scene_assembly" as const : "single_run" as const },
       plan: { state: p.planned.record.state, purpose: "preview" as const, operations: ops, supported: ops.filter((o) => o.supported).length, unsupported: ops.filter((o) => !o.supported).length, notes: p.planned.record.notes },
-      coverage: p.coverage,
+      coverage,
       /** Per operation: status, every engine considered and why it was or was not usable, and the engine selected. */
       capability: p.planned.diagnosis.map((d) => ({ operation_id: d.operation_id, scene_id: d.scene_id, recipe_id: d.recipe_id, status: d.status, selected_engine: d.selected_engine, selected_template: d.selected_template, reason: scrub(d.reason, scrubRoots(s)), engines: d.engines.map((e) => ({ engine: e.engine, verdict: e.verdict, reason: scrub(e.reason, scrubRoots(s)) })) })),
       eligible: p.eligible,
@@ -869,7 +885,7 @@ export function createApp(ctx: AppContext) {
       blockers,
       /** A separate question from the preview: could this go to production? Never true while any recipe is a draft. */
       production: {
-        ready: p.production.ok && p.production.record.state === "executable", blockers: p.production.ok ? p.production.record.blockers.map((b) => scrub(b, scrubRoots(s))) : [],
+        ready: p.production.ok && (assembled ? prodBlockers.length === 0 && assembled.complete : p.production.record.state === "executable"), blockers: prodBlockers.map((b) => scrub(b, scrubRoots(s))),
         /** Per operation: whether its recipe is reviewed, and the exact template or renderer that is missing. */
         operations: p.production.ok ? p.production.record.operations.map((o) => ({ operation_id: o.operation_id, recipe_id: o.recipe_id, template: o.implementation_ref, renderer: o.renderer, reviewed: o.production_executable, missing: o.renderer === null ? `no renderer has the template ${o.implementation_ref} registered (registered here: ${p.registered.join(", ") || "none"})` : null, open: prodBlockers.filter((b) => b.startsWith(`${o.operation_id}:`)).map((b) => scrub(b.slice(o.operation_id.length + 1).trim(), scrubRoots(s))) })) : [],
       },
@@ -877,10 +893,11 @@ export function createApp(ctx: AppContext) {
        * How far each operation has been shown to work, kept apart: registered, validated on its own, compatible with this scene, rendered with this scene's
        * inputs, validated in the finished video. A registry status of "validated_available" appears only as `registry_status`; it is not one of these levels.
        */
+      ladder: p.ladder,
       readiness: p.assembly?.ok ? p.assembly.plan.scenes.flatMap((sc) => sc.operations.map((o) => ({ operation_id: o.operation_id, scene_id: sc.scene_id, recipe_id: o.recipe_id, template: o.template, operation_type: o.operation_type, engine: o.engine, registry_status: o.status, ...o.readiness, missing: o.readiness.missing ? scrub(o.readiness.missing, scrubRoots(s)) : null }))) : null,
       layout_constraints: p.planned.record.settings ? layoutConstraints(p.planned.record.settings.width, p.planned.record.settings.height) : null,
-      needs: { aspect_ratio: p.handoff.constraints.aspect_ratio, duration_s: timelineEnd(p.handoff), supported_output: { container: "mp4", video_codec: "h264", audio_codec: null }, you_provide: ["width", "height", "fps"] },
-      label: p.eligible ? "Preview only: every approved scene rendered with the templates of the selected renderer. It is not production-ready." : "No preview can be made yet. Nothing here is rendered, and no partial video is offered.",
+      needs: { aspect_ratio: p.handoff.constraints.aspect_ratio, duration_s: timelineEnd(p.handoff), supported_output: { container: "mp4", video_codec: "h264", audio_codec: p.planned.record.audio_required && ctx.audio ? "aac" : null }, you_provide: ["width", "height", "fps"] },
+      label: p.eligible ? "Preview only: every approved scene rendered with the templates of the selected renderer. It is not production-ready." : assembled?.complete ? "Preview only: every approved scene is rendered by its own engine and joined by the assembler. It is not production-ready." : "No preview can be made yet. Nothing here is rendered, and no partial video is offered.",
     };
   };
 
@@ -889,7 +906,7 @@ export function createApp(ctx: AppContext) {
     const s = session(c.req.param("id"));
     if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
     const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
-    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true });
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
     if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
     saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
     return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });

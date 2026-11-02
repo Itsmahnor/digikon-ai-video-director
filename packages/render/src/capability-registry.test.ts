@@ -21,7 +21,7 @@ describe("reconciliation covers every source", () => {
   it("accounts for every recipe, learned record and visual block", () => {
     expect(recipes.length).toBe(40);
     expect(learned.records.length).toBe(18);
-    expect(visual.length).toBe(7);
+    expect(visual.length).toBe(14);
     for (const r of recipes) expect(reg.snapshot.capabilities.some((c) => c.recipe_id === r.recipe_id && c.variant_of === null), r.recipe_id).toBe(true);
     for (const l of learned.records) expect(reg.get(l.capability_id), l.capability_id).toBeDefined();
     for (const v of visual) expect(reg.get(`remotion:scene-composition:${v.block}`), v.block).toBeDefined();
@@ -34,7 +34,7 @@ describe("reconciliation covers every source", () => {
   });
   it("derives readiness honestly from the repository data", () => {
     const c = reg.counts();
-    expect(c.registered).toBe(47);
+    expect(c.registered).toBe(54);
     expect(c.executable).toBeGreaterThanOrEqual(c.validated);
     expect(c.reviewed).toBe(0);
     expect(c.production).toBe(0);
@@ -75,7 +75,7 @@ describe("rejections carry reason codes and nothing is dropped", () => {
   it("duplicate ids are detected and the duplicate kept but not executable", () => {
     const dup = recipe("text-card-fade");
     const reg = build({ recipes: [...recipes, dup] });
-    expect(reg.snapshot.capabilities.length).toBe(48);
+    expect(reg.snapshot.capabilities.length).toBe(55);
     expect(reg.snapshot.diagnostics.some((d) => d.code === "DUPLICATE_CAPABILITY_ID")).toBe(true);
     expect(reg.get("ffmpeg:text-card-fade#duplicate2")!.status).toBe("registered");
   });
