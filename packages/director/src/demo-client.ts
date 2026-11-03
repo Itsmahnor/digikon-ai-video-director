@@ -69,7 +69,7 @@ export class DemoClient implements LlmClient {
       cta: "Order today", claims,
       ...(!this.opts.creative ? {} : { art_direction: {
         audience_response: "The viewer should feel confident enough to place one order.", concept: "One honest view of the product, then one action.", visual_metaphor: null,
-        palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#e8590c", accent_2: "#2b8a6e" },
+        palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#b8430a", accent_2: "#2b8a6e" },
         typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "Bold sentence case reads as warm and direct." },
         composition: "Headline on the left or top, one picture beside it, generous margins.",
         motion_language: { feel: "precise", easing: "ease_out", description: "Elements ease out of place and every scene ends held still." },

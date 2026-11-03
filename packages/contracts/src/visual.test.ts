@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ArtDirection, Palette, SceneVisual, Scene, Treatment, contrastRatio, creativeIssues, visualTexts } from "./index.js";
 
-const palette = { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#e8590c", accent_2: "#2b8a6e" };
+const palette = { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#b8430a", accent_2: "#2b8a6e" };
 const art = {
   audience_response: "Relief", concept: "One calm slot", visual_metaphor: null, palette,
   typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "friendly" }, composition: "left column",
@@ -27,7 +27,7 @@ describe("art direction", () => {
   it("is optional on a treatment, so an older treatment still loads, and is validated when present", () => {
     const base = { logline: "l", hook: "h", tone: "t", beats: [{ beat: "b", purpose: "p", approx_seconds: 5 }], cta: "c" };
     expect(Treatment.parse(base).art_direction).toBeNull();
-    expect(Treatment.parse({ ...base, art_direction: art }).art_direction?.palette.accent).toBe("#e8590c");
+    expect(Treatment.parse({ ...base, art_direction: art }).art_direction?.palette.accent).toBe("#b8430a");
     expect(Treatment.safeParse({ ...base, art_direction: { ...art, palette: { ...palette, text: "#eeeeee" } } }).success).toBe(false);
     expect(ArtDirection.safeParse({ ...art, typography: { ...art.typography, scale: "huge" } }).success).toBe(false);
   });

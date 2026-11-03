@@ -9,7 +9,7 @@ export const EXAMPLE_ART_DIRECTION: ArtDirection = {
   audience_response: "Busy owners should feel relief and click to start the free trial.",
   concept: "Booking goes from a pile of back-and-forth messages to one calm, confirmed slot.",
   visual_metaphor: "A tangle of message bubbles that resolves into a single tidy calendar row.",
-  palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#e8590c", accent_2: "#2b8a6e" },
+  palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#b8430a", accent_2: "#2b8a6e" },
   typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "Bold sentence case reads as friendly and confident." },
   composition: "Headline in a left column or on top, one picture beside or below it, generous margins, one accent per scene.",
   motion_language: { feel: "precise", easing: "ease_out", description: "Elements ease out of their own place; nothing bounces; every scene ends held still." },

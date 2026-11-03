@@ -8,7 +8,7 @@ import { root } from "./fixtures.js";
 const art = {
   audience_response: "Home coffee drinkers should feel the pleasure of a fresh cup and order a first bag.",
   concept: "A week of roasting compressed into one pour.", visual_metaphor: null,
-  palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#e8590c", accent_2: "#2b8a6e" },
+  palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#b8430a", accent_2: "#2b8a6e" },
   typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "warm and direct" }, composition: "headline left, picture right",
   motion_language: { feel: "precise", easing: "ease_out", description: "eases out, then holds" }, narrative: { opening: "a", development: "b", conclusion: "c" },
 };
@@ -41,7 +41,7 @@ describe("creative direction in the Director", () => {
     const ok = new ScriptedClient([{ status: "ready", questions: [] }, withArt, good, { uses: [] }]);
     const out = await throughGate1(buildDirectorGraph(strict(ok)), input, "t-art");
     expect(out.status).toBe("awaiting_approval");
-    expect(out.treatmentDoc!.art_direction!.palette.accent).toBe("#e8590c");
+    expect(out.treatmentDoc!.art_direction!.palette.accent).toBe("#b8430a");
     const sb = ok.calls.find((c) => c.name === "storyboard")!.user;
     expect(sb).toContain("visual_purpose");
     expect(sb).toContain("art_direction");

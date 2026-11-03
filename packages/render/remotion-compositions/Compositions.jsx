@@ -30,6 +30,9 @@ const hexToRgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) 
 const rgba = (h, a) => { const [r, g, b] = hexToRgb(h); return `rgba(${r},${g},${b},${a})`; };
 const chan = (v) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
 const lum = (h) => { const [r, g, b] = hexToRgb(h); return 0.2126 * chan(r) + 0.7152 * chan(g) + 0.0722 * chan(b); };
+const contrastOf = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+// Text in the accent only when the accent reads as text (4.5:1) on the background; otherwise the palette text colour, so a decorative accent never makes unreadable words.
+const accentText = (pal) => (contrastOf(pal.accent, pal.background) >= 4.5 ? pal.accent : pal.text);
 const onColor = (bg) => (lum(bg) > 0.4 ? "#0b0f19" : "#ffffff");
 
 // progress of one element: starts at `start` and takes `dur`, both as shares of the active window (the first 70% of the scene, so the end is held)
@@ -490,7 +493,7 @@ const ClosingSignature = ({ scene, p }) => {
       {g.mark ? <div style={{ opacity: p(0, 0.4), letterSpacing: `${0.14 - 0.1 * p(0, 0.6)}em`, marginBottom: g.mark.px * 0.3 }}>{lines(g.mark.lines, g.mark.px, 1.15)}</div> : null}
       {g.mark ? <div style={{ height: 1, width: scene.width * 0.16 * rule, margin: `0 auto ${g.mark.px * 0.3}px`, background: pal.accent }} /> : null}
       {g.head ? <div style={{ opacity: p(0.3, 0.3), fontWeight: 400, marginBottom: g.head.px * 0.8 }}>{lines(g.head.lines, g.head.px, 1.25)}</div> : null}
-      <div style={{ opacity: p(0.5, 0.3), color: pal.accent }}>{lines(g.action.lines, g.action.px, 1.3)}</div>
+      <div style={{ opacity: p(0.5, 0.3), color: accentText(pal) }}>{lines(g.action.lines, g.action.px, 1.3)}</div>
       {g.sub ? <div style={{ opacity: p(0.65, 0.25), color: pal.muted, marginTop: g.sub.px, fontWeight: 400 }}>{lines(g.sub.lines, g.sub.px, 1.3)}</div> : null}
     </div>
   );

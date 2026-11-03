@@ -50,7 +50,7 @@ describe("planning a drawn scene", () => {
     if (!p.ok) return;
     expect(p.scenes.map((s) => s.from_frame)).toEqual(BLOCKS.map((_b, i) => i * SCENE_S * 30));
     expect(p.total_frames).toBe(BLOCKS.length * SCENE_S * 30);
-    expect(p.scenes[0]!.palette.accent).toBe("#e8590c");
+    expect(p.scenes[0]!.palette.accent).toBe("#b8430a");
     expect(p.scenes[0]!.portrait).toBe(false);
   });
   it("lays text out from the short side, so a portrait frame gets legible type and a headline above the picture", () => {
