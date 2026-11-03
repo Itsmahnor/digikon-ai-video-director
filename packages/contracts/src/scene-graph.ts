@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
 /**
  * The scene graph (format version 2): a scene described as elements on a timeline, never as code. It is additive: the draft version 1 graph in
@@ -60,6 +60,8 @@ export const TextProps = z.object({
   weight: z.enum(["regular", "bold"]).default("bold"),
   align: z.enum(["left", "center", "right"]).default("left"),
   upper: z.boolean().default(false),
+  /** Which of the film's font roles draws this text. Absent means the film's single font, as before. */
+  font: z.enum(["display", "body", "mono"]).optional(),
   color: Color.default("text"),
   line_height: z.number().min(0.4).max(2).default(1.2),
   /** Counts a number up: the text is `prefix` + value + `suffix`, and the `progress` track runs 0..1 from `from` to `to`. */
