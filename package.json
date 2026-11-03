@@ -24,7 +24,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "db:up": "docker compose up -d postgres",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "tsx scripts/db.mts migrate",
+    "db:health": "tsx scripts/db.mts health"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
@@ -33,3 +35,4 @@
     "vitest": "^2.1.0"
   }
 }
+
