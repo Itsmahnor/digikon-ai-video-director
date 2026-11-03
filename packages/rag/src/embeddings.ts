@@ -15,6 +15,8 @@ export interface Embedder {
   readonly version: string;
   readonly dim: number;
   embed(texts: readonly string[]): Promise<number[][]>;
+  /** Embeds a search query. Models trained with a query instruction (bge) add it here; absent means queries and documents are embedded alike. */
+  embedQuery?(text: string): Promise<number[]>;
 }
 
 const fnv1a = (s: string): number => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; };
@@ -57,7 +59,13 @@ export function findLocalSentenceModel(modelsDir: string): string | null {
   return null;
 }
 
-type Extractor = (texts: string[], o: { pooling: "mean"; normalize: true }) => Promise<{ tolist(): number[][] }>;
+type Pooling = "mean" | "cls";
+/** How each known model pools token vectors; bge models are trained for the [CLS] vector, the others for the mean. */
+const poolingFor = (model: string): Pooling => (/bge/i.test(model) ? "cls" : "mean");
+/** bge v1.5 prepends this to short search queries (not to documents). */
+const BGE_QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: ";
+
+type Extractor = (texts: string[], o: { pooling: Pooling; normalize: true }) => Promise<{ tolist(): number[][] }>;
 
 export class TransformersEmbedder implements Embedder {
   readonly version = "1";
@@ -72,20 +80,24 @@ export class TransformersEmbedder implements Embedder {
         throw new Error(`No sentence-embedding model at ${join(this.modelsDir, this.model)}. This code never downloads one. Place the files of ${this.model} there (config.json, tokenizer files and onnx/model*.onnx) after the model has been approved.`);
       }
       const name = "@huggingface/transformers";
-      const tf = (await import(name)) as { env: { localModelPath: string; allowRemoteModels: boolean; allowLocalModels: boolean }; pipeline: (task: string, model: string, o: { local_files_only: boolean }) => Promise<Extractor> };
+      const tf = (await import(name)) as { env: { localModelPath: string; allowRemoteModels: boolean; allowLocalModels: boolean }; pipeline: (task: string, model: string, o: { local_files_only: boolean; dtype: "q8" }) => Promise<Extractor> };
       tf.env.localModelPath = this.modelsDir;
       tf.env.allowRemoteModels = false;
       tf.env.allowLocalModels = true;
-      return tf.pipeline("feature-extraction", this.model, { local_files_only: true });
+      return tf.pipeline("feature-extraction", this.model, { local_files_only: true, dtype: "q8" });
     })();
     return this.extractor;
   }
 
   async embed(texts: readonly string[]): Promise<number[][]> {
     const ex = await this.load();
-    const out = (await ex([...texts], { pooling: "mean", normalize: true })).tolist();
+    const out = (await ex([...texts], { pooling: poolingFor(this.model), normalize: true })).tolist();
     if (out[0]) this.dim = out[0].length;
     return out;
+  }
+
+  async embedQuery(text: string): Promise<number[]> {
+    return (await this.embed([/bge/i.test(this.model) ? BGE_QUERY_INSTRUCTION + text : text]))[0]!;
   }
 }
 

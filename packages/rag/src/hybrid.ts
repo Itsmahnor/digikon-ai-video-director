@@ -71,7 +71,7 @@ export class HybridRetriever implements Retriever {
   async retrieve(q: RetrieveQuery): Promise<Hit[]> {
     const o = this.opts, rrfK = o.rrf_k ?? 60, n = o.candidates ?? 50, minSim = o.min_similarity ?? 0.2, wl = o.weight_lexical ?? 1, wv = o.weight_vector ?? 1;
     const lex = await this.lexical.retrieve({ ...q, k: n, max_tokens: undefined });
-    const [qv] = await this.embedder.embed([q.text]);
+    const qv = this.embedder.embedQuery ? await this.embedder.embedQuery(q.text) : (await this.embedder.embed([q.text]))[0];
     const raw = qv ? await this.index.search(qv, Math.max(n * 4, 200)) : [];
     const vec: { doc: Doc; sim: number }[] = [];
     for (const r of raw) {
