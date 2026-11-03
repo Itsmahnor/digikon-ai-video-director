@@ -63,10 +63,13 @@
   ],
   "status": "validated",
   "validated": {
-    "at": "2026-11-02T11:18:39.213Z",
-    "fingerprint": "050275a4c2ba3365",
+    "at": "2026-11-03T09:47:22.913Z",
+    "fingerprint": "4806e0d3ba5b542e",
     "remotion": "4.0.539",
     "browser": "chrome via remotion",
+    "remotion_renderer": "4.0.539",
+    "ffmpeg": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "chrome": "156.0.4314.58",
     "inputs": [
       {
         "width": 960,
@@ -74,7 +77,7 @@
         "fps": 30,
         "duration_s": 3,
         "spec_hash": "4070365cc2785036",
-        "art_direction_hash": "691eded9ff83822e",
+        "art_direction_hash": "c3aa39a53400555f",
         "overlay_text": "Share your open times. Your client picks one."
       },
       {
@@ -83,7 +86,7 @@
         "fps": 30,
         "duration_s": 3,
         "spec_hash": "4070365cc2785036",
-        "art_direction_hash": "691eded9ff83822e",
+        "art_direction_hash": "c3aa39a53400555f",
         "overlay_text": "Share your open times. Your client picks one."
       }
     ],
@@ -91,16 +94,16 @@
       {
         "width": 960,
         "height": 540,
-        "sha256": "644f2988e7470d5edfaa8211e59977591c4a2b8d1b9e024ecfcac9ba738222a7",
-        "bytes": 2293665,
+        "sha256": "cb2b799f13fc502a4821c7631583cb236b3aac10349fcc77a3f7f39ad6178b33",
+        "bytes": 2254238,
         "frames": 1260,
         "film_scene": "S02 of a 14-scene film"
       },
       {
         "width": 540,
         "height": 960,
-        "sha256": "02d5a2377768ee52e2c3ff0164dc86519daa533e53c4c71fe519ed1b65c8d121",
-        "bytes": 2090989,
+        "sha256": "6f3f919d5f7719479e748aa533fda177a907d52a0781088ad07395a22c0dec6f",
+        "bytes": 2054071,
         "frames": 1260,
         "film_scene": "S02 of a 14-scene film"
       }
@@ -113,80 +116,18 @@
       {
         "width": 960,
         "coverage": 0.116,
-        "motion": 12.31,
+        "motion": 12.34,
         "edge_ink": 0
       },
       {
         "width": 540,
         "coverage": 0.109,
-        "motion": 10.98,
+        "motion": 11.03,
         "edge_ink": 0
       }
     ]
   },
   "history": [
-    {
-      "at": "2026-10-30T10:15:30.741Z",
-      "fingerprint": "70d797eb38b9e7b3",
-      "remotion": "4.0.539",
-      "browser": "chrome via remotion",
-      "inputs": [
-        {
-          "width": 960,
-          "height": 540,
-          "fps": 30,
-          "duration_s": 3,
-          "spec_hash": "4070365cc2785036",
-          "art_direction_hash": "691eded9ff83822e",
-          "overlay_text": "Share your open times. Your client picks one."
-        },
-        {
-          "width": 540,
-          "height": 960,
-          "fps": 30,
-          "duration_s": 3,
-          "spec_hash": "4070365cc2785036",
-          "art_direction_hash": "691eded9ff83822e",
-          "overlay_text": "Share your open times. Your client picks one."
-        }
-      ],
-      "renders": [
-        {
-          "width": 960,
-          "height": 540,
-          "sha256": "1a1cfd7cb4f187c612428107d9722c2b385afd6213d943f08328cf69f1205f5f",
-          "bytes": 1387657,
-          "frames": 630,
-          "film_scene": "S02 of a 7-scene film"
-        },
-        {
-          "width": 540,
-          "height": 960,
-          "sha256": "2cecab53fb30a82739a8af59eccea0c08a95ac9ec1afb8fe9f6d234425fac1c2",
-          "bytes": 1219381,
-          "frames": 630,
-          "film_scene": "S02 of a 7-scene film"
-        }
-      ],
-      "checks": [
-        "960x540: rendered by remotion in a 7-scene film; background on the approved palette, 12% of the frame drawn, nothing on the frame edge, headline area inked, motion 12.3 of 255 between frames, file probed as 960x540",
-        "540x960: rendered by remotion in a 7-scene film; background on the approved palette, 11% of the frame drawn, nothing on the frame edge, headline area inked, motion 11.0 of 255 between frames, file probed as 540x960"
-      ],
-      "measures": [
-        {
-          "width": 960,
-          "coverage": 0.116,
-          "motion": 12.31,
-          "edge_ink": 0
-        },
-        {
-          "width": 540,
-          "coverage": 0.109,
-          "motion": 10.99,
-          "edge_ink": 0
-        }
-      ]
-    },
     {
       "at": "2026-10-30T11:19:50.498Z",
       "fingerprint": "ccd73fa75e98f982",
@@ -434,8 +375,70 @@
           "edge_ink": 0
         }
       ]
+    },
+    {
+      "at": "2026-11-02T11:18:39.213Z",
+      "fingerprint": "050275a4c2ba3365",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "4070365cc2785036",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Share your open times. Your client picks one."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "4070365cc2785036",
+          "art_direction_hash": "691eded9ff83822e",
+          "overlay_text": "Share your open times. Your client picks one."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "644f2988e7470d5edfaa8211e59977591c4a2b8d1b9e024ecfcac9ba738222a7",
+          "bytes": 2293665,
+          "frames": 1260,
+          "film_scene": "S02 of a 14-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "02d5a2377768ee52e2c3ff0164dc86519daa533e53c4c71fe519ed1b65c8d121",
+          "bytes": 2090989,
+          "frames": 1260,
+          "film_scene": "S02 of a 14-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 14-scene film; background on the approved palette, 12% of the frame drawn, nothing on the frame edge, headline area inked, motion 12.3 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 14-scene film; background on the approved palette, 11% of the frame drawn, nothing on the frame edge, headline area inked, motion 11.0 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.116,
+          "motion": 12.31,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.109,
+          "motion": 10.98,
+          "edge_ink": 0
+        }
+      ]
     }
   ],
   "failure": null,
-  "record_hash": "8dcefe85504e7328"
+  "record_hash": "9619845640819788567b0d3e434f23b586209170a7e78146b5f848a5d511b92c"
 }
