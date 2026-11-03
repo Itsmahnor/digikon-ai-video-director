@@ -14,7 +14,17 @@ export interface TemplateUsageRow { template_id: string; film_id: string | null;
 /** Template use counts, overall and in one film (the shape rerank.ts reads). */
 export interface UsageCounts { total: Map<string, number>; in_film: Map<string, number> }
 
+export interface CategoryRow { id: string; name: string; parent_id: string | null; description: string }
+export interface ReviewRow { template_id: string; reviewer: string; verdict: "approved" | "rejected" | "needs_changes"; notes: string }
+
 export interface DataStore {
+  upsertCategory(row: CategoryRow): Promise<void>;
+  listCategories(): Promise<CategoryRow[]>;
+  addReview(row: ReviewRow): Promise<void>;
+  listReviews(templateId?: string): Promise<ReviewRow[]>;
+  logTemplateUsage(row: TemplateUsageRow): Promise<void>;
+  /** How often each template was used, overall and in one film. */
+  usage(filmId?: string): Promise<UsageCounts>;
   upsertTemplate(row: TemplateRow): Promise<void>;
   getTemplate(id: string): Promise<TemplateRow | null>;
   listTemplates(filter?: { family?: string; status?: TemplateRow["status"] }): Promise<TemplateRow[]>;
@@ -43,6 +53,15 @@ export class MemoryDataStore implements DataStore {
   private calls: ModelCallRow[] = [];
   private retrievals: RetrievalLogRow[] = [];
   private uses: TemplateUsageRow[] = [];
+  private categories = new Map<string, CategoryRow>();
+  private reviews: ReviewRow[] = [];
+  async upsertCategory(row: CategoryRow) {
+    if (row.parent_id !== null && !this.categories.has(row.parent_id)) throw new Error(`no category ${row.parent_id}`);
+    this.categories.set(row.id, { ...row });
+  }
+  async listCategories() { return [...this.categories.values()].map((c) => ({ ...c })); }
+  async addReview(row: ReviewRow) { if (!this.templates.has(row.template_id)) throw new Error(`no template ${row.template_id}`); this.reviews.push({ ...row }); }
+  async listReviews(templateId?: string) { return this.reviews.filter((r) => templateId === undefined || r.template_id === templateId).map((r) => ({ ...r })); }
   async logTemplateUsage(row: TemplateUsageRow) { if (!this.templates.has(row.template_id)) throw new Error(`no template ${row.template_id}`); this.uses.push(structuredClone(row)); }
   async usage(filmId?: string): Promise<UsageCounts> { return countUses(this.uses, filmId); }
   async upsertTemplate(row: TemplateRow) { this.templates.set(row.id, structuredClone(row)); }
@@ -84,6 +103,18 @@ const vec = (v: readonly number[]): string => `[${v.join(",")}]`;
 
 export class PgDataStore implements DataStore {
   constructor(private readonly sql: SqlClient) {}
+  async upsertCategory(c: CategoryRow) {
+    await this.sql.query("INSERT INTO template_categories (id, name, parent_id, description) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET name=$2, parent_id=$3, description=$4", [c.id, c.name, c.parent_id, c.description]);
+  }
+  async listCategories() {
+    const r = await this.sql.query("SELECT id, name, parent_id, description FROM template_categories ORDER BY id");
+    return r.rows.map((x) => ({ id: String(x["id"]), name: String(x["name"]), parent_id: (x["parent_id"] as string | null) ?? null, description: String(x["description"] ?? "") }));
+  }
+  async addReview(r: ReviewRow) { await this.sql.query("INSERT INTO template_review (template_id, reviewer, verdict, notes) VALUES ($1,$2,$3,$4)", [r.template_id, r.reviewer, r.verdict, r.notes]); }
+  async listReviews(templateId?: string) {
+    const r = await this.sql.query("SELECT template_id, reviewer, verdict, notes FROM template_review WHERE ($1::text IS NULL OR template_id=$1) ORDER BY id", [templateId ?? null]);
+    return r.rows.map((x) => ({ template_id: String(x["template_id"]), reviewer: String(x["reviewer"]), verdict: x["verdict"] as ReviewRow["verdict"], notes: String(x["notes"] ?? "") }));
+  }
   async logTemplateUsage(u: TemplateUsageRow) { await this.sql.query("INSERT INTO template_usage (template_id, film_id, scene_id, outcome) VALUES ($1,$2,$3,$4::jsonb)", [u.template_id, u.film_id, u.scene_id, JSON.stringify(u.outcome ?? {})]); }
   async usage(filmId?: string): Promise<UsageCounts> {
     const r = await this.sql.query("SELECT template_id, film_id FROM template_usage");
