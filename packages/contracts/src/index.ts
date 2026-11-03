@@ -15,3 +15,4 @@ export * from "./render.js";
 export * from "./capability.js";
 export * from "./capability-query.js";
 export * from "./production.js";
+export * from "./templates.js";

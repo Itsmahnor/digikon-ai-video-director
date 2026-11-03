@@ -91,6 +91,12 @@ export const Recipe = z
       url: z.string().url().nullable().default(null),
       license: z.string().min(1),
     }),
+    /** The family of recipes this belongs to, and the recipe it is a variant of. Optional, absent on existing recipes. */
+    family: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).optional(),
+    variant_of: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).optional(),
+    /** The scene archetype this recipe is made for (see Scene.scene_archetype). */
+    archetype: z.string().regex(/^[a-z][a-z0-9_]*$/).optional(),
+    tags: z.array(z.string().trim().min(1).max(40)).max(24).optional(),
     status: RecipeStatus,
     /** Who reviewed the recipe, when, and the evidence (for example a test render). `reviewed` is not accepted without it. */
     review: z.object({ reviewed_by: z.string().min(1), reviewed_at: z.string().datetime(), evidence: z.string().min(1) }).nullable().default(null),

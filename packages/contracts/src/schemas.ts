@@ -74,6 +74,18 @@ export const UnresolvedItem = z.object({
   note: z.string().min(1).max(300),
 });
 
+/** What a scene needs from the picture, stated before any template is chosen, so a template is picked for the need and not the other way round. */
+export const SCENE_NEED_KINDS = ["emphasise_claim", "show_data", "show_process", "show_place_or_object", "introduce_brand", "transition_idea", "emotional_beat", "call_to_action", "explain_concept", "ambient_context"] as const;
+export const SceneNeed = z.object({
+  kind: z.enum(SCENE_NEED_KINDS),
+  /** The need in plain words, tied to this scene. */
+  description: z.string().trim().min(1).max(240),
+  /** A claim id from the treatment this need serves, when it serves one. */
+  claim_id: z.string().nullable().default(null),
+  priority: z.enum(["primary", "secondary"]).default("primary"),
+});
+export type SceneNeed = z.infer<typeof SceneNeed>;
+
 export const Scene = z.object({
   scene_id: z.string().regex(/^S\d{2,}$/),
   purpose: z.string().min(1),
@@ -92,6 +104,10 @@ export const Scene = z.object({
   visual_purpose: z.string().trim().min(1).max(240).nullable().default(null),
   /** What the scene draws, as data: one of the supported visual blocks. Approved with the storyboard like everything else on the scene. */
   visual: SceneVisual.nullable().default(null),
+  /** The kind of scene this is (for example "stat_reveal", "product_hero"). Optional and absent on older plans, so their approval hashes do not change. */
+  scene_archetype: z.string().regex(/^[a-z][a-z0-9_]*$/).max(60).optional(),
+  /** What the scene needs from its picture. Optional and absent on older plans, so their approval hashes do not change. */
+  needs: z.array(SceneNeed).max(8).optional(),
   asset_ids: z.array(z.string()).default([]),
   /** How each uploaded picture is used in this scene. Absent on older plans, so their approval hashes do not change. Every id here is also in asset_ids. */
   asset_refs: z.array(SceneAssetRef).max(6).optional(),
