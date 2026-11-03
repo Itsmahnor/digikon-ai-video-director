@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { DRAWN_BLOCKS, type EditorOperation, type DrawnBlock } from "@digikon/contracts";
+import { readNormalized } from "./fingerprint.js";
 import { createRemotionAdapter } from "./remotion.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
 import { EXAMPLE_ART_DIRECTION, EXAMPLE_VISUALS } from "./composition-examples.js";
@@ -31,10 +32,10 @@ const pkgVersion = (name: string): string => { try { return (createRequire(impor
 export function compositionFingerprint(): string {
   try {
     const h = createHash("sha256");
-    for (const f of ["composition.ts", "composition-verify.ts", "text.ts", "layout.ts", "font-metrics.ts"]) h.update(f).update(readFileSync(join(here, f)));
-    h.update("visual.ts").update(readFileSync(join(here, "..", "..", "contracts", "src", "visual.ts")));
+    for (const f of ["composition.ts", "composition-verify.ts", "text.ts", "layout.ts", "font-metrics.ts"]) h.update(f).update(readNormalized(join(here, f)));
+    h.update("visual.ts").update(readNormalized(join(here, "..", "..", "contracts", "src", "visual.ts")));
     const d = join(here, "..", "remotion-compositions");
-    for (const f of readdirSync(d).filter((x) => /\.(jsx?|json)$/.test(x)).sort()) h.update(f).update(readFileSync(join(d, f)));
+    for (const f of readdirSync(d).filter((x) => /\.(jsx?|json)$/.test(x)).sort()) h.update(f).update(readNormalized(join(d, f)));
     return h.digest("hex").slice(0, 16);
   } catch { return "unknown"; }
 }

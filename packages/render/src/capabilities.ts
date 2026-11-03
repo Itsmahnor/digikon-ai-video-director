@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 import { z } from "zod";
 import { EditorOperation, RenderSettings, type Recipe, type RenderRecord, type Renderer } from "@digikon/contracts";
 import type { RenderJob } from "./adapter.js";
+import { readNormalized } from "./fingerprint.js";
 import { createFfmpegAdapter } from "./ffmpeg.js";
 import type { LearnedTransition } from "./learned-types.js";
 import { validateOutput } from "./output.js";
@@ -647,7 +648,7 @@ export async function learnCapability(template: string, opts: LearnOptions): Pro
 export function xfadeCodeHash(): string {
   try {
     const h = createHash("sha256");
-    for (const f of ["assemble.ts", "ffmpeg.ts", "transition-checks.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
+    for (const f of ["assemble.ts", "ffmpeg.ts", "transition-checks.ts"]) h.update(f).update(readNormalized(fileURLToPath(new URL(`./${f}`, import.meta.url))));
     return h.digest("hex").slice(0, 16);
   } catch { return "unknown"; }
 }

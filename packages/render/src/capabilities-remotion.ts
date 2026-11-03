@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 import { EditorOperation, RenderSettings } from "@digikon/contracts";
 import type { RenderJob } from "./adapter.js";
 import { registerFamily, type CapabilityFamily, type CatalogEntry, type FamilyImpl, type VariantOutcome } from "./capabilities.js";
+import { readNormalized } from "./fingerprint.js";
 import { findChrome, selectRemotionBrowser } from "./browser.js";
 import { createHyperframesAdapter } from "./hyperframes.js";
 import { validateOutput } from "./output.js";
@@ -275,11 +276,11 @@ const packageVersion = (name: string): string => { try { return (createRequire(i
 export const implementationHash = (engine: string): string => {
   try {
     const h = createHash("sha256");
-    for (const f of ["web-composed.ts", "web-composed-verify.ts", "web-scenes.ts", "text.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
-    if (engine === "hyperframes") for (const f of ["hyperframes.ts", "hyperframes-composed.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
+    for (const f of ["web-composed.ts", "web-composed-verify.ts", "web-scenes.ts", "text.ts"]) h.update(f).update(readNormalized(fileURLToPath(new URL(`./${f}`, import.meta.url))));
+    if (engine === "hyperframes") for (const f of ["hyperframes.ts", "hyperframes-composed.ts"]) h.update(f).update(readNormalized(fileURLToPath(new URL(`./${f}`, import.meta.url))));
     else {
       const dir = fileURLToPath(new URL("../remotion-project/", import.meta.url));
-      for (const f of readdirSync(dir).filter((x) => /\.(jsx?|tsx?|json)$/.test(x)).sort()) h.update(f).update(readFileSync(join(dir, f)));
+      for (const f of readdirSync(dir).filter((x) => /\.(jsx?|tsx?|json)$/.test(x)).sort()) h.update(f).update(readNormalized(join(dir, f)));
     }
     return h.digest("hex").slice(0, 16);
   } catch { return "unknown"; }

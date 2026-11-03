@@ -39,3 +39,4 @@ export * from "./preflight.js";
 export * from "./selection-integrity.js";
 export * from "./production-gate.js";
 export * from "./registry-cache.js";
+export * from "./fingerprint.js";
