@@ -56,7 +56,7 @@ export interface LlmClient {
 
 export const DEFAULT_MODEL = "claude-sonnet-5-5";
 
-export type LlmErrorCode = "llm_billing" | "llm_auth" | "llm_rate_limit" | "llm_overloaded" | "llm_network" | "llm_model" | "llm_error";
+export type LlmErrorCode = "llm_budget" | "llm_billing" | "llm_auth" | "llm_rate_limit" | "llm_overloaded" | "llm_network" | "llm_model" | "llm_error";
 
 /** A model failure with a message a person can act on. The raw provider text never reaches the UI, so keys cannot leak through it. */
 export class LlmError extends Error {
@@ -93,8 +93,10 @@ export function classifyLlmError(err: unknown, model = DEFAULT_MODEL): LlmError 
 export class AnthropicClient implements LlmClient {
   private readonly client: Anthropic;
   readonly model: string;
+  private readonly onUsage: ((u: { input_tokens: number; output_tokens: number }) => void) | undefined;
 
-  constructor(opts: { apiKey?: string; model?: string } = {}) {
+  constructor(opts: { apiKey?: string; model?: string; onUsage?: (u: { input_tokens: number; output_tokens: number }) => void } = {}) {
+    this.onUsage = opts.onUsage;
     const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set. Add it to .env (see .env.example).");
     this.client = new Anthropic({ apiKey });
@@ -127,6 +129,7 @@ export class AnthropicClient implements LlmClient {
         }
         throw classifyLlmError(e, this.model) ?? e;
       });
+      if (this.onUsage && res.usage) this.onUsage({ input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens });
       const block = res.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
       if (!block) { lastError = "no structured output returned"; continue; }
       const parsed = req.schema.safeParse(block.input);
