@@ -17,6 +17,7 @@ const recipes = loadRecipes(join(repo, "recipes"));
 const font = ["C:\\Windows\\Fonts\\arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"].find((f) => existsSync(f)) ?? null;
 realPrerequisites({ font: !!font });
 vi.setConfig({ testTimeout: 120_000 });
+import { seedCapabilities, withdrawCapabilities } from "./test-capabilities.js";
 let dir: string, store: string;
 beforeAll(() => { dir = mkdtempSync(join(tmpdir(), "console-capabilities-")); store = join(dir, "capabilities"); });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -35,6 +36,7 @@ class Client extends DemoClient {
     return super.generate(req);
   }
 }
+const DIP = ["ffmpeg__xfade-fadeblack"];
 const build = (capabilitiesDir: string | null = store) => createApp({
   llm: new Client(), demo: true, speech, whisper: () => ({ state: "ready" }), skills: new SkillLibrary(join(repo, "skills")), editorSkills: new SkillLibrary(join(repo, "skills/editor")),
   retriever: new KeywordRetriever([...recipeDocs(recipes), ...loadKnowledge(join(repo, "knowledge"))]),
@@ -65,24 +67,14 @@ async function approvedRun(app: App) {
 }
 
 describe.skipIf(skipReal(!!font))("the console learns a capability once and every later session reuses it", () => {
-  it("project one: the approved dip to black is blocked, learned on request with a real render, then renders", async () => {
+  it("project one: the approved dip to black has validated evidence, the plan is executable, and it renders", async () => {
     const app = build();
+    seedCapabilities(store, DIP); // the production gate refuses to approve a plan whose capability has no validated evidence
+    expect((await body(await app.request("/api/health"))).render.learned).toEqual(["ffmpeg:dip-to-black"]);
     const id = await approvedRun(app);
-    const before = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS })));
-    expect(before).toMatchObject({ eligible: false, plan: { state: "planning" } });
-    expect(before.blockers.join(" ")).toContain("no template is registered for ffmpeg/xfade-fadeblack");
-    expect(before.blockers.join(" ")).toContain("S01: its dip to black transition is not rendered");
-    expect(before.capability.find((o: any) => o.recipe_id === "dip-to-black")).toMatchObject({ status: "learning_required", selected_engine: null });
-    expect((await body(await app.request("/api/health"))).render.learned).toEqual([]);
-
-    const res = await app.request(`/api/sessions/${id}/render/learn`, json({ settings: SETTINGS }));
-    const out = await body(res);
-    expect(res.status, JSON.stringify(out)).toBe(200);
-    expect(out.gaps).toEqual([expect.objectContaining({ recipe_id: "dip-to-black", template: "ffmpeg/xfade-fadeblack", learnable: true })]);
-    expect(out.results).toEqual([expect.objectContaining({ template: "ffmpeg/xfade-fadeblack", status: "learned" })]);
-    expect(JSON.stringify(out)).not.toContain(dir.replaceAll("\\", "\\\\")); // no absolute paths reach the browser
-    expect(out.view).toMatchObject({ eligible: true, plan: { state: "executable" }, renderer: { selected: "ffmpeg" } });
-    expect(out.view.capability.find((o: any) => o.recipe_id === "dip-to-black")).toMatchObject({ status: "validated_available", selected_engine: "ffmpeg", selected_template: "ffmpeg/xfade-fadeblack" });
+    const view = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS })));
+    expect(view).toMatchObject({ eligible: true, plan: { state: "executable" }, renderer: { selected: "ffmpeg" } });
+    expect(view.capability.find((o: any) => o.recipe_id === "dip-to-black")).toMatchObject({ status: "validated_available", selected_engine: "ffmpeg", selected_template: "ffmpeg/xfade-fadeblack" });
     expect(readdirSync(join(store, "registry", "ffmpeg"))).toEqual(["ffmpeg__xfade-fadeblack.json"]);
 
     const rendered = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
@@ -91,6 +83,30 @@ describe.skipIf(skipReal(!!font))("the console learns a capability once and ever
     expect(r.record).toMatchObject({ state: "rendered", purpose: "preview", output: { width: 640, height: 360, fps: 30, duration_s: 12 } });
     expect(r.record.operations.map((o: any) => o.implementation_ref)).toContain("ffmpeg/xfade-fadeblack");
     expect(r.qa.findings).toEqual([]);
+  });
+
+  it("evidence lost after approval: the plan is blocked, learning on request makes a real render and keeps it, and the plan must be approved again because it was bound to the old evidence", async () => {
+    const own = join(dir, "capabilities-lost");
+    const app = build(own);
+    seedCapabilities(own, DIP);
+    const id = await approvedRun(app);
+    withdrawCapabilities(own, DIP);
+    const before = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS })));
+    expect(before).toMatchObject({ eligible: false });
+    expect(before.blockers.join(" ")).toContain("no template is registered for ffmpeg/xfade-fadeblack");
+    expect(before.capability.find((o: any) => o.recipe_id === "dip-to-black")).toMatchObject({ status: "learning_required", selected_engine: null });
+
+    const res = await app.request(`/api/sessions/${id}/render/learn`, json({ settings: SETTINGS }));
+    const out = await body(res);
+    expect(res.status, JSON.stringify(out)).toBe(200);
+    expect(out.gaps).toEqual([expect.objectContaining({ recipe_id: "dip-to-black", template: "ffmpeg/xfade-fadeblack", learnable: true })]);
+    expect(out.results).toEqual([expect.objectContaining({ template: "ffmpeg/xfade-fadeblack", status: "learned" })]);
+    expect(JSON.stringify(out)).not.toContain(dir.replaceAll("\\", "\\\\")); // no absolute paths reach the browser
+    expect(readdirSync(join(own, "registry", "ffmpeg"))).toEqual(["ffmpeg__xfade-fadeblack.json"]);
+    // the new evidence is a new record, so the approved production plan no longer matches it: nothing is rendered until the person approves again
+    expect(out.view.capability.find((o: any) => o.recipe_id === "dip-to-black")).toMatchObject({ status: "validated_available" });
+    expect(out.view.eligible).toBe(false);
+    expect(out.view.blockers.join(" ")).toContain("no longer matches what you approved");
   });
 
   it("project two, a new session of a new app with no memory of project one, finds the capability in the store with no learning step", async () => {

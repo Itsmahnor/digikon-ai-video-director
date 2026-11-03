@@ -22,8 +22,9 @@ const chrome = findChrome();
 const can = !!font && !!chrome;
 realPrerequisites({ font: !!font, "a Chrome for HyperFrames": !!chrome });
 vi.setConfig({ testTimeout: 240_000 });
+import { seedCapabilities } from "./test-capabilities.js";
 let dir: string, store: string;
-beforeAll(() => { dir = mkdtempSync(join(tmpdir(), "console-assembly-")); store = join(dir, "capabilities"); });
+beforeAll(() => { dir = mkdtempSync(join(tmpdir(), "console-assembly-")); store = join(dir, "capabilities"); seedCapabilities(store, ["ffmpeg__xfade-fadeblack"]); });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 const speech: SpeechEngine = { model: "stub", transcribe: async () => Transcript.parse({ text: "x", language: "en", language_confidence: 1, model: "stub", duration_s: 1, words: [], segments: [] }) };
@@ -52,6 +53,20 @@ const body = async (r: Response) => (await r.json()) as any;
 const SETTINGS = { aspect_ratio: "16:9", width: 640, height: 360, fps: 30, duration_s: 12, container: "mp4", video_codec: "h264", audio_codec: null };
 async function sse(res: Response) { const t = await res.text(); if (process.env.DEBUG_SSE) console.log(t.slice(-1500)); }
 const approve = (app: App, id: string, stage: "storyboard" | "edit_plan") => app.request(`/api/sessions/${id}/approve`, json({ stage, plan_version: 1, decision: "approved", ...(stage === "edit_plan" ? { storyboard_version: 1 } : {}) }));
+/** A film the production gate refuses: the storyboard is approved, but no edit plan ever waits for a decision, so nothing downstream can run. */
+async function gatedRun(app: App, f: Film) {
+  film = f;
+  const id = (await body(await app.request("/api/sessions", { method: "POST" }))).id as string;
+  await app.request(`/api/sessions/${id}/route`, json({ text: "A 12 second YouTube explainer for my online course." }));
+  await sse(await app.request(`/api/sessions/${id}/direct`, json({})));
+  const a1 = await approve(app, id, "storyboard"); expect(a1.status).toBe(200);
+  const state = ((await a1.json()) as { state: { escalation: { what_failed: string } | null; editPlan: unknown } }).state;
+  expect(state.editPlan).toBeNull();
+  expect(state.escalation?.what_failed).toContain("edit plan still failed validation");
+  expect((await approve(app, id, "edit_plan")).status, "no edit plan is waiting for a decision").toBe(409);
+  expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status, "the Editor has nothing approved to run on").toBe(409);
+  return id;
+}
 async function approvedRun(app: App, f: Film, editorReady = true) {
   film = f;
   const id = (await body(await app.request("/api/sessions", { method: "POST" }))).id as string;
@@ -74,12 +89,12 @@ const WITH_GAP: Film = {
 };
 
 describe.skipIf(skipReal(can))("the console renders through the multi-engine assembler", () => {
-  it("a film needing FFmpeg and HyperFrames is learned for, assembled, reported and served as a complete preview that is not production-ready", async () => {
+  it("a film needing FFmpeg and HyperFrames is assembled, reported and served as a complete preview that is not production-ready", async () => {
     const app = build();
     const id = await approvedRun(app, MIXED);
     const plan = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS })));
     expect(plan.eligible).toBe(false); // the single-renderer planner refuses a film that needs two renderers
-    expect(plan.assembly).toMatchObject({ ok: true, complete: false }); // the dip to black is not learned yet
+    expect(plan.assembly).toMatchObject({ ok: true, complete: true }); // the dip to black has validated evidence (seeded), so every scene can be drawn
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
     const out = await body(res);
     expect(res.status, JSON.stringify(out.errors ?? out.reasons ?? out.message)).toBe(200);
@@ -90,7 +105,7 @@ describe.skipIf(skipReal(can))("the console renders through the multi-engine ass
     expect(out.record).toMatchObject({ state: "rendered", purpose: "preview" });
     expect(JSON.stringify(out)).not.toContain(dir.replaceAll("\\", "\\\\")); // no absolute path reaches the browser
     expect(out.delivery.output.path).not.toMatch(/^([a-zA-Z]:|\/)/);
-    // the generation-first step learned the missing dip to black once, and kept it
+    // the dip to black was validated before the plan was approved, and is still the one record in the store
     expect(existsSync(join(store, "registry", "ffmpeg", "ffmpeg__xfade-fadeblack.json"))).toBe(true);
     // the listed delivery is the one just made, and the video served is the very file the report names
     const list = await body(await app.request(`/api/sessions/${id}/deliveries`));
@@ -103,34 +118,20 @@ describe.skipIf(skipReal(can))("the console renders through the multi-engine ass
     expect((await app.request(`/api/sessions/${id}/deliveries/..%2f..%2fx/video`)).status).toBe(404);
   });
 
-  it("a scene nothing can draw gives a labelled incomplete preview that names the missing operation and is never final", async () => {
+  it("a scene nothing can draw is stopped at planning, before any approval, and nothing is rendered", async () => {
     const app = build();
-    const id = await approvedRun(app, WITH_GAP);
-    const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
-    const out = await body(res);
-    expect(res.status, JSON.stringify(out.errors ?? out.reasons ?? out.message)).toBe(200);
-    expect(out.kind).toBe("partial");
-    expect(out.record).toBeNull(); // an incomplete film has no "rendered" record
-    expect(out.delivery).toMatchObject({ kind: "partial", status: "incomplete_preview", states: { scenes_total: 3, scenes_rendered: 2, final_video_validated: true, final_delivery_ready: false } });
-    expect(out.delivery.label).toContain("INCOMPLETE PREVIEW");
-    expect(out.delivery.scenes.map((s: any) => [s.scene_id, s.status])).toEqual([["S01", "rendered_unverified"], ["S02", "placeholder"], ["S03", "rendered_unverified"]]);
-    expect(out.delivery.omitted_operations.map((o: any) => o.recipe_id)).toContain("text-fade-hyperframes");
-    expect(out.delivery.scenes[1].omitted_reason).toBeTruthy();
-    expect(out.delivery.final_delivery_blockers.join(" ")).toContain("incomplete");
-    expect((await app.request(out.delivery.output.video_url)).headers.get("x-digikon-preview")).toBe("incomplete");
-  });
-
-  it("when nothing can be drawn at all, no video is made and every reason is given", async () => {
-    const app = build();
-    const id = await approvedRun(app, { scenes: [scene("S01", "Presented by us."), scene("S02", "Presented again."), scene("S03", "Presented last.")], uses: [use(1, "S01", "text-card-fade"), use(4, "S01", "text-fade-hyperframes"), use(2, "S02", "text-card-fade"), use(5, "S02", "text-fade-hyperframes"), use(3, "S03", "text-card-fade"), use(6, "S03", "text-fade-hyperframes")] });
+    const id = await gatedRun(app, WITH_GAP); // text-card-fade and text-fade-hyperframes in one scene need two engines, which the renderer does not support
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
     expect(res.status).toBe(409);
-    const out = await body(res);
-    expect(out.error).toBe("not_renderable");
-    expect(out.assembly.scenes[0]).toMatchObject({ renderable: false });
-    expect(out.can_render).toBe(false);
+    expect((await body(res)).kind ?? null).not.toBe("partial");
   });
 
+  it("when nothing can be drawn at all, planning stops and no video is made", async () => {
+    const app = build();
+    const id = await gatedRun(app, { scenes: [scene("S01", "Presented by us."), scene("S02", "Presented again."), scene("S03", "Presented last.")], uses: [use(1, "S01", "text-card-fade"), use(4, "S01", "text-fade-hyperframes"), use(2, "S02", "text-card-fade"), use(5, "S02", "text-fade-hyperframes"), use(3, "S03", "text-card-fade"), use(6, "S03", "text-fade-hyperframes")] });
+    const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
+    expect(res.status).toBe(409);
+  });
   it("approval gates stay in force: no render without both approvals and the Editor result", async () => {
     const app = build();
     film = MIXED;
@@ -155,18 +156,19 @@ describe.skipIf(skipReal(can && !!remotionBrowser))("automatic capability learni
     recipes: new RecipeLibrary(recipes, "draft"), ffmpegOk: true, renderFont: font, storageDir: dir, publicDir: join(repo, "apps/console/public"), capabilitiesDir: store,
   });
 
-  it("an empty registry: the render learns what is missing with real renders, keeps it, renders every scene, and labels the film incomplete because of the one thing nothing can do", async () => {
+  it("a registry holding the validated evidence the plan needs: the render uses it, renders every scene, and labels the film incomplete because of the one thing nothing can do", async () => {
     capDir = join(dir, "e2e-capabilities");
+    seedCapabilities(capDir, ["ffmpeg__xfade-fadeblack", "remotion__text-fade-up"]);
     const app = buildWith(capDir);
     const id = await approvedRun(app, PLAN);
     const plan = await body(await app.request(`/api/sessions/${id}/render/plan`, json({ settings: SETTINGS_E2E })));
     expect(plan.eligible).toBe(false);
-    expect(plan.capability.map((o: any) => [o.recipe_id, o.status]).filter((x: any) => ["dip-to-black", "text-fade-up"].includes(x[0]))).toEqual([["dip-to-black", "learning_required"], ["text-fade-up", "learning_required"]]);
+    expect(plan.capability.map((o: any) => [o.recipe_id, o.status]).filter((x: any) => ["dip-to-black", "text-fade-up"].includes(x[0]))).toEqual([["dip-to-black", "validated_available"], ["text-fade-up", "validated_available"]]);
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS_E2E }));
     const out = await body(res);
     expect(res.status, JSON.stringify(out.errors ?? out.reasons ?? out.message)).toBe(200);
-    // detected, tried, learned
-    expect(out.learning.attempted.map((a: any) => [a.template, a.status]).sort()).toEqual([["ffmpeg/xfade-fadeblack", "learned"], ["remotion/text-fade-up", "learned"]]);
+    // nothing needed learning: the plan could only be approved because both capabilities already had validated evidence
+    expect(out.learning?.attempted ?? []).toEqual([]);
     expect(existsSync(join(capDir, "registry", "ffmpeg", "ffmpeg__xfade-fadeblack.json"))).toBe(true);
     expect(existsSync(join(capDir, "registry", "remotion", "remotion__text-fade-up.json"))).toBe(true);
     // the original plan was retried and rendered: every scene, one engine each; the push-in nobody can carry out is named, and the film is labelled incomplete
@@ -224,17 +226,11 @@ describe.skipIf(skipReal(can && !!remotionBrowser))("automatic capability learni
     expect(out.delivery.final_delivery_blockers.join(" ")).toMatch(/requires audio|incomplete/);
     // any other open conflict still refuses
   });
-  it("a capability nothing can implement is recorded, not retried forever, and does not stop the rest: the audio operation stays unresolved and final delivery stays blocked", async () => {
+  it("a capability nothing can implement is stopped at planning, before any approval: the film is never rendered with it", async () => {
     const app = buildWith(capDir);
     const withAudio: Film = { scenes: PLAN.scenes, uses: [...PLAN.uses, use(6, "S03", "loudness-normalise")] };
-    const id = await approvedRun(app, withAudio);
+    const id = await gatedRun(app, withAudio); // loudness-normalise has no validated capability and none can be learned
     const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS_E2E }));
-    const out = await body(res);
-    expect(res.status, JSON.stringify(out.errors ?? out.message)).toBe(200);
-    expect(out.kind).toBe("partial");
-    expect(out.delivery.omitted_operations.map((o: any) => o.recipe_id)).toContain("loudness-normalise");
-    expect(out.delivery.final_delivery_blockers.join(" ")).toMatch(/audio|incomplete/);
-    expect(out.delivery.states.final_delivery_ready).toBe(false);
-    expect(out.learning.not_learnable.map((g: any) => g.template)).toContain("ffmpeg/loudnorm");
+    expect(res.status).toBe(409);
   });
 });

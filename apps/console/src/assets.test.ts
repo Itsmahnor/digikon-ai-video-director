@@ -180,11 +180,15 @@ describe.skipIf(skipReal(ffmpegOk && !!font && !!remotion))("the reviewed pictur
     const { id, up } = await projectWithPictures(app);
     await direct(app, id);
     // the first plan's S03 need is "needs_external": its approval is not enough for the Editor, because the material is not supplied
-    expect((await approve(app, id, "storyboard")).status).toBe(200);
-    expect((await approve(app, id, "edit_plan")).status).toBe(200);
+    const first = await approve(app, id, "storyboard");
+    expect(first.status).toBe(200);
+    // the production gate now stops it before the second approval: the edit plan escalates (its missing picture is named only in the hidden production detail), so nothing waits for a decision and the Editor has nothing approved to run on
+    const gated = (await first.json()) as { state: { escalation: { what_failed: string } | null; editPlan: unknown } };
+    expect(gated.state.editPlan).toBeNull();
+    expect(gated.state.escalation?.what_failed).toContain("edit plan still failed validation");
+    expect((await approve(app, id, "edit_plan")).status).toBe(409);
     const blocked = await app.request(`/api/sessions/${id}/editor`, { method: "POST" });
     expect(blocked.status).toBe(409);
-    expect(JSON.stringify(await blocked.json())).toContain("not supplied");
 
     // review every picture; the matches name the picture for the product-screen need, and say none shows people
     for (const a of up.added) await app.request(`/api/sessions/${id}/assets/${a.asset_id}/review`, json(REVIEW({ shows_product_ui: a.asset_id === up.added[0].asset_id })));
