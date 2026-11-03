@@ -43,7 +43,7 @@ export interface AppContext {
    * Builds a retriever whose recipe documents are labelled with which recipes can be carried out. When set (with `capabilitiesDir`), the labels come from the capability
    * registry as it is now, and the retriever is rebuilt whenever the registry snapshot hash changes, instead of using a list fixed at start-up.
    */
-  retrieverFor?: (implemented: ReadonlySet<string>) => Retriever;
+  retrieverFor?: (implemented: ReadonlySet<string>, validated?: ReadonlySet<string>) => Retriever;
   /** The knowledge notes behind the retriever. Used only to name the sources in the Editor handoff; optional. */
   knowledge?: readonly Doc[];
   recipes: RecipeLibrary;
@@ -760,7 +760,8 @@ export function createApp(ctx: AppContext) {
     const { registry } = liveCapabilities();
     if (liveIndex?.hash !== registry.snapshot.snapshot_hash) {
       const implemented = new Set(registry.atLeast("executable").filter((c) => c.variant_of === null && c.recipe_id).map((c) => c.recipe_id!));
-      liveIndex = { hash: registry.snapshot.snapshot_hash, retriever: ctx.retrieverFor(implemented) };
+      const validated = new Set(registry.atLeast("validated").filter((c) => c.variant_of === null && c.recipe_id).map((c) => c.recipe_id!));
+      liveIndex = { hash: registry.snapshot.snapshot_hash, retriever: ctx.retrieverFor(implemented, validated) };
     }
     return liveIndex.retriever;
   };

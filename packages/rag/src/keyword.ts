@@ -95,8 +95,10 @@ export class KeywordRetriever implements Retriever {
       }
       // A recipe that is known to have a working template ranks a little above an equally good match that has none, so a capability that was
       // learned in one project is the one picked in the next. A recipe whose state is unknown is not penalised.
-      if (doc.metadata.recipe_implemented === true) score *= IMPLEMENTED_BOOST;
-      else if (doc.metadata.recipe_implemented === false) score *= 1 / IMPLEMENTED_BOOST;
+      // Once validation is known, the boost means "proven by a real render"; otherwise it means "an implementation is registered".
+      const boosted = doc.metadata.recipe_validated ?? doc.metadata.recipe_implemented;
+      if (boosted === true) score *= IMPLEMENTED_BOOST;
+      else if (boosted === false) score *= 1 / IMPLEMENTED_BOOST;
       if (score > 0) scored.push({ doc, score });
     }
     scored.sort((a, b) => b.score - a.score || a.doc.id.localeCompare(b.doc.id));

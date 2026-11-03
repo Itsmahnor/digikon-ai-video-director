@@ -75,6 +75,7 @@ export function recipeDocs(recipes: Recipe[], opts: { implemented?: ReadonlySet<
       recipe_max_duration_s: r.constraints.max_duration_s,
       recipe_energy: r.constraints.energy,
       ...(opts.implemented ? { recipe_implemented: opts.implemented.has(r.recipe_id) } : {}),
+      ...(opts.implemented && opts.validated ? { recipe_validated: opts.implemented.has(r.recipe_id) && opts.validated.has(r.recipe_id) } : {}),
     },
   }));
 }

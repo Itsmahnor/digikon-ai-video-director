@@ -33,6 +33,8 @@ export interface Doc {
     recipe_energy?: Energy;
     /** shot_recipes only. True when the recipe has a working, validated template (built in, or learned and validated). Absent means unknown. */
     recipe_implemented?: boolean;
+    /** Present only when the caller knew which recipes a real render has validated; when present it, not recipe_implemented, decides the ranking boost. */
+    recipe_validated?: boolean;
     topics?: string[];
     grade?: "A" | "B" | "C";
     /** Knowledge notes only. A `draft` note is never retrieved unless `include_draft` is set. Notes without a status keep today's behaviour. */

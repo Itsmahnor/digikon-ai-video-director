@@ -35,7 +35,7 @@ const learned = loadCapabilityRegistry(capabilitiesDir, { recipes: library });
 for (const problem of learned.problems) console.warn(`Ignored capability record: ${problem}`);
 for (const u of learned.unusable.filter((x) => x.record.status === "validated")) console.warn(`Capability ${u.record.capability_id} is not usable here: ${u.reason}`);
 // Which recipes can be carried out is not decided here: the console asks the capability registry per request (see `retrieverFor`), so nothing fixed at start-up can go stale.
-const retrieverFor = (implemented?: ReadonlySet<string>) => new KeywordRetriever([...recipeDocs(recipes, implemented ? { implemented } : {}), ...knowledge]);
+const retrieverFor = (implemented?: ReadonlySet<string>, validated?: ReadonlySet<string>) => new KeywordRetriever([...recipeDocs(recipes, implemented ? { implemented, ...(validated ? { validated } : {}) } : {}), ...knowledge]);
 const retriever = retrieverFor();
 const skills = new SkillLibrary(join(repoRoot, "skills"));
 
