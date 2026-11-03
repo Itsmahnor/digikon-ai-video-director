@@ -20,6 +20,7 @@ import {
 import {
   AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
+  directoryStamp, KeyedCache,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
 import { ALL_EXTENSIONS, AssetRegistry, MEDIA_LIMITS, analyseContent, analyseMedia, buildAssetNotes, manifestEntry, measureImage, notesWithAnalysis, probeFile, understandAsset, type OcrEngine, type VisionModel } from "@digikon/media";
@@ -733,11 +734,17 @@ export function createApp(ctx: AppContext) {
    * The capability registry as it is right now: the recipes, the learned and visual records on disk, and what the live adapters register. Built fresh on every call (nothing
    * is kept between calls), so a change in any of them shows up at once and the snapshot hash changes with it.
    */
-  const liveCapabilities = (): { registry: CapabilityRegistry; engines: ReturnType<AdapterRegistry["renderers"]>; adapters: AdapterRegistry; failures: { engine: "ffmpeg" | "remotion" | "hyperframes"; reason: string }[] } => {
+  type LiveCapabilities = { registry: CapabilityRegistry; engines: ReturnType<AdapterRegistry["renderers"]>; adapters: AdapterRegistry; failures: { engine: "ffmpeg" | "remotion" | "hyperframes"; reason: string }[] };
+  const buildLiveCapabilities = (): LiveCapabilities => {
     const built = buildAdapterRegistry({ ffmpegOk: ctx.ffmpegOk, fontFile: ctx.renderFont, outputRoot: tmpdir(), capabilitiesDir: ctx.capabilitiesDir, recipes: ctx.recipes });
     const registry = CapabilityRegistry.from({ recipes: ctx.recipes.all(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }), visual: loadVisualCapabilities(ctx.capabilitiesDir), implementations: implementationsOf(built.registry), adapter_failures: built.failures });
     return { registry, engines: built.registry.renderers(), adapters: built.registry, failures: built.failures };
   };
+  // Off unless DIGIKON_REGISTRY_CACHE=1: the registry is then rebuilt only when a record file, the recipe set or the machine settings change (or after a minute), instead of on every call.
+  const registryCache = process.env["DIGIKON_REGISTRY_CACHE"] === "1" ? new KeyedCache<LiveCapabilities>(60_000) : null;
+  const liveCapabilities = (): LiveCapabilities => registryCache
+    ? registryCache.get([directoryStamp(ctx.capabilitiesDir), ctx.recipes.all().map((r) => `${r.recipe_id}@${r.version}`).join(","), ctx.ffmpegOk, ctx.renderFont ?? ""].join("#"), buildLiveCapabilities)
+    : buildLiveCapabilities();
   /**
    * What the Director is given to make production decisions: the registry as data, the engines that exist, and the renderer's own pre-flight (the same planners final assembly
    * runs). The Director never imports the render package; it sees only this. Set only when a capabilities folder is configured.
