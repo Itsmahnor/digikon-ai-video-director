@@ -1,0 +1,280 @@
+{
+  "embedder": "hash-features@1",
+  "real_model": false,
+  "note": "hash embedder (wording only; no sentence model was asked for)",
+  "sweep": [
+    {
+      "min_similarity": 0.1,
+      "overall": {
+        "n": 98,
+        "p_at_1": 0.7755,
+        "recall_at_3": 0.8469,
+        "mrr": 0.8269,
+        "ndcg_at_3": 0.8179,
+        "neg_empty": "13/19"
+      }
+    },
+    {
+      "min_similarity": 0.2,
+      "overall": {
+        "n": 98,
+        "p_at_1": 0.8061,
+        "recall_at_3": 0.8878,
+        "mrr": 0.8523,
+        "ndcg_at_3": 0.8536,
+        "neg_empty": "17/19"
+      }
+    },
+    {
+      "min_similarity": 0.3,
+      "overall": {
+        "n": 98,
+        "p_at_1": 0.8163,
+        "recall_at_3": 0.898,
+        "mrr": 0.8582,
+        "ndcg_at_3": 0.8625,
+        "neg_empty": "17/19"
+      }
+    },
+    {
+      "min_similarity": 0.4,
+      "overall": {
+        "n": 98,
+        "p_at_1": 0.8061,
+        "recall_at_3": 0.898,
+        "mrr": 0.8531,
+        "ndcg_at_3": 0.8587,
+        "neg_empty": "17/19"
+      }
+    },
+    {
+      "min_similarity": 0.5,
+      "overall": {
+        "n": 98,
+        "p_at_1": 0.8061,
+        "recall_at_3": 0.898,
+        "mrr": 0.8531,
+        "ndcg_at_3": 0.8587,
+        "neg_empty": "17/19"
+      }
+    }
+  ],
+  "groups": {
+    "overall": {
+      "bm25": {
+        "n": 98,
+        "p_at_1": 0.8061,
+        "recall_at_3": 0.898,
+        "mrr": 0.8531,
+        "ndcg_at_3": 0.8587,
+        "neg_empty": "17/19"
+      },
+      "hybrid": {
+        "n": 98,
+        "p_at_1": 0.8061,
+        "recall_at_3": 0.8878,
+        "mrr": 0.8523,
+        "ndcg_at_3": 0.8536,
+        "neg_empty": "17/19"
+      }
+    },
+    "collection:directing_principles": {
+      "bm25": {
+        "n": 22,
+        "p_at_1": 0.6818,
+        "recall_at_3": 0.9091,
+        "mrr": 0.7894,
+        "ndcg_at_3": 0.8133,
+        "neg_empty": "5/6"
+      },
+      "hybrid": {
+        "n": 22,
+        "p_at_1": 0.7273,
+        "recall_at_3": 0.9091,
+        "mrr": 0.8121,
+        "ndcg_at_3": 0.8301,
+        "neg_empty": "5/6"
+      }
+    },
+    "collection:ad_playbooks": {
+      "bm25": {
+        "n": 14,
+        "p_at_1": 0.8571,
+        "recall_at_3": 0.9286,
+        "mrr": 0.9107,
+        "ndcg_at_3": 0.9022,
+        "neg_empty": "4/4"
+      },
+      "hybrid": {
+        "n": 14,
+        "p_at_1": 0.8571,
+        "recall_at_3": 0.9286,
+        "mrr": 0.9107,
+        "ndcg_at_3": 0.9022,
+        "neg_empty": "4/4"
+      }
+    },
+    "collection:shot_recipes": {
+      "bm25": {
+        "n": 62,
+        "p_at_1": 0.8387,
+        "recall_at_3": 0.8871,
+        "mrr": 0.8627,
+        "ndcg_at_3": 0.865,
+        "neg_empty": "8/9"
+      },
+      "hybrid": {
+        "n": 62,
+        "p_at_1": 0.8226,
+        "recall_at_3": 0.871,
+        "mrr": 0.8533,
+        "ndcg_at_3": 0.851,
+        "neg_empty": "8/9"
+      }
+    },
+    "collection:platform_specs": {
+      "bm25": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      }
+    },
+    "collection:brand_product_facts": {
+      "bm25": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      }
+    },
+    "collection:approved_examples": {
+      "bm25": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "0/0"
+      }
+    },
+    "tag:seed": {
+      "bm25": {
+        "n": 21,
+        "p_at_1": 0.9524,
+        "recall_at_3": 0.9524,
+        "mrr": 0.9643,
+        "ndcg_at_3": 0.9524,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 21,
+        "p_at_1": 0.9524,
+        "recall_at_3": 0.9524,
+        "mrr": 0.9643,
+        "ndcg_at_3": 0.9524,
+        "neg_empty": "0/0"
+      }
+    },
+    "tag:paraphrase": {
+      "bm25": {
+        "n": 28,
+        "p_at_1": 0.6429,
+        "recall_at_3": 0.7857,
+        "mrr": 0.724,
+        "ndcg_at_3": 0.7283,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 28,
+        "p_at_1": 0.6786,
+        "recall_at_3": 0.7857,
+        "mrr": 0.7418,
+        "ndcg_at_3": 0.7415,
+        "neg_empty": "0/0"
+      }
+    },
+    "tag:scene_level": {
+      "bm25": {
+        "n": 24,
+        "p_at_1": 0.75,
+        "recall_at_3": 0.9583,
+        "mrr": 0.8368,
+        "ndcg_at_3": 0.8651,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 24,
+        "p_at_1": 0.7083,
+        "recall_at_3": 0.9167,
+        "mrr": 0.8125,
+        "ndcg_at_3": 0.8289,
+        "neg_empty": "0/0"
+      }
+    },
+    "tag:negative": {
+      "bm25": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "17/19"
+      },
+      "hybrid": {
+        "n": 0,
+        "p_at_1": null,
+        "recall_at_3": null,
+        "mrr": null,
+        "ndcg_at_3": null,
+        "neg_empty": "17/19"
+      }
+    },
+    "tag:semantic": {
+      "bm25": {
+        "n": 6,
+        "p_at_1": 0.6667,
+        "recall_at_3": 0.6667,
+        "mrr": 0.6667,
+        "ndcg_at_3": 0.6667,
+        "neg_empty": "0/0"
+      },
+      "hybrid": {
+        "n": 6,
+        "p_at_1": 0.6667,
+        "recall_at_3": 0.6667,
+        "mrr": 0.6667,
+        "ndcg_at_3": 0.6667,
+        "neg_empty": "0/0"
+      }
+    }
+  }
+}

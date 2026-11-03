@@ -98,26 +98,26 @@
     }
   },
   "benchmark": {
-    "total_queries": 64,
+    "total_queries": 124,
     "by_kind": {
-      "retrieval": 50,
-      "negative": 7,
+      "retrieval": 98,
+      "negative": 19,
       "missing_knowledge": 7
     },
     "by_collection": {
       "shot_recipes": {
-        "retrieval": 32,
-        "negative": 4,
+        "retrieval": 62,
+        "negative": 9,
         "missing_knowledge": 0
       },
       "ad_playbooks": {
-        "retrieval": 7,
-        "negative": 1,
+        "retrieval": 14,
+        "negative": 4,
         "missing_knowledge": 0
       },
       "directing_principles": {
-        "retrieval": 11,
-        "negative": 2,
+        "retrieval": 22,
+        "negative": 6,
         "missing_knowledge": 0
       },
       "platform_specs": {
@@ -139,42 +139,44 @@
     "by_tag": {
       "seed": 21,
       "direct": 3,
-      "paraphrase": 4,
+      "paraphrase": 28,
       "semantic": 6,
       "transition_camera": 8,
       "motion_graphics": 6,
       "scene_creative": 7,
       "metadata_filter": 9,
-      "negative": 7,
+      "negative": 19,
       "brand_product": 4,
       "template_discovery": 3,
-      "platform": 3
+      "platform": 3,
+      "scene_level": 24,
+      "off_topic": 12
     }
   },
   "metrics": {
     "overall": {
-      "queries": 50,
-      "p_at_1": 0.92,
-      "recall_at_3": 0.94,
-      "mrr": 0.935,
-      "ndcg_at_3": 0.9326,
+      "queries": 98,
+      "p_at_1": 0.8061,
+      "recall_at_3": 0.898,
+      "mrr": 0.8531,
+      "ndcg_at_3": 0.8587,
       "negative": {
-        "queries": 7,
-        "empty_correct": 5,
-        "accuracy": 0.7143
+        "queries": 19,
+        "empty_correct": 17,
+        "accuracy": 0.8947
       }
     },
     "per_collection": {
       "directing_principles": {
-        "queries": 11,
-        "p_at_1": 0.9091,
-        "recall_at_3": 1,
-        "mrr": 0.9545,
-        "ndcg_at_3": 0.9664,
+        "queries": 22,
+        "p_at_1": 0.6818,
+        "recall_at_3": 0.9091,
+        "mrr": 0.7894,
+        "ndcg_at_3": 0.8133,
         "negative": {
-          "queries": 2,
-          "empty_correct": 1,
-          "accuracy": 0.5
+          "queries": 6,
+          "empty_correct": 5,
+          "accuracy": 0.8333
         },
         "missing_knowledge": {
           "queries": 0,
@@ -182,14 +184,14 @@
         }
       },
       "ad_playbooks": {
-        "queries": 7,
+        "queries": 14,
         "p_at_1": 0.8571,
-        "recall_at_3": 0.8571,
-        "mrr": 0.8929,
-        "ndcg_at_3": 0.8571,
+        "recall_at_3": 0.9286,
+        "mrr": 0.9107,
+        "ndcg_at_3": 0.9022,
         "negative": {
-          "queries": 1,
-          "empty_correct": 1,
+          "queries": 4,
+          "empty_correct": 4,
           "accuracy": 1
         },
         "missing_knowledge": {
@@ -214,15 +216,15 @@
         }
       },
       "shot_recipes": {
-        "queries": 32,
-        "p_at_1": 0.9375,
-        "recall_at_3": 0.9375,
-        "mrr": 0.9375,
-        "ndcg_at_3": 0.9375,
+        "queries": 62,
+        "p_at_1": 0.8387,
+        "recall_at_3": 0.8871,
+        "mrr": 0.8627,
+        "ndcg_at_3": 0.865,
         "negative": {
-          "queries": 4,
-          "empty_correct": 3,
-          "accuracy": 0.75
+          "queries": 9,
+          "empty_correct": 8,
+          "accuracy": 0.8889
         },
         "missing_knowledge": {
           "queries": 0,
@@ -439,6 +441,686 @@
         },
         "cause": "vocabulary_mismatch",
         "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-03",
+        "collection": "ad_playbooks",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "make the audience notice, care, want it, then act",
+        "filter": {},
+        "expect": [
+          "aida-structure"
+        ],
+        "equivalent": [],
+        "why": "AIDA described step by step without the acronym or the word attention.",
+        "returned": [
+          {
+            "id": "problem-agitate-solution",
+            "score": 5.892
+          },
+          {
+            "id": "aida-structure",
+            "score": 2.217
+          },
+          {
+            "id": "claims-discipline",
+            "score": 1.851
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind problem-agitate-solution"
+      },
+      {
+        "id": "pp-07",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "hide the edit inside a gesture so it does not feel jarring",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Cut on motion, described by its effect.",
+        "returned": [
+          {
+            "id": "cut-priority-murch",
+            "score": 9.03
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 6.69
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 6.065
+          },
+          {
+            "id": "text-legibility",
+            "score": 5.661
+          },
+          {
+            "id": "reframing-limits",
+            "score": 3.334
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+      },
+      {
+        "id": "pp-09",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "dialogue from the following shot begins over the end of this one",
+        "filter": {},
+        "expect": [
+          "j-and-l-cuts"
+        ],
+        "equivalent": [],
+        "why": "J-cut described without J-cut.",
+        "returned": [
+          {
+            "id": "axis-180-rule",
+            "score": 4.27
+          },
+          {
+            "id": "shot-size-progression",
+            "score": 3.676
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 1.886
+          },
+          {
+            "id": "reframing-limits",
+            "score": 1.618
+          },
+          {
+            "id": "motion-purpose-easing",
+            "score": 1.287
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind axis-180-rule"
+      },
+      {
+        "id": "pp-10",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "a movement needs a reason and should not start or stop abruptly",
+        "filter": {},
+        "expect": [
+          "motion-purpose-easing"
+        ],
+        "equivalent": [],
+        "why": "Purposeful motion and easing, in plain words.",
+        "returned": [
+          {
+            "id": "cut-on-motion",
+            "score": 4.888
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 4.096
+          },
+          {
+            "id": "cut-priority-murch",
+            "score": 3.973
+          },
+          {
+            "id": "reframing-limits",
+            "score": 3.567
+          },
+          {
+            "id": "motion-purpose-easing",
+            "score": 2.798
+          }
+        ],
+        "best_relevant_rank": 5,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.2,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 5 behind cut-on-motion"
+      },
+      {
+        "id": "pp-12",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "mixing far away, mid-distance and tight views stops it getting dull",
+        "filter": {},
+        "expect": [
+          "shot-size-progression"
+        ],
+        "equivalent": [],
+        "why": "Shot size variety without the words shot or size.",
+        "returned": [
+          {
+            "id": "text-legibility",
+            "score": 3.241
+          },
+          {
+            "id": "reframing-limits",
+            "score": 2.17
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-15",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "the company symbol gently grows into view",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "logo-reveal"
+        ],
+        "equivalent": [],
+        "why": "Logo reveal without logo or reveal.",
+        "returned": [
+          {
+            "id": "crossfade",
+            "score": 3.947
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 3.319
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-21",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "no effect at all, just switch to the next shot",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "hard-cut"
+        ],
+        "equivalent": [],
+        "why": "Hard cut described plainly.",
+        "returned": [
+          {
+            "id": "clip-play",
+            "score": 4.415
+          },
+          {
+            "id": "sfx-hit-on-cut",
+            "score": 4.064
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 3.459
+          },
+          {
+            "id": "match-cut",
+            "score": 3.026
+          },
+          {
+            "id": "static-hold",
+            "score": 2.996
+          }
+        ],
+        "best_relevant_rank": 14,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.07142857142857142,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 14 behind clip-play"
+      },
+      {
+        "id": "pp-22",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "a thud sound lands exactly when the picture changes",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "sfx-hit-on-cut"
+        ],
+        "equivalent": [],
+        "why": "Sound effect on cut without sfx.",
+        "returned": [
+          {
+            "id": "punch-in-emphasis",
+            "score": 5.645
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 5.347
+          },
+          {
+            "id": "match-cut",
+            "score": 5.26
+          },
+          {
+            "id": "clip-play",
+            "score": 5.152
+          },
+          {
+            "id": "clip-play-caption",
+            "score": 5.018
+          }
+        ],
+        "best_relevant_rank": 6,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.16666666666666666,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 6 behind punch-in-emphasis"
+      },
+      {
+        "id": "pp-24",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "tighten the frame onto the writing on the packaging",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "crop-to-detail"
+        ],
+        "equivalent": [],
+        "why": "Crop to detail: tighten the frame = crop, writing on the packaging = label.",
+        "returned": [
+          {
+            "id": "static-hold",
+            "score": 2.522
+          },
+          {
+            "id": "pan-reframe",
+            "score": 2.461
+          },
+          {
+            "id": "pan-reframe-hyperframes",
+            "score": 2.018
+          },
+          {
+            "id": "clip-play",
+            "score": 1.785
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "sl-02",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: the customer's uploaded photo with a short sentence beneath it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "image-scene"
+        ],
+        "equivalent": [
+          "image-caption-hyperframes",
+          "image-caption-remotion"
+        ],
+        "why": "A supplied image with caption.",
+        "returned": [
+          {
+            "id": "asset-stage-hyperframes",
+            "score": 7.36
+          },
+          {
+            "id": "asset-stage-ffmpeg",
+            "score": 7.165
+          },
+          {
+            "id": "image-scene",
+            "score": 7.031
+          },
+          {
+            "id": "image-caption-hyperframes",
+            "score": 5.523
+          },
+          {
+            "id": "image-caption-remotion",
+            "score": 5.428
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind asset-stage-hyperframes"
+      },
+      {
+        "id": "sl-03",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "opening scene: the customer's own video plays untouched with the speaker's name under it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "clip-play-caption"
+        ],
+        "equivalent": [],
+        "why": "Supplied clip played as is, with a caption.",
+        "returned": [
+          {
+            "id": "clip-play",
+            "score": 12.03
+          },
+          {
+            "id": "clip-play-caption",
+            "score": 11.308
+          },
+          {
+            "id": "title-subtitle",
+            "score": 5.762
+          },
+          {
+            "id": "lower-third-slide",
+            "score": 5.682
+          },
+          {
+            "id": "music-bed-duck",
+            "score": 4.836
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind clip-play"
+      },
+      {
+        "id": "sl-14",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: chat bubbles on a phone settle into one confirmed calendar slot",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "scene-composition"
+        ],
+        "equivalent": [],
+        "why": "A drawn message thread resolves into a calendar row: a structured drawn scene.",
+        "returned": [
+          {
+            "id": "crossfade",
+            "score": 5.208
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 4.801
+          },
+          {
+            "id": "loudness-normalise",
+            "score": 3.357
+          },
+          {
+            "id": "bullet-list",
+            "score": 3.003
+          },
+          {
+            "id": "image-caption-hyperframes",
+            "score": 2.79
+          }
+        ],
+        "best_relevant_rank": 12,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.08333333333333333,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 12 behind crossfade"
+      },
+      {
+        "id": "sl-17",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: zoom hard onto the price so nobody misses it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "punch-in-emphasis"
+        ],
+        "equivalent": [],
+        "why": "Fast zoom landing on a key number.",
+        "returned": [
+          {
+            "id": "hard-cut",
+            "score": 5.93
+          },
+          {
+            "id": "slow-push-in",
+            "score": 3.197
+          },
+          {
+            "id": "punch-in-emphasis",
+            "score": 3.117
+          },
+          {
+            "id": "slow-push-in-hyperframes",
+            "score": 2.773
+          },
+          {
+            "id": "match-cut",
+            "score": 2.544
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind hard-cut"
+      },
+      {
+        "id": "sl-23",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene transition: the second shot continues the same arm movement as the first",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Continuing a movement across the cut.",
+        "returned": [
+          {
+            "id": "shot-size-progression",
+            "score": 7.558
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 7.197
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 5.119
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 4.558
+          },
+          {
+            "id": "cut-priority-murch",
+            "score": 2.093
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind shot-size-progression"
+      },
+      {
+        "id": "sl-24",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: subtitles run along the very bottom edge of a vertical video",
+        "filter": {},
+        "expect": [
+          "text-legibility"
+        ],
+        "equivalent": [],
+        "why": "Safe-area and legibility for on-screen text.",
+        "returned": [
+          {
+            "id": "axis-180-rule",
+            "score": 3.472
+          },
+          {
+            "id": "text-legibility",
+            "score": 2.478
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 1.288
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind axis-180-rule"
       }
     ],
     "wrong_top_result": [
@@ -585,6 +1267,686 @@
         },
         "cause": "vocabulary_mismatch",
         "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-03",
+        "collection": "ad_playbooks",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "make the audience notice, care, want it, then act",
+        "filter": {},
+        "expect": [
+          "aida-structure"
+        ],
+        "equivalent": [],
+        "why": "AIDA described step by step without the acronym or the word attention.",
+        "returned": [
+          {
+            "id": "problem-agitate-solution",
+            "score": 5.892
+          },
+          {
+            "id": "aida-structure",
+            "score": 2.217
+          },
+          {
+            "id": "claims-discipline",
+            "score": 1.851
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind problem-agitate-solution"
+      },
+      {
+        "id": "pp-07",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "hide the edit inside a gesture so it does not feel jarring",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Cut on motion, described by its effect.",
+        "returned": [
+          {
+            "id": "cut-priority-murch",
+            "score": 9.03
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 6.69
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 6.065
+          },
+          {
+            "id": "text-legibility",
+            "score": 5.661
+          },
+          {
+            "id": "reframing-limits",
+            "score": 3.334
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+      },
+      {
+        "id": "pp-09",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "dialogue from the following shot begins over the end of this one",
+        "filter": {},
+        "expect": [
+          "j-and-l-cuts"
+        ],
+        "equivalent": [],
+        "why": "J-cut described without J-cut.",
+        "returned": [
+          {
+            "id": "axis-180-rule",
+            "score": 4.27
+          },
+          {
+            "id": "shot-size-progression",
+            "score": 3.676
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 1.886
+          },
+          {
+            "id": "reframing-limits",
+            "score": 1.618
+          },
+          {
+            "id": "motion-purpose-easing",
+            "score": 1.287
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind axis-180-rule"
+      },
+      {
+        "id": "pp-10",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "a movement needs a reason and should not start or stop abruptly",
+        "filter": {},
+        "expect": [
+          "motion-purpose-easing"
+        ],
+        "equivalent": [],
+        "why": "Purposeful motion and easing, in plain words.",
+        "returned": [
+          {
+            "id": "cut-on-motion",
+            "score": 4.888
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 4.096
+          },
+          {
+            "id": "cut-priority-murch",
+            "score": 3.973
+          },
+          {
+            "id": "reframing-limits",
+            "score": 3.567
+          },
+          {
+            "id": "motion-purpose-easing",
+            "score": 2.798
+          }
+        ],
+        "best_relevant_rank": 5,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.2,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 5 behind cut-on-motion"
+      },
+      {
+        "id": "pp-12",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "mixing far away, mid-distance and tight views stops it getting dull",
+        "filter": {},
+        "expect": [
+          "shot-size-progression"
+        ],
+        "equivalent": [],
+        "why": "Shot size variety without the words shot or size.",
+        "returned": [
+          {
+            "id": "text-legibility",
+            "score": 3.241
+          },
+          {
+            "id": "reframing-limits",
+            "score": 2.17
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-15",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "the company symbol gently grows into view",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "logo-reveal"
+        ],
+        "equivalent": [],
+        "why": "Logo reveal without logo or reveal.",
+        "returned": [
+          {
+            "id": "crossfade",
+            "score": 3.947
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 3.319
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-21",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "no effect at all, just switch to the next shot",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "hard-cut"
+        ],
+        "equivalent": [],
+        "why": "Hard cut described plainly.",
+        "returned": [
+          {
+            "id": "clip-play",
+            "score": 4.415
+          },
+          {
+            "id": "sfx-hit-on-cut",
+            "score": 4.064
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 3.459
+          },
+          {
+            "id": "match-cut",
+            "score": 3.026
+          },
+          {
+            "id": "static-hold",
+            "score": 2.996
+          }
+        ],
+        "best_relevant_rank": 14,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.07142857142857142,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 14 behind clip-play"
+      },
+      {
+        "id": "pp-22",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "a thud sound lands exactly when the picture changes",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "sfx-hit-on-cut"
+        ],
+        "equivalent": [],
+        "why": "Sound effect on cut without sfx.",
+        "returned": [
+          {
+            "id": "punch-in-emphasis",
+            "score": 5.645
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 5.347
+          },
+          {
+            "id": "match-cut",
+            "score": 5.26
+          },
+          {
+            "id": "clip-play",
+            "score": 5.152
+          },
+          {
+            "id": "clip-play-caption",
+            "score": 5.018
+          }
+        ],
+        "best_relevant_rank": 6,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.16666666666666666,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 6 behind punch-in-emphasis"
+      },
+      {
+        "id": "pp-24",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "tighten the frame onto the writing on the packaging",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "crop-to-detail"
+        ],
+        "equivalent": [],
+        "why": "Crop to detail: tighten the frame = crop, writing on the packaging = label.",
+        "returned": [
+          {
+            "id": "static-hold",
+            "score": 2.522
+          },
+          {
+            "id": "pan-reframe",
+            "score": 2.461
+          },
+          {
+            "id": "pan-reframe-hyperframes",
+            "score": 2.018
+          },
+          {
+            "id": "clip-play",
+            "score": 1.785
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "sl-02",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: the customer's uploaded photo with a short sentence beneath it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "image-scene"
+        ],
+        "equivalent": [
+          "image-caption-hyperframes",
+          "image-caption-remotion"
+        ],
+        "why": "A supplied image with caption.",
+        "returned": [
+          {
+            "id": "asset-stage-hyperframes",
+            "score": 7.36
+          },
+          {
+            "id": "asset-stage-ffmpeg",
+            "score": 7.165
+          },
+          {
+            "id": "image-scene",
+            "score": 7.031
+          },
+          {
+            "id": "image-caption-hyperframes",
+            "score": 5.523
+          },
+          {
+            "id": "image-caption-remotion",
+            "score": 5.428
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind asset-stage-hyperframes"
+      },
+      {
+        "id": "sl-03",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "opening scene: the customer's own video plays untouched with the speaker's name under it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "clip-play-caption"
+        ],
+        "equivalent": [],
+        "why": "Supplied clip played as is, with a caption.",
+        "returned": [
+          {
+            "id": "clip-play",
+            "score": 12.03
+          },
+          {
+            "id": "clip-play-caption",
+            "score": 11.308
+          },
+          {
+            "id": "title-subtitle",
+            "score": 5.762
+          },
+          {
+            "id": "lower-third-slide",
+            "score": 5.682
+          },
+          {
+            "id": "music-bed-duck",
+            "score": 4.836
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind clip-play"
+      },
+      {
+        "id": "sl-14",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: chat bubbles on a phone settle into one confirmed calendar slot",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "scene-composition"
+        ],
+        "equivalent": [],
+        "why": "A drawn message thread resolves into a calendar row: a structured drawn scene.",
+        "returned": [
+          {
+            "id": "crossfade",
+            "score": 5.208
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 4.801
+          },
+          {
+            "id": "loudness-normalise",
+            "score": 3.357
+          },
+          {
+            "id": "bullet-list",
+            "score": 3.003
+          },
+          {
+            "id": "image-caption-hyperframes",
+            "score": 2.79
+          }
+        ],
+        "best_relevant_rank": 12,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0.08333333333333333,
+          "ndcg_at_3": 0
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 12 behind crossfade"
+      },
+      {
+        "id": "sl-17",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: zoom hard onto the price so nobody misses it",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "punch-in-emphasis"
+        ],
+        "equivalent": [],
+        "why": "Fast zoom landing on a key number.",
+        "returned": [
+          {
+            "id": "hard-cut",
+            "score": 5.93
+          },
+          {
+            "id": "slow-push-in",
+            "score": 3.197
+          },
+          {
+            "id": "punch-in-emphasis",
+            "score": 3.117
+          },
+          {
+            "id": "slow-push-in-hyperframes",
+            "score": 2.773
+          },
+          {
+            "id": "match-cut",
+            "score": 2.544
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind hard-cut"
+      },
+      {
+        "id": "sl-23",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene transition: the second shot continues the same arm movement as the first",
+        "filter": {},
+        "expect": [
+          "cut-on-motion"
+        ],
+        "equivalent": [],
+        "why": "Continuing a movement across the cut.",
+        "returned": [
+          {
+            "id": "shot-size-progression",
+            "score": 7.558
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 7.197
+          },
+          {
+            "id": "cut-on-motion",
+            "score": 5.119
+          },
+          {
+            "id": "axis-180-rule",
+            "score": 4.558
+          },
+          {
+            "id": "cut-priority-murch",
+            "score": 2.093
+          }
+        ],
+        "best_relevant_rank": 3,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.3333333333333333,
+          "ndcg_at_3": 0.5
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 3 behind shot-size-progression"
+      },
+      {
+        "id": "sl-24",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "scene_level"
+        ],
+        "query": "scene: subtitles run along the very bottom edge of a vertical video",
+        "filter": {},
+        "expect": [
+          "text-legibility"
+        ],
+        "equivalent": [],
+        "why": "Safe-area and legibility for on-screen text.",
+        "returned": [
+          {
+            "id": "axis-180-rule",
+            "score": 3.472
+          },
+          {
+            "id": "text-legibility",
+            "score": 2.478
+          },
+          {
+            "id": "j-and-l-cuts",
+            "score": 1.288
+          }
+        ],
+        "best_relevant_rank": 2,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 1,
+          "rr": 0.5,
+          "ndcg_at_3": 0.6309297535714575
+        },
+        "cause": "outranked",
+        "cause_detail": "relevant document shares terms with the query but ranked 2 behind axis-180-rule"
       }
     ],
     "no_relevant_result": [
@@ -655,6 +2017,123 @@
           {
             "id": "text-slide-remotion",
             "score": 2.102
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-12",
+        "collection": "directing_principles",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "mixing far away, mid-distance and tight views stops it getting dull",
+        "filter": {},
+        "expect": [
+          "shot-size-progression"
+        ],
+        "equivalent": [],
+        "why": "Shot size variety without the words shot or size.",
+        "returned": [
+          {
+            "id": "text-legibility",
+            "score": 3.241
+          },
+          {
+            "id": "reframing-limits",
+            "score": 2.17
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-15",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "the company symbol gently grows into view",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "logo-reveal"
+        ],
+        "equivalent": [],
+        "why": "Logo reveal without logo or reveal.",
+        "returned": [
+          {
+            "id": "crossfade",
+            "score": 3.947
+          },
+          {
+            "id": "j-cut-audio-lead",
+            "score": 3.319
+          }
+        ],
+        "best_relevant_rank": null,
+        "outcome": "wrong_top_result",
+        "metrics": {
+          "p_at_1": 0,
+          "recall_at_3": 0,
+          "rr": 0,
+          "ndcg_at_3": 0
+        },
+        "cause": "vocabulary_mismatch",
+        "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+      },
+      {
+        "id": "pp-24",
+        "collection": "shot_recipes",
+        "kind": "retrieval",
+        "tags": [
+          "paraphrase"
+        ],
+        "query": "tighten the frame onto the writing on the packaging",
+        "filter": {
+          "include_draft": true
+        },
+        "expect": [
+          "crop-to-detail"
+        ],
+        "equivalent": [],
+        "why": "Crop to detail: tighten the frame = crop, writing on the packaging = label.",
+        "returned": [
+          {
+            "id": "static-hold",
+            "score": 2.522
+          },
+          {
+            "id": "pan-reframe",
+            "score": 2.461
+          },
+          {
+            "id": "pan-reframe-hyperframes",
+            "score": 2.018
+          },
+          {
+            "id": "clip-play",
+            "score": 1.785
           }
         ],
         "best_relevant_rank": null,
@@ -868,9 +2347,9 @@
     ]
   },
   "limitations": [
-    "No relevance threshold: 2 of 7 negative queries still returned documents (ng-01, ng-03) because any shared term gives a positive BM25 score. Production needs a score floor or a reranker to say \"nothing suitable\".",
-    "Vocabulary mismatch: 2 retrieval queries share no stemmed term with their relevant document (sr-18, sr-19). Only dense retrieval can recover these.",
-    "Outranking: 2 retrieval queries had a relevant document that shares terms with the query but ranked below a wrong one (seed-18, dp-04).",
+    "No relevance threshold: 2 of 19 negative queries still returned documents (ng-01, ng-03) because any shared term gives a positive BM25 score. Production needs a score floor or a reranker to say \"nothing suitable\".",
+    "Vocabulary mismatch: 5 retrieval queries share no stemmed term with their relevant document (sr-18, sr-19, pp-12, pp-15, pp-24). Only dense retrieval can recover these.",
+    "Outranking: 14 retrieval queries had a relevant document that shares terms with the query but ranked below a wrong one (seed-18, dp-04, pp-03, pp-07, pp-09, pp-10, pp-21, pp-22, sl-02, sl-03, sl-14, sl-17, sl-23, sl-24).",
     "Recipe titles are indexed twice and 'Used for' phrases are keyword lists, so queries phrased like those lists succeed while paraphrases depend on shared stems.",
     "Renderer variants (-hyperframes, -remotion) duplicate their base recipe text, so a plain query cannot distinguish them; the benchmark treats them as equivalent unless the query names the renderer.",
     "The tokenizer is English-only suffix stripping with no synonyms, so 'dissolve' will not match 'crossfade' unless the document lists it.",
@@ -3362,6 +4841,2391 @@
       },
       "cause": "vocabulary_mismatch",
       "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    },
+    {
+      "id": "pp-01",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "grab the viewer with something eye-catching before they scroll away",
+      "filter": {},
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "equivalent": [],
+      "why": "The hook playbook, asked for without the words hook, first or seconds.",
+      "returned": [
+        {
+          "id": "hook-first-seconds",
+          "score": 5.564
+        },
+        {
+          "id": "aida-structure",
+          "score": 3.74
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-02",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "describe the pain, make it hurt a bit more, then offer the fix",
+      "filter": {},
+      "expect": [
+        "problem-agitate-solution"
+      ],
+      "equivalent": [],
+      "why": "PAS structure described without its name.",
+      "returned": [
+        {
+          "id": "problem-agitate-solution",
+          "score": 5.892
+        },
+        {
+          "id": "aida-structure",
+          "score": 2.217
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.851
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-03",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "make the audience notice, care, want it, then act",
+      "filter": {},
+      "expect": [
+        "aida-structure"
+      ],
+      "equivalent": [],
+      "why": "AIDA described step by step without the acronym or the word attention.",
+      "returned": [
+        {
+          "id": "problem-agitate-solution",
+          "score": 5.892
+        },
+        {
+          "id": "aida-structure",
+          "score": 2.217
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.851
+        }
+      ],
+      "best_relevant_rank": 2,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.5,
+        "ndcg_at_3": 0.6309297535714575
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 2 behind problem-agitate-solution"
+    },
+    {
+      "id": "pp-04",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "never say anything about the product that has not been signed off",
+      "filter": {},
+      "expect": [
+        "claims-discipline"
+      ],
+      "equivalent": [],
+      "why": "Claims discipline in other words (signed off = approved).",
+      "returned": [
+        {
+          "id": "claims-discipline",
+          "score": 5.169
+        },
+        {
+          "id": "single-clear-cta",
+          "score": 4.495
+        },
+        {
+          "id": "hook-first-seconds",
+          "score": 2.357
+        },
+        {
+          "id": "aida-structure",
+          "score": 1.521
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 1.51
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-05",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "finish by telling people the one thing to do next",
+      "filter": {},
+      "expect": [
+        "single-clear-cta"
+      ],
+      "equivalent": [],
+      "why": "One clear CTA, without the word action or call.",
+      "returned": [
+        {
+          "id": "single-clear-cta",
+          "score": 2.129
+        },
+        {
+          "id": "claims-discipline",
+          "score": 1.996
+        },
+        {
+          "id": "aida-structure",
+          "score": 1.315
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 1.301
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-06",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keep the camera from crossing the line between two people talking",
+      "filter": {},
+      "expect": [
+        "axis-180-rule"
+      ],
+      "equivalent": [],
+      "why": "The 180-degree rule, without degree or rule.",
+      "returned": [
+        {
+          "id": "axis-180-rule",
+          "score": 10.229
+        },
+        {
+          "id": "text-legibility",
+          "score": 3.538
+        },
+        {
+          "id": "shot-size-progression",
+          "score": 3.242
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 2.029
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.759
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-07",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "hide the edit inside a gesture so it does not feel jarring",
+      "filter": {},
+      "expect": [
+        "cut-on-motion"
+      ],
+      "equivalent": [],
+      "why": "Cut on motion, described by its effect.",
+      "returned": [
+        {
+          "id": "cut-priority-murch",
+          "score": 9.03
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 6.69
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 6.065
+        },
+        {
+          "id": "text-legibility",
+          "score": 5.661
+        },
+        {
+          "id": "reframing-limits",
+          "score": 3.334
+        }
+      ],
+      "best_relevant_rank": 2,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.5,
+        "ndcg_at_3": 0.6309297535714575
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 2 behind cut-priority-murch"
+    },
+    {
+      "id": "pp-08",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "what matters most when choosing where to cut: feeling, story or timing",
+      "filter": {},
+      "expect": [
+        "cut-priority-murch"
+      ],
+      "equivalent": [],
+      "why": "Murch's priorities, without his name.",
+      "returned": [
+        {
+          "id": "cut-priority-murch",
+          "score": 14.52
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 6.268
+        },
+        {
+          "id": "text-legibility",
+          "score": 4.921
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 4.631
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 3.948
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-09",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "dialogue from the following shot begins over the end of this one",
+      "filter": {},
+      "expect": [
+        "j-and-l-cuts"
+      ],
+      "equivalent": [],
+      "why": "J-cut described without J-cut.",
+      "returned": [
+        {
+          "id": "axis-180-rule",
+          "score": 4.27
+        },
+        {
+          "id": "shot-size-progression",
+          "score": 3.676
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.886
+        },
+        {
+          "id": "reframing-limits",
+          "score": 1.618
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 1.287
+        }
+      ],
+      "best_relevant_rank": 3,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.3333333333333333,
+        "ndcg_at_3": 0.5
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 3 behind axis-180-rule"
+    },
+    {
+      "id": "pp-10",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a movement needs a reason and should not start or stop abruptly",
+      "filter": {},
+      "expect": [
+        "motion-purpose-easing"
+      ],
+      "equivalent": [],
+      "why": "Purposeful motion and easing, in plain words.",
+      "returned": [
+        {
+          "id": "cut-on-motion",
+          "score": 4.888
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 4.096
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 3.973
+        },
+        {
+          "id": "reframing-limits",
+          "score": 3.567
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 2.798
+        }
+      ],
+      "best_relevant_rank": 5,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0.2,
+        "ndcg_at_3": 0
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 5 behind cut-on-motion"
+    },
+    {
+      "id": "pp-11",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "magnifying a supplied clip makes it blurry",
+      "filter": {},
+      "expect": [
+        "reframing-limits"
+      ],
+      "equivalent": [],
+      "why": "Reframing limits: magnifying = zoom, blurry = resolution cost.",
+      "returned": [
+        {
+          "id": "reframing-limits",
+          "score": 2.132
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 1.596
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-12",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "mixing far away, mid-distance and tight views stops it getting dull",
+      "filter": {},
+      "expect": [
+        "shot-size-progression"
+      ],
+      "equivalent": [],
+      "why": "Shot size variety without the words shot or size.",
+      "returned": [
+        {
+          "id": "text-legibility",
+          "score": 3.241
+        },
+        {
+          "id": "reframing-limits",
+          "score": 2.17
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0,
+        "ndcg_at_3": 0
+      },
+      "cause": "vocabulary_mismatch",
+      "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    },
+    {
+      "id": "pp-13",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "captions should stay up long enough and away from the screen edges",
+      "filter": {},
+      "expect": [
+        "text-legibility"
+      ],
+      "equivalent": [],
+      "why": "Text legibility described as captions staying readable and safe.",
+      "returned": [
+        {
+          "id": "text-legibility",
+          "score": 12.947
+        },
+        {
+          "id": "motion-purpose-easing",
+          "score": 5.939
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 4.408
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 3.541
+        },
+        {
+          "id": "shot-size-progression",
+          "score": 1.676
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-14",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "turn the background music down while somebody talks",
+      "filter": {},
+      "expect": [
+        "audio-ducking-loudness"
+      ],
+      "equivalent": [],
+      "why": "Ducking described without the word.",
+      "returned": [
+        {
+          "id": "audio-ducking-loudness",
+          "score": 4.347
+        },
+        {
+          "id": "text-legibility",
+          "score": 3.241
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 2.432
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "the company symbol gently grows into view",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "logo-reveal"
+      ],
+      "equivalent": [],
+      "why": "Logo reveal without logo or reveal.",
+      "returned": [
+        {
+          "id": "crossfade",
+          "score": 3.947
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.319
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0,
+        "ndcg_at_3": 0
+      },
+      "cause": "vocabulary_mismatch",
+      "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    },
+    {
+      "id": "pp-16",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "creep closer to the subject to build suspense",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "Slow push-in described by its effect.",
+      "returned": [
+        {
+          "id": "slow-push-in",
+          "score": 7.139
+        },
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 6.053
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-17",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "start on a tiny detail then widen to show everything",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "pull-out-reveal"
+      ],
+      "equivalent": [
+        "pull-out-reveal-hyperframes"
+      ],
+      "why": "Pull-out reveal without its name.",
+      "returned": [
+        {
+          "id": "pull-out-reveal",
+          "score": 6.822
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 5.593
+        },
+        {
+          "id": "crop-to-detail",
+          "score": 4.409
+        },
+        {
+          "id": "clip-play",
+          "score": 3.024
+        },
+        {
+          "id": "music-bed-duck",
+          "score": 2.431
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keep the picture still so people can take it in",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "static-hold"
+      ],
+      "equivalent": [],
+      "why": "Static hold without hold or static.",
+      "returned": [
+        {
+          "id": "static-hold",
+          "score": 9.11
+        },
+        {
+          "id": "match-cut",
+          "score": 4.47
+        },
+        {
+          "id": "asset-stage-hyperframes",
+          "score": 4.03
+        },
+        {
+          "id": "asset-stage-ffmpeg",
+          "score": 3.801
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.208
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "each word pops up in turn to give the sentence a beat",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "text-word-stagger"
+      ],
+      "equivalent": [
+        "text-word-stagger-hyperframes"
+      ],
+      "why": "Word stagger without stagger.",
+      "returned": [
+        {
+          "id": "text-word-stagger",
+          "score": 7.588
+        },
+        {
+          "id": "text-word-stagger-hyperframes",
+          "score": 6.752
+        },
+        {
+          "id": "bullet-list",
+          "score": 4.748
+        },
+        {
+          "id": "static-hold",
+          "score": 3.254
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 3.17
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-20",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a name tag appears in the lower corner and then leaves",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "lower-third-slide"
+      ],
+      "equivalent": [],
+      "why": "Lower third without the term.",
+      "returned": [
+        {
+          "id": "lower-third-slide",
+          "score": 17.932
+        },
+        {
+          "id": "music-bed-duck",
+          "score": 6.348
+        },
+        {
+          "id": "text-fade-up",
+          "score": 2.653
+        },
+        {
+          "id": "text-word-stagger",
+          "score": 2.621
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 2.175
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-21",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "no effect at all, just switch to the next shot",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "hard-cut"
+      ],
+      "equivalent": [],
+      "why": "Hard cut described plainly.",
+      "returned": [
+        {
+          "id": "clip-play",
+          "score": 4.415
+        },
+        {
+          "id": "sfx-hit-on-cut",
+          "score": 4.064
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.459
+        },
+        {
+          "id": "match-cut",
+          "score": 3.026
+        },
+        {
+          "id": "static-hold",
+          "score": 2.996
+        }
+      ],
+      "best_relevant_rank": 14,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0.07142857142857142,
+        "ndcg_at_3": 0
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 14 behind clip-play"
+    },
+    {
+      "id": "pp-22",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a thud sound lands exactly when the picture changes",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "sfx-hit-on-cut"
+      ],
+      "equivalent": [],
+      "why": "Sound effect on cut without sfx.",
+      "returned": [
+        {
+          "id": "punch-in-emphasis",
+          "score": 5.645
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 5.347
+        },
+        {
+          "id": "match-cut",
+          "score": 5.26
+        },
+        {
+          "id": "clip-play",
+          "score": 5.152
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 5.018
+        }
+      ],
+      "best_relevant_rank": 6,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0.16666666666666666,
+        "ndcg_at_3": 0
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 6 behind punch-in-emphasis"
+    },
+    {
+      "id": "pp-23",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "smoothly melt one calm moment into the next",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "crossfade"
+      ],
+      "equivalent": [],
+      "why": "Crossfade without cross or fade.",
+      "returned": [
+        {
+          "id": "crossfade",
+          "score": 14.783
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 6.778
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 4.836
+        },
+        {
+          "id": "match-cut",
+          "score": 4.69
+        },
+        {
+          "id": "static-hold",
+          "score": 3.651
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "pp-24",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "tighten the frame onto the writing on the packaging",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "crop-to-detail"
+      ],
+      "equivalent": [],
+      "why": "Crop to detail: tighten the frame = crop, writing on the packaging = label.",
+      "returned": [
+        {
+          "id": "static-hold",
+          "score": 2.522
+        },
+        {
+          "id": "pan-reframe",
+          "score": 2.461
+        },
+        {
+          "id": "pan-reframe-hyperframes",
+          "score": 2.018
+        },
+        {
+          "id": "clip-play",
+          "score": 1.785
+        }
+      ],
+      "best_relevant_rank": null,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0,
+        "ndcg_at_3": 0
+      },
+      "cause": "vocabulary_mismatch",
+      "cause_detail": "no query term (after stop-word removal and stemming) occurs in any relevant document"
+    },
+    {
+      "id": "sl-01",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "closing scene, five seconds: our offer and the web address on a clean card",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "end-card-cta"
+      ],
+      "equivalent": [
+        "end-card-cta-hyperframes"
+      ],
+      "why": "A closing scene with the offer and address is the end card.",
+      "returned": [
+        {
+          "id": "end-card-cta",
+          "score": 8.946
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 7.973
+        },
+        {
+          "id": "text-card-fade",
+          "score": 5.459
+        },
+        {
+          "id": "scene-composition",
+          "score": 4.767
+        },
+        {
+          "id": "bullet-list",
+          "score": 4.587
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-02",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: the customer's uploaded photo with a short sentence beneath it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "image-scene"
+      ],
+      "equivalent": [
+        "image-caption-hyperframes",
+        "image-caption-remotion"
+      ],
+      "why": "A supplied image with caption.",
+      "returned": [
+        {
+          "id": "asset-stage-hyperframes",
+          "score": 7.36
+        },
+        {
+          "id": "asset-stage-ffmpeg",
+          "score": 7.165
+        },
+        {
+          "id": "image-scene",
+          "score": 7.031
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 5.523
+        },
+        {
+          "id": "image-caption-remotion",
+          "score": 5.428
+        }
+      ],
+      "best_relevant_rank": 3,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.3333333333333333,
+        "ndcg_at_3": 0.5
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 3 behind asset-stage-hyperframes"
+    },
+    {
+      "id": "sl-03",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "opening scene: the customer's own video plays untouched with the speaker's name under it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "clip-play-caption"
+      ],
+      "equivalent": [],
+      "why": "Supplied clip played as is, with a caption.",
+      "returned": [
+        {
+          "id": "clip-play",
+          "score": 12.03
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 11.308
+        },
+        {
+          "id": "title-subtitle",
+          "score": 5.762
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 5.682
+        },
+        {
+          "id": "music-bed-duck",
+          "score": 4.836
+        }
+      ],
+      "best_relevant_rank": 2,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.5,
+        "ndcg_at_3": 0.6309297535714575
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 2 behind clip-play"
+    },
+    {
+      "id": "sl-04",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: three benefits shown one after another beneath a heading",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "bullet-list"
+      ],
+      "equivalent": [],
+      "why": "Heading with a short list.",
+      "returned": [
+        {
+          "id": "bullet-list",
+          "score": 14.976
+        },
+        {
+          "id": "text-word-stagger",
+          "score": 8.536
+        },
+        {
+          "id": "text-word-stagger-hyperframes",
+          "score": 7.186
+        },
+        {
+          "id": "title-subtitle",
+          "score": 6.105
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 4.449
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-05",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: 98% on-time delivery as a huge number with last quarter written under it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "stat-callout"
+      ],
+      "equivalent": [],
+      "why": "One large figure with a label.",
+      "returned": [
+        {
+          "id": "stat-callout",
+          "score": 5.094
+        },
+        {
+          "id": "music-bed-duck",
+          "score": 4.836
+        },
+        {
+          "id": "match-cut",
+          "score": 4.09
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.136
+        },
+        {
+          "id": "scene-composition",
+          "score": 1.815
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-06",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "move from the problem scene to the solution with an energetic graphic transition",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "directional-wipe"
+      ],
+      "equivalent": [],
+      "why": "Energetic graphic transition between scenes.",
+      "returned": [
+        {
+          "id": "directional-wipe",
+          "score": 11.163
+        },
+        {
+          "id": "scene-composition",
+          "score": 5.029
+        },
+        {
+          "id": "crossfade",
+          "score": 4.629
+        },
+        {
+          "id": "match-cut",
+          "score": 4.22
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.622
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-07",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "end of chapter two: go dark and come back for chapter three",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "dip-to-black"
+      ],
+      "equivalent": [],
+      "why": "A chapter break marked by fading to black.",
+      "returned": [
+        {
+          "id": "dip-to-black",
+          "score": 12.669
+        },
+        {
+          "id": "end-card-cta",
+          "score": 4.116
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 3.949
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 3.696
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 3.433
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-08",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "the voice of scene 4 should begin while scene 3 is still on screen",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "j-cut-audio-lead"
+      ],
+      "equivalent": [],
+      "why": "Audio leads picture.",
+      "returned": [
+        {
+          "id": "j-cut-audio-lead",
+          "score": 5.35
+        },
+        {
+          "id": "text-fade-up",
+          "score": 4.882
+        },
+        {
+          "id": "text-slide-remotion",
+          "score": 4.105
+        },
+        {
+          "id": "music-bed-duck",
+          "score": 4.101
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 4.002
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-09",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "the film ends with the brand mark entering softly",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "logo-reveal"
+      ],
+      "equivalent": [],
+      "why": "Brand mark entering = logo reveal.",
+      "returned": [
+        {
+          "id": "logo-reveal",
+          "score": 12.699
+        },
+        {
+          "id": "dip-to-black",
+          "score": 6.791
+        },
+        {
+          "id": "end-card-cta",
+          "score": 6.737
+        },
+        {
+          "id": "end-card-cta-hyperframes",
+          "score": 5.85
+        },
+        {
+          "id": "scene-composition",
+          "score": 4.325
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-10",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "final mix check: bring the whole film to broadcast loudness",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "loudness-normalise"
+      ],
+      "equivalent": [],
+      "why": "Loudness target on the final mix.",
+      "returned": [
+        {
+          "id": "loudness-normalise",
+          "score": 15.376
+        },
+        {
+          "id": "pull-out-reveal",
+          "score": 4.345
+        },
+        {
+          "id": "pull-out-reveal-hyperframes",
+          "score": 3.777
+        },
+        {
+          "id": "scene-composition",
+          "score": 3.752
+        },
+        {
+          "id": "dip-to-black",
+          "score": 3.033
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-11",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "narration begins here, the music must dip and then return",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "music-bed-duck"
+      ],
+      "equivalent": [],
+      "why": "Music ducking under speech.",
+      "returned": [
+        {
+          "id": "music-bed-duck",
+          "score": 7.988
+        },
+        {
+          "id": "dip-to-black",
+          "score": 5.879
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.867
+        },
+        {
+          "id": "stat-callout",
+          "score": 2.342
+        },
+        {
+          "id": "bullet-list",
+          "score": 2.274
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-12",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: sweep the camera left across the wide photo of the shop",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "pan-reframe"
+      ],
+      "equivalent": [
+        "pan-reframe-hyperframes"
+      ],
+      "why": "A sideways move across a larger source.",
+      "returned": [
+        {
+          "id": "pan-reframe",
+          "score": 9.543
+        },
+        {
+          "id": "pan-reframe-hyperframes",
+          "score": 8.039
+        },
+        {
+          "id": "image-scene",
+          "score": 5.73
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 4.196
+        },
+        {
+          "id": "image-caption-remotion",
+          "score": 4.127
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-13",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "two shots each show a round object, cut so the circle stays where it is",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "match-cut"
+      ],
+      "equivalent": [],
+      "why": "Shared shape and position carry the eye.",
+      "returned": [
+        {
+          "id": "match-cut",
+          "score": 7.4
+        },
+        {
+          "id": "static-hold",
+          "score": 5.201
+        },
+        {
+          "id": "bullet-list",
+          "score": 4.618
+        },
+        {
+          "id": "sfx-hit-on-cut",
+          "score": 3.796
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 3.739
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-14",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: chat bubbles on a phone settle into one confirmed calendar slot",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "scene-composition"
+      ],
+      "equivalent": [],
+      "why": "A drawn message thread resolves into a calendar row: a structured drawn scene.",
+      "returned": [
+        {
+          "id": "crossfade",
+          "score": 5.208
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 4.801
+        },
+        {
+          "id": "loudness-normalise",
+          "score": 3.357
+        },
+        {
+          "id": "bullet-list",
+          "score": 3.003
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 2.79
+        }
+      ],
+      "best_relevant_rank": 12,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 0,
+        "rr": 0.08333333333333333,
+        "ndcg_at_3": 0
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 12 behind crossfade"
+    },
+    {
+      "id": "sl-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: product name large with a smaller line beneath on a plain colour",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "title-subtitle"
+      ],
+      "equivalent": [],
+      "why": "Large title with subtitle.",
+      "returned": [
+        {
+          "id": "title-subtitle",
+          "score": 10.341
+        },
+        {
+          "id": "text-card-fade",
+          "score": 8.483
+        },
+        {
+          "id": "stat-callout",
+          "score": 7.691
+        },
+        {
+          "id": "lower-third-slide",
+          "score": 6.877
+        },
+        {
+          "id": "text-fade-hyperframes",
+          "score": 4.619
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-16",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: label the presenter's name for three seconds near the bottom",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "lower-third-slide"
+      ],
+      "equivalent": [],
+      "why": "A name label near the bottom of the safe area.",
+      "returned": [
+        {
+          "id": "lower-third-slide",
+          "score": 16.376
+        },
+        {
+          "id": "stat-callout",
+          "score": 7.513
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 7.425
+        },
+        {
+          "id": "crop-to-detail",
+          "score": 4.274
+        },
+        {
+          "id": "scene-composition",
+          "score": 3.505
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-17",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: zoom hard onto the price so nobody misses it",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "punch-in-emphasis"
+      ],
+      "equivalent": [],
+      "why": "Fast zoom landing on a key number.",
+      "returned": [
+        {
+          "id": "hard-cut",
+          "score": 5.93
+        },
+        {
+          "id": "slow-push-in",
+          "score": 3.197
+        },
+        {
+          "id": "punch-in-emphasis",
+          "score": 3.117
+        },
+        {
+          "id": "slow-push-in-hyperframes",
+          "score": 2.773
+        },
+        {
+          "id": "match-cut",
+          "score": 2.544
+        }
+      ],
+      "best_relevant_rank": 3,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.3333333333333333,
+        "ndcg_at_3": 0.5
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 3 behind hard-cut"
+    },
+    {
+      "id": "sl-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: the supplied pictures placed over the background with transparency kept",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "asset-stage-ffmpeg"
+      ],
+      "equivalent": [
+        "asset-stage-hyperframes"
+      ],
+      "why": "Uploaded pictures with alpha preserved.",
+      "returned": [
+        {
+          "id": "asset-stage-hyperframes",
+          "score": 9.785
+        },
+        {
+          "id": "asset-stage-ffmpeg",
+          "score": 9.373
+        },
+        {
+          "id": "clip-play-caption",
+          "score": 5.401
+        },
+        {
+          "id": "image-caption-remotion",
+          "score": 4.665
+        },
+        {
+          "id": "image-caption-hyperframes",
+          "score": 4.526
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: dissolve gently from the morning shot to the evening one",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "crossfade"
+      ],
+      "equivalent": [],
+      "why": "Soft blend between calm moments.",
+      "returned": [
+        {
+          "id": "crossfade",
+          "score": 5.86
+        },
+        {
+          "id": "clip-play",
+          "score": 3.576
+        },
+        {
+          "id": "crop-to-detail",
+          "score": 3.525
+        },
+        {
+          "id": "bullet-list",
+          "score": 3.003
+        },
+        {
+          "id": "static-hold",
+          "score": 2.996
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-20",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: one headline rises into place on a plain background",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [
+        "text-fade-up"
+      ],
+      "equivalent": [
+        "text-fade-up-hyperframes"
+      ],
+      "why": "Headline fading in while rising.",
+      "returned": [
+        {
+          "id": "text-fade-up",
+          "score": 6.736
+        },
+        {
+          "id": "text-fade-up-hyperframes",
+          "score": 5.523
+        },
+        {
+          "id": "crossfade",
+          "score": 5.208
+        },
+        {
+          "id": "j-cut-audio-lead",
+          "score": 4.801
+        },
+        {
+          "id": "text-card-fade",
+          "score": 4.752
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-21",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "first scene: open on the best-looking result, not on our name",
+      "filter": {},
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "equivalent": [],
+      "why": "Opening on the result rather than a logo.",
+      "returned": [
+        {
+          "id": "hook-first-seconds",
+          "score": 12.281
+        },
+        {
+          "id": "claims-discipline",
+          "score": 3.543
+        },
+        {
+          "id": "single-clear-cta",
+          "score": 1.354
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-22",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "last scene: one button-style instruction shown long enough to read",
+      "filter": {},
+      "expect": [
+        "single-clear-cta"
+      ],
+      "equivalent": [],
+      "why": "A single readable action at the end.",
+      "returned": [
+        {
+          "id": "single-clear-cta",
+          "score": 11.024
+        },
+        {
+          "id": "claims-discipline",
+          "score": 4.636
+        },
+        {
+          "id": "problem-agitate-solution",
+          "score": 3.104
+        },
+        {
+          "id": "aida-structure",
+          "score": 1.315
+        },
+        {
+          "id": "hook-first-seconds",
+          "score": 0.982
+        }
+      ],
+      "best_relevant_rank": 1,
+      "outcome": "ok",
+      "metrics": {
+        "p_at_1": 1,
+        "recall_at_3": 1,
+        "rr": 1,
+        "ndcg_at_3": 1
+      }
+    },
+    {
+      "id": "sl-23",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene transition: the second shot continues the same arm movement as the first",
+      "filter": {},
+      "expect": [
+        "cut-on-motion"
+      ],
+      "equivalent": [],
+      "why": "Continuing a movement across the cut.",
+      "returned": [
+        {
+          "id": "shot-size-progression",
+          "score": 7.558
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 7.197
+        },
+        {
+          "id": "cut-on-motion",
+          "score": 5.119
+        },
+        {
+          "id": "axis-180-rule",
+          "score": 4.558
+        },
+        {
+          "id": "cut-priority-murch",
+          "score": 2.093
+        }
+      ],
+      "best_relevant_rank": 3,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.3333333333333333,
+        "ndcg_at_3": 0.5
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 3 behind shot-size-progression"
+    },
+    {
+      "id": "sl-24",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: subtitles run along the very bottom edge of a vertical video",
+      "filter": {},
+      "expect": [
+        "text-legibility"
+      ],
+      "equivalent": [],
+      "why": "Safe-area and legibility for on-screen text.",
+      "returned": [
+        {
+          "id": "axis-180-rule",
+          "score": 3.472
+        },
+        {
+          "id": "text-legibility",
+          "score": 2.478
+        },
+        {
+          "id": "j-and-l-cuts",
+          "score": 1.288
+        }
+      ],
+      "best_relevant_rank": 2,
+      "outcome": "wrong_top_result",
+      "metrics": {
+        "p_at_1": 0,
+        "recall_at_3": 1,
+        "rr": 0.5,
+        "ndcg_at_3": 0.6309297535714575
+      },
+      "cause": "outranked",
+      "cause_detail": "relevant document shares terms with the query but ranked 2 behind axis-180-rule"
+    },
+    {
+      "id": "ngo-01",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "recipe for chocolate chip cookies",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "Nothing in the video-direction corpus is about baking.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-02",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "current exchange rate of the euro",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "Not about directing.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-03",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "how to train a neural network for segmentation",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "Not about advertising.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-04",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "weather forecast for tomorrow in Lisbon",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No weather content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-05",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "tax filing deadline for freelancers",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No tax content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-06",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "how many calories are in a banana",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No nutrition content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-07",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "best hiking boots for winter",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No footwear content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-08",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "football world cup winners list",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No sport content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-09",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "install a database server on linux",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No server administration content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-10",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "quantum computing error correction",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No physics content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-11",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "ancient roman aqueduct construction",
+      "filter": {
+        "include_draft": true
+      },
+      "expect": [],
+      "equivalent": [],
+      "why": "No history content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
+    },
+    {
+      "id": "ngo-12",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "wedding venue seating chart",
+      "filter": {},
+      "expect": [],
+      "equivalent": [],
+      "why": "No event planning content exists.",
+      "returned": [],
+      "best_relevant_rank": null,
+      "outcome": "negative_correct",
+      "returned_empty": true
     }
   ]
 }

@@ -373,7 +373,7 @@
       "query": "zoom",
       "filter": {
         "recipe_type": "camera_move",
-        "duration_s": 1.0,
+        "duration_s": 1,
         "aspect_ratio": "9:16"
       },
       "expect": [
@@ -600,6 +600,799 @@
         "music-bed-duck"
       ],
       "why": "music-bed-duck lowers music under speech; the query uses different terms (voiceover, background track)."
+    },
+    {
+      "id": "pp-01",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "grab the viewer with something eye-catching before they scroll away",
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "why": "The hook playbook, asked for without the words hook, first or seconds."
+    },
+    {
+      "id": "pp-02",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "describe the pain, make it hurt a bit more, then offer the fix",
+      "expect": [
+        "problem-agitate-solution"
+      ],
+      "why": "PAS structure described without its name."
+    },
+    {
+      "id": "pp-03",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "make the audience notice, care, want it, then act",
+      "expect": [
+        "aida-structure"
+      ],
+      "why": "AIDA described step by step without the acronym or the word attention."
+    },
+    {
+      "id": "pp-04",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "never say anything about the product that has not been signed off",
+      "expect": [
+        "claims-discipline"
+      ],
+      "why": "Claims discipline in other words (signed off = approved)."
+    },
+    {
+      "id": "pp-05",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "finish by telling people the one thing to do next",
+      "expect": [
+        "single-clear-cta"
+      ],
+      "why": "One clear CTA, without the word action or call."
+    },
+    {
+      "id": "pp-06",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keep the camera from crossing the line between two people talking",
+      "expect": [
+        "axis-180-rule"
+      ],
+      "why": "The 180-degree rule, without degree or rule."
+    },
+    {
+      "id": "pp-07",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "hide the edit inside a gesture so it does not feel jarring",
+      "expect": [
+        "cut-on-motion"
+      ],
+      "why": "Cut on motion, described by its effect."
+    },
+    {
+      "id": "pp-08",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "what matters most when choosing where to cut: feeling, story or timing",
+      "expect": [
+        "cut-priority-murch"
+      ],
+      "why": "Murch's priorities, without his name."
+    },
+    {
+      "id": "pp-09",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "dialogue from the following shot begins over the end of this one",
+      "expect": [
+        "j-and-l-cuts"
+      ],
+      "why": "J-cut described without J-cut."
+    },
+    {
+      "id": "pp-10",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a movement needs a reason and should not start or stop abruptly",
+      "expect": [
+        "motion-purpose-easing"
+      ],
+      "why": "Purposeful motion and easing, in plain words."
+    },
+    {
+      "id": "pp-11",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "magnifying a supplied clip makes it blurry",
+      "expect": [
+        "reframing-limits"
+      ],
+      "why": "Reframing limits: magnifying = zoom, blurry = resolution cost."
+    },
+    {
+      "id": "pp-12",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "mixing far away, mid-distance and tight views stops it getting dull",
+      "expect": [
+        "shot-size-progression"
+      ],
+      "why": "Shot size variety without the words shot or size."
+    },
+    {
+      "id": "pp-13",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "captions should stay up long enough and away from the screen edges",
+      "expect": [
+        "text-legibility"
+      ],
+      "why": "Text legibility described as captions staying readable and safe."
+    },
+    {
+      "id": "pp-14",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "turn the background music down while somebody talks",
+      "expect": [
+        "audio-ducking-loudness"
+      ],
+      "why": "Ducking described without the word."
+    },
+    {
+      "id": "pp-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "the company symbol gently grows into view",
+      "expect": [
+        "logo-reveal"
+      ],
+      "why": "Logo reveal without logo or reveal."
+    },
+    {
+      "id": "pp-16",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "creep closer to the subject to build suspense",
+      "expect": [
+        "slow-push-in"
+      ],
+      "equivalent": [
+        "slow-push-in-hyperframes"
+      ],
+      "why": "Slow push-in described by its effect."
+    },
+    {
+      "id": "pp-17",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "start on a tiny detail then widen to show everything",
+      "expect": [
+        "pull-out-reveal"
+      ],
+      "equivalent": [
+        "pull-out-reveal-hyperframes"
+      ],
+      "why": "Pull-out reveal without its name."
+    },
+    {
+      "id": "pp-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "keep the picture still so people can take it in",
+      "expect": [
+        "static-hold"
+      ],
+      "why": "Static hold without hold or static."
+    },
+    {
+      "id": "pp-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "each word pops up in turn to give the sentence a beat",
+      "expect": [
+        "text-word-stagger"
+      ],
+      "equivalent": [
+        "text-word-stagger-hyperframes"
+      ],
+      "why": "Word stagger without stagger."
+    },
+    {
+      "id": "pp-20",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a name tag appears in the lower corner and then leaves",
+      "expect": [
+        "lower-third-slide"
+      ],
+      "why": "Lower third without the term."
+    },
+    {
+      "id": "pp-21",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "no effect at all, just switch to the next shot",
+      "expect": [
+        "hard-cut"
+      ],
+      "why": "Hard cut described plainly."
+    },
+    {
+      "id": "pp-22",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "a thud sound lands exactly when the picture changes",
+      "expect": [
+        "sfx-hit-on-cut"
+      ],
+      "why": "Sound effect on cut without sfx."
+    },
+    {
+      "id": "pp-23",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "smoothly melt one calm moment into the next",
+      "expect": [
+        "crossfade"
+      ],
+      "why": "Crossfade without cross or fade."
+    },
+    {
+      "id": "pp-24",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "paraphrase"
+      ],
+      "query": "tighten the frame onto the writing on the packaging",
+      "expect": [
+        "crop-to-detail"
+      ],
+      "why": "Crop to detail: tighten the frame = crop, writing on the packaging = label."
+    },
+    {
+      "id": "sl-01",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "closing scene, five seconds: our offer and the web address on a clean card",
+      "expect": [
+        "end-card-cta"
+      ],
+      "equivalent": [
+        "end-card-cta-hyperframes"
+      ],
+      "why": "A closing scene with the offer and address is the end card."
+    },
+    {
+      "id": "sl-02",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: the customer's uploaded photo with a short sentence beneath it",
+      "expect": [
+        "image-scene"
+      ],
+      "equivalent": [
+        "image-caption-hyperframes",
+        "image-caption-remotion"
+      ],
+      "why": "A supplied image with caption."
+    },
+    {
+      "id": "sl-03",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "opening scene: the customer's own video plays untouched with the speaker's name under it",
+      "expect": [
+        "clip-play-caption"
+      ],
+      "why": "Supplied clip played as is, with a caption."
+    },
+    {
+      "id": "sl-04",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: three benefits shown one after another beneath a heading",
+      "expect": [
+        "bullet-list"
+      ],
+      "why": "Heading with a short list."
+    },
+    {
+      "id": "sl-05",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: 98% on-time delivery as a huge number with last quarter written under it",
+      "expect": [
+        "stat-callout"
+      ],
+      "why": "One large figure with a label."
+    },
+    {
+      "id": "sl-06",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "move from the problem scene to the solution with an energetic graphic transition",
+      "expect": [
+        "directional-wipe"
+      ],
+      "why": "Energetic graphic transition between scenes."
+    },
+    {
+      "id": "sl-07",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "end of chapter two: go dark and come back for chapter three",
+      "expect": [
+        "dip-to-black"
+      ],
+      "why": "A chapter break marked by fading to black."
+    },
+    {
+      "id": "sl-08",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "the voice of scene 4 should begin while scene 3 is still on screen",
+      "expect": [
+        "j-cut-audio-lead"
+      ],
+      "why": "Audio leads picture."
+    },
+    {
+      "id": "sl-09",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "the film ends with the brand mark entering softly",
+      "expect": [
+        "logo-reveal"
+      ],
+      "why": "Brand mark entering = logo reveal."
+    },
+    {
+      "id": "sl-10",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "final mix check: bring the whole film to broadcast loudness",
+      "expect": [
+        "loudness-normalise"
+      ],
+      "why": "Loudness target on the final mix."
+    },
+    {
+      "id": "sl-11",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "narration begins here, the music must dip and then return",
+      "expect": [
+        "music-bed-duck"
+      ],
+      "why": "Music ducking under speech."
+    },
+    {
+      "id": "sl-12",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: sweep the camera left across the wide photo of the shop",
+      "expect": [
+        "pan-reframe"
+      ],
+      "equivalent": [
+        "pan-reframe-hyperframes"
+      ],
+      "why": "A sideways move across a larger source."
+    },
+    {
+      "id": "sl-13",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "two shots each show a round object, cut so the circle stays where it is",
+      "expect": [
+        "match-cut"
+      ],
+      "why": "Shared shape and position carry the eye."
+    },
+    {
+      "id": "sl-14",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: chat bubbles on a phone settle into one confirmed calendar slot",
+      "expect": [
+        "scene-composition"
+      ],
+      "why": "A drawn message thread resolves into a calendar row: a structured drawn scene."
+    },
+    {
+      "id": "sl-15",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: product name large with a smaller line beneath on a plain colour",
+      "expect": [
+        "title-subtitle"
+      ],
+      "why": "Large title with subtitle."
+    },
+    {
+      "id": "sl-16",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: label the presenter's name for three seconds near the bottom",
+      "expect": [
+        "lower-third-slide"
+      ],
+      "why": "A name label near the bottom of the safe area."
+    },
+    {
+      "id": "sl-17",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: zoom hard onto the price so nobody misses it",
+      "expect": [
+        "punch-in-emphasis"
+      ],
+      "why": "Fast zoom landing on a key number."
+    },
+    {
+      "id": "sl-18",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: the supplied pictures placed over the background with transparency kept",
+      "expect": [
+        "asset-stage-ffmpeg"
+      ],
+      "equivalent": [
+        "asset-stage-hyperframes"
+      ],
+      "why": "Uploaded pictures with alpha preserved."
+    },
+    {
+      "id": "sl-19",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: dissolve gently from the morning shot to the evening one",
+      "expect": [
+        "crossfade"
+      ],
+      "why": "Soft blend between calm moments."
+    },
+    {
+      "id": "sl-20",
+      "collection": "shot_recipes",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: one headline rises into place on a plain background",
+      "expect": [
+        "text-fade-up"
+      ],
+      "equivalent": [
+        "text-fade-up-hyperframes"
+      ],
+      "why": "Headline fading in while rising."
+    },
+    {
+      "id": "sl-21",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "first scene: open on the best-looking result, not on our name",
+      "expect": [
+        "hook-first-seconds"
+      ],
+      "why": "Opening on the result rather than a logo."
+    },
+    {
+      "id": "sl-22",
+      "collection": "ad_playbooks",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "last scene: one button-style instruction shown long enough to read",
+      "expect": [
+        "single-clear-cta"
+      ],
+      "why": "A single readable action at the end."
+    },
+    {
+      "id": "sl-23",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene transition: the second shot continues the same arm movement as the first",
+      "expect": [
+        "cut-on-motion"
+      ],
+      "why": "Continuing a movement across the cut."
+    },
+    {
+      "id": "sl-24",
+      "collection": "directing_principles",
+      "kind": "retrieval",
+      "tags": [
+        "scene_level"
+      ],
+      "query": "scene: subtitles run along the very bottom edge of a vertical video",
+      "expect": [
+        "text-legibility"
+      ],
+      "why": "Safe-area and legibility for on-screen text."
+    },
+    {
+      "id": "ngo-01",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "recipe for chocolate chip cookies",
+      "expect": [],
+      "why": "Nothing in the video-direction corpus is about baking."
+    },
+    {
+      "id": "ngo-02",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "current exchange rate of the euro",
+      "expect": [],
+      "why": "Not about directing."
+    },
+    {
+      "id": "ngo-03",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "how to train a neural network for segmentation",
+      "expect": [],
+      "why": "Not about advertising."
+    },
+    {
+      "id": "ngo-04",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "weather forecast for tomorrow in Lisbon",
+      "expect": [],
+      "why": "No weather content exists."
+    },
+    {
+      "id": "ngo-05",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "tax filing deadline for freelancers",
+      "expect": [],
+      "why": "No tax content exists."
+    },
+    {
+      "id": "ngo-06",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "how many calories are in a banana",
+      "expect": [],
+      "why": "No nutrition content exists."
+    },
+    {
+      "id": "ngo-07",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "best hiking boots for winter",
+      "expect": [],
+      "why": "No footwear content exists."
+    },
+    {
+      "id": "ngo-08",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "football world cup winners list",
+      "expect": [],
+      "why": "No sport content exists."
+    },
+    {
+      "id": "ngo-09",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "install a database server on linux",
+      "expect": [],
+      "why": "No server administration content exists."
+    },
+    {
+      "id": "ngo-10",
+      "collection": "ad_playbooks",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "quantum computing error correction",
+      "expect": [],
+      "why": "No physics content exists."
+    },
+    {
+      "id": "ngo-11",
+      "collection": "shot_recipes",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "ancient roman aqueduct construction",
+      "expect": [],
+      "why": "No history content exists."
+    },
+    {
+      "id": "ngo-12",
+      "collection": "directing_principles",
+      "kind": "negative",
+      "tags": [
+        "negative",
+        "off_topic"
+      ],
+      "query": "wedding venue seating chart",
+      "expect": [],
+      "why": "No event planning content exists."
     }
   ]
 }

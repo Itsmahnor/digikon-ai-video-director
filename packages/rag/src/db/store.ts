@@ -10,6 +10,9 @@ export interface EmbeddingRow { template_id: string; kind: EmbeddingKind; model:
 export interface ModelCallRow { film_id: string | null; provider: string; model: string; name: string; input_tokens: number; output_tokens: number; cost_usd: number; attempts: number; outcome: "ok" | "error" | "budget_stop"; error_code: string | null; duration_ms: number }
 export interface RetrievalLogRow { film_id: string | null; query: string; collection: string | null; hits: unknown[] }
 export interface Neighbour { template_id: string; score: number }
+export interface TemplateUsageRow { template_id: string; film_id: string | null; scene_id: string | null; outcome: unknown }
+/** Template use counts, overall and in one film (the shape rerank.ts reads). */
+export interface UsageCounts { total: Map<string, number>; in_film: Map<string, number> }
 
 export interface DataStore {
   upsertTemplate(row: TemplateRow): Promise<void>;
@@ -39,6 +42,9 @@ export class MemoryDataStore implements DataStore {
   private embeddings = new Map<string, EmbeddingRow>();
   private calls: ModelCallRow[] = [];
   private retrievals: RetrievalLogRow[] = [];
+  private uses: TemplateUsageRow[] = [];
+  async logTemplateUsage(row: TemplateUsageRow) { if (!this.templates.has(row.template_id)) throw new Error(`no template ${row.template_id}`); this.uses.push(structuredClone(row)); }
+  async usage(filmId?: string): Promise<UsageCounts> { return countUses(this.uses, filmId); }
   async upsertTemplate(row: TemplateRow) { this.templates.set(row.id, structuredClone(row)); }
   async getTemplate(id: string) { const t = this.templates.get(id); return t ? structuredClone(t) : null; }
   async listTemplates(f: { family?: string; status?: TemplateRow["status"] } = {}) {
@@ -65,10 +71,24 @@ export interface SqlClient {
   end(): Promise<void>;
 }
 
+function countUses(rows: readonly TemplateUsageRow[], filmId?: string): UsageCounts {
+  const total = new Map<string, number>(), in_film = new Map<string, number>();
+  for (const u of rows) {
+    total.set(u.template_id, (total.get(u.template_id) ?? 0) + 1);
+    if (filmId !== undefined && u.film_id === filmId) in_film.set(u.template_id, (in_film.get(u.template_id) ?? 0) + 1);
+  }
+  return { total, in_film };
+}
+
 const vec = (v: readonly number[]): string => `[${v.join(",")}]`;
 
 export class PgDataStore implements DataStore {
   constructor(private readonly sql: SqlClient) {}
+  async logTemplateUsage(u: TemplateUsageRow) { await this.sql.query("INSERT INTO template_usage (template_id, film_id, scene_id, outcome) VALUES ($1,$2,$3,$4::jsonb)", [u.template_id, u.film_id, u.scene_id, JSON.stringify(u.outcome ?? {})]); }
+  async usage(filmId?: string): Promise<UsageCounts> {
+    const r = await this.sql.query("SELECT template_id, film_id FROM template_usage");
+    return countUses(r.rows.map((x) => ({ template_id: String(x["template_id"]), film_id: (x["film_id"] as string | null) ?? null, scene_id: null, outcome: null })), filmId);
+  }
   async upsertTemplate(t: TemplateRow) {
     await this.sql.query(
       `INSERT INTO templates (id, category_id, title, family, variant_of, archetype, tags, status, body, content_hash) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)
@@ -137,9 +157,10 @@ export async function connectPgSingle(connectionString: string): Promise<SqlClie
   return c;
 }
 
-/** DATABASE_URL set â†’ Postgres; otherwise the in-memory store. */
+/** DATABASE_URL set Ã¢â€ â€™ Postgres; otherwise the in-memory store. */
 export async function openStore(env: Record<string, string | undefined> = process.env): Promise<DataStore> {
   const url = env["DATABASE_URL"];
   return url ? connectPg(url) : new MemoryDataStore();
 }
+
 

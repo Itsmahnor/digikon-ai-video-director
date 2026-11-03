@@ -50,6 +50,8 @@ export interface RetrieveFilter {
   energy?: Energy;
   /** Media types present in the target scene. Empty array means a graphics-only scene. */
   media?: string[];
+  /** Hybrid retrieval only: the film being directed. What this film has already used is ranked lower. */
+  film_id?: string;
   /** Include draft recipes. Development only. */
   include_draft?: boolean;
   /** Recipes only: keep only those with a working, validated template. Recipes whose state is unknown are dropped when this is set. */
@@ -80,3 +82,4 @@ export interface Retriever {
   /** Fetch one document by id, applying the same eligibility rules. Used to pin policy notes that must always be shown. */
   get(id: string, collection: Collection, filter?: RetrieveFilter): Promise<Doc | null>;
 }
+

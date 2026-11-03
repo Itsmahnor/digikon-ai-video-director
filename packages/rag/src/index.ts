@@ -4,3 +4,7 @@ export * from "./docs.js";
 export * from "./scopes.js";
 export * from "./db/store.js";
 export * from "./db/migrate.js";
+export * from "./embeddings.js";
+export * from "./rerank.js";
+export * from "./hybrid.js";
+export * from "./templates.js";

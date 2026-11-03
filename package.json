@@ -19,6 +19,7 @@
     "capabilities:visual": "tsx scripts/validate-visual-capabilities.mts",
     "eval:live": "tsx packages/evals/src/cli.ts --live",
     "eval:retrieval": "tsx packages/evals/src/retrieval-cli.ts",
+    "eval:hybrid": "tsx packages/evals/src/hybrid-cli.ts",
     "console:demo": "tsx apps/console/src/server.ts --demo",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -26,7 +27,8 @@
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:migrate": "tsx scripts/db.mts migrate",
-    "db:health": "tsx scripts/db.mts health"
+    "db:health": "tsx scripts/db.mts health",
+    "templates": "tsx scripts/templates.mts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
@@ -35,4 +37,5 @@
     "vitest": "^2.1.0"
   }
 }
+
 
