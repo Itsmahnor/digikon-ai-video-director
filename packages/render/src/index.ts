@@ -40,3 +40,4 @@ export * from "./selection-integrity.js";
 export * from "./production-gate.js";
 export * from "./registry-cache.js";
 export * from "./fingerprint.js";
+export * from "./scene-graph/index.js";

@@ -1,4 +1,4 @@
-export * from "./visual.js";
+﻿export * from "./visual.js";
 export * from "./visual-systems.js";
 export * from "./assets.js";
 export * from "./schemas.js";
@@ -16,3 +16,5 @@ export * from "./capability.js";
 export * from "./capability-query.js";
 export * from "./production.js";
 export * from "./templates.js";
+export { SCENE_GRAPH_V2, ELEMENT_KINDS, NAMED_EASINGS, ANIMATABLE, SceneGraphV2, sceneGraphEnabled, Element as SgElement, Easing as SgEasing, Track as SgTrack, Timeline as SgTimeline, Stagger as SgStagger, Key as SgKey, CameraRig as SgCameraRig, TextProps as SgTextProps, ShapeProps as SgShapeProps, MediaProps as SgMediaProps, MaskProps as SgMaskProps, ChartProps as SgChartProps, CursorProps as SgCursorProps, GroupProps as SgGroupProps } from "./scene-graph.js";
+export type { ElementKind, Animatable } from "./scene-graph.js";
