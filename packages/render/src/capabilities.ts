@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFile
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { z } from "zod";
 import { EditorOperation, RenderSettings, type Recipe, type RenderRecord, type Renderer } from "@digikon/contracts";
@@ -642,6 +643,33 @@ export async function learnCapability(template: string, opts: LearnOptions): Pro
   }
 }
 
+/** A fingerprint of the code that builds and checks an FFmpeg xfade transition. */
+export function xfadeCodeHash(): string {
+  try {
+    const h = createHash("sha256");
+    for (const f of ["assemble.ts", "ffmpeg.ts", "transition-checks.ts"]) h.update(f).update(readFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url))));
+    return h.digest("hex").slice(0, 16);
+  } catch { return "unknown"; }
+}
+let ffmpegVersionCache: string | null | undefined;
+const currentFfmpegVersion = (): string | null => {
+  if (ffmpegVersionCache === undefined) { try { ffmpegVersionCache = dependencyVersion("ffmpeg"); } catch { ffmpegVersionCache = null; } }
+  return ffmpegVersionCache;
+};
+/**
+ * Why an xfade record no longer describes what would run: the xfade code changed, or FFmpeg was upgraded or replaced. A record written before the code hash was
+ * recorded is judged by its FFmpeg version alone (it is not discarded outright, so existing evidence keeps working until the next validation).
+ */
+export function xfadeStaleness(r: CapabilityRecord, now: { code?: string; ffmpeg?: string | null } = {}): string | null {
+  const recordedCode = /xfade-code ([0-9a-f]{16}|unknown)/.exec(r.validated?.browser ?? "")?.[1];
+  const code = now.code ?? xfadeCodeHash();
+  if (recordedCode && recordedCode !== code) return `the xfade code changed after it was validated (the evidence is for ${recordedCode}, the code is now ${code}); it must be validated again`;
+  const recordedFfmpeg = r.validated?.ffmpeg_version;
+  const ffmpeg = now.ffmpeg === undefined ? currentFfmpegVersion() : now.ffmpeg;
+  if (recordedFfmpeg && ffmpeg && recordedFfmpeg !== ffmpeg) return `FFmpeg changed after it was validated (the evidence is for "${recordedFfmpeg}", it is now "${ffmpeg}"); it must be validated again`;
+  return null;
+}
+
 /** The FFmpeg xfade transition family: needs the transitions in the spec to exist in the local FFmpeg; validated on a synthetic two-scene film. */
 registerFamily("xfade_transition", {
   unavailable: (e) => {
@@ -652,7 +680,8 @@ registerFamily("xfade_transition", {
     const missing = needed.filter((n) => !xfadeCache!.includes(n));
     return !needed.length || missing.length ? `the local FFmpeg does not have the xfade transition${missing.length === 1 ? "" : "s"} ${missing.join(", ") || "(none named)"} that ${e.engine} needs` : null;
   },
-  versions: async (o) => ({ ffmpeg_version: dependencyVersion(o.ffmpegPath ?? "ffmpeg"), browser: null, needs: [] }),
+  versions: async (o) => ({ ffmpeg_version: dependencyVersion(o.ffmpegPath ?? "ffmpeg"), browser: `xfade-code ${xfadeCodeHash()}`, needs: [] }),
+  stale: (r) => xfadeStaleness(r),
   variants: (e) => (e.direction_map ? Object.keys(e.direction_map) : [null]),
   validate: (e, v, o, w) => validateVariant(e, v, o, w),
 });

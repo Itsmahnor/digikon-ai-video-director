@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+﻿import { execFileSync, spawn } from "node:child_process";
 import { closeSync, existsSync, openSync, readSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -61,6 +61,22 @@ export function inspectBrowser(path: string): BrowserInspection {
   }
   if (head[0] === 0x7f && head.toString("latin1", 1, 4) === "ELF") return head[4] === 2 ? { path, bits: "64-bit", compatible: true, reason: "a 64-bit build" } : bad("32-bit");
   return { path, bits: "unknown", compatible: true, reason: "its word size cannot be read from the file (not Windows or Linux), so it is accepted without a check" };
+}
+
+/** The installed version of a browser executable ("unknown" when it cannot be read). Nothing is launched on Windows: the file's version resource is read instead. */
+const browserVersions = new Map<string, string>();
+export function browserVersion(path: string | null | undefined): string {
+  if (!path) return "unknown";
+  const known = browserVersions.get(path);
+  if (known) return known;
+  let v = "unknown";
+  try {
+    if (process.platform === "win32") {
+      v = execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", "(Get-Item -LiteralPath $env:DIGIKON_BROWSER_PATH).VersionInfo.ProductVersion"], { encoding: "utf8", windowsHide: true, timeout: 15_000, env: { ...process.env, DIGIKON_BROWSER_PATH: path } }).trim() || "unknown";
+    } else v = execFileSync(path, ["--version"], { encoding: "utf8", windowsHide: true, timeout: 15_000 }).trim() || "unknown";
+  } catch { /* version stays unknown */ }
+  browserVersions.set(path, v);
+  return v;
 }
 
 function remotionCandidates(explicit?: string | null): string[] {
@@ -146,3 +162,4 @@ export function runProcess(file: string, args: readonly string[], opts: { cwd: s
     });
   });
 }
+

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+﻿import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -11,6 +11,7 @@ import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
 import { EXAMPLE_ART_DIRECTION, EXAMPLE_VISUALS } from "./composition-examples.js";
 import { verifyCompositionScenes } from "./composition-verify.js";
 import { execFileSync } from "node:child_process";
+import { browserVersion, selectRemotionBrowser } from "./browser.js";
 import type { RenderJob } from "./adapter.js";
 
 /**
@@ -45,13 +46,33 @@ async function probeRender(path: string): Promise<{ width: number; height: numbe
   return { width: j.streams[0]!.width, height: j.streams[0]!.height, duration_s: Number(j.format.duration), bytes: b.length, sha256: createHash("sha256").update(b).digest("hex") };
 }
 
+/** The 16-hex seal of records written before the canonical seal existed. Still accepted when a record is read; never written. */
 const sha = (v: unknown) => createHash("sha256").update(JSON.stringify(v)).digest("hex").slice(0, 16);
+/** Key order must not change a seal: objects are written with their keys sorted. */
+const canonical = (v: unknown): string => JSON.stringify(v, (_k, x: unknown) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : x));
+export const canonicalSeal = (v: unknown): string => createHash("sha256").update(canonical(v)).digest("hex");
+/** True when `hash` seals `body`: a full 64-hex canonical seal, or (during migration) a legacy 16-hex one. */
+export function verifySeal(body: unknown, hash: string): boolean {
+  if (/^[0-9a-f]{64}$/.test(hash)) return canonicalSeal(body) === hash;
+  if (/^[0-9a-f]{16}$/.test(hash)) return sha(body) === hash;
+  return false;
+}
+const ffmpegVersion = (): string => { try { return execFileSync("ffmpeg", ["-version"], { encoding: "utf8", windowsHide: true, timeout: 30_000 }).split(/\r?\n/)[0]!.trim() || "unknown"; } catch { return "unknown"; } }
+/** What the evidence depends on, read from this machine. */
+type ToolVersions = { remotion: string; remotion_renderer: string; ffmpeg: string; chrome: string };
+let versionsCache: ToolVersions | undefined;
+/** Read once per process: the tools do not change under a running console. */
+export const visualToolVersions = (): ToolVersions => (versionsCache ??= { remotion: pkgVersion("remotion"), remotion_renderer: pkgVersion("@remotion/renderer"), ffmpeg: ffmpegVersion(), chrome: browserVersion(selectRemotionBrowser().path) });
 
 const Validation = z.object({
   at: z.string().datetime(),
   fingerprint: z.string(),
   remotion: z.string(),
   browser: z.string(),
+  /** Tool versions at validation. Absent in records written before they were recorded. */
+  remotion_renderer: z.string().optional(),
+  ffmpeg: z.string().optional(),
+  chrome: z.string().optional(),
   /** What was rendered: the example spec and text, the art direction, and the frame size. */
   inputs: z.array(z.object({ width: z.number().int(), height: z.number().int(), fps: z.number(), duration_s: z.number(), spec_hash: z.string(), art_direction_hash: z.string(), overlay_text: z.string().nullable() })).min(1),
   renders: z.array(z.object({ width: z.number().int(), height: z.number().int(), sha256: z.string(), bytes: z.number().int(), frames: z.number().int(), film_scene: z.string() })),
@@ -80,7 +101,7 @@ export const VisualCapabilityRecord = z.object({
 });
 export type VisualCapabilityRecord = z.infer<typeof VisualCapabilityRecord>;
 
-const seal = (r: Omit<VisualCapabilityRecord, "record_hash">): VisualCapabilityRecord => VisualCapabilityRecord.parse({ ...r, record_hash: sha(r) });
+const seal = (r: Omit<VisualCapabilityRecord, "record_hash">): VisualCapabilityRecord => VisualCapabilityRecord.parse({ ...r, record_hash: canonicalSeal(r) });
 export const visualDir = (root: string) => join(root, "visual");
 const fileOf = (root: string, block: string) => join(visualDir(root), `${block}.json`);
 
@@ -92,17 +113,28 @@ export interface VisualCapabilityState {
   reason: string;
 }
 
+/** Why the tools have changed since validation (a different Remotion, Remotion renderer, FFmpeg or Chrome), or null. A version that was not recorded, or cannot be read now, is not compared. */
+export function toolDrift(v: Pick<z.infer<typeof Validation>, "remotion" | "remotion_renderer" | "ffmpeg" | "chrome">, now: { remotion: string; remotion_renderer: string; ffmpeg: string; chrome: string }): string | null {
+  const changed: string[] = [];
+  const cmp = (name: string, rec: string | undefined, cur: string) => { if (rec && rec !== "unknown" && cur !== "unknown" && rec !== cur) changed.push(`${name} ${rec} -> ${cur}`); };
+  cmp("remotion", v.remotion, now.remotion); cmp("@remotion/renderer", v.remotion_renderer, now.remotion_renderer); cmp("ffmpeg", v.ffmpeg, now.ffmpeg); cmp("chrome", v.chrome, now.chrome);
+  return changed.length ? `the tools changed after it was validated (${changed.join("; ")}); validate it again` : null;
+}
+
 export function loadVisualCapabilities(root: string | null | undefined): VisualCapabilityState[] {
   const now = compositionFingerprint();
+  const tools = visualToolVersions();
   return DRAWN_BLOCKS.map((block): VisualCapabilityState => {
     const f = root ? fileOf(root, block) : null;
     if (!f || !existsSync(f)) return { block, record: null, usable: false, reason: "no validation record exists for this block" };
     try {
       const parsed = VisualCapabilityRecord.parse(JSON.parse(readFileSync(f, "utf8")));
       const { record_hash, ...rest } = parsed;
-      if (sha(rest) !== record_hash) return { block, record: parsed, usable: false, reason: "the record was changed after it was written (hash mismatch)" };
+      if (!verifySeal(rest, record_hash)) return { block, record: parsed, usable: false, reason: "the record was changed after it was written (hash mismatch)" };
       if (parsed.status !== "validated" || !parsed.validated) return { block, record: parsed, usable: false, reason: `the last validation failed: ${parsed.failure ?? "no reason recorded"}` };
       if (parsed.validated.fingerprint !== now) return { block, record: parsed, usable: false, reason: `the drawing code changed after it was validated (evidence is for ${parsed.validated.fingerprint}, the code is now ${now}); validate it again` };
+      const drift = toolDrift(parsed.validated, tools);
+      if (drift) return { block, record: parsed, usable: false, reason: drift };
       return { block, record: parsed, usable: true, reason: `validated ${parsed.validated.at.slice(0, 10)} on ${parsed.validated.inputs.map((i) => `${i.width}x${i.height}`).join(" and ")}` };
     } catch (e) { return { block, record: null, usable: false, reason: `the record cannot be read: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}` }; }
   });
@@ -164,12 +196,13 @@ export async function validateVisualCapabilities(opts: ValidateOptions): Promise
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 
   const browser = "chrome via remotion";
+  const tv = visualToolVersions();
   const results: VisualCapabilityState[] = [];
   for (const b of blocks) {
     const s = per.get(b)!;
     const old = existsSync(fileOf(opts.root, b)) ? (() => { try { return VisualCapabilityRecord.parse(JSON.parse(readFileSync(fileOf(opts.root, b), "utf8"))); } catch { return null; } })() : null;
     const ok = !s.failure && s.checks.length === sizes.length;
-    const validated = ok ? { at: new Date().toISOString(), fingerprint: fp, remotion: pkgVersion("remotion"), browser, inputs: s.inputs, renders: s.renders, checks: s.checks, measures: s.measures } : null;
+    const validated = ok ? { at: new Date().toISOString(), fingerprint: fp, ...tv, browser, inputs: s.inputs, renders: s.renders, checks: s.checks, measures: s.measures } : null;
     const history = [...(old?.history ?? []), ...(old?.validated && old.validated.fingerprint !== fp ? [old.validated] : [])].slice(-5);
     const ex = EXAMPLE_VISUALS[b];
     const rec = seal({
@@ -186,3 +219,6 @@ export async function validateVisualCapabilities(opts: ValidateOptions): Promise
   }
   return results;
 }
+
+
+

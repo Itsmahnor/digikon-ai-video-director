@@ -53,12 +53,18 @@ export function loadKnowledge(dir: string): Doc[] {
 }
 
 /** One recipe is one chunk. The parameter table is shown after selection, so the indexed text is intent-focused. */
-export function recipeDocs(recipes: Recipe[], opts: { implemented?: ReadonlySet<string> } = {}): Doc[] {
+export function recipeDocs(recipes: Recipe[], opts: { implemented?: ReadonlySet<string>; validated?: ReadonlySet<string> } = {}): Doc[] {
+  // "implemented" means an executable implementation is registered, not that a real render proved it; only the optional `validated` set earns the stronger wording.
+  const wording = (id: string): string => {
+    if (!opts.implemented) return "";
+    if (!opts.implemented.has(id)) return " Working template: not yet, it cannot be rendered today.";
+    return opts.validated?.has(id) ? " Working template: yes, validated by a real render." : " Working template: yes, an implementation is registered.";
+  };
   return recipes.map((r) => ({
     id: r.recipe_id,
     collection: "shot_recipes" as const,
     title: r.title,
-    text: `${r.purpose} Used for: ${r.intents.join("; ")}. Type: ${r.type}. Energy: ${r.constraints.energy}.${opts.implemented ? (opts.implemented.has(r.recipe_id) ? " Working template: yes, validated by a real render." : " Working template: not yet, it cannot be rendered today.") : ""}`,
+    text: `${r.purpose} Used for: ${r.intents.join("; ")}. Type: ${r.type}. Energy: ${r.constraints.energy}.${wording(r.recipe_id)}`,
     source: `recipe ${r.recipe_id}@${r.version} (${r.source.origin}, ${r.source.license})`,
     metadata: {
       recipe_type: r.type,

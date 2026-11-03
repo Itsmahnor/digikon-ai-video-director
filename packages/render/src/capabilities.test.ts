@@ -436,7 +436,11 @@ console.log(JSON.stringify({ usable: l.usable.map((r) => [r.capability_id, r.rec
     const learned = [...Object.keys(FFMPEG_TEMPLATES), ...loadCapabilityRegistry(capRoot, { recipes: library }).usable.map((r) => r.template)];
     const doc = asDoc(implementedRecipeIds(recipes, learned));
     expect(doc.metadata.recipe_implemented).toBe(true);
-    expect(doc.text).toContain("Working template: yes, validated by a real render");
+    // "implemented" alone only says an implementation is registered; the stronger wording needs the validated set
+    expect(doc.text).toContain("Working template: yes, an implementation is registered.");
+    expect(doc.text).not.toContain("validated by a real render");
+    const proven = recipeDocs(recipes, { implemented: implementedRecipeIds(recipes, learned), validated: implementedRecipeIds(recipes, learned) }).find((d) => d.id === "dip-to-black")!;
+    expect(proven.text).toContain("Working template: yes, validated by a real render");
     const q = { text: "fade to black before the final scene", collection: "shot_recipes" as const, k: 3, filter: { include_draft: true } };
     const score = async (impl: Set<string>) => (await new KeywordRetriever(recipeDocs(recipes, { implemented: impl })).retrieve(q)).find((h) => h.doc.id === "dip-to-black")!.score;
     expect(await score(implementedRecipeIds(recipes, learned))).toBeGreaterThan(await score(builtIn));
