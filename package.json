@@ -28,14 +28,14 @@
     "db:down": "docker compose down",
     "db:migrate": "tsx scripts/db.mts migrate",
     "db:health": "tsx scripts/db.mts health",
-    "templates": "tsx scripts/templates.mts"
+    "templates": "tsx scripts/templates.mts",
+    "new-template": "tsx scripts/new-template.mts"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.15",
     "@types/node": "^26.6.5",
     "tsx": "^4.23.15",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }
 }
-
-
