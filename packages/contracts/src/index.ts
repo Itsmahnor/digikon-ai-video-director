@@ -1,4 +1,4 @@
-﻿export * from "./visual.js";
+export * from "./visual.js";
 export * from "./visual-systems.js";
 export * from "./assets.js";
 export * from "./schemas.js";
@@ -20,3 +20,5 @@ export { SCENE_GRAPH_V2, ELEMENT_KINDS, NAMED_EASINGS, ANIMATABLE, SceneGraphV2,
 export type { ElementKind, Animatable } from "./scene-graph.js";
 export * from "./template-record.js";
 export * from "./skill-record.js";
+export * from "./kit.js";
+
