@@ -24,6 +24,11 @@ export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
   if (d.collection !== "shot_recipes" && m.status === "draft" && !f.include_draft) return false;
   if (f.min_grade && (!m.grade || m.grade > f.min_grade)) return false;
   switch (d.collection) {
+    case "skills":
+      if (f.category && m.skill_category !== f.category) return false;
+      if (f.platform && !(m.skill_platforms ?? []).includes(f.platform)) return false;
+      if (f.skill_grade && (m.skill_grade ?? "").toLowerCase() !== f.skill_grade.toLowerCase()) return false;
+      return true;
     case "platform_specs":
       return m.verified === true;
     case "brand_product_facts":

@@ -7,6 +7,7 @@ export const COLLECTIONS = [
   "shot_recipes",
   "brand_product_facts",
   "approved_examples",
+  "skills",
 ] as const;
 export type Collection = (typeof COLLECTIONS)[number];
 
@@ -36,6 +37,12 @@ export interface Doc {
     /** Present only when the caller knew which recipes a real render has validated; when present it, not recipe_implemented, decides the ranking boost. */
     recipe_validated?: boolean;
     topics?: string[];
+    /** skills only. */
+    skill_category?: string;
+    skill_funnel_stage?: string;
+    skill_platforms?: string[];
+    /** skills only: the library grade as stored (free text, compared case-insensitively). */
+    skill_grade?: string;
     grade?: "A" | "B" | "C";
     /** Knowledge notes only. A `draft` note is never retrieved unless `include_draft` is set. Notes without a status keep today's behaviour. */
     status?: "draft" | "reviewed";
@@ -52,6 +59,12 @@ export interface RetrieveFilter {
   media?: string[];
   /** Hybrid retrieval only: the film being directed. What this film has already used is ranked lower. */
   film_id?: string;
+  /** skills only: keep only this skill category. */
+  category?: string;
+  /** skills only: keep only skills for this platform. */
+  platform?: string;
+  /** skills only: keep only skills of this grade. */
+  skill_grade?: string;
   /** Include draft recipes. Development only. */
   include_draft?: boolean;
   /** Recipes only: keep only those with a working, validated template. Recipes whose state is unknown are dropped when this is set. */

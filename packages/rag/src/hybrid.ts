@@ -21,6 +21,11 @@ export class MemoryVectorIndex implements VectorIndex {
   }
 }
 
+/** Searches the skill embeddings in a DataStore, for one embedding model. */
+export function skillVectorIndex(store: { nearestSkills(q: { model: string; model_version: string; vector: readonly number[]; k: number }): Promise<{ skill_id: string; score: number }[]> }, embedder: Embedder): VectorIndex {
+  return { search: async (vector, k) => (await store.nearestSkills({ model: embedder.model, model_version: embedder.version, vector, k })).map((n) => ({ id: n.skill_id, score: n.score })) };
+}
+
 /** Searches the template embeddings in a DataStore (Memory or Postgres + pgvector), for one embedding model. */
 export function storeVectorIndex(store: { nearest(q: { kind: "text" | "look"; model: string; model_version: string; vector: readonly number[]; k: number }): Promise<{ template_id: string; score: number }[]> }, embedder: Embedder): VectorIndex {
   return { search: async (vector, k) => (await store.nearest({ kind: "text", model: embedder.model, model_version: embedder.version, vector, k })).map((n) => ({ id: n.template_id, score: n.score })) };

@@ -5,6 +5,7 @@ import { SkillRecord } from "@digikon/contracts";
 import { contentHash } from "./templates.js";
 import { cosine, type DataStore, type SkillRow, type SkillSourceRow } from "./db/store.js";
 import type { Embedder } from "./embeddings.js";
+import type { Doc } from "./types.js";
 
 /**
  * Importing skills from a folder (or a local clone of a repo): read -> licence gate -> normalise -> near-duplicate removal -> embed -> store.
@@ -61,6 +62,16 @@ export function parseSkillFile(text: string): ParsedSkillFile | null {
     if (kv) meta[kv[1]!] = kv[1] === "platform" ? kv[2]!.split(",").map((s) => s.trim()).filter(Boolean) : kv[2]!.trim();
   }
   return { meta, body: m[2]!.trim() };
+}
+
+/** A stored skill as a retrievable document. Retired skills are not retrievable; approved ones count as reviewed. */
+export function skillDoc(row: SkillRow): Doc | null {
+  if (row.status === "retired") return null;
+  return {
+    id: row.id, collection: "skills", title: row.title, text: `${row.title}. ${typeof row.body === "string" ? row.body : JSON.stringify(row.body)}`,
+    source: `skill ${row.id} (source ${row.source_id})`,
+    metadata: { status: row.status === "draft" ? "draft" : "reviewed", skill_category: row.category, skill_funnel_stage: row.funnel_stage, skill_platforms: row.platform, skill_grade: row.grade, topics: [row.category, row.funnel_stage] },
+  };
 }
 
 export interface ImportResult {

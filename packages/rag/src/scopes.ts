@@ -32,12 +32,12 @@ const EDITOR_TOPICS = [
 export const AGENT_SCOPES: Record<Agent, AgentScope> = {
   director: {
     agent: "director",
-    collections: ["directing_principles", "ad_playbooks", "platform_specs", "shot_recipes", "brand_product_facts", "approved_examples"],
+    collections: ["directing_principles", "ad_playbooks", "platform_specs", "shot_recipes", "brand_product_facts", "approved_examples", "skills"],
     topics: DIRECTOR_TOPICS,
   },
   editor: {
     agent: "editor",
-    collections: ["directing_principles", "shot_recipes", "platform_specs", "approved_examples"],
+    collections: ["directing_principles", "shot_recipes", "platform_specs", "approved_examples", "skills"],
     topics: EDITOR_TOPICS,
   },
 };
