@@ -39,6 +39,8 @@ export interface AppContext {
   whisper: () => WhisperStatus;
   skills: SkillLibrary;
   retriever: Retriever;
+  /** Let draft skills reach the Director and Editor (SKILLS_INCLUDE_DRAFT=1). Off by default, because every shipped skill is a draft. Only affects which skills may be read. */
+  skillsIncludeDraft?: boolean;
   /**
    * Builds a retriever whose recipe documents are labelled with which recipes can be carried out. When set (with `capabilitiesDir`), the labels come from the capability
    * registry as it is now, and the retriever is rebuilt whenever the registry snapshot hash changes, instead of using a list fixed at start-up.
@@ -575,7 +577,7 @@ export function createApp(ctx: AppContext) {
     s.facts = body.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "entered in the console" }));
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     const project = request.project;
@@ -670,7 +672,7 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);
@@ -914,7 +916,7 @@ export function createApp(ctx: AppContext) {
     const s = session(c.req.param("id"));
     if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
     const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
-    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
     if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
     saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
     return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });

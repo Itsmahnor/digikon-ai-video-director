@@ -9,3 +9,4 @@ export * from "./rerank.js";
 export * from "./hybrid.js";
 export * from "./templates.js";
 export * from "./skills.js";
+export * from "./db-retriever.js";

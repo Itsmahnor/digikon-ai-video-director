@@ -31,6 +31,7 @@
     "db:health": "tsx scripts/db.mts health",
     "templates": "tsx scripts/templates.mts",
     "skills": "tsx scripts/skills.mts",
+    "skills:demo": "tsx scripts/skills-demo.mts",
     "new-template": "tsx scripts/new-template.mts"
   },
   "devDependencies": {

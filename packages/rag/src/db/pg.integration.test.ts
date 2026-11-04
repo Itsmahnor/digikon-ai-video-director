@@ -3,6 +3,10 @@ import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { connectPgSingle, PgDataStore, type SqlClient, type TemplateRow } from "./store.js";
 import { readMigrations, runMigrations } from "./migrate.js";
+import { HashEmbedder } from "../embeddings.js";
+import { createDbBackedRetriever } from "../db-retriever.js";
+import { importSkills, skillDoc } from "../skills.js";
+import { ScopedRetriever } from "../scopes.js";
 
 /**
  * Runs against Postgres with pgvector, in a throwaway schema. With DATABASE_URL set it uses that server (the real thing: docker compose up postgres).
@@ -127,4 +131,25 @@ describe.skipIf(!available)("Postgres + pgvector integration", () => {
     expect((await store.nearestSkills({ model: "m", model_version: "1", vector: [1, 0, 0], k: 2 })).map((h) => h.skill_id)).toEqual(["k1", "k2"]);
     await store.upsertLibraryAsset({ id: "inter", kind: "font", file: "Inter.ttf", licence: "OFL-1.1", source: "rsms.me/inter" });
     expect((await store.listLibraryAssets("font")).map((a) => a.id)).toEqual(["inter"]);
+  });
+  it("the shipped skills import into the database and the DB-backed retriever returns them by category and agent scope", async () => {
+    const root = resolve(import.meta.dirname, "..", "..", "..", "..", "examples", "skills");
+    const { readdirSync, existsSync } = await import("node:fs");
+    const emb = new HashEmbedder();
+    for (const d of readdirSync(root)) { const dir = resolve(root, d); if (existsSync(resolve(dir, "skills-source.json"))) await importSkills(store, emb, dir, { today: "2026-11-04" }); }
+    const rows = await store.listSkills();
+    expect(rows.length).toBeGreaterThanOrEqual(100);
+    const docs = rows.map(skillDoc).filter((x) => x !== null);
+    const build = await createDbBackedRetriever(store, emb, docs);
+    const retriever = build(docs);
+    const q = (agent: "director" | "editor", category: string, draft: boolean) =>
+      new ScopedRetriever(retriever, agent, { allowDraft: draft }).retrieve({ text: "how to open the video and structure the scenes", collection: "skills", k: 20, filter: { category, include_draft: draft } });
+    expect(await q("director", "saas", false)).toEqual([]); // every shipped skill is a draft, so none is returned unless drafts are allowed
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const d = await q("director", "saas", true);
+    expect(d.length).toBeGreaterThan(0);
+    for (const h of d) { const r = byId.get(h.doc.id)!; expect(["saas", "all"]).toContain(r.category); expect(r.scope).not.toBe("editor"); }
+    const e = await q("editor", "ecommerce", true);
+    expect(e.length).toBeGreaterThan(0);
+    for (const h of e) { const r = byId.get(h.doc.id)!; expect(["ecommerce", "all"]).toContain(r.category); expect(r.scope).not.toBe("director"); }
   });});
