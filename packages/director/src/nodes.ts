@@ -108,6 +108,8 @@ async function retrieve(deps: Deps, collection: Collection, text: string, k: num
  * Skills for this project's video category (plus the cross-cutting `all`), read through the Director scope: skills marked Editor-only never arrive here.
  * Empty when the retriever holds no skills or when only draft skills exist and drafts are not allowed. Retrieved text is reference data, never instructions.
  */
+/** The category the story follows: the one the user set, else the one of the chosen video type. Skill retrieval stays on the user's own setting only. */
+const storyCategory = (p: Pick<Project, "video_category" | "video_type">) => p.video_category ?? Object.values(CATEGORY_VIDEO_TYPES).flat().find((t) => t.id === p.video_type)?.category ?? null;
 export async function retrieveDirectorSkills(deps: Deps, project: Pick<Project, "video_category">, text: string, k = 3, maxTokens = 900): Promise<Hit[]> {
   const scoped = new ScopedRetriever(deps.retriever, "director", { allowDraft: !!deps.skillsIncludeDraft });
   return scoped.retrieve({ text, collection: "skills", k, max_tokens: maxTokens, filter: { category: project.video_category ?? "all", include_draft: !!deps.skillsIncludeDraft } });
@@ -247,7 +249,7 @@ export async function treatmentNode(deps: Deps, project: Project, facts: BrandFa
   const { shown, note } = await selectFacts(project, facts, q);
   const user = [
     section("Brief", `<brief>\n${project.brief}\n</brief>`),
-    section("Target", json({ objective: project.objective, audience: project.audience, platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: project.video_category ?? null, video_type: project.video_type ?? null })),
+    section("Target", json({ objective: project.objective, audience: project.audience, platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
       const allTypes = Object.values(CATEGORY_VIDEO_TYPES).flat();
       const match = allTypes.find((t) => t.id === project.video_type);
@@ -308,7 +310,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   const usable = blocks ? forSubject.filter((b) => blocks.some((r) => r.block === b)) : forSubject;
   const base = [
     section("Treatment", json({ ...treatment, claims: treatment.claims })),
-    section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: project.video_category ?? null, video_type: project.video_type ?? null })),
+    section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
       const allTypes = Object.values(CATEGORY_VIDEO_TYPES).flat();
       const match = allTypes.find((t) => t.id === project.video_type);
