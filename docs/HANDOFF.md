@@ -2,7 +2,7 @@
 
 Written so that a session with **zero context** can continue the work. Keep it current: update the status table and the "next steps" after every step or commit. Never put a secret in this file or anywhere in git.
 
-_Last updated for D2 (needs analysis), 2026-11-04._
+_Last updated after the real PostgreSQL install and the skills approval, 2026-11-04._
 
 ## 1. What this project is, and the rules that never loosen
 
@@ -21,7 +21,7 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 
 | Step | What | Status | Commit(s) |
 |---|---|---|---|
-| A1 | Database for real | **partly**: all database tests pass on PGlite (Postgres in WebAssembly + pgvector), **not on a Postgres server** | `ae91bd8` |
+| A1 | Database for real | **done on a real server**: native PostgreSQL 16.15 + pgvector 0.8.7 on localhost:5433; migrations 0001-0003 applied (idempotent), `pg.integration.test.ts` 7/7 on the server (and on PGlite), 117 skills imported (a repeat import changes nothing), console reads skills from Postgres, `npm run eval:skills:db` gives identical numbers to the file path | `ae91bd8` (PGlite), `333ece5` (server) |
 | A2 | Skills tables with licences (`0002_skills.sql`), `SkillRecord`, store methods | done | `04cf77b` |
 | A3 | Importer: licence gate (B0), normalise, near-duplicate removal, embed, store | done | `e313ea0`, `e2b1fd0` |
 | A4 | Skills retriever, scopes | done | `6969586` |
@@ -47,7 +47,7 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 ## 4. Approvals and decisions (with who said what)
 
 - Digikon approved: Docker install (their own message, 2026-11-04); skipping Docker when BIOS virtualization was off ("skip docker testing for now, implement with pgvector for now": PGlite); the push of this branch.
-- **Digikon's own messages (2026-11-04, 09:37 to 09:55 UTC) approved both of these, and the skills approval is done (commit below):** installing native PostgreSQL 16 + pgvector (no Docker); promoting the 111 `reviewed` skills to `approved`. A working session needs Digikon's own message in the thread for each before doing it. Real Claude runs: Digikon said **not now**.
+- **Digikon's own messages (2026-11-04, 09:37 to 09:55 UTC) approved both of these, and both are done:** native PostgreSQL 16 + pgvector (installed, section 5, `333ece5`) and the skills approval (111 `approved`, 6 skimmed-source skills stay `draft`, `78c6298`). Real Claude runs: Digikon said **not now**; `ANTHROPIC_API_KEY` is in `.env` but nothing may spend it.
 - Skill statuses: `draft` -> `reviewed` (by the checklist in `docs/SKILL_REVIEW.md`, run by the agent that wrote the skills) -> `approved` (a **human** only). 111 are `reviewed`, 6 skimmed-source skills stay `draft`: `registry-before-hand-building`, `style-sampling-proven-styles`, `slideshow-vs-rendered-video`, `reverse-any-video-rebuild-and-compare`, `media-use-assets-and-audio`, `promo-creation-mode-choice`.
 - `grade` is `C` for everything (nothing is benchmarked well enough for a better grade).
 - **Licence allow-list** (importer refuses anything else, and a source with no licence): MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, CC0-1.0, CC-BY-4.0 (needs an attribution line). `remotion-dev/skills` has no LICENSE file and is refused; Remotion itself has its own licence, so the 5 Remotion skills are originals with a licence warning line.
@@ -75,7 +75,7 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 
 - **Config lives in `.env`** at the repo root (copy `.env.example`; **never commit it or paste a value**). Names only: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `DATABASE_URL`, `SKILLS_INCLUDE_DRAFT`, `STORAGE_*`, `WHISPER_*`, `RECIPES_MODE`.
 - **Database**: with `DATABASE_URL` unset the store is in memory and `pg.integration.test.ts` runs on PGlite (it prints which backend ran). With `DATABASE_URL` set it runs on that server. Migrations are `db/migrations/0001..0003`; a migration that was applied and later edited is an error: add a new numbered file.
-- **Native Postgres (not installed yet):** once installed, record here the exact version, the port, the data directory and the database name (not the password). Intended: PostgreSQL 16 with a prebuilt pgvector, localhost only, non-default port, local password in `.env`.
+- **Native PostgreSQL (installed 2026-11-04):** `winget install PostgreSQL.PostgreSQL.16` (EnterpriseDB build **16.15**), installed under `D:\PostgreSQL\16`, data in `D:\PostgreSQL\16\data`, Windows service `postgresql-x64-16`, **port 5433, `listen_addresses = localhost`** (127.0.0.1 and ::1 only; `pg_hba.conf` is loopback with scram-sha-256). pgvector **0.8.7** was **built from the official source** (`github.com/pgvector/pgvector`, tag `v0.8.7`, cloned to `D:\pg-build\pgvector`, built with Visual Studio 2022 `nmake /F Makefile.win`, installed into the server directory), not a third-party binary. Database `digikon`, owner role `digikon`, extension `vector` created. Passwords are generated and live only in `.env` (`PG_SUPERUSER_PASSWORD`, `PG_APP_PASSWORD`, `DATABASE_URL`); **never print or commit them**. To use it: load `DATABASE_URL` from `.env` into the shell (`$env:DATABASE_URL = ...`), then `npm run db:migrate`, `npm run db:health`, `npm run skills -- import examples/skills`, `npm run eval:skills:db`; the console reads `DATABASE_URL` itself when it is in the environment. Restarting the service needs administrator rights.
 - Retrieval/eval models are local (`storage/models`, `Xenova/bge-small-en-v1.5`); nothing is downloaded at run time.
 
 ## 6. Rules of engagement
@@ -90,7 +90,7 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 ## 7. Next steps, in order
 
 1. **D3 story from the chosen type:** treatment and storyboard follow that category's skills. Done when golden briefs for three categories (`evals/golden-briefs.json`) produce different, category-appropriate stories and the Gate 1 tests are unchanged.
-2. **Real Postgres server** once Digikon directly approves the install: install, migrate 0001-0003, run `pg.integration.test.ts` with `DATABASE_URL`, `db:health`, import the skills into it, run the console and `eval:skills` against it, record versions here.
+2. **Real Postgres server: done** (section 5). What is still unproven there: a full Director run through the database-backed retriever with a real model (real Claude runs are off).
 3. **Phases E, F, G:** E1 to E7; then F1 to F3; G later (see `docs/PLAN_PHASES_D-G.md`). Check the plan text before starting each step.
 
 ## 8. Known gotchas
@@ -110,3 +110,8 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 ## 9. Where things are
 
 `packages/contracts` (schemas, `kit.ts`, `kit-completeness.ts`), `packages/director` (graph, nodes, editor agent), `packages/rag` (retrievers, skills importer, floor, DB-backed retriever), `packages/media` (assets, `website.ts`, `guideline.ts`), `packages/evals`, `apps/console` (server, routes, `kit-routes.ts`, `public/` UI incl. `wizard.js`), `examples/skills` (117 skills, one folder per source, `REVIEW.md`), `evals/` (benchmarks, baselines), `docs/` (`SKILLS.md`, `SKILL_REVIEW.md`, `PLAN_PHASES_A-C.md`, this file), `db/migrations`.
+
+- **Only one session may work in this folder at a time.** On 2026-11-04 two Claude sessions edited the same working tree: commits appeared that the other session did not make, and uncommitted edits were silently reverted. Check `git status` and `git log` before starting; commit only by explicit file path (never `git add -A` while another session is active); use a separate worktree for anything long (for example `git worktree add --detach D:\digikon-worktrees\verify <commit>`; node_modules must be copied without the `@digikon` junctions, which point at the main tree, and those junctions re-created inside the copy).
+- Two full-suite flakes under load, both pass alone: `apps/console/src/render.test.ts` ("needs a logo", timeout) and `apps/console/src/assets.test.ts` (120 s timeout, Windows temp-folder EPERM on cleanup).
+- The D1 video-type catalog (`packages/director/src/video-types.ts`) has example lines with invented figures ("get paid 4x faster", "5 seconds to prep salad"). They are shown to the user as reference examples, but they break the no-invented-statistics rule; rewrite them without numbers.
+- `handoff.ts` now falls back to version `1.0.0` for a skill id that is not in the SkillLibrary (video-type playbook ids are skills-collection ids, not SkillLibrary skills). That records a version that does not exist; prefer recording `null` or the skill's content hash.
