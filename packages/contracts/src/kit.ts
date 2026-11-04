@@ -68,7 +68,7 @@ export const ProjectKit = z.object({
     tone: field(z.string().max(300)),
   }).default(() => ({ colours: BLANK, fonts: BLANK, logo: BLANK, tone: BLANK }) as never),
   website: field(z.string().url().max(2000)),
-  /** The asset id of the uploaded brand guideline file. */
+  /** The stored file name of the uploaded brand guideline. */
   guideline: field(z.string().min(1)),
   assets: field(z.array(z.string().min(1)).max(40)),
   facts: field(z.array(KitFact).max(40)),

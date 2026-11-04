@@ -3,7 +3,8 @@ import { join } from "node:path";
 import type { Hono } from "hono";
 import { z } from "zod";
 import { KIT_FIELDS, KitFact, ProjectKit, VideoCategory, approvedFacts, completeness, confirmField, emptyKit, getField, provide, skip, unconfirmed, unset, type Asset, type KitField } from "@digikon/contracts";
-import { readWebsite, type ReadOptions, type WebsiteReading } from "@digikon/media";
+import { MAX_GUIDELINE_BYTES, readGuideline, readWebsite, type ReadOptions, type WebsiteReading } from "@digikon/media";
+import { createHash } from "node:crypto";
 
 /**
  * The guided intake's server side: each session has a project kit (digikon.project-kit), saved to the session folder after every change so progress survives a reload,
@@ -105,6 +106,31 @@ export function registerKitRoutes(app: Hono, deps: KitRouteDeps) {
     setKit(s, guard(() => provide(kitOf(s), "website", r.final_url, "user")));
     s.extractions = { ...s.extractions, website: { source: "website", from: r.final_url, colours: r.colours, fonts: r.fonts, facts: r.candidate_facts.map((f, i) => ({ id: `w${i + 1}`, text: f.text })), logo_candidates: r.logo_candidates, excerpt: [r.title, r.description, ...r.headings].filter((x): x is string => !!x).slice(0, 6) } };
     return c.json({ status: "ok", extraction: s.extractions.website, note: "These were found on the page. Nothing is used until you confirm it." });
+  });
+
+  // ---------- brand guideline (PDF) ----------
+  /**
+   * Reads a brand guideline PDF. A file of the wrong type is refused (422) and a huge one too (413); a real PDF that cannot be read (scanned, encrypted, damaged) is kept as the
+   * user's answer and the reply says to type the details in. What it reads is offered as candidates and goes through the same confirm step as a website.
+   */
+  app.post("/api/sessions/:id/guideline", async (c) => {
+    const s = deps.session(c.req.param("id"));
+    if (Number(c.req.header("content-length") ?? 0) > MAX_GUIDELINE_BYTES + 64 * 1024) deps.fail(413, "file_too_large", `a guideline file can be at most ${MAX_GUIDELINE_BYTES / 1048576} MB`);
+    const form = await c.req.formData().catch(() => null);
+    const file = form?.get("file");
+    if (!(file instanceof File)) deps.fail(400, "bad_request", "send the PDF in a form field named file");
+    if (file.size > MAX_GUIDELINE_BYTES) deps.fail(413, "file_too_large", `a guideline file can be at most ${MAX_GUIDELINE_BYTES / 1048576} MB`);
+    if (!/\.pdf$/i.test(file.name)) deps.fail(422, "wrong_file_type", "a brand guideline must be a PDF file");
+    const buf = Buffer.from(await file.arrayBuffer());
+    const r = readGuideline(buf);
+    if (r.status === "could_not_read" && r.reason === "not_pdf") deps.fail(422, "wrong_file_type", "that file is not a PDF, even though its name ends in .pdf");
+    const stored = `guideline-${createHash("sha256").update(buf).digest("hex").slice(0, 8)}.pdf`;
+    mkdirSync(join(s.dir, "uploads"), { recursive: true });
+    writeFileSync(join(s.dir, "uploads", stored), buf);
+    setKit(s, guard(() => provide(kitOf(s), "guideline", stored, "upload")));
+    if (r.status === "could_not_read") return c.json({ status: "could_not_read", reason: r.reason, detail: r.detail, ask: `I could not read that guideline (${r.detail}). Type the colours, fonts and tone in yourself, or skip this step.`, file: stored });
+    s.extractions = { ...s.extractions, guideline: { source: "guideline", from: file.name, colours: r.colours, fonts: r.fonts, facts: r.candidate_facts.map((text, i) => ({ id: `g${i + 1}`, text })), logo_candidates: [], excerpt: r.excerpt } };
+    return c.json({ status: "ok", file: stored, extraction: s.extractions.guideline, note: "These were found in the file. Nothing is used until you confirm it." });
   });
 
   /** The confirm step: only items that were actually extracted can be confirmed, one by one. */

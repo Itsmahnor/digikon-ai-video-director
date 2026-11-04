@@ -8,3 +8,4 @@ export * from "./vision.js";
 export * from "./asset-registry.js";
 export * from "./understand.js";
 export * from "./website.js";
+export * from "./guideline.js";

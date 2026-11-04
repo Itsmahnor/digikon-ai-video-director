@@ -107,6 +107,62 @@ describe("website step: extracted values are candidates until the user confirms 
   });
 });
 
+/** A one-page PDF with text, an RGB colour and a brand font, for the guideline route. */
+const guidePdf = (text = "Our brand voice is warm, direct and never loud. We write the way we talk to a neighbour, in plain words and short sentences.") => Buffer.from(`%PDF-1.5\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /Contents 4 0 R >>\nendobj\n10 0 obj\n<< /Type /Font /BaseFont /ABCDEF+Fraunces-Bold >>\nendobj\n4 0 obj\n<< /Length 200 >>\nstream\n0.784 0.314 0.118 rg 0 0 50 50 re f\nBT /F1 12 Tf 72 700 Td (${text}) Tj ET\nendstream\nendobj\n%%EOF\n`, "latin1");
+const upload = (name: string, bytes: Buffer | Uint8Array, type = "application/pdf") => { const fd = new FormData(); fd.append("file", new File([bytes as BlobPart], name, { type })); return { method: "POST", body: fd }; };
+
+describe("brand guideline step", () => {
+  it("reads a PDF, offers what it found, and applies nothing until the user confirms", async () => {
+    const app = build(), id = await newSession(app);
+    const res = await app.request(`/api/sessions/${id}/guideline`, upload("brand.pdf", guidePdf()));
+    expect(res.status).toBe(200);
+    const body = await j(res);
+    expect(body.status).toBe("ok");
+    expect(body.extraction.colours.map((c: any) => c.hex)).toContain("#c8501e");
+    expect(body.extraction.fonts).toContain("Fraunces");
+    const kit = await j(await app.request(`/api/sessions/${id}/kit`));
+    expect(kit.kit.guideline).toMatchObject({ state: "provided", source: "upload" });
+    expect(kit.kit.brand.colours.state).toBe("missing");
+    expect(kit.approved_fact_count).toBe(0);
+    const k = await j(await app.request(`/api/sessions/${id}/kit/confirm`, post({ source: "guideline", colours: ["#c8501e"], fact_ids: [body.extraction.facts[0].id] })));
+    expect(k.kit.brand.colours).toMatchObject({ value: ["#c8501e"], source: "guideline", confirmed: true });
+    expect(k.kit.facts.value[0]).toMatchObject({ origin: "guideline", confirmed: true });
+    expect(k.approved_fact_count).toBe(1);
+  });
+  it("a PDF that cannot be read is kept and the user is asked to type the details in", async () => {
+    const app = build(), id = await newSession(app);
+    const scanned = Buffer.from("%PDF-1.4\n3 0 obj\n<< /Type /Page >>\nendobj\n4 0 obj\n<< /Length 30 >>\nstream\nq 600 0 0 800 0 0 cm /Im1 Do Q\nendstream\nendobj\n%%EOF\n", "latin1");
+    const res = await app.request(`/api/sessions/${id}/guideline`, upload("scan.pdf", scanned));
+    expect(res.status).toBe(200);
+    expect(await j(res)).toMatchObject({ status: "could_not_read", reason: "no_text" });
+    const kit = await j(await app.request(`/api/sessions/${id}/kit`));
+    expect(kit.kit.guideline.state).toBe("provided"); // the file itself was provided
+    expect(kit.pending_extractions).toEqual([]);
+    expect(kit.kit.brand.colours.state).toBe("missing");
+    const enc = await j(await app.request(`/api/sessions/${id}/guideline`, upload("locked.pdf", Buffer.from("%PDF-1.5\n<< /Encrypt 9 0 R >>\n%%EOF\n", "latin1"))));
+    expect(enc).toMatchObject({ status: "could_not_read", reason: "encrypted" });
+    expect(enc.ask).toContain("Type the colours, fonts and tone in yourself, or skip this step");
+  });
+  it("the wrong type of file is refused: another extension, or a picture named .pdf", async () => {
+    const app = build(), id = await newSession(app);
+    const png = Buffer.from("\x89PNG\r\n\x1a\n" + "x".repeat(500), "latin1");
+    for (const [name, bytes] of [["logo.png", png], ["brand.docx", Buffer.from("PK\x03\x04docx")], ["notes.txt", Buffer.from("just text")], ["fake.pdf", png]] as [string, Buffer][]) {
+      const res = await app.request(`/api/sessions/${id}/guideline`, upload(name, bytes));
+      expect(res.status, name).toBe(422);
+      expect((await j(res)).error, name).toBe("wrong_file_type");
+    }
+    expect((await j(await app.request(`/api/sessions/${id}/kit`))).kit.guideline.state).toBe("missing"); // nothing was stored
+  });
+  it("an oversized file is refused with 413 and nothing is read", async () => {
+    const app = build(), id = await newSession(app);
+    const huge = Buffer.alloc(21 * 1024 * 1024, 0x20); huge.write("%PDF-1.4\n");
+    const res = await app.request(`/api/sessions/${id}/guideline`, upload("huge.pdf", huge));
+    expect(res.status).toBe(413);
+    expect((await j(res)).error).toBe("file_too_large");
+    expect((await app.request(`/api/sessions/${id}/guideline`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status).toBe(400);
+  });
+});
+
 describe("kit routes", () => {
   it("provide, skip and clear fields; a required field cannot be skipped; bad values are refused", async () => {
     const app = build(), id = await newSession(app);
