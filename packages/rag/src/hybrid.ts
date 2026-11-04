@@ -1,5 +1,5 @@
 import { dot, type Embedder } from "./embeddings.js";
-import { eligible, KeywordRetriever } from "./keyword.js";
+import { eligible, KeywordRetriever, type LexicalFloor } from "./keyword.js";
 import { mmr, noRepeat, type NoRepeatOptions, type UsageSource } from "./rerank.js";
 import type { Collection, Doc, Hit, RetrieveFilter, RetrieveQuery, Retriever } from "./types.js";
 
@@ -46,6 +46,17 @@ export interface HybridOptions {
   /** Library use history; with a film id in the query filter, what the film already used is pushed down. */
   usage?: UsageSource;
   no_repeat?: NoRepeatOptions;
+  /**
+   * Lets a query return nothing, for the listed collections only. `min_idf_coverage` is the BM25 floor (see LexicalFloor). `lexical_min_similarity` says that a document found only
+   * by keywords must also have at least this cosine similarity to the query; a document found by vectors is judged by `min_similarity` as before.
+   */
+  floor?: LexicalFloor & {
+    lexical_min_similarity?: number;
+    /** Abstain: if no eligible document has at least this cosine similarity to the query, return nothing at all (keyword hits included). Leaves queries that do have a close document untouched. */
+    abstain_below?: number;
+    /** Two-stage: if the keyword floor leaves no keyword hit at all, return nothing (vector hits included); otherwise rank with both rankers as usual. Needs min_idf_coverage > 0. */
+    require_keyword?: boolean;
+  };
 }
 
 const approxTokens = (s: string) => Math.ceil(s.length / 4);
@@ -57,7 +68,7 @@ export class HybridRetriever implements Retriever {
 
   /** Use `HybridRetriever.create` to embed the documents; this takes vectors that are already made. */
   constructor(private readonly docs: Doc[], private readonly embedder: Embedder, private readonly index: VectorIndex, private readonly opts: HybridOptions = {}, vectors?: ReadonlyMap<string, readonly number[]>) {
-    this.lexical = new KeywordRetriever(docs);
+    this.lexical = new KeywordRetriever(docs, 1.5, 0.75, opts.floor ? { min_idf_coverage: opts.floor.min_idf_coverage, collections: opts.floor.collections } : undefined);
     for (const d of docs) this.byId.set(`${d.collection}\u0000${d.id}`, d);
     if (vectors) for (const [k, v] of vectors) this.vectors.set(k, v);
   }
@@ -87,8 +98,23 @@ export class HybridRetriever implements Retriever {
       if (vec.length >= n) break;
     }
 
+    const abstainBelow = o.floor?.abstain_below !== undefined && o.floor.collections.includes(q.collection) ? o.floor.abstain_below : null;
+    if (abstainBelow !== null) {
+      let best = -1;
+      for (const r of raw) {
+        const doc = this.byId.get(r.id.includes("\u0000") ? r.id : `${q.collection}\u0000${r.id}`);
+        if (doc && doc.collection === q.collection && eligible(doc, q.filter) && r.score > best) best = r.score;
+      }
+      if (best < abstainBelow) return [];
+    }
+    // Cosine similarity of every document the vector index returned, for the keyword-only gate below.
+    const simOf = new Map<string, number>();
+    for (const r of raw) { if (r.id.includes("\u0000")) { const [c, id] = r.id.split("\u0000"); if (c === q.collection) simOf.set(id!, r.score); } else simOf.set(r.id, r.score); }
+    const gate = o.floor && o.floor.lexical_min_similarity !== undefined && o.floor.collections.includes(q.collection) ? o.floor.lexical_min_similarity : null;
+    const vecIds = new Set(vec.map((v) => v.doc.id));
+    if (o.floor?.require_keyword && o.floor.min_idf_coverage > 0 && o.floor.collections.includes(q.collection) && lex.length === 0) return [];
     const fused = new Map<string, Hit>();
-    lex.forEach((h, i) => fused.set(h.doc.id, { doc: h.doc, score: wl / (rrfK + i + 1) }));
+    lex.filter((h) => gate === null || vecIds.has(h.doc.id) || (simOf.get(h.doc.id) ?? -1) >= gate).forEach((h, i) => fused.set(h.doc.id, { doc: h.doc, score: wl / (rrfK + i + 1) }));
     vec.forEach((v, i) => {
       const cur = fused.get(v.doc.id);
       fused.set(v.doc.id, { doc: v.doc, score: (cur?.score ?? 0) + wv / (rrfK + i + 1) });

@@ -56,6 +56,13 @@ export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
   }
 }
 
+/**
+ * A floor that lets a query match nothing. For the listed collections a document is returned only if the query terms it contains carry at least `min_idf_coverage` of the
+ * query's total weight (each term weighted by its rarity in the corpus; a term the corpus has never seen counts in full and can never be matched). A query that shares only
+ * common words with a document ("how", "to") fails; one that shares its distinctive words passes. Collections not listed are untouched.
+ */
+export interface LexicalFloor { min_idf_coverage: number; collections: readonly Doc["collection"][] }
+
 const approxTokens = (s: string) => Math.ceil(s.length / 4);
 const IMPLEMENTED_BOOST = 1.15;
 
@@ -66,7 +73,7 @@ export class KeywordRetriever implements Retriever {
   private readonly df = new Map<string, number>();
   private readonly avgLen: number;
 
-  constructor(private readonly docs: Doc[], private readonly k1 = 1.5, private readonly b = 0.75) {
+  constructor(private readonly docs: Doc[], private readonly k1 = 1.5, private readonly b = 0.75, private readonly floor?: LexicalFloor) {
     let total = 0;
     for (const d of docs) {
       const toks = tokenize(`${d.title} ${d.title} ${d.text}`);
@@ -89,14 +96,18 @@ export class KeywordRetriever implements Retriever {
     const terms = [...new Set(tokenize(q.text))];
     const n = this.docs.length;
     const scored: Hit[] = [];
+    const idfOf = (t: string) => Math.log(1 + (n - (this.df.get(t) ?? 0) + 0.5) / ((this.df.get(t) ?? 0) + 0.5));
+    const floor = this.floor && this.floor.collections.includes(q.collection) ? this.floor.min_idf_coverage : 0;
+    const totalIdf = terms.reduce((s, t) => s + idfOf(t), 0);
     for (const doc of this.docs) {
       if (doc.collection !== q.collection || !eligible(doc, q.filter)) continue;
       const counts = this.tf.get(doc.id)!;
       const dl = this.len.get(doc.id)!;
-      let score = 0;
+      let score = 0, matchedIdf = 0;
       for (const t of terms) {
         const f = counts.get(t);
         if (!f) continue;
+        matchedIdf += idfOf(t);
         const idf = Math.log(1 + (n - (this.df.get(t) ?? 0) + 0.5) / ((this.df.get(t) ?? 0) + 0.5));
         score += idf * ((f * (this.k1 + 1)) / (f + this.k1 * (1 - this.b + (this.b * dl) / (this.avgLen || 1))));
       }
@@ -106,6 +117,7 @@ export class KeywordRetriever implements Retriever {
       const boosted = doc.metadata.recipe_validated ?? doc.metadata.recipe_implemented;
       if (boosted === true) score *= IMPLEMENTED_BOOST;
       else if (boosted === false) score *= 1 / IMPLEMENTED_BOOST;
+      if (floor > 0 && (totalIdf === 0 || matchedIdf / totalIdf < floor)) continue;
       if (score > 0) scored.push({ doc, score });
     }
     scored.sort((a, b) => b.score - a.score || a.doc.id.localeCompare(b.doc.id));

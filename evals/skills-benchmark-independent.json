@@ -1,0 +1,2087 @@
+{
+ "_readme": "Independent benchmark for the skills collection. Written from the category/topic taxonomy and realistic user briefs without reading skill text; ground truth is decided by rule (see the header of the generator and each case's `why`), resolved from skill metadata only. Kept separate from skills-benchmark.json (the first 51 queries, written alongside the skills). Run with include_draft for benchmarking only. skill_scope in each filter is the querying agent. A topic query's relevant set is every skill with that topic for the category plus `all` in that agent's scope, so P@1 is the chance the top result is on the right topic and Recall@3 is capped by the size of that set.",
+ "queries": [
+  {
+   "id": "ind-001",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "we need a short clip that shows our scheduling tool doing its job for someone evaluating software",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-product-demo"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-product-demo)."
+  },
+  {
+   "id": "ind-002",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "announce the new reporting dashboard to current customers on linkedin",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-feature-launch"
+   ],
+   "equivalent": [
+    "launch-hard-won-lessons",
+    "saas-launch-video-storyboard-first"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-feature-launch, launch-hard-won-lessons, saas-launch-video-storyboard-first)."
+  },
+  {
+   "id": "ind-003",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "explain what a compliance platform is to people who have never heard of the category",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-explainer-60s"
+   ],
+   "equivalent": [
+    "explainer-story-arc"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-explainer-60s, explainer-story-arc)."
+  },
+  {
+   "id": "ind-004",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "first week video for freshly signed up users so they get value fast",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-onboarding-walkthrough"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-onboarding-walkthrough)."
+  },
+  {
+   "id": "ind-005",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "a happy client describes how the analytics tool saved their team time",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-testimonial-case-study"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-testimonial-case-study)."
+  },
+  {
+   "id": "ind-006",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "quick answer video for the most common billing question we get",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-faq-support-short"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-faq-support-short)."
+  },
+  {
+   "id": "ind-007",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "monthly product update video made from our release notes",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "changelog-video-visualize-dont-list"
+   ],
+   "why": "Type rule: the playbook for this video type (changelog-video-visualize-dont-list)."
+  },
+  {
+   "id": "ind-008",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "teaser for our new API aimed at developers",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-feature-launch"
+   ],
+   "equivalent": [
+    "launch-hard-won-lessons",
+    "saas-launch-video-storyboard-first"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-feature-launch, launch-hard-won-lessons, saas-launch-video-storyboard-first)."
+  },
+  {
+   "id": "ind-009",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "walk people through setting up the integration in a couple of minutes",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-onboarding-walkthrough"
+   ],
+   "equivalent": [
+    "saas-product-demo",
+    "saas-faq-support-short"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-onboarding-walkthrough, saas-product-demo, saas-faq-support-short)."
+  },
+  {
+   "id": "ind-010",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "type"
+   ],
+   "query": "customer interview video for the enterprise landing page",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-testimonial-case-study"
+   ],
+   "why": "Type rule: the playbook for this video type (saas-testimonial-case-study)."
+  },
+  {
+   "id": "ind-011",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:hook"
+   ],
+   "query": "what should the opening line of our software ad be",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "hook-must-pay-off"
+   ],
+   "equivalent": [
+    "tiktok-three-layer-hook",
+    "hook-formulas-pattern-question-claim",
+    "stat-and-authority-hook",
+    "cover-frame-and-first-frame",
+    "hook-patterns",
+    "youtube-hook-and-retention"
+   ],
+   "why": "Topic rule: any hook skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-012",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:structure"
+   ],
+   "query": "how do I organise a thirty second ad for a project management app",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "tiktok-completion-first"
+   ],
+   "equivalent": [
+    "ad-body-structures",
+    "cutdowns-and-versions",
+    "problem-solution-proof-cta",
+    "storyboard-shot-table",
+    "voice-over-script-writing",
+    "map-every-feature-to-a-shot"
+   ],
+   "why": "Topic rule: any structure skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-013",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:cta-offer"
+   ],
+   "query": "what call to action suits a free trial offer",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "cta-patterns-by-funnel-intent"
+   ],
+   "equivalent": [
+    "cta-and-offer-clarity",
+    "one-offer-one-motion"
+   ],
+   "why": "Topic rule: any cta-offer skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-014",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:claims-safety"
+   ],
+   "query": "can we claim to be the fastest tool on the market",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-disclosure-and-labelling"
+   ],
+   "equivalent": [
+    "proof-and-claims-safety",
+    "real-captures-not-mock-ui"
+   ],
+   "why": "Topic rule: any claims-safety skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-015",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:brand"
+   ],
+   "query": "our app is purple and white, how do we keep the video on brand",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "brand-consistency"
+   ],
+   "equivalent": [],
+   "why": "Topic rule: any brand skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-016",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:platform-rules"
+   ],
+   "query": "best video length and shape for the linkedin feed",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-format-platform-guide"
+   ],
+   "equivalent": [
+    "platform-landing-hero-loop",
+    "platform-linkedin-feed-1x1-4x5",
+    "platform-vertical-9x16",
+    "platform-youtube-16x9",
+    "ship-platform-sizes-and-deliverable-pack"
+   ],
+   "why": "Topic rule: any platform-rules skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-017",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:funnel"
+   ],
+   "query": "what should I say to someone comparing us with two competitors",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-awareness"
+   ],
+   "equivalent": [
+    "funnel-consideration",
+    "funnel-conversion",
+    "funnel-retention"
+   ],
+   "why": "Topic rule: any funnel skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-018",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:asset-gaps"
+   ],
+   "query": "we have no screen recordings yet, what do you need from us",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "asset-gaps-questions"
+   ],
+   "equivalent": [
+    "media-use-assets-and-audio"
+   ],
+   "why": "Topic rule: any asset-gaps skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-019",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:testing"
+   ],
+   "query": "how do we test two versions of this ad against each other",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ab-test-hook-first"
+   ],
+   "equivalent": [
+    "ab-testing-metrics-and-batch-rhythm"
+   ],
+   "why": "Topic rule: any testing skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-020",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:brief"
+   ],
+   "query": "fill in a brief before we start making the ad",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-creative-brief-first"
+   ],
+   "equivalent": [],
+   "why": "Topic rule: any brief skill for saas+all in director scope."
+  },
+  {
+   "id": "ind-021",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:motion"
+   ],
+   "query": "how should the interface animate when a button gets clicked",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "data-and-chart-scenes"
+   ],
+   "equivalent": [
+    "carriers-and-causal-motion",
+    "cursor-entry-click-and-tip-targeting",
+    "cut-the-curve-parameters",
+    "cut-the-curve-seams",
+    "film-current-direction",
+    "motion-anti-patterns",
+    "motion-vector-law",
+    "oversized-cursor-causal-motion",
+    "sustained-motion-no-idle-wobble",
+    "vector-ledger-and-seam-gate",
+    "waterfall-entry-and-nudge-curve",
+    "single-hero-and-stable-camera"
+   ],
+   "why": "Topic rule: any motion skill for saas+all in editor scope."
+  },
+  {
+   "id": "ind-022",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:pacing"
+   ],
+   "query": "how fast should scenes change in a software walkthrough",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "scene-beat-design-and-pacing"
+   ],
+   "equivalent": [
+    "stillness-before-climax-and-timing-intents",
+    "explainer-pacing-per-beat",
+    "explainer-vo-timing-math",
+    "pacing-by-video-type",
+    "what-a-cut-is-for",
+    "beat-hit-limits",
+    "pacing-slower-with-room-to-breathe"
+   ],
+   "why": "Topic rule: any pacing skill for saas+all in editor scope."
+  },
+  {
+   "id": "ind-023",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:text-captions"
+   ],
+   "query": "should the demo have subtitles and how long should each stay up",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-language-and-text-expansion"
+   ],
+   "equivalent": [
+    "onscreen-text-and-captions",
+    "remotion-captions-and-text",
+    "captions-drop-rail-embed",
+    "captions-overlay-law",
+    "caption-sync-spec",
+    "graphics-text-timing-and-safe-zones"
+   ],
+   "why": "Topic rule: any text-captions skill for saas+all in editor scope."
+  },
+  {
+   "id": "ind-024",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:audio"
+   ],
+   "query": "how loud should the music be under the narrator",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "audio-music-and-voiceover"
+   ],
+   "equivalent": [
+    "audio-levels-music-under-voice",
+    "beat-sync-music-to-grid",
+    "sound-design-riser-impact-sparkle",
+    "sound-sourcing-local-files-and-credits"
+   ],
+   "why": "Topic rule: any audio skill for saas+all in editor scope."
+  },
+  {
+   "id": "ind-025",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "topic",
+    "topic:renderer"
+   ],
+   "query": "we are moving a remotion project to another renderer",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "remotion-composition-structure"
+   ],
+   "equivalent": [
+    "remotion-render-and-determinism",
+    "remotion-scene-graph-mapping",
+    "remotion-timing-in-frames",
+    "render-audit-stills-first",
+    "hyperframes-film-workflow",
+    "hyperframes-render-work-loop",
+    "port-remotion-to-hyperframes",
+    "registry-before-hand-building",
+    "reverse-any-video-rebuild-and-compare",
+    "seam-render-white-flash-guard"
+   ],
+   "why": "Topic rule: any renderer skill for saas+all in editor scope."
+  },
+  {
+   "id": "ind-026",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "show our new backpack from every angle with price and a shop link",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-product-showcase"
+   ],
+   "equivalent": [
+    "product-closeup-and-brand-finale"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-product-showcase, product-closeup-and-brand-finale)."
+  },
+  {
+   "id": "ind-027",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "a real customer type video of someone using our skincare serum",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-ugc-style-ad"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-ugc-style-ad)."
+  },
+  {
+   "id": "ind-028",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "film the moment someone opens our gift box for the first time",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-unboxing"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-unboxing)."
+  },
+  {
+   "id": "ind-029",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "black friday discount video with a code and an end date",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-offer-sale"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-offer-sale)."
+  },
+  {
+   "id": "ind-030",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "put our two blenders next to each other so shoppers can pick",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-comparison"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-comparison)."
+  },
+  {
+   "id": "ind-031",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "introduce the autumn range as a run of outfits",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-collection-lookbook"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-collection-lookbook)."
+  },
+  {
+   "id": "ind-032",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "slow dramatic hero shot of a watch ending on the logo",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "product-closeup-and-brand-finale"
+   ],
+   "equivalent": [
+    "ecom-product-showcase"
+   ],
+   "why": "Type rule: the playbook for this video type (product-closeup-and-brand-finale, ecom-product-showcase)."
+  },
+  {
+   "id": "ind-033",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "short clip for tiktok of a person talking to camera about our sneakers",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-ugc-style-ad"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-ugc-style-ad)."
+  },
+  {
+   "id": "ind-034",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "flash sale ending tonight, make it urgent but honest",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-offer-sale"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-offer-sale)."
+  },
+  {
+   "id": "ind-035",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "type"
+   ],
+   "query": "what is in the box video for our headphones",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-unboxing"
+   ],
+   "why": "Type rule: the playbook for this video type (ecom-unboxing)."
+  },
+  {
+   "id": "ind-036",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:hook"
+   ],
+   "query": "what is a good first three seconds for a shoe ad",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "hook-must-pay-off"
+   ],
+   "equivalent": [
+    "tiktok-three-layer-hook",
+    "hook-formulas-pattern-question-claim",
+    "stat-and-authority-hook",
+    "cover-frame-and-first-frame",
+    "hook-patterns",
+    "youtube-hook-and-retention"
+   ],
+   "why": "Topic rule: any hook skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-037",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:claims-safety"
+   ],
+   "query": "can I say our supplement cures tiredness",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-disclosure-and-labelling"
+   ],
+   "equivalent": [
+    "proof-and-claims-safety"
+   ],
+   "why": "Topic rule: any claims-safety skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-038",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:claims-safety"
+   ],
+   "query": "we pay creators to post about our product, what must be disclosed",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-disclosure-and-labelling"
+   ],
+   "equivalent": [
+    "proof-and-claims-safety"
+   ],
+   "why": "Topic rule: any claims-safety skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-039",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:platform-rules"
+   ],
+   "query": "which aspect ratio for instagram reels and the feed",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-format-platform-guide"
+   ],
+   "equivalent": [
+    "platform-landing-hero-loop",
+    "platform-linkedin-feed-1x1-4x5",
+    "platform-vertical-9x16",
+    "platform-youtube-16x9",
+    "ship-platform-sizes-and-deliverable-pack"
+   ],
+   "why": "Topic rule: any platform-rules skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-040",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:cta-offer"
+   ],
+   "query": "how do I word the buy now ending",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "cta-patterns-by-funnel-intent"
+   ],
+   "equivalent": [
+    "cta-and-offer-clarity",
+    "one-offer-one-motion"
+   ],
+   "why": "Topic rule: any cta-offer skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-041",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:funnel"
+   ],
+   "query": "what to say to a shopper who is ready to buy today",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-awareness"
+   ],
+   "equivalent": [
+    "funnel-consideration",
+    "funnel-conversion",
+    "funnel-retention"
+   ],
+   "why": "Topic rule: any funnel skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-042",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:asset-gaps"
+   ],
+   "query": "the client has not sent the logo or product photos",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "asset-gaps-questions"
+   ],
+   "equivalent": [
+    "media-use-assets-and-audio"
+   ],
+   "why": "Topic rule: any asset-gaps skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-043",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:testing"
+   ],
+   "query": "which version of the ad performs better, how do I measure it",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ab-test-hook-first"
+   ],
+   "equivalent": [
+    "ab-testing-metrics-and-batch-rhythm"
+   ],
+   "why": "Topic rule: any testing skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-044",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:brand"
+   ],
+   "query": "keep our fonts and colours the same across all the product videos",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "brand-consistency"
+   ],
+   "equivalent": [],
+   "why": "Topic rule: any brand skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-045",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:structure"
+   ],
+   "query": "make a table of scenes for the client to approve",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "tiktok-completion-first"
+   ],
+   "equivalent": [
+    "ad-body-structures",
+    "cutdowns-and-versions",
+    "problem-solution-proof-cta",
+    "storyboard-shot-table",
+    "voice-over-script-writing"
+   ],
+   "why": "Topic rule: any structure skill for ecommerce+all in director scope."
+  },
+  {
+   "id": "ind-046",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:pacing"
+   ],
+   "query": "the pictures shake on every drum beat, how much is too much",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "scene-beat-design-and-pacing"
+   ],
+   "equivalent": [
+    "stillness-before-climax-and-timing-intents",
+    "pacing-by-video-type",
+    "what-a-cut-is-for",
+    "beat-hit-limits",
+    "pacing-slower-with-room-to-breathe"
+   ],
+   "why": "Topic rule: any pacing skill for ecommerce+all in editor scope."
+  },
+  {
+   "id": "ind-047",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:audio"
+   ],
+   "query": "which sound effects can I use and how do I keep the licences",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "audio-music-and-voiceover"
+   ],
+   "equivalent": [
+    "audio-levels-music-under-voice",
+    "beat-sync-music-to-grid",
+    "sound-design-riser-impact-sparkle",
+    "sound-sourcing-local-files-and-credits"
+   ],
+   "why": "Topic rule: any audio skill for ecommerce+all in editor scope."
+  },
+  {
+   "id": "ind-048",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:text-captions"
+   ],
+   "query": "captions for viewers who watch with the sound off",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-language-and-text-expansion"
+   ],
+   "equivalent": [
+    "onscreen-text-and-captions",
+    "remotion-captions-and-text",
+    "captions-drop-rail-embed",
+    "captions-overlay-law",
+    "caption-sync-spec",
+    "graphics-text-timing-and-safe-zones"
+   ],
+   "why": "Topic rule: any text-captions skill for ecommerce+all in editor scope."
+  },
+  {
+   "id": "ind-049",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "topic",
+    "topic:motion"
+   ],
+   "query": "how should text and shapes enter the screen",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "data-and-chart-scenes"
+   ],
+   "equivalent": [
+    "carriers-and-causal-motion",
+    "cut-the-curve-parameters",
+    "cut-the-curve-seams",
+    "film-current-direction",
+    "motion-anti-patterns",
+    "motion-vector-law",
+    "sustained-motion-no-idle-wobble",
+    "vector-ledger-and-seam-gate",
+    "waterfall-entry-and-nudge-curve",
+    "single-hero-and-stable-camera"
+   ],
+   "why": "Topic rule: any motion skill for ecommerce+all in editor scope."
+  },
+  {
+   "id": "ind-050",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "tell people why our family bakery was started",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-brand-story"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-brand-story)."
+  },
+  {
+   "id": "ind-051",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "get people excited for our open day on the twelfth of june",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-event-teaser"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-event-teaser)."
+  },
+  {
+   "id": "ind-052",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "tell customers we are moving to a new address next month",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-announcement"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-announcement)."
+  },
+  {
+   "id": "ind-053",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "a fifteen second ad for our dog grooming service",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-social-ad"
+   ],
+   "equivalent": [
+    "promo-local-service-ad"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-social-ad, promo-local-service-ad)."
+  },
+  {
+   "id": "ind-054",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "we are hiring three engineers and want applicants",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-recruitment-employer-brand"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-recruitment-employer-brand)."
+  },
+  {
+   "id": "ind-055",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "our plumbing firm wants more phone calls from nearby homes",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-local-service-ad"
+   ],
+   "equivalent": [
+    "promo-social-ad"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-local-service-ad, promo-social-ad)."
+  },
+  {
+   "id": "ind-056",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "should this be a presentation we give live or a video file",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "slideshow-vs-rendered-video"
+   ],
+   "why": "Type rule: the playbook for this video type (slideshow-vs-rendered-video)."
+  },
+  {
+   "id": "ind-057",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "a teaser for our annual charity gala",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-event-teaser"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-event-teaser)."
+  },
+  {
+   "id": "ind-058",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "explain our new opening hours to regulars",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-announcement"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-announcement)."
+  },
+  {
+   "id": "ind-059",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "type"
+   ],
+   "query": "show what working at our studio is really like",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-recruitment-employer-brand"
+   ],
+   "why": "Type rule: the playbook for this video type (promo-recruitment-employer-brand)."
+  },
+  {
+   "id": "ind-060",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:hook"
+   ],
+   "query": "what grabs attention at the start of a local business ad",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "hook-must-pay-off"
+   ],
+   "equivalent": [
+    "tiktok-three-layer-hook",
+    "hook-formulas-pattern-question-claim",
+    "stat-and-authority-hook",
+    "cover-frame-and-first-frame",
+    "hook-patterns",
+    "youtube-hook-and-retention"
+   ],
+   "why": "Topic rule: any hook skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-061",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:funnel"
+   ],
+   "query": "what do we say to someone who has never heard of us",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-awareness"
+   ],
+   "equivalent": [
+    "funnel-consideration",
+    "funnel-conversion",
+    "funnel-retention"
+   ],
+   "why": "Topic rule: any funnel skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-062",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:cta-offer"
+   ],
+   "query": "how do I make the offer and the next step obvious",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "cta-patterns-by-funnel-intent"
+   ],
+   "equivalent": [
+    "cta-and-offer-clarity",
+    "one-offer-one-motion"
+   ],
+   "why": "Topic rule: any cta-offer skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-063",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:claims-safety"
+   ],
+   "query": "the owner wants to say we are the best in the city",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-disclosure-and-labelling"
+   ],
+   "equivalent": [
+    "proof-and-claims-safety"
+   ],
+   "why": "Topic rule: any claims-safety skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-064",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:platform-rules"
+   ],
+   "query": "how long should it be and what shape for instagram",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-format-platform-guide"
+   ],
+   "equivalent": [
+    "platform-landing-hero-loop",
+    "platform-linkedin-feed-1x1-4x5",
+    "platform-vertical-9x16",
+    "platform-youtube-16x9",
+    "ship-platform-sizes-and-deliverable-pack"
+   ],
+   "why": "Topic rule: any platform-rules skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-065",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:asset-gaps"
+   ],
+   "query": "what should I ask the client for before we begin",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "asset-gaps-questions"
+   ],
+   "equivalent": [
+    "media-use-assets-and-audio"
+   ],
+   "why": "Topic rule: any asset-gaps skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-066",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:structure"
+   ],
+   "query": "make a fifteen second and a six second cutdown from the main film",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "tiktok-completion-first"
+   ],
+   "equivalent": [
+    "ad-body-structures",
+    "cutdowns-and-versions",
+    "problem-solution-proof-cta",
+    "storyboard-shot-table",
+    "voice-over-script-writing"
+   ],
+   "why": "Topic rule: any structure skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-067",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:accessibility"
+   ],
+   "query": "does the video have to work for people who cannot see or hear well",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "accessibility"
+   ],
+   "equivalent": [],
+   "why": "Topic rule: any accessibility skill for general-promo+all in editor scope."
+  },
+  {
+   "id": "ind-068",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:quality"
+   ],
+   "query": "check the finished video before the client sees it",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "launch-multi-critic-review"
+   ],
+   "equivalent": [
+    "final-review-independent-pass"
+   ],
+   "why": "Topic rule: any quality skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-069",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:structure"
+   ],
+   "query": "write the narration so it sounds natural",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "tiktok-completion-first"
+   ],
+   "equivalent": [
+    "ad-body-structures",
+    "cutdowns-and-versions",
+    "problem-solution-proof-cta",
+    "storyboard-shot-table",
+    "voice-over-script-writing"
+   ],
+   "why": "Topic rule: any structure skill for general-promo+all in director scope."
+  },
+  {
+   "id": "ind-070",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:pacing"
+   ],
+   "query": "when is a cut actually justified",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "scene-beat-design-and-pacing"
+   ],
+   "equivalent": [
+    "stillness-before-climax-and-timing-intents",
+    "pacing-by-video-type",
+    "what-a-cut-is-for",
+    "beat-hit-limits",
+    "pacing-slower-with-room-to-breathe"
+   ],
+   "why": "Topic rule: any pacing skill for general-promo+all in editor scope."
+  },
+  {
+   "id": "ind-071",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:audio"
+   ],
+   "query": "make the voice clear over background music",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "audio-music-and-voiceover"
+   ],
+   "equivalent": [
+    "audio-levels-music-under-voice",
+    "beat-sync-music-to-grid",
+    "sound-design-riser-impact-sparkle",
+    "sound-sourcing-local-files-and-credits"
+   ],
+   "why": "Topic rule: any audio skill for general-promo+all in editor scope."
+  },
+  {
+   "id": "ind-072",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:text-captions"
+   ],
+   "query": "translating the captions into another language and a right to left script",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-language-and-text-expansion"
+   ],
+   "equivalent": [
+    "onscreen-text-and-captions",
+    "remotion-captions-and-text",
+    "captions-drop-rail-embed",
+    "captions-overlay-law",
+    "caption-sync-spec",
+    "graphics-text-timing-and-safe-zones"
+   ],
+   "why": "Topic rule: any text-captions skill for general-promo+all in editor scope."
+  },
+  {
+   "id": "ind-073",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "topic",
+    "topic:motion"
+   ],
+   "query": "how do I move smoothly from one scene to the next",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "data-and-chart-scenes"
+   ],
+   "equivalent": [
+    "carriers-and-causal-motion",
+    "cut-the-curve-parameters",
+    "cut-the-curve-seams",
+    "film-current-direction",
+    "motion-anti-patterns",
+    "motion-vector-law",
+    "sustained-motion-no-idle-wobble",
+    "vector-ledger-and-seam-gate",
+    "waterfall-entry-and-nudge-curve",
+    "single-hero-and-stable-camera"
+   ],
+   "why": "Topic rule: any motion skill for general-promo+all in editor scope."
+  },
+  {
+   "id": "ind-074",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "off_topic"
+   ],
+   "query": "quantum chromodynamics lecture notes",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-075",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "off_topic"
+   ],
+   "query": "recipe for sourdough bread starter",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-076",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "off_topic"
+   ],
+   "query": "what is the capital of australia",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-077",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:saas",
+    "off_topic"
+   ],
+   "query": "fix a leaking kitchen tap",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-078",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "off_topic"
+   ],
+   "query": "how to repair a car gearbox",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-079",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "off_topic"
+   ],
+   "query": "guitar chords for a beginner song",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-080",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "off_topic"
+   ],
+   "query": "symptoms of seasonal flu",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-081",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:ecommerce",
+    "off_topic"
+   ],
+   "query": "football match score yesterday",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-082",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "off_topic"
+   ],
+   "query": "tax treatment of employee stock options",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-083",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "off_topic"
+   ],
+   "query": "how to train for a half marathon",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-084",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "off_topic"
+   ],
+   "query": "best way to learn spanish quickly",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "ind-085",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "independent",
+    "cat:general-promo",
+    "off_topic"
+   ],
+   "query": "visa requirements for travel to japan",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  }
+ ]
+}

@@ -4,7 +4,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
-import { KeywordRetriever, chooseEmbedder, createDbBackedRetriever, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type Retriever } from "@digikon/rag";
+import { KeywordRetriever, chooseEmbedder, createDbBackedRetriever, SKILLS_HYBRID_OPTIONS, SKILLS_KEYWORD_FLOOR, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type Retriever } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import { detectAudio, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
 import { LocalVision, availableOcr } from "@digikon/media";
@@ -51,7 +51,7 @@ if (process.env.DATABASE_URL) {
     skillsFrom = `Postgres (${rows.length} skills)`;
     if (rows.length === 0) console.warn("DATABASE_URL is set but the skills table is empty: run `npm run skills -- import examples/skills`. No skills will be retrieved.");
     const { embedder, note } = chooseEmbedder(join(repoRoot, "storage", "models"));
-    buildDbRetriever = await createDbBackedRetriever(store, embedder, [...recipeDocs(recipes), ...knowledge]);
+    buildDbRetriever = await createDbBackedRetriever(store, embedder, [...recipeDocs(recipes), ...knowledge], SKILLS_HYBRID_OPTIONS);
     console.log(`Retrieval: database-backed hybrid (BM25 + vectors; ${note}).`);
   } catch (e) {
     console.warn(`DATABASE_URL is set but the database cannot be used (${e instanceof Error ? e.message : String(e)}); falling back to the keyword retriever with skills from files.`);
@@ -63,7 +63,7 @@ if (process.env.DATABASE_URL) {
 console.log(`Skills: ${skillDocs.length} from ${skillsFrom}; draft skills ${skillsIncludeDraft ? "ARE" : "are not"} retrieved (SKILLS_INCLUDE_DRAFT).`);
 const retrieverFor = (implemented?: ReadonlySet<string>, validated?: ReadonlySet<string>): Retriever => {
   const docs = [...recipeDocs(recipes, implemented ? { implemented, ...(validated ? { validated } : {}) } : {}), ...knowledge, ...skillDocs];
-  return buildDbRetriever ? buildDbRetriever(docs) : new KeywordRetriever(docs);
+  return buildDbRetriever ? buildDbRetriever(docs) : new KeywordRetriever(docs, 1.5, 0.75, SKILLS_KEYWORD_FLOOR);
 };
 const retriever = retrieverFor();const skills = new SkillLibrary(join(repoRoot, "skills"));
 
