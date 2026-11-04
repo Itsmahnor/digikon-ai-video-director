@@ -36,7 +36,7 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 | C4 | Intake wizard UI | done (edge cases checked in a real browser; no Playwright suite) | `6de606a` |
 | C5 | Deterministic completeness check | done | `e061aad` |
 | C6 | Question module (typed questions replace free-text questions in `IntakeOut`) | **not started** | |
-| D to G | see section 7 | not started | |
+| D to G | see `docs/PLAN_PHASES_D-G.md` | not started | |
 
 **Unproven, say so in every report:** (1) a real Postgres **server** run; (2) any **real LLM** run (every demo uses the stub model, `DemoClient`); (3) **human-written** benchmark queries (the 85 independent queries were written by the same agent that wrote the skills); (4) a **human spot-check** of the skill review; (5) the wizard has no automated browser test (Playwright is not installed here; it was checked by driving the built-in browser).
 
@@ -88,7 +88,7 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 1. **C6 question module** (optional in Phase C): typed questions (upload, choice, short text, Skip); ask only what is missing (the completeness check in `packages/contracts/src/kit-completeness.ts` already says what to ask next); replaces the free-text `questions` list in `IntakeOut` and `intakeNode` in `packages/director/src/nodes.ts`. No model needed for deciding what to ask.
 2. **Real Postgres server** once Digikon directly approves the install: install, migrate 0001-0003, run `pg.integration.test.ts` with `DATABASE_URL`, `db:health`, import the skills into it, run the console and `eval:skills` against it, record versions here.
 3. **Skills to `approved`** once Digikon directly says so (record "approved by Digikon on <date>, their message in the project thread" in `examples/skills/REVIEW.md`, update `skills-library.test.ts` and `docs/SKILLS.md`).
-4. **Phases D, E, F, G.** The plan file (`architecture/UPDATED_PLAN.md`, `IMPLEMENTATION_STEPS.md`) is **not in this repo** and the working session never received the D to G text. Ask Digikon to paste it into `docs/PLAN_PHASES_D-G.md`. From the project notes only: D = video-type step and story; E = editor previews and change requests; F = post-review and the model gateway; G = later. Do not invent their content.
+4. **Phases D, E, F, G:** the plan text is in `docs/PLAN_PHASES_D-G.md` (given by the coordinator; the original `architecture/UPDATED_PLAN.md` is still not in the repo). Order: D1 video-type step, D2 needs analysis, D3 story from the chosen type; then E1 to E7; then F1 to F3; G later. Check the plan text before starting each step.
 
 ## 8. Known gotchas
 
