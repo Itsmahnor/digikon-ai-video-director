@@ -1,0 +1,1016 @@
+{
+ "_readme": "Retrieval benchmark for the skills collection (examples/skills). Same case shape as retrieval-benchmark.json. Queries run with include_draft because every shipped skill is draft; this is for benchmarking only and does not change any skill's status or grade. Category semantics: a category filter returns that category plus the cross-cutting 'all' skills.",
+ "queries": [
+  {
+   "id": "sk-saas-01",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "show a customer how the product works, step by step, on the real interface",
+   "expect": [
+    "saas-product-demo"
+   ],
+   "equivalent": [
+    "saas-onboarding-walkthrough"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Describes the SaaS product demo without its title."
+  },
+  {
+   "id": "sk-saas-02",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "tell existing users about a feature we just shipped",
+   "expect": [
+    "saas-feature-launch"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "A feature launch announcement."
+  },
+  {
+   "id": "sk-saas-03",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "explain the problem and our idea in about a minute for people new to the category",
+   "expect": [
+    "saas-explainer-60s"
+   ],
+   "equivalent": [
+    "explainer-story-arc"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "A 45 to 75 second explainer."
+  },
+  {
+   "id": "sk-saas-04",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "help new sign-ups reach their first success quickly",
+   "expect": [
+    "saas-onboarding-walkthrough"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Onboarding walkthrough."
+  },
+  {
+   "id": "sk-saas-05",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "a customer story that proves the product works for people like them",
+   "expect": [
+    "saas-testimonial-case-study"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Testimonial or case study."
+  },
+  {
+   "id": "sk-saas-06",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "answer a question support gets all the time in a short clip",
+   "expect": [
+    "saas-faq-support-short"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "FAQ or support short."
+  },
+  {
+   "id": "sk-saas-07",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "scene_level"
+   ],
+   "query": "turn this week's release notes into a video for customers",
+   "expect": [
+    "changelog-video-visualize-dont-list"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Changelog video."
+  },
+  {
+   "id": "sk-saas-08",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "scene_level"
+   ],
+   "query": "make the pointer walk the viewer's eye across the interface and click to cause the next thing",
+   "expect": [
+    "oversized-cursor-causal-motion"
+   ],
+   "equivalent": [
+    "cursor-entry-click-and-tip-targeting"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Oversized cursor."
+  },
+  {
+   "id": "sk-saas-09",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "scene_level"
+   ],
+   "query": "we must not fake screens; use genuine product captures",
+   "expect": [
+    "real-captures-not-mock-ui"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Real captures rule."
+  },
+  {
+   "id": "sk-saas-10",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "decide which product features deserve a scene in the promo",
+   "expect": [
+    "map-every-feature-to-a-shot"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Map every feature to a shot."
+  },
+  {
+   "id": "sk-saas-11",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "paraphrase"
+   ],
+   "query": "choose between a ready template, fully autonomous production, or a guided process",
+   "expect": [
+    "promo-creation-mode-choice"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Creation mode choice."
+  },
+  {
+   "id": "sk-saas-12",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "scene_level"
+   ],
+   "query": "how many seconds of narration fit in a 60 second explainer",
+   "expect": [
+    "explainer-vo-timing-math"
+   ],
+   "equivalent": [
+    "voice-over-script-writing"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Voice-over timing maths."
+  },
+  {
+   "id": "sk-ecom-01",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "show the product from several angles with the price and a link",
+   "expect": [
+    "ecom-product-showcase"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Product showcase."
+  },
+  {
+   "id": "sk-ecom-02",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "a creator talking to camera about the product, native to the feed",
+   "expect": [
+    "ecom-ugc-style-ad"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "UGC-style ad."
+  },
+  {
+   "id": "sk-ecom-03",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "opening the parcel and revealing what is inside",
+   "expect": [
+    "ecom-unboxing"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Unboxing."
+  },
+  {
+   "id": "sk-ecom-04",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "limited time discount with a promo code and a deadline",
+   "expect": [
+    "ecom-offer-sale"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Offer or sale."
+  },
+  {
+   "id": "sk-ecom-05",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "put two models side by side so the shopper can choose",
+   "expect": [
+    "ecom-comparison"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Comparison."
+  },
+  {
+   "id": "sk-ecom-06",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "paraphrase"
+   ],
+   "query": "introduce a seasonal range as a run of looks",
+   "expect": [
+    "ecom-collection-lookbook"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Collection lookbook."
+  },
+  {
+   "id": "sk-ecom-07",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "scene_level"
+   ],
+   "query": "hero close-up of the physical item with a dramatic ending on the logo",
+   "expect": [
+    "product-closeup-and-brand-finale"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Close-up kit and finale."
+  },
+  {
+   "id": "sk-ecom-08",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "scene_level"
+   ],
+   "query": "how to avoid false urgency and made-up scarcity in a sale video",
+   "expect": [
+    "ecom-offer-sale"
+   ],
+   "equivalent": [
+    "cta-patterns-by-funnel-intent",
+    "cta-and-offer-clarity"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "States never to create false urgency."
+  },
+  {
+   "id": "sk-gen-01",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "tell the story of why the company was founded",
+   "expect": [
+    "promo-brand-story"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Brand story."
+  },
+  {
+   "id": "sk-gen-02",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "build excitement for an upcoming date and venue",
+   "expect": [
+    "promo-event-teaser"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Event teaser."
+  },
+  {
+   "id": "sk-gen-03",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "share news such as a new location or changed opening hours",
+   "expect": [
+    "promo-announcement"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Announcement."
+  },
+  {
+   "id": "sk-gen-04",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "a quick ad for a simple service offer",
+   "expect": [
+    "promo-social-ad"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Short social ad."
+  },
+  {
+   "id": "sk-gen-05",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "attract job applicants and show what working here is like",
+   "expect": [
+    "promo-recruitment-employer-brand"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Recruitment video."
+  },
+  {
+   "id": "sk-gen-06",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "paraphrase"
+   ],
+   "query": "a cleaner or plumber wants more phone calls and bookings",
+   "expect": [
+    "promo-local-service-ad"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Local service ad."
+  },
+  {
+   "id": "sk-gen-07",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "scene_level"
+   ],
+   "query": "will this be presented live with speaker notes or shared as a file",
+   "expect": [
+    "slideshow-vs-rendered-video"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Slideshow vs video."
+  },
+  {
+   "id": "sk-x-01",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "cross_cutting"
+   ],
+   "query": "what to say in the first three seconds",
+   "expect": [
+    "hook-patterns"
+   ],
+   "equivalent": [
+    "hook-formulas-pattern-question-claim",
+    "tiktok-three-layer-hook",
+    "hook-must-pay-off"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Cross-cutting hook skill."
+  },
+  {
+   "id": "sk-x-02",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "cross_cutting"
+   ],
+   "query": "which claims about results must we not make without a source",
+   "expect": [
+    "proof-and-claims-safety"
+   ],
+   "equivalent": [
+    "ad-disclosure-and-labelling"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Claims safety."
+  },
+  {
+   "id": "sk-x-03",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "cross_cutting"
+   ],
+   "query": "which aspect ratio and length for tiktok and instagram reels",
+   "expect": [
+    "platform-vertical-9x16"
+   ],
+   "equivalent": [
+    "multi-format-platform-guide"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Vertical rules."
+  },
+  {
+   "id": "sk-x-04",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "cross_cutting"
+   ],
+   "query": "how loud should the music be under the voice",
+   "expect": [
+    "audio-levels-music-under-voice"
+   ],
+   "equivalent": [
+    "audio-music-and-voiceover"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Audio levels."
+  },
+  {
+   "id": "sk-x-05",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "cross_cutting"
+   ],
+   "query": "captions for people watching without sound",
+   "expect": [
+    "onscreen-text-and-captions"
+   ],
+   "equivalent": [
+    "caption-sync-spec"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Captions."
+  },
+  {
+   "id": "sk-x-06",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "cross_cutting"
+   ],
+   "query": "what to ask the client when the logo and footage are missing",
+   "expect": [
+    "asset-gaps-questions"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Asset gaps."
+  },
+  {
+   "id": "sk-x-07",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "cross_cutting"
+   ],
+   "query": "what the video should say to a viewer who is ready to buy",
+   "expect": [
+    "funnel-conversion"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Conversion stage."
+  },
+  {
+   "id": "sk-x-08",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "cross_cutting"
+   ],
+   "query": "what to say to someone who already bought from us",
+   "expect": [
+    "funnel-retention"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Retention stage."
+  },
+  {
+   "id": "sk-x-09",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "cross_cutting"
+   ],
+   "query": "make a fifteen second and a six second version from the master",
+   "expect": [
+    "cutdowns-and-versions"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Cutdowns."
+  },
+  {
+   "id": "sk-x-10",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "cross_cutting"
+   ],
+   "query": "how long should a text card stay on screen so it can be read",
+   "expect": [
+    "scene-beat-design-and-pacing"
+   ],
+   "equivalent": [
+    "graphics-text-timing-and-safe-zones",
+    "pacing-by-video-type"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Reading time floor."
+  },
+  {
+   "id": "sk-x-11",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "cross_cutting"
+   ],
+   "query": "a table the client can approve before anything is built",
+   "expect": [
+    "storyboard-shot-table"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Shot table."
+  },
+  {
+   "id": "sk-x-12",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "cross_cutting"
+   ],
+   "query": "keep brand colours, fonts and logo consistent",
+   "expect": [
+    "brand-consistency"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Brand consistency."
+  },
+  {
+   "id": "sk-x-13",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "cross_cutting"
+   ],
+   "query": "make the video usable for people who cannot hear or see well",
+   "expect": [
+    "accessibility"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Accessibility."
+  },
+  {
+   "id": "sk-ed-01",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "editor_scope"
+   ],
+   "query": "how to hand over from one scene to the next while things are still moving",
+   "expect": [
+    "motion-vector-law"
+   ],
+   "equivalent": [
+    "cut-the-curve-seams",
+    "film-current-direction",
+    "vector-ledger-and-seam-gate",
+    "cut-the-curve-parameters"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "Seam law."
+  },
+  {
+   "id": "sk-ed-02",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "editor_scope"
+   ],
+   "query": "stop a bright flash appearing at the transitions of a dark film",
+   "expect": [
+    "seam-render-white-flash-guard"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "White flash guard."
+  },
+  {
+   "id": "sk-ed-03",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "editor_scope"
+   ],
+   "query": "limit the picture shaking on every beat of the music",
+   "expect": [
+    "beat-hit-limits"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "Beat-hit limits."
+  },
+  {
+   "id": "sk-ed-04",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "editor_scope"
+   ],
+   "query": "when is a cut justified",
+   "expect": [
+    "what-a-cut-is-for"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "What a cut is for."
+  },
+  {
+   "id": "sk-ed-05",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "editor_scope"
+   ],
+   "query": "move an existing remotion project to another renderer and check it frame by frame",
+   "expect": [
+    "port-remotion-to-hyperframes"
+   ],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "Port to HyperFrames."
+  },
+  {
+   "id": "sk-ed-06",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "editor_scope"
+   ],
+   "query": "convert seconds to frames in remotion",
+   "expect": [
+    "remotion-timing-in-frames"
+   ],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "Remotion timing."
+  },
+  {
+   "id": "sk-ed-07",
+   "collection": "skills",
+   "kind": "retrieval",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "editor_scope"
+   ],
+   "query": "decide which spoken words show as subtitles and which become a big word behind the speaker",
+   "expect": [
+    "captions-drop-rail-embed"
+   ],
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "why": "Caption model."
+  },
+  {
+   "id": "sk-neg-01",
+   "collection": "skills",
+   "kind": "negative",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "negative"
+   ],
+   "query": "quantum chromodynamics lecture notes",
+   "expect": [],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Off-topic; nothing in the skills corpus covers it."
+  },
+  {
+   "id": "sk-neg-02",
+   "collection": "skills",
+   "kind": "negative",
+   "tags": [
+    "skills",
+    "cat:ecommerce",
+    "negative"
+   ],
+   "query": "how to repair a car gearbox",
+   "expect": [],
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true
+   },
+   "why": "Off-topic."
+  },
+  {
+   "id": "sk-neg-03",
+   "collection": "skills",
+   "kind": "negative",
+   "tags": [
+    "skills",
+    "cat:general-promo",
+    "negative"
+   ],
+   "query": "tax treatment of employee stock options",
+   "expect": [],
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true
+   },
+   "why": "Off-topic."
+  },
+  {
+   "id": "sk-neg-04",
+   "collection": "skills",
+   "kind": "negative",
+   "tags": [
+    "skills",
+    "cat:saas",
+    "negative"
+   ],
+   "query": "recipe for sourdough bread starter",
+   "expect": [],
+   "filter": {
+    "category": "saas",
+    "include_draft": true
+   },
+   "why": "Off-topic."
+  }
+ ]
+}

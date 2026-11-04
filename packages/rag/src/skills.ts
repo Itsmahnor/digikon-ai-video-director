@@ -74,6 +74,28 @@ export function skillDoc(row: SkillRow): Doc | null {
   };
 }
 
+/** Reads every source folder under `root` (or `root` itself) and returns the skills as retrievable documents, with no store or embedder. For benchmarks and the keyword fallback. Sources that fail the licence gate are skipped. */
+export function loadSkillDocs(root: string): Doc[] {
+  const dirs = existsSync(join(root, "skills-source.json")) ? [root] : readdirSync(root).map((n) => join(root, n)).filter((p) => statSync(p).isDirectory() && existsSync(join(p, "skills-source.json")));
+  const docs: Doc[] = [];
+  for (const dir of dirs) {
+    let manifest: { repo?: string; url?: string; licence?: string; attribution?: string };
+    try { manifest = JSON.parse(stripBom(readFileSync(join(dir, "skills-source.json"), "utf8"))); } catch { continue; }
+    const licFile = ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENCE"].map((n) => join(dir, n)).find(existsSync);
+    const verdict = checkLicence(manifest.licence, licFile ? readFileSync(licFile, "utf8") : null, manifest.attribution);
+    if (!verdict.ok || !manifest.repo || !manifest.url) continue;
+    for (const path of walk(dir).filter((p) => p.endsWith(".md") && !/^licen[cs]e/i.test(p.split(/[\\/]/).pop()!))) {
+      const parsed = parseSkillFile(stripBom(readFileSync(path, "utf8")));
+      if (!parsed) continue;
+      const r = SkillRecord.safeParse({ ...parsed.meta, body: parsed.body, source: { repo: manifest.repo, url: manifest.url, licence: verdict.licence, attribution: manifest.attribution?.trim() || null, checked_on: "1970-01-01" } });
+      if (!r.success) continue;
+      const d = skillDoc({ id: r.data.id, category: r.data.category, topic: r.data.topic, scope: r.data.scope, funnel_stage: r.data.funnel_stage, platform: r.data.platform, grade: r.data.grade, status: r.data.status, title: r.data.title, body: r.data.body, content_hash: "", source_id: manifest.url });
+      if (d) docs.push(d);
+    }
+  }
+  return docs.sort((a, b) => a.id.localeCompare(b.id));
+}
+
 export interface ImportResult {
   source_id: string | null;
   licence: LicenceVerdict | null;
