@@ -104,7 +104,7 @@ export async function importSkills(store: DataStore, embedder: Embedder, dir: st
     return res;
   }
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
-  const source: SkillSourceRow = { id: createHash("sha256").update(manifest.repo).digest("hex").slice(0, 16), repo: manifest.repo, url: manifest.url, licence: verdict.licence!, attribution: manifest.attribution?.trim() || null, checked_on: today };
+  const source: SkillSourceRow = { id: createHash("sha256").update(manifest.url).digest("hex").slice(0, 16), repo: manifest.repo, url: manifest.url, licence: verdict.licence!, attribution: manifest.attribution?.trim() || null, checked_on: today };
   res.source_id = source.id;
 
   const records: { file: string; record: SkillRecord }[] = [];
