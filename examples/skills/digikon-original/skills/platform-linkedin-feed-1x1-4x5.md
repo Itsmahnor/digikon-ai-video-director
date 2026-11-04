@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: linkedin, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** professional and feed placements.
 

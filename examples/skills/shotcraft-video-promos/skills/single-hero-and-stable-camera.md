@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: awareness
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** opening shots and any product close-up.
 

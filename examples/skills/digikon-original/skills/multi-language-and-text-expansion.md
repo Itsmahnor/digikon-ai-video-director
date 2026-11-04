@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the video will be localised or the audience reads another language.
 

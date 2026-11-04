@@ -147,7 +147,7 @@ describe.skipIf(!available)("Postgres + pgvector integration", () => {
     const byId = new Map(rows.map((r) => [r.id, r]));
     const noDraft = await q("director", "saas", false); // drafts not allowed: only reviewed skills come back
     expect(noDraft.length).toBeGreaterThan(0);
-    for (const h of noDraft) expect(byId.get(h.doc.id)!.status).toBe("reviewed");
+    for (const h of noDraft) expect(["reviewed", "approved"]).toContain(byId.get(h.doc.id)!.status);
     const d = await q("director", "saas", true);
     expect(d.length).toBeGreaterThan(0);
     for (const h of d) { const r = byId.get(h.doc.id)!; expect(["saas", "all"]).toContain(r.category); expect(r.scope).not.toBe("editor"); }

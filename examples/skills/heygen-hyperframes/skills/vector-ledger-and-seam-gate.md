@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** before building the master timeline of any multi-scene film.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: youtube, shorts
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** YouTube videos and Shorts, especially tutorials and talking heads.
 

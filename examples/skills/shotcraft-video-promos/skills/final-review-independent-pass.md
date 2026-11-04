@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** before declaring any promo finished.
 

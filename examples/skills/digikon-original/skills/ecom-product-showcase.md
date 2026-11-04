@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: tiktok, reels, shorts, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the shopper needs to see the product clearly and want it.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** a viewer is evaluating the product and wants to see it work.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** at storyboard time for any feature-led promo.
 

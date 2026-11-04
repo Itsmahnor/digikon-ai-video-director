@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: tiktok, reels, youtube
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** packaging and first impressions are part of the appeal.
 

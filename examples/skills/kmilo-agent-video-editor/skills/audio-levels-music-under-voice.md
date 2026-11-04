@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** at the mix stage of any video with speech and music.
 

@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: awareness
 platform: tiktok, reels, shorts
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** short vertical videos where rewatches help.
 

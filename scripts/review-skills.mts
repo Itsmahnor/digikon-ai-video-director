@@ -8,6 +8,11 @@ import { ALLOWED_LICENCES, detectLicence, parseSkillFile } from "@digikon/rag";
 
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");
+// --approve "<who>, <YYYY-MM-DD>, <basis>": a HUMAN approval, recorded in REVIEW.json and REVIEW.md. Skills that pass every check and are `reviewed` become `approved`.
+// A skill already `approved` stays approved while it still passes the checks; one that no longer passes (it was edited) goes back to draft, because the approval was for the old text.
+const approveIdx = args.indexOf("--approve");
+const approval = approveIdx >= 0 ? args[approveIdx + 1]! : null;
+const prevApproval = (() => { try { return (JSON.parse(readFileSync(join(import.meta.dirname, "..", "examples", "skills", "REVIEW.json"), "utf8")) as { approval?: { by: string; on: string; basis: string } }).approval ?? null; } catch { return null; } })();
 const srcArg = args.indexOf("--sources");
 const SOURCES = resolve(srcArg >= 0 ? args[srcArg + 1]! : "D:/skills-src");
 const ROOT = resolve(import.meta.dirname, "..", "examples", "skills");
@@ -112,7 +117,8 @@ for (const src of sources) {
     c["C8"] = NOTES.skimmed[id] ? { pass: false, note: `source read in outline only: ${NOTES.skimmed[id]}` } : { pass: true, note: "source read closely (author's account)" };
 
     const pass = Object.values(c).every((x) => x.pass);
-    entries.push({ id, source: src.repo + (src.url.includes("/tree/") ? ` (${src.url.split("/tree/")[1]})` : ""), file, topic, scope, category, status_before: status, checks: c, result: pass ? "pass" : "fail", status_after: pass ? "reviewed" : "draft" });
+    const keepApproved = pass && status === "approved";
+    entries.push({ id, source: src.repo + (src.url.includes("/tree/") ? ` (${src.url.split("/tree/")[1]})` : ""), file, topic, scope, category, status_before: status, checks: c, result: pass ? "pass" : "fail", status_after: !pass ? "draft" : keepApproved || approval ? "approved" : "reviewed" });
   }
 }
 entries.sort((a, b) => a.id.localeCompare(b.id));
@@ -124,10 +130,13 @@ if (apply) for (const e of entries) {
 }
 const passed = entries.filter((e) => e.result === "pass").length;
 const reviewedAt = new Date().toISOString().slice(0, 10);
-writeFileSync(join(ROOT, "REVIEW.json"), JSON.stringify({ reviewed_on: reviewedAt, reviewer: "the agent that wrote the skills (needs a human spot-check)", checklist: "docs/SKILL_REVIEW.md", sources_checked: existsSync(SOURCES), total: entries.length, passed, kept_draft: entries.length - passed, skills: entries.map(({ file: _f, ...e }) => e) }, null, 1) + "\n");
-const L = [`# Skill review results (${reviewedAt})`, "", "Checklist: [docs/SKILL_REVIEW.md](../../docs/SKILL_REVIEW.md). **Reviewer: the same agent that wrote the skills. This needs a human spot-check before anything is promoted to `approved`.**", "", `${entries.length} skills: ${passed} pass (status \`reviewed\`), ${entries.length - passed} stay \`draft\`. Sources ${existsSync(SOURCES) ? "were" : "were NOT"} available for the verbatim check.`, "", "| skill | source | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | result |", "|---|---|---|---|---|---|---|---|---|---|---|"];
+const [by, on, ...basis] = (approval ?? "").split(",").map((x) => x.trim());
+if (approval && (!by || !/^\d{4}-\d{2}-\d{2}$/.test(on ?? ""))) { console.error(`--approve needs "<who>, <YYYY-MM-DD>, <basis>"`); process.exit(2); }
+const approvalRecord = approval ? { by: by!, on: on!, basis: basis.join(", ") } : prevApproval;
+writeFileSync(join(ROOT, "REVIEW.json"), JSON.stringify({ reviewed_on: reviewedAt, reviewer: "the agent that wrote the skills (a human approved the result, see approval)", checklist: "docs/SKILL_REVIEW.md", sources_checked: existsSync(SOURCES), total: entries.length, passed, kept_draft: entries.length - passed, approved: entries.filter((e) => e.status_after === "approved").length, approval: approvalRecord, skills: entries.map(({ file: _f, ...e }) => e) }, null, 1) + "\n");
+const L = [`# Skill review results (${reviewedAt})`, "", "Checklist: [docs/SKILL_REVIEW.md](../../docs/SKILL_REVIEW.md). The checks were run by the same agent that wrote the skills." + (approvalRecord ? ` **Approved by ${approvalRecord.by} on ${approvalRecord.on} (${approvalRecord.basis}).** Approval covers the text as it was on that date; a skill that is edited and no longer passes goes back to draft.` : " **Nothing is approved yet: that needs a human.**"), "", `${entries.length} skills: ${passed} pass, ${entries.filter((e) => e.status_after === "approved").length} \`approved\`, ${entries.filter((e) => e.status_after === "reviewed").length} \`reviewed\`, ${entries.length - passed} stay \`draft\`. Sources ${existsSync(SOURCES) ? "were" : "were NOT"} available for the verbatim check.`, "", "| skill | source | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | result |", "|---|---|---|---|---|---|---|---|---|---|---|"];
 const mark = (c: Check) => (c.pass ? "ok" : "FAIL");
-for (const e of entries) L.push(`| ${e.id} | ${e.source.split(" ")[0]} | ${["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"].map((k) => mark(e.checks[k]!)).join(" | ")} | ${e.result === "pass" ? "reviewed" : "draft"} |`);
+for (const e of entries) L.push(`| ${e.id} | ${e.source.split(" ")[0]} | ${["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"].map((k) => mark(e.checks[k]!)).join(" | ")} | ${e.status_after} |`);
 const fails = entries.filter((e) => e.result === "fail");
 if (fails.length) { L.push("", "## Why skills stay draft", ""); for (const e of fails) L.push(`- **${e.id}**: ${Object.entries(e.checks).filter(([, c]) => !c.pass).map(([k, c]) => `${k} ${c.note}`).join("; ")}`); }
 writeFileSync(join(ROOT, "REVIEW.md"), L.join("\n") + "\n");

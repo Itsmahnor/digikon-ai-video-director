@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: tiktok, reels, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** hero shots of a physical product and the closing beat.
 

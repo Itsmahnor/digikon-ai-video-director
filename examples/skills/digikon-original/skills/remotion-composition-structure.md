@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** planning or reviewing a Remotion video project.
 

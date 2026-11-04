@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** a background or hero video on a website.
 

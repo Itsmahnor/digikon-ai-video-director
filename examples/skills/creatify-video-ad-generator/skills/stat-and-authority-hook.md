@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: linkedin, feed, youtube
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** sceptical or B2B audiences where credibility matters more than surprise.
 

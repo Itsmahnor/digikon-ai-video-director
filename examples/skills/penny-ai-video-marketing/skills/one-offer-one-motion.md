@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** before scripting any promotional video, to fix what is being sold and what the viewer does next.
 

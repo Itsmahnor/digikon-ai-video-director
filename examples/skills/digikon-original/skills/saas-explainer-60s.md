@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: youtube, linkedin, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the audience does not yet understand the category or the problem.
 

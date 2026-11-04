@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** an explainer built script-first.
 

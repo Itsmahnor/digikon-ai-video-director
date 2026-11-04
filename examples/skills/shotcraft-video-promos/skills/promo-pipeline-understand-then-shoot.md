@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** a full product promo for a web or desktop product.
 

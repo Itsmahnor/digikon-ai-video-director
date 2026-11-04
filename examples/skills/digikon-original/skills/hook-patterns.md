@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, youtube, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** every video, at the start of scene design.
 

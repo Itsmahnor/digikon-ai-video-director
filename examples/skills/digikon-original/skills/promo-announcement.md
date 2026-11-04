@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: linkedin, feed, youtube
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** news that people should hear (new location, partnership, milestone, hours).
 

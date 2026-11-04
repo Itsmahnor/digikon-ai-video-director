@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: tiktok, reels, shorts
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** any vertical short.
 

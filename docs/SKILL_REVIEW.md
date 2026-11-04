@@ -1,9 +1,9 @@
 # Skill review checklist
 
-A skill starts as `draft`. It may be promoted to `reviewed` (never `approved`) only when it passes every check below. `approved` is reserved for a human reviewer, after a spot-check of the skill against its source.
+A skill starts as `draft`. It may be promoted to `reviewed` only when it passes every check below. `approved` is a human act: it is set with `npm run skills:review -- --apply --approve "<who>, <YYYY-MM-DD>, <basis>"`, which records who approved and when in `examples/skills/REVIEW.json` and `REVIEW.md`. **Digikon approved the 111 skills that passed the checks on 2026-11-04 (their messages in the project thread); the 6 skimmed-source skills stay `draft`.** Approval covers the text as it was on that date: a skill that is edited and then fails a check goes back to `draft` the next time the script runs.
 `npm run skills:review` applies the checks and writes `examples/skills/REVIEW.json` and `examples/skills/REVIEW.md`; `npm run skills:review -- --apply` also sets `status: reviewed` in the files of the skills that pass.
 
-**Who reviewed these.** The first review of the shipped 117 skills was done by the same agent that wrote them, using this checklist. The mechanical checks (C1, C2, C3, C5, C6, C7) are scripted and repeatable; C4 is a scripted flag plus a judgement; C8 is the author's own account of how closely a source was read. It needs a human spot-check before anything is promoted to `approved`, and before anyone treats `reviewed` as independent review.
+**Who reviewed these.** The checks were run by the same agent that wrote the skills. The mechanical checks (C1, C2, C3, C5, C6, C7) are scripted and repeatable; C4 is a scripted flag plus a judgement; C8 is the author's own account of how closely a source was read. A human (Digikon) then approved the result on 2026-11-04. That approval is the owner's decision, not an independent line-by-line review.
 
 | # | Check | How it is checked | Fails when |
 |---|---|---|---|
@@ -16,4 +16,4 @@ A skill starts as `draft`. It may be promoted to `reviewed` (never `approved`) o
 | C7 | Provenance line | Adapted skills end with a line naming the source URL, the licence and the copyright holder, and say they are condensed adaptations. Originals say they are original. | missing |
 | C8 | Source read closely | Skills whose source the author read only in outline stay `draft`. This is recorded by hand in `scripts/skill-review-notes.json`, with the reason. | listed as skimmed |
 
-Retrieval: `reviewed` skills are returned with `SKILLS_INCLUDE_DRAFT` off; `draft` skills only when it is on.
+Retrieval: `reviewed` and `approved` skills are returned with `SKILLS_INCLUDE_DRAFT` off; `draft` skills only when it is on.

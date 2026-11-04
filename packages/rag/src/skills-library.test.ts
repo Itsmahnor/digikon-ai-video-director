@@ -12,7 +12,9 @@ import { ScopedRetriever } from "./scopes.js";
 const ROOT = resolve(import.meta.dirname, "..", "..", "..", "examples", "skills");
 const sources = readdirSync(ROOT).map((n) => join(ROOT, n)).filter((p) => statSync(p).isDirectory() && existsSync(join(p, "skills-source.json")));
 
-const review = new Map((JSON.parse(readFileSync(resolve(ROOT, "REVIEW.json"), "utf8")) as { skills: { id: string; status_after: string; result: string }[] }).skills.map((e) => [e.id, e.status_after]));
+const reviewFile = JSON.parse(readFileSync(resolve(ROOT, "REVIEW.json"), "utf8")) as { approval: { by: string; on: string; basis: string } | null; skills: { id: string; status_after: string; result: string }[] };
+const review = new Map(reviewFile.skills.map((e) => [e.id, e.status_after]));
+const approval = reviewFile.approval;
 const store = new MemoryDataStore();
 const results: ImportResult[] = [];
 const emb = new HashEmbedder();
@@ -37,7 +39,8 @@ describe("shipped skill library", () => {
       expect(["saas", "ecommerce", "general-promo", "all"]).toContain(s.category);
       expect(["director", "editor", "both"]).toContain(s.scope);
       expect(s.topic.length).toBeGreaterThan(0);
-      expect(["draft", "reviewed"]).toContain(s.status); // nothing is ever "approved" by the review script; that is for a human
+      expect(["draft", "reviewed", "approved"]).toContain(s.status);
+      if (s.status === "approved") expect(approval, `${s.id} is approved, so REVIEW.json must record who approved it`).toMatchObject({ by: "Digikon", on: "2026-11-04" }); // approval is a human act and is recorded
       expect(s.status, `${s.id} status must match docs/SKILL_REVIEW.md results`).toBe(review.get(s.id));
       expect(s.grade).toBe("C");
     }

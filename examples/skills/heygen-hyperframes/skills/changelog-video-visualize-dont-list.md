@@ -7,7 +7,7 @@ scope: director
 funnel_stage: retention
 platform: linkedin, youtube, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** weekly or release changelog videos for existing customers.
 

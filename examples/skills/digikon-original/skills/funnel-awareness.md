@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the viewer does not know the brand or may not know they have the problem.
 

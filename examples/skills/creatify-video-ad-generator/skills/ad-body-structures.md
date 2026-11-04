@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** after the hook is chosen, to pick the body of a 15 to 30 second ad.
 

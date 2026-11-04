@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: tiktok, reels, shorts, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** a time-bound or limited offer should drive immediate purchase.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** when preparing the post copy for a TikTok video.
 

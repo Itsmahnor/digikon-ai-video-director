@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, feed, youtube
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** introducing a range, a season or a themed set of products.
 

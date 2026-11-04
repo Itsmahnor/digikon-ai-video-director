@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** any ad, creator video, testimonial, giveaway or video using generated people or voices.
 

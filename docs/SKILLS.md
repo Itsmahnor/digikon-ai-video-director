@@ -1,4 +1,4 @@
-﻿# Skills library
+# Skills library
 
 Production skills are short pieces of craft guidance (how a SaaS demo is structured, how to cut on the beat, what to ask when the logo is missing). The Director reads them when planning and the Editor when turning an approved plan into operations. They are reference data: a skill never supports a claim, only approved brand facts do.
 
@@ -22,9 +22,9 @@ A query for a category returns that category **and** `all`, never another specif
 
 ## Status and review
 
-Everything starts as `draft`. `docs/SKILL_REVIEW.md` is the checklist; `npm run skills:review [-- --apply]` applies it and writes `examples/skills/REVIEW.md` and `REVIEW.json`. Passing skills become `reviewed`; **`approved` is for a human**. The first review was done by the agent that wrote the skills, so it needs a human spot-check. Skills whose source was only skimmed stay `draft`.
+Everything starts as `draft`. `docs/SKILL_REVIEW.md` is the checklist; `npm run skills:review [-- --apply]` applies it and writes `examples/skills/REVIEW.md` and `REVIEW.json`. Passing skills become `reviewed`; **`approved` is a human act**, recorded with `--approve`. **Digikon approved the 111 passing skills on 2026-11-04**; the checks were run by the agent that wrote the skills. Skills whose source was only skimmed (6) stay `draft`.
 
-`reviewed` skills are retrieved by default. `draft` skills are hidden unless `SKILLS_INCLUDE_DRAFT=1` (demos, development). That switch only widens what may be read; no approval gate or render gate looks at it.
+`reviewed` and `approved` skills are retrieved by default. `draft` skills are hidden unless `SKILLS_INCLUDE_DRAFT=1` (demos, development). That switch only widens what may be read; no approval gate or render gate looks at it.
 
 ## Retrieval
 

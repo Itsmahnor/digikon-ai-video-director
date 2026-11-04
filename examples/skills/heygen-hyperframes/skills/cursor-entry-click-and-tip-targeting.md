@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** any scene with a pointer-led action.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the viewer is ready to decide.
 

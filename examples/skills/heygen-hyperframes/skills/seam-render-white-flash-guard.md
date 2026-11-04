@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** when assembling the master timeline or when a transition shows a bright flash, especially on dark films.
 

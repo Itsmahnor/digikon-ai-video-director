@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, linkedin, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** reviewing or planning any launch or feature clip.
 

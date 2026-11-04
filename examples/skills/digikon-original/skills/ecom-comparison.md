@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: youtube, feed, tiktok
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the shopper is choosing between your product and an alternative or between your own models.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** every ad. The first three seconds decide whether the rest is seen.
 

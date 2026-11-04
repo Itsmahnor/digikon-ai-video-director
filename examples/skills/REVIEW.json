@@ -1,11 +1,17 @@
 {
  "reviewed_on": "2026-11-04",
- "reviewer": "the agent that wrote the skills (needs a human spot-check)",
+ "reviewer": "the agent that wrote the skills (a human approved the result, see approval)",
  "checklist": "docs/SKILL_REVIEW.md",
  "sources_checked": true,
  "total": 117,
  "passed": 111,
  "kept_draft": 6,
+ "approved": 111,
+ "approval": {
+  "by": "Digikon",
+  "on": "2026-11-04",
+  "basis": "their messages in the project thread (09:37, 09:40 and 09:55 UTC): skills approved"
+ },
  "skills": [
   {
    "id": "ab-test-hook-first",
@@ -13,7 +19,7 @@
    "topic": "testing",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -49,7 +55,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ab-testing-metrics-and-batch-rhythm",
@@ -57,7 +63,7 @@
    "topic": "testing",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -93,7 +99,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "accessibility",
@@ -101,7 +107,7 @@
    "topic": "accessibility",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -137,7 +143,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ad-body-structures",
@@ -145,7 +151,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -181,7 +187,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ad-creative-brief-first",
@@ -189,7 +195,7 @@
    "topic": "brief",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -225,7 +231,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ad-disclosure-and-labelling",
@@ -233,7 +239,7 @@
    "topic": "claims-safety",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -269,7 +275,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "asset-gaps-questions",
@@ -277,7 +283,7 @@
    "topic": "asset-gaps",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -313,7 +319,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "audio-levels-music-under-voice",
@@ -321,7 +327,7 @@
    "topic": "audio",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -357,7 +363,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "audio-music-and-voiceover",
@@ -365,7 +371,7 @@
    "topic": "audio",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -401,7 +407,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "basic-colour-order-of-work",
@@ -409,7 +415,7 @@
    "topic": "visual-design",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -445,7 +451,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "beat-hit-limits",
@@ -453,7 +459,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -489,7 +495,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "beat-sync-music-to-grid",
@@ -497,7 +503,7 @@
    "topic": "audio",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -533,7 +539,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "brand-consistency",
@@ -541,7 +547,7 @@
    "topic": "brand",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -577,7 +583,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "caption-sync-spec",
@@ -585,7 +591,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -621,7 +627,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "captions-drop-rail-embed",
@@ -629,7 +635,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -665,7 +671,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "captions-overlay-law",
@@ -673,7 +679,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -709,7 +715,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "carriers-and-causal-motion",
@@ -717,7 +723,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -753,7 +759,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "changelog-video-visualize-dont-list",
@@ -761,7 +767,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -797,7 +803,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cover-frame-and-first-frame",
@@ -805,7 +811,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -841,7 +847,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cta-and-offer-clarity",
@@ -849,7 +855,7 @@
    "topic": "cta-offer",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -885,7 +891,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cta-patterns-by-funnel-intent",
@@ -893,7 +899,7 @@
    "topic": "cta-offer",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -929,7 +935,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cursor-entry-click-and-tip-targeting",
@@ -937,7 +943,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -973,7 +979,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cut-the-curve-parameters",
@@ -981,7 +987,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1017,7 +1023,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cut-the-curve-seams",
@@ -1025,7 +1031,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1061,7 +1067,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "cutdowns-and-versions",
@@ -1069,7 +1075,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1105,7 +1111,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "data-and-chart-scenes",
@@ -1113,7 +1119,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1149,7 +1155,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "distinctive-type-and-hero-first",
@@ -1157,7 +1163,7 @@
    "topic": "visual-design",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1193,7 +1199,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-collection-lookbook",
@@ -1201,7 +1207,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1237,7 +1243,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-comparison",
@@ -1245,7 +1251,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1281,7 +1287,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-offer-sale",
@@ -1289,7 +1295,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1325,7 +1331,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-product-showcase",
@@ -1333,7 +1339,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1369,7 +1375,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-ugc-style-ad",
@@ -1377,7 +1383,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1413,7 +1419,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ecom-unboxing",
@@ -1421,7 +1427,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1457,7 +1463,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "explainer-pacing-per-beat",
@@ -1465,7 +1471,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1501,7 +1507,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "explainer-story-arc",
@@ -1509,7 +1515,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1545,7 +1551,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "explainer-style-system-consistency",
@@ -1553,7 +1559,7 @@
    "topic": "visual-design",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1589,7 +1595,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "explainer-vo-timing-math",
@@ -1597,7 +1603,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1633,7 +1639,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "film-current-direction",
@@ -1641,7 +1647,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1677,7 +1683,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "final-review-independent-pass",
@@ -1685,7 +1691,7 @@
    "topic": "quality",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1721,7 +1727,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "funnel-awareness",
@@ -1729,7 +1735,7 @@
    "topic": "funnel",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1765,7 +1771,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "funnel-consideration",
@@ -1773,7 +1779,7 @@
    "topic": "funnel",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1809,7 +1815,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "funnel-conversion",
@@ -1817,7 +1823,7 @@
    "topic": "funnel",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1853,7 +1859,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "funnel-retention",
@@ -1861,7 +1867,7 @@
    "topic": "funnel",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1897,7 +1903,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "graphics-text-timing-and-safe-zones",
@@ -1905,7 +1911,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1941,7 +1947,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "hook-formulas-pattern-question-claim",
@@ -1949,7 +1955,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -1985,7 +1991,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "hook-must-pay-off",
@@ -1993,7 +1999,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2029,7 +2035,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "hook-patterns",
@@ -2037,7 +2043,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2073,7 +2079,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "hyperframes-film-workflow",
@@ -2081,7 +2087,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2117,7 +2123,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "hyperframes-render-work-loop",
@@ -2125,7 +2131,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2161,7 +2167,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "launch-hard-won-lessons",
@@ -2169,7 +2175,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2205,7 +2211,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "launch-multi-critic-review",
@@ -2213,7 +2219,7 @@
    "topic": "quality",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2249,7 +2255,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "map-every-feature-to-a-shot",
@@ -2257,7 +2263,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2293,7 +2299,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "media-use-assets-and-audio",
@@ -2345,7 +2351,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2381,7 +2387,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "motion-vector-law",
@@ -2389,7 +2395,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2425,7 +2431,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "multi-format-platform-guide",
@@ -2433,7 +2439,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2469,7 +2475,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "multi-language-and-text-expansion",
@@ -2477,7 +2483,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2513,7 +2519,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "one-offer-one-motion",
@@ -2521,7 +2527,7 @@
    "topic": "cta-offer",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2557,7 +2563,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "one-theme-applied-consistently",
@@ -2565,7 +2571,7 @@
    "topic": "visual-design",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2601,7 +2607,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "onscreen-text-and-captions",
@@ -2609,7 +2615,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2645,7 +2651,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "oversized-cursor-causal-motion",
@@ -2653,7 +2659,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2689,7 +2695,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "pacing-by-video-type",
@@ -2697,7 +2703,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2733,7 +2739,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "pacing-slower-with-room-to-breathe",
@@ -2741,7 +2747,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2777,7 +2783,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "platform-landing-hero-loop",
@@ -2785,7 +2791,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2821,7 +2827,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "platform-linkedin-feed-1x1-4x5",
@@ -2829,7 +2835,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2865,7 +2871,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "platform-vertical-9x16",
@@ -2873,7 +2879,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2909,7 +2915,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "platform-youtube-16x9",
@@ -2917,7 +2923,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2953,7 +2959,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "port-remotion-to-hyperframes",
@@ -2961,7 +2967,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -2997,7 +3003,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "problem-solution-proof-cta",
@@ -3005,7 +3011,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3041,7 +3047,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "product-closeup-and-brand-finale",
@@ -3049,7 +3055,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "ecommerce",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3085,7 +3091,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-announcement",
@@ -3093,7 +3099,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3129,7 +3135,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-brand-story",
@@ -3137,7 +3143,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3173,7 +3179,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-creation-mode-choice",
@@ -3225,7 +3231,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3261,7 +3267,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-local-service-ad",
@@ -3269,7 +3275,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3305,7 +3311,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-pipeline-understand-then-shoot",
@@ -3313,7 +3319,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3349,7 +3355,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-recruitment-employer-brand",
@@ -3357,7 +3363,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3393,7 +3399,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "promo-social-ad",
@@ -3401,7 +3407,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "general-promo",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3437,7 +3443,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "proof-and-claims-safety",
@@ -3445,7 +3451,7 @@
    "topic": "claims-safety",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3481,7 +3487,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "real-captures-not-mock-ui",
@@ -3489,7 +3495,7 @@
    "topic": "claims-safety",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3525,7 +3531,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "registry-before-hand-building",
@@ -3577,7 +3583,7 @@
    "topic": "text-captions",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3613,7 +3619,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "remotion-composition-structure",
@@ -3621,7 +3627,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3657,7 +3663,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "remotion-render-and-determinism",
@@ -3665,7 +3671,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3701,7 +3707,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "remotion-scene-graph-mapping",
@@ -3709,7 +3715,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3745,7 +3751,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "remotion-timing-in-frames",
@@ -3753,7 +3759,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3789,7 +3795,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "render-audit-stills-first",
@@ -3797,7 +3803,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3833,7 +3839,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "reverse-any-video-rebuild-and-compare",
@@ -3885,7 +3891,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3921,7 +3927,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-faq-support-short",
@@ -3929,7 +3935,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -3965,7 +3971,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-feature-launch",
@@ -3973,7 +3979,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4009,7 +4015,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-launch-video-storyboard-first",
@@ -4017,7 +4023,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4053,7 +4059,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-onboarding-walkthrough",
@@ -4061,7 +4067,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4097,7 +4103,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-product-demo",
@@ -4105,7 +4111,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4141,7 +4147,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "saas-testimonial-case-study",
@@ -4149,7 +4155,7 @@
    "topic": "video-type-playbook",
    "scope": "director",
    "category": "saas",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4185,7 +4191,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "scene-beat-design-and-pacing",
@@ -4193,7 +4199,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4229,7 +4235,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "seam-render-white-flash-guard",
@@ -4237,7 +4243,7 @@
    "topic": "renderer",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4273,7 +4279,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "ship-platform-sizes-and-deliverable-pack",
@@ -4281,7 +4287,7 @@
    "topic": "platform-rules",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4317,7 +4323,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "single-hero-and-stable-camera",
@@ -4325,7 +4331,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4361,7 +4367,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "slideshow-vs-rendered-video",
@@ -4413,7 +4419,7 @@
    "topic": "audio",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4449,7 +4455,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "sound-sourcing-local-files-and-credits",
@@ -4457,7 +4463,7 @@
    "topic": "audio",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4493,7 +4499,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "stat-and-authority-hook",
@@ -4501,7 +4507,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4537,7 +4543,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "stillness-before-climax-and-timing-intents",
@@ -4545,7 +4551,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4581,7 +4587,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "storyboard-shot-table",
@@ -4589,7 +4595,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4625,7 +4631,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "style-sampling-proven-styles",
@@ -4677,7 +4683,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4713,7 +4719,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "tiktok-caption-supports-the-video",
@@ -4721,7 +4727,7 @@
    "topic": "text-captions",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4757,7 +4763,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "tiktok-completion-first",
@@ -4765,7 +4771,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4801,7 +4807,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "tiktok-loop-and-clean-ending",
@@ -4809,7 +4815,7 @@
    "topic": "structure",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4845,7 +4851,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "tiktok-three-layer-hook",
@@ -4853,7 +4859,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4889,7 +4895,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "vector-ledger-and-seam-gate",
@@ -4897,7 +4903,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4933,7 +4939,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "visual-philosophy-before-layout",
@@ -4941,7 +4947,7 @@
    "topic": "visual-design",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -4977,7 +4983,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "voice-over-script-writing",
@@ -4985,7 +4991,7 @@
    "topic": "structure",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -5021,7 +5027,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "waterfall-entry-and-nudge-curve",
@@ -5029,7 +5035,7 @@
    "topic": "motion",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -5065,7 +5071,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "what-a-cut-is-for",
@@ -5073,7 +5079,7 @@
    "topic": "pacing",
    "scope": "editor",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -5109,7 +5115,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   },
   {
    "id": "youtube-hook-and-retention",
@@ -5117,7 +5123,7 @@
    "topic": "hook",
    "scope": "director",
    "category": "all",
-   "status_before": "draft",
+   "status_before": "reviewed",
    "checks": {
     "C1": {
      "pass": true,
@@ -5153,7 +5159,7 @@
     }
    },
    "result": "pass",
-   "status_after": "reviewed"
+   "status_after": "approved"
   }
  ]
 }

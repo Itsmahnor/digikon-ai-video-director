@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the platform rewards native, person-to-camera content.
 

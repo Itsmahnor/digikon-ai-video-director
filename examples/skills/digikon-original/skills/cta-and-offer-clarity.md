@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** the last beat of every video and any video that states an offer.
 

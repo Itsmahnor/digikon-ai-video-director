@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** UI demos and scenes that feel static or stale.
 

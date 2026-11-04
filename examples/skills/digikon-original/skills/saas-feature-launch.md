@@ -7,7 +7,7 @@ scope: director
 funnel_stage: retention
 platform: linkedin, tiktok, reels, shorts, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** a new feature ships and existing and prospective users should notice it.
 

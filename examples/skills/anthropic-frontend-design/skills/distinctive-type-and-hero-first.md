@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: landing
 grade: C
-status: reviewed
+status: approved
 ---
 **General visual-design skill (not video-specific); useful for landing-page hero loops and title cards.**
 

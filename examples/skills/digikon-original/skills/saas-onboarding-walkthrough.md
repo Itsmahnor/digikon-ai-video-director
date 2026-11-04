@@ -7,7 +7,7 @@ scope: director
 funnel_stage: retention
 platform: youtube, landing
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** new users need to reach their first success quickly.
 

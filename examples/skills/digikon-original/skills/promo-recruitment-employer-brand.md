@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: linkedin, youtube, feed, tiktok
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** attracting candidates to a company or a role.
 

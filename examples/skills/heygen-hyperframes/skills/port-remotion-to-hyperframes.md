@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** moving a Remotion composition, or other canvas or HTML animation, into the HyperFrames renderer.
 

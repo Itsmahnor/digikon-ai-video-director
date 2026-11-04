@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, youtube, feed
 grade: C
-status: reviewed
+status: approved
 ---
 **When to use:** every video that will appear in a grid, feed or search result.
 
