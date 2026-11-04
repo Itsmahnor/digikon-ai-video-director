@@ -29,6 +29,7 @@
     "db:migrate": "tsx scripts/db.mts migrate",
     "db:health": "tsx scripts/db.mts health",
     "templates": "tsx scripts/templates.mts",
+    "skills": "tsx scripts/skills.mts",
     "new-template": "tsx scripts/new-template.mts"
   },
   "devDependencies": {

@@ -8,3 +8,4 @@ export * from "./embeddings.js";
 export * from "./rerank.js";
 export * from "./hybrid.js";
 export * from "./templates.js";
+export * from "./skills.js";
