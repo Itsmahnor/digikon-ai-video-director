@@ -39,7 +39,7 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 | Phase C | Guided intake and question module | **done** | `ea2c45d` |
 | D1 | Video-type step: propose 2-3 types, user choice, audit record, node before treatment (bump `director-graph/5`), UI card | done | `5b5dd72` |
 | D2 | Needs analysis: Gate 1 requirements sheet (assets, fonts, sound) | done | `94c04de` |
-| D3 | Story from the chosen type | not started | |
+| D3 | Story from the chosen type | done (stub model only) | see git log; test `category-stories.test.ts` |
 | E to G | see `docs/PLAN_PHASES_D-G.md` | not started | |
 
 **Unproven, say so in every report:** (1) a real Postgres **server** run; (2) any **real LLM** run (every demo uses the stub model, `DemoClient`); (3) **human-written** benchmark queries (the 85 independent queries were written by the same agent that wrote the skills); (4) a **human spot-check** of the skill review; (5) the wizard has no automated browser test (Playwright is not installed here; it was checked by driving the built-in browser).
@@ -116,5 +116,8 @@ The full annotated tree (every directory, which plan step it belongs to, its sta
 
 - **Only one session may work in this folder at a time.** On 2026-11-04 two Claude sessions edited the same working tree: commits appeared that the other session did not make, and uncommitted edits were silently reverted. Check `git status` and `git log` before starting; commit only by explicit file path (never `git add -A` while another session is active); use a separate worktree for anything long (for example `git worktree add --detach D:\digikon-worktrees\verify <commit>`; node_modules must be copied without the `@digikon` junctions, which point at the main tree, and those junctions re-created inside the copy).
 - Two full-suite flakes under load, both pass alone: `apps/console/src/render.test.ts` ("needs a logo", timeout) and `apps/console/src/assets.test.ts` (120 s timeout, Windows temp-folder EPERM on cleanup).
-- The D1 video-type catalog (`packages/director/src/video-types.ts`) has example lines with invented figures ("get paid 4x faster", "5 seconds to prep salad"). They are shown to the user as reference examples, but they break the no-invented-statistics rule; rewrite them without numbers.
+- Fixed: the D1 video-type catalog examples no longer contain invented figures; the sale example uses the placeholder `[OFFER: from the brief]`.
 - Fixed: a skill id that the SkillLibrary does not hold (a video-type playbook id) is recorded as `name@unknown` in the audit record and the handoff (`packages/director/src/skill-ref.ts`), no longer as an invented `1.0.0`.
+
+- D3 (stub model only, no real Claude run): the chosen video type and its category flow into the treatment and storyboard prompts (graph.ts, 
+odes.ts); DemoClient answers by category (saas, ecommerce, general promo) using only blocks the category's visual system allows. Unproven: how the real model uses the chosen type; that needs a real Claude run (off for now). Gates untouched.

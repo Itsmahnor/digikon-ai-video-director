@@ -30,7 +30,7 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |-- visual/                                 15 files
 |-- db/                                          3 files  [done; A1, A2, B1] SQL migrations
 |   |-- migrations/                              3 files  [done; A1, A2, B1] 0001 pgvector foundation (base), 0002 skills (A2), 0003 skill scope and topic (B1)
-|-- docs/                                      211 files  [done; base, B3, C, handoff] Design notes, the handoff guide, the plan text, skills and review docs
+|-- docs/                                      212 files  [done; base, B3, C, handoff] Design notes, the handoff guide, the plan text, skills and review docs
 |   |-- assets/                                 28 files  [base] Evidence for the asset-handling milestone
 |   |   |-- evidence/                           26 files
 |   |-- quality/                               150 files  [base] Rendered quality evidence (before/after, blocks, regression)
@@ -66,7 +66,7 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |-- packages/                                  308 files  [done; base, A-D] Workspace packages
 |   |-- contracts/                              41 files  [done; A2, B1, C1, C5, C6, D1, D2] Schemas: SkillRecord, ProjectKit, completeness, typed questions, video types, Gate 1 requirements
 |   |   |-- src/                                39 files
-|   |-- director/                               47 files  [partial; B3, C6, D1, D2, D3] Director graph and nodes, Editor agent; D3 (story from the chosen type) is in progress
+|   |-- director/                               47 files  [partial; B3, C6, D1, D2, D3] Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model
 |   |   |-- src/                                45 files
 |   |-- evals/                                  15 files  [done; B3] Benchmark runners (eval:skills, eval:skills:db, eval:hybrid)
 |   |   |-- src/                                13 files
@@ -96,7 +96,7 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |-- shot/                                    4 files
 |   |-- sound_cue/                               3 files
 |   |-- transition/                              6 files
-|-- scripts/                                    14 files  [done; A3, B3, B-review, tree] CLIs: db, skills import, skills:review, skills:demo, tree, templates
+|-- scripts/                                    16 files  [done; A3, B3, B-review, tree] CLIs: db, skills import, skills:review, skills:demo, tree, templates
 |-- skills/                                     41 files  [partial; base, E5 (planned)] Director and Editor SKILL.md files (the Editor skills get an llm in E5)
 |   |-- cinematography/                          3 files
 |   |   |-- evals/                               1 files
@@ -166,7 +166,7 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 | Retrieval default | BM25 baseline; hybrid if it beats it | Hybrid ranking with an off-topic floor (nothing is returned when no distinctive word matches); BM25 with the same floor when there is no database | Chosen from the benchmark; the floor is a keyword-coverage rule and answers most, not all, off-topic queries |
 | PDF reading (C3) | PDF text and colour extraction | A small purpose-built reader in packages/media/src/guideline.ts | No PDF library was installed and nothing was installed without approval; scanned or encrypted files fall back to asking |
 | Wizard browser tests (C4) | A browser test (Playwright) | Wizard logic is unit-tested; edge cases were checked in the built-in browser | Playwright is not installed on this machine |
-| Video-type catalog (D1) | Types proposed using the skills | A hard-coded catalog in packages/director/src/video-types.ts that mirrors the playbook skills; examples still contain invented figures | Open follow-up in HANDOFF.md (the file has another session's uncommitted edits) |
+| Video-type catalog (D1) | Types proposed using the skills | A hard-coded catalog in packages/director/src/video-types.ts that mirrors the playbook skills; examples carry no invented figures (placeholder where an offer is needed) | Fixed together with D3 |
 | Plan files | architecture/UPDATED_PLAN.md and IMPLEMENTATION_STEPS.md | Not in the repo; the plan text received is in docs/PLAN_PHASES_A-C.md and docs/PLAN_PHASES_D-G.md | The files were never provided |
 | Extra documents | - | docs/HANDOFF.md, docs/SKILLS.md, docs/SKILL_REVIEW.md, docs/PROJECT_TREE.md (this file) | So another session can continue without context |
 | Sessions | One session at a time | On 2026-11-04 two sessions edited the same working tree | See HANDOFF.md, section 8 |

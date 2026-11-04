@@ -1,4 +1,5 @@
 import type { GenerateRequest, LlmClient } from "./llm.js";
+import { detectCategory } from "./video-types.js";
 
 /**
  * DEMO ONLY. Canned, rule-based answers so the console can be exercised without an API key.
@@ -51,24 +52,98 @@ export class DemoClient implements LlmClient {
     return m ? Number(m[1]) : 15;
   }
 
+  private extractCategory(user: string): "saas" | "ecommerce" | "general-promo" {
+    const targetMatch = /## Target\n([\s\S]*?)(?:\n\n|\n##|$)/.exec(user);
+    const target = targetMatch ? (() => { try { return JSON.parse(targetMatch[1]!); } catch { return {}; } })() : {};
+    if (target.video_category) return target.video_category;
+    const briefMatch = /<brief>\n([\s\S]*?)\n<\/brief>/.exec(user);
+    const brief = briefMatch ? briefMatch[1]! : "";
+    return detectCategory(brief);
+  }
+
   private treatment(user: string) {
     const total = this.target(user);
+    const category = this.extractCategory(user);
     const facts = [...user.matchAll(/\[(F\d+)\] ([^\n]+)/g)].map((m) => ({ id: m[1]!, text: m[2]! }));
     const claims = [
       ...facts.slice(0, 2).map((f, i) => ({ claim_id: `C0${i + 1}`, text: f.text, brand_fact_id: f.id })),
       { claim_id: "C09", text: "The best you can buy", brand_fact_id: null, kind: "factual", safe_alternative: "Let the product shots speak; no ranking claim." },
     ];
     const a = Math.round(total * 0.35 * 2) / 2, c = Math.max(2, Math.min(4, Math.round(total * 0.2 * 2) / 2));
+    const midSec = Math.round((total - a - c) * 2) / 2;
+
+    if (category === "saas") {
+      const trialFact = facts.find((f) => /14\s*days/i.test(f.text));
+      return {
+        logline: "Automate calendar scheduling in one click, without the back-and-forth.",
+        hook: "Stop losing hours to manual calendar scheduling.",
+        tone: "calm, efficient, and precise",
+        beats: [
+          { beat: "Hook", purpose: "Show the scheduling bottleneck and double bookings", approx_seconds: a },
+          { beat: "Demo", purpose: "Demonstrate 1-click calendar sync and automatic availability", approx_seconds: midSec },
+          { beat: "Call to action", purpose: "Invite user to start free trial", approx_seconds: c },
+        ],
+        cta: trialFact ? "Start 14-day free trial" : "Start free trial",
+        claims,
+        ...(!this.opts.creative ? {} : { art_direction: {
+          audience_response: "The viewer should feel relief from administrative friction and try the app.",
+          concept: "Scheduling reduced to one click.",
+          visual_metaphor: null,
+          visual_system: "saas_clarity",
+          palette: { background: "#0b132b", surface: "#1c2541", text: "#ffffff", muted: "#a0aec0", accent: "#48cae4", accent_2: "#5bc0be" },
+          typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "Clean technical sans-serif for software readability." },
+          composition: "Left-aligned headline with clear interface viewport and generous padding.",
+          motion_language: { feel: "precise", easing: "ease_out", description: "Elements ease smoothly and hold still on key outcomes." },
+          narrative: { opening: "Expose the workflow friction.", development: "Demonstrate the seamless software workflow.", conclusion: "Close with clear free-trial sign-up action." },
+        } }),
+        conflicts_log: [{ conflict: "Style wanted a superlative claim", decision: "Dropped: no approved fact supports it (claims rule wins)." }],
+      };
+    }
+
+    if (category === "ecommerce") {
+      return {
+        logline: "Engineered for speed: lightweight responsive cushioning with high-traction grip.",
+        hook: "Feel the responsive bounce in every stride.",
+        tone: "dynamic, athletic, and tactile",
+        beats: [
+          { beat: "Hook", purpose: "Arrest attention with the shoe in motion", approx_seconds: a },
+          { beat: "Proof", purpose: "Showcase responsive sole technology and breathable upper", approx_seconds: midSec },
+          { beat: "Call to action", purpose: "Direct runners to visit store and gear up", approx_seconds: c },
+        ],
+        cta: "Visit store today",
+        claims,
+        ...(!this.opts.creative ? {} : { art_direction: {
+          audience_response: "Runners should feel motivated to test the shoes in store.",
+          concept: "High-speed cushioning in motion.",
+          visual_metaphor: null,
+          visual_system: "product_bench",
+          palette: { background: "#111111", surface: "#222222", text: "#ffffff", muted: "#888888", accent: "#e63946", accent_2: "#f4a261" },
+          typography: { weight: "bold", scale: "large", case: "upper", rationale: "Bold uppercase typography channels athletic energy and impact." },
+          composition: "Diagonal product hero staging with high visual contrast.",
+          motion_language: { feel: "snappy", easing: "ease_out", description: "Snappy momentum matched to athletic movement." },
+          narrative: { opening: "Hero runner footage bursts into frame.", development: "Showcase tactile technical details.", conclusion: "Clear store location call to action." },
+        } }),
+        conflicts_log: [{ conflict: "Style wanted a superlative claim", decision: "Dropped: no approved fact supports it (claims rule wins)." }],
+      };
+    }
+
+    // Default: general-promo
     return {
-      logline: "A confident, simple story that ends on one clear action.", hook: "Open on the most striking real view.", tone: "warm and direct",
+      logline: "Small-batch craft coffee roasted weekly for the freshest cup at home.",
+      hook: "Great coffee begins the day it was roasted.",
+      tone: "warm and direct",
       beats: [
-        { beat: "Hook", purpose: "Stop the scroll with a concrete visual", approx_seconds: a },
-        { beat: "Proof", purpose: "Show the detail that earns trust", approx_seconds: Math.round((total - a - c) * 2) / 2 },
-        { beat: "Call to action", purpose: "Invite one action", approx_seconds: c },
+        { beat: "Hook", purpose: "Open on freshly roasted coffee beans in small batches", approx_seconds: a },
+        { beat: "Proof", purpose: "Show the small-batch craft that ensures peak flavor", approx_seconds: midSec },
+        { beat: "Call to action", purpose: "Invite coffee lovers to order their first bag", approx_seconds: c },
       ],
-      cta: "Order today", claims,
+      cta: "Order your first bag",
+      claims,
       ...(!this.opts.creative ? {} : { art_direction: {
-        audience_response: "The viewer should feel confident enough to place one order.", concept: "One honest view of the product, then one action.", visual_metaphor: null,
+        audience_response: "The viewer should feel confident enough to place one order.",
+        concept: "One honest view of the product, then one action.",
+        visual_metaphor: null,
+        visual_system: "cinema",
         palette: { background: "#f6f2ea", surface: "#ffffff", text: "#1b2230", muted: "#5d6678", accent: "#b8430a", accent_2: "#2b8a6e" },
         typography: { weight: "bold", scale: "standard", case: "sentence", rationale: "Bold sentence case reads as warm and direct." },
         composition: "Headline on the left or top, one picture beside it, generous margins.",
@@ -81,6 +156,7 @@ export class DemoClient implements LlmClient {
 
   private storyboard(user: string) {
     const total = this.target(user);
+    const category = this.extractCategory(user);
     const block = /## Assets and notes[^\n]*\n([\s\S]*?)\n\n## /.exec(user)?.[1];
     const parsed = block ? JSON.parse(block) : { assets: [], notes: [] };
     const videos = (parsed.assets as { asset_id: string; media_type: string; duration: number | null }[]).filter((a) => a.media_type === "video");
@@ -110,24 +186,96 @@ export class DemoClient implements LlmClient {
     };
     const shot = (size: string, motion: string, action: string) => ({ shot_size: size, camera_motion: motion, visual_action: action });
     const hasClaim = /"claim_id": "C01"/.test(user);
+    const hasClaim2 = /"claim_id": "C02"/.test(user);
     const sizes = ["medium", "close_up", "wide"];
     /** What the scene needs: the supplied clip it uses, or graphics the workflow can build. */
     const needs = (v: { asset_ids: string[] }, graphics: string) => v.asset_ids.length
       ? [{ need: "Supplied footage", kind: "footage", availability: "supplied", asset_id: v.asset_ids[0] }]
       : [{ need: graphics, kind: "graphics", availability: "generate_graphics" }];
     const hookVideo = withVideo(hook);
-    return this.placePictures({
-      scenes: [
-        { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Open on the idea in words" } : {}), ...(hookVideo.asset_ids.length || !this.opts.creative ? {} : { visual: { block: "kinetic_type", style: "word_pop", emphasis_word: 1, camera: "push_in", reveal: "none", backdrop: "gradient" } }), duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Made fresh, made to be noticed", safe_area: "platform_safe" }, transition_out: "cut" },
+
+    let scenes: Record<string, unknown>[];
+
+    if (category === "saas") {
+      const hookVis = hookVideo.asset_ids.length || !this.opts.creative ? {} : {
+        visual: { block: "message_thread", messages: [{ from: "them", text: "Can we find 15 mins this week?" }, { from: "you", text: "Sent you my direct booking link!" }], mode: "stack", camera: "push_in", reveal: "none", backdrop: "flat" },
+      };
+      scenes = [
+        { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Open on calendar scheduling friction" } : {}), ...hookVis, duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated scheduling graphics"), shot: shot("medium", "slow_push_in", "Scheduling booking interface"), overlay: { text: "Automate your calendar bookings", safe_area: "platform_safe" }, transition_out: "cut" },
         ...middleScenes.map((d, i) => {
           const v = withVideo(d);
-          const blocks = [{ block: "layered_cards", depth: "subtle", cards: [{ title: "The detail", detail: null }, { title: "That earns trust", detail: null }] }, { block: "process_flow", steps: [{ label: "Look closer", detail: null }, { label: "See why", detail: null }] }];
-          const vis = v.asset_ids.length || !this.opts.creative ? {} : { visual: { ...blocks[i % 2]!, camera: i % 2 ? "pan_right" : "static", reveal: "none", backdrop: "flat" } };
-          return { scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof", ...(this.opts.creative ? { visual_purpose: `Proof ${i + 1}: ${i % 2 ? "how it works" : "the layers of the detail"}` } : {}), ...vis, duration_seconds: d, ...v, required_assets: needs(v, "Animated detail graphics"), shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"), claim_ids: i === 0 && hasClaim ? ["C01"] : [], overlay: null, transition_out: "cut" };
+          const blocks = [
+            { block: "process_flow", steps: [{ label: "Connect calendar", detail: "Google & Outlook" }, { label: "Auto-sync", detail: "Instant updates" }] },
+            { block: "layered_cards", depth: "subtle", cards: [{ title: "Fewer back-and-forths", detail: null }, { title: "One booking link", detail: null }] },
+          ];
+          const vis = v.asset_ids.length || !this.opts.creative ? {} : { visual: { ...blocks[i % 2]!, camera: i % 2 ? "static" : "pan_right", reveal: "none", backdrop: i % 2 ? "grid" : "dots" } };
+          const purposeDesc = i % 2 ? "Layered cards showing the booking flow" : "Process flow showing 2-way sync";
+          return {
+            scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof",
+            ...(this.opts.creative ? { visual_purpose: `Proof ${i + 1}: ${purposeDesc}` } : {}),
+            ...vis, duration_seconds: d, ...v,
+            required_assets: needs(v, "Animated interface graphics"),
+            shot: shot(sizes[i % 3]!, i % 2 ? "static" : "pan_right", "Interface demonstration"),
+            claim_ids: i === 0 && hasClaim ? ["C01"] : i === 1 && hasClaim2 ? ["C02"] : [],
+            overlay: null, transition_out: "cut",
+          };
         }),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on one action, held still", visual: { block: "end_card", wordmark: null, button: "Order today", subline: null, camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order today", safe_area: "platform_safe" }, transition_out: "cut" },
-      ],
-    }, user);
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on free trial call to action", visual: { block: "end_card", wordmark: null, button: "Start free trial", subline: "Works with Google Calendar and Outlook", camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Trial sign-up end card"), overlay: { text: "Start your free trial today", safe_area: "platform_safe" }, transition_out: "cut" },
+      ];
+    } else if (category === "ecommerce") {
+      const hookVis = hookVideo.asset_ids.length || !this.opts.creative ? {} : {
+        visual: { block: "kinetic_type", style: "word_pop", emphasis_word: 1, camera: "push_in", reveal: "none", backdrop: "spotlight" },
+      };
+      scenes = [
+        { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Arrest attention with the shoe in motion" } : {}), ...hookVis, duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Product hero graphics"), shot: shot("close_up", "slow_push_in", "Shoe in motion"), overlay: { text: "Engineered for speed", safe_area: "platform_safe" }, transition_out: "cut" },
+        ...middleScenes.map((d, i) => {
+          const v = withVideo(d);
+          const blocks = [
+            { block: "layered_cards", depth: "prominent", cards: [{ title: "Lightweight foam", detail: "Responsive bounce" }, { title: "Engineered grip", detail: "All-weather traction" }] },
+            { block: "process_flow", steps: [{ label: "Step in", detail: "Sock-like fit" }, { label: "Push off", detail: "High energy return" }] },
+          ];
+          const vis = v.asset_ids.length || !this.opts.creative ? {} : { visual: { ...blocks[i % 2]!, camera: i % 2 ? "pan_right" : "static", reveal: "none", backdrop: "spotlight" } };
+          return {
+            scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof",
+            ...(this.opts.creative ? { visual_purpose: `Proof ${i + 1}: ${i % 2 ? "stride flow" : "cushioning and grip cards"}` } : {}),
+            ...vis, duration_seconds: d, ...v,
+            required_assets: needs(v, "Product detail graphics"),
+            shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Product detail demonstration"),
+            claim_ids: i === 0 && hasClaim ? ["C01"] : [],
+            overlay: null, transition_out: "cut",
+          };
+        }),
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on store visit call to action", visual: { block: "end_card", wordmark: null, button: "Visit store today", subline: "Available in all sizes", camera: "static", reveal: "none", backdrop: "flat" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Store visit end card"), overlay: { text: "Visit store today", safe_area: "platform_safe" }, transition_out: "cut" },
+      ];
+    } else {
+      // General promo
+      const hookVis = hookVideo.asset_ids.length || !this.opts.creative ? {} : {
+        visual: { block: "kinetic_type", style: "word_pop", emphasis_word: 1, camera: "push_in", reveal: "none", backdrop: "gradient" },
+      };
+      scenes = [
+        { scene_id: "S01", purpose: "Hook", ...(this.opts.creative ? { visual_purpose: "Open on freshly roasted coffee beans" } : {}), ...hookVis, duration_seconds: hook, ...hookVideo, required_assets: needs(hookVideo, "Animated opening graphics"), shot: shot("close_up", "slow_push_in", "Opening hero view"), overlay: { text: "Roasted weekly in small batches", safe_area: "platform_safe" }, transition_out: "cut" },
+        ...middleScenes.map((d, i) => {
+          const v = withVideo(d);
+          const blocks = [
+            { block: "timeline_path", marks: [{ when: "Roast", label: "Small batches" }, { when: "Pack", label: "Sealed fresh" }, { when: "Ship", label: "To your door" }] },
+            { block: "title_plate", eyebrow: null, subline: null, plate: "hairline" },
+          ];
+          const vis = v.asset_ids.length || !this.opts.creative ? {} : { visual: { ...blocks[i % 2]!, camera: i % 2 ? "pan_right" : "static", reveal: "none", backdrop: "flat" } };
+          return {
+            scene_id: `S${String(i + 2).padStart(2, "0")}`, purpose: "Proof",
+            ...(this.opts.creative ? { visual_purpose: `Proof ${i + 1}: ${i % 2 ? "how it works" : "the layers of the detail"}` } : {}),
+            ...vis, duration_seconds: d, ...v,
+            required_assets: needs(v, "Animated detail graphics"),
+            shot: shot(sizes[i % 3]!, i % 2 ? "pan_right" : "static", "Detail that earns trust"),
+            claim_ids: i === 0 && hasClaim ? ["C01"] : [],
+            overlay: this.opts.creative && !v.asset_ids.length && i % 2 ? { text: "Fresh to the last cup", safe_area: "platform_safe" } : null, transition_out: "cut",
+          };
+        }),
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on invitation to order", visual: { block: "closing_signature", wordmark: null, action: "Order your first bag", subline: null, camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order your first bag", safe_area: "platform_safe" }, transition_out: "cut" },
+      ];
+    }
+
+    return this.placePictures({ scenes }, user);
   }
 
   /** Canned placement for the demo: each usable picture takes over a scene, a logo the opening one. What reaches the scene is only what the manifest listed. */

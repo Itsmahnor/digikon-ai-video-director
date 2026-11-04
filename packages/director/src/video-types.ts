@@ -19,7 +19,7 @@ export const CATEGORY_VIDEO_TYPES: Record<"saas" | "ecommerce" | "general-promo"
       title: "SaaS feature launch video",
       category: "saas",
       description: "Focuses on one new capability: the old way vs the new way, how it works, and who gets it.",
-      example: "Introducing automated invoice reminders: set rules once, get paid 4x faster.",
+      example: "Introducing automated invoice reminders: set rules once, get paid on time.",
       recommended: false,
     },
     {
@@ -45,7 +45,7 @@ export const CATEGORY_VIDEO_TYPES: Record<"saas" | "ecommerce" | "general-promo"
       title: "E-commerce UGC-style ad",
       category: "ecommerce",
       description: "Authentic first-person hook, relatable problem, genuine demonstration, and unpolished feel.",
-      example: "I was skeptical until I tried this kitchen slicer: 5 seconds to prep salad.",
+      example: "I was skeptical until I tried this kitchen slicer: prep salad in no time.",
       recommended: false,
     },
     {
@@ -71,7 +71,7 @@ export const CATEGORY_VIDEO_TYPES: Record<"saas" | "ecommerce" | "general-promo"
       title: "Social promo ad",
       category: "general-promo",
       description: "Fast thumb-stopping hook in 0-3s, quick value proposition, on-screen text, and urgent CTA.",
-      example: "Stop scrolling: flash summer sale starts now, 20% off all weekend.",
+      example: "Stop scrolling: flash summer sale starts now, [OFFER: from the brief].",
       recommended: false,
     },
     {
@@ -98,6 +98,25 @@ const KEYWORD_PATTERNS: Record<string, RegExp> = {
 };
 
 /**
+ * Detects the most appropriate video category ("saas", "ecommerce", "general-promo")
+ * from the brief when not explicitly provided by the user.
+ */
+export function detectCategory(
+  brief: string,
+  explicitCategory?: "saas" | "ecommerce" | "general-promo" | null,
+): "saas" | "ecommerce" | "general-promo" {
+  if (explicitCategory) return explicitCategory;
+  const b = brief.toLowerCase();
+  if (/\b(saas|software|app\b|apps\b|platform|dashboard|crm|portal|api|workflow|tool|scheduling|integration|b2b|subscription)\b/i.test(b)) {
+    return "saas";
+  }
+  if (/\b(shop|store|product|shoe|shoes|apparel|sneaker|bottle|unboxing|collection|order\s+today|ecommerce|e-commerce|catalog|cart|candle|bakery)\b/i.test(b)) {
+    return "ecommerce";
+  }
+  return "general-promo";
+}
+
+/**
  * Proposes 2 to 3 category-appropriate video types with a one-line description and a reference example,
  * marking the best recommendation based on brief context.
  */
@@ -105,7 +124,7 @@ export function proposeVideoTypes(
   category: "saas" | "ecommerce" | "general-promo" | null,
   brief = "",
 ): VideoTypeProposal[] {
-  const cat = category ?? "general-promo";
+  const cat = category ?? detectCategory(brief);
   const pool = (CATEGORY_VIDEO_TYPES[cat] ?? CATEGORY_VIDEO_TYPES["general-promo"]).map((p) => ({ ...p }));
 
   // Score candidates against brief keywords
@@ -144,7 +163,7 @@ export async function videoTypeNode(
   project: Pick<Project, "video_category" | "video_type" | "brief">,
   chosenVideoType?: string | null,
 ): Promise<VideoTypeNodeOut> {
-  const category = project.video_category ?? null;
+  const category = project.video_category ?? detectCategory(project.brief);
   const proposals = proposeVideoTypes(category, project.brief);
 
   // User explicit choice takes priority; fallback to project field, then top recommended proposal

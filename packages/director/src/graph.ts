@@ -238,7 +238,9 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       };
     })
     .addNode("treatment", async (s: DirectorStateType) => {
-      const { treatment, skills, references, citations } = await treatmentNode(deps, s.project, s.facts ?? [], s.notes ?? []);
+      const category = s.project.video_category ?? (s.proposedVideoTypes?.[0]?.category ?? null);
+      const proj = { ...s.project, video_category: category, video_type: s.chosenVideoType ?? s.project.video_type ?? null };
+      const { treatment, skills, references, citations } = await treatmentNode(deps, proj, s.facts ?? [], s.notes ?? []);
       const unsupported = treatment.claims.filter((c) => c.brand_fact_id === null).length;
       return { treatmentDoc: treatment, skillsUsed: skills, referencesUsed: references, citations, trace: [`treatment: ${treatment.beats.length} beats, ${treatment.claims.length} claims (${unsupported} unsupported)`] };
     })
@@ -247,7 +249,9 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const rev = s.pendingRevision?.stage === "storyboard" ? s.pendingRevision : null;
       const previous = s.scenePlan;
       const version = rev && previous ? previous.version + 1 : 1;
-      const r = await storyboardNode(deps, s.project, s.assets, s.notes, s.treatmentDoc!, s.facts ?? [], version, rev && previous ? { notes: rev.notes, previous } : undefined);
+      const category = s.project.video_category ?? (s.proposedVideoTypes?.[0]?.category ?? null);
+      const proj = { ...s.project, video_category: category, video_type: s.chosenVideoType ?? s.project.video_type ?? null };
+      const r = await storyboardNode(deps, proj, s.assets, s.notes, s.treatmentDoc!, s.facts ?? [], version, rev && previous ? { notes: rev.notes, previous } : undefined);
       if (r.issues.length) {
         return {
           escalation: escalationFor("storyboard", r.issues, [`generated and repaired the storyboard (${r.attempts} attempts)`]),
