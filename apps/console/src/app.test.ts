@@ -179,7 +179,7 @@ describe("routing and the Director run", () => {
 
   it("streams the run up to the storyboard gate and stops there, with no edit plan", async () => {
     const { events, state } = await atGate1();
-    expect(events.filter((e) => e.event === "step").map((e) => e.data.node)).toEqual(["intake", "analyse_assets", "treatment", "storyboard"]);
+    expect(events.filter((e) => e.event === "step").map((e) => e.data.node)).toEqual(["intake", "analyse_assets", "video_type_step", "treatment", "storyboard"]); // D1 added the video-type step before the treatment; the gate and what follows it are unchanged
     expect(state).toMatchObject({ status: "awaiting_approval", gate: "storyboard", editPlan: null, versions: { storyboard: 1, edit_plan: null } });
     expect(state.hashes.storyboard).toMatch(/^[a-f0-9]{64}$/);
     expect(state.scenePlan.scenes.reduce((a: number, s: any) => a + s.duration_seconds, 0)).toBeCloseTo(12, 1);
