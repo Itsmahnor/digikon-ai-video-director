@@ -1,4 +1,4 @@
-﻿import { createHash } from "node:crypto";
+import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { SkillRecord } from "@digikon/contracts";
@@ -73,6 +73,7 @@ export interface ImportResult {
 
 const skillText = (r: SkillRecord): string => [r.title, r.category.replace(/-/g, " "), r.funnel_stage.replace(/-/g, " "), r.platform.join(" "), r.body].join(". ");
 
+const stripBom = (s: string): string => s.replace(/^\uFEFF/, "");
 
 function walk(dir: string): string[] {
   return readdirSync(dir).sort().flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? (n === ".git" || n === "node_modules" ? [] : walk(p)) : [p]; });
@@ -83,7 +84,7 @@ export async function importSkills(store: DataStore, embedder: Embedder, dir: st
   const manifestPath = join(dir, "skills-source.json");
   if (!existsSync(manifestPath)) { res.rejected.push({ file: "skills-source.json", problems: ["missing: say which repo this is (repo, url, licence)"] }); return res; }
   let manifest: { repo?: string; url?: string; licence?: string; attribution?: string };
-  try { manifest = JSON.parse(readFileSync(manifestPath, "utf8")); } catch { res.rejected.push({ file: "skills-source.json", problems: ["not readable JSON"] }); return res; }
+  try { manifest = JSON.parse(stripBom(readFileSync(manifestPath, "utf8"))); } catch { res.rejected.push({ file: "skills-source.json", problems: ["not readable JSON"] }); return res; }
   const licFile = ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENCE"].map((n) => join(dir, n)).find(existsSync);
   const verdict = checkLicence(manifest.licence, licFile ? readFileSync(licFile, "utf8") : null, manifest.attribution);
   res.licence = verdict;
@@ -99,7 +100,7 @@ export async function importSkills(store: DataStore, embedder: Embedder, dir: st
   const seenIds = new Set<string>();
   for (const path of walk(dir).filter((p) => p.endsWith(".md") && !/^licen[cs]e/i.test(p.split(/[\\/]/).pop()!))) {
     const file = path.slice(dir.length + 1).replace(/\\/g, "/");
-    const parsed = parseSkillFile(readFileSync(path, "utf8"));
+    const parsed = parseSkillFile(stripBom(readFileSync(path, "utf8")));
     if (!parsed) { res.rejected.push({ file, problems: ["no frontmatter block"] }); continue; }
     const r = SkillRecord.safeParse({ ...parsed.meta, body: parsed.body, source: { repo: source.repo, url: source.url, licence: source.licence, attribution: source.attribution, checked_on: today } });
     if (!r.success) { res.rejected.push({ file, problems: r.error.issues.map((i) => `${i.path.join(".") || "record"}: ${i.message}`) }); continue; }

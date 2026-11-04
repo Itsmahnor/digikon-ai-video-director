@@ -5,7 +5,7 @@ import { z } from "zod";
  * Which licences are allowed is the importer's decision (rag/skills.ts), not the contract's: the contract only guarantees one is recorded.
  */
 
-const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+const slug = z.string().regex(/^[a-z0-9]+([-_][a-z0-9]+)*$/);
 const text = z.string().trim().min(1);
 
 export const SKILL_STATUSES = ["draft", "reviewed", "approved", "retired"] as const;
