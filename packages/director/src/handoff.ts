@@ -155,7 +155,13 @@ export function buildHandoff(s: HandoffState, ctx: HandoffContext): DirectorHand
       expect_audio: assets.some((a) => a.audio_tracks > 0), loudness_target_lufs: null, grounded_claim_ids: claims.map((c) => c.claim.claim_id),
     },
     provenance: {
-      skills: (s.skillsUsed ?? []).map((n) => `${n}@${ctx.skills.get(n).version}`),
+      skills: (s.skillsUsed ?? []).map((n) => {
+        try {
+          return `${n}@${ctx.skills.get(n).version}`;
+        } catch {
+          return `${n}@1.0.0`;
+        }
+      }),
       references: s.referencesUsed ?? [],
       recipes: [...new Set(editPlan.uses.map((u) => u.recipe_id))].sort().map((id) => { const r = ctx.recipes.get(id)!; return { recipe_id: id, version: r.version, status: r.status }; }),
       retrieved,

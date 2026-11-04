@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QAFinding } from "./schemas.js";
+import { AssetKind, QAFinding } from "./schemas.js";
 import { ArtDirection } from "./visual.js";
 import { AssetManifestEntry } from "./assets.js";
 
@@ -167,3 +167,47 @@ export type EditPlan = z.infer<typeof EditPlan>;
 export type RevisionTicket = z.infer<typeof RevisionTicket>;
 export type Escalation = z.infer<typeof Escalation>;
 export type { QAFinding };
+
+/**
+ * Gate 1 requirements sheet: what the approved story needs from assets, fonts, and sound before production planning.
+ */
+export const Gate1RequirementsSheet = z.object({
+  format: z.literal("digikon.gate1-requirements").default("digikon.gate1-requirements"),
+  format_version: z.literal(1).default(1),
+  storyboard_version: z.number().int().positive(),
+  assets: z.object({
+    supplied_count: z.number().int().nonnegative(),
+    graphics_count: z.number().int().nonnegative(),
+    needs_external_count: z.number().int().nonnegative(),
+    missing_blocking_count: z.number().int().nonnegative(),
+    items: z.array(z.object({
+      scene_id: z.string(),
+      kind: AssetKind,
+      need: z.string(),
+      availability: z.enum(["supplied", "generate_graphics", "needs_external", "missing_blocking"]),
+      placeholder: z.boolean().default(false),
+      fallback: z.string().nullable().default(null),
+    })),
+  }),
+  fonts: z.object({
+    face: z.enum(["sans", "serif", "mono"]),
+    weight: z.enum(["regular", "bold"]),
+    scale: z.enum(["compact", "standard", "large"]),
+    case: z.enum(["sentence", "upper"]),
+    rationale: z.string(),
+    declared_brand_fonts: z.array(z.string()).default([]),
+  }),
+  sound: z.object({
+    voiceover_scenes: z.array(z.string()),
+    total_voiceover_words: z.number().int().nonnegative(),
+    audio_cues: z.array(z.object({
+      scene_id: z.string(),
+      cue: z.string(),
+    })),
+    system_sound: z.string().nullable().default(null),
+    audio_supplied: z.boolean(),
+  }),
+  summary: z.string(),
+  ready_for_review: z.boolean(),
+});
+export type Gate1RequirementsSheet = z.infer<typeof Gate1RequirementsSheet>;

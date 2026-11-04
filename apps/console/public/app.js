@@ -631,6 +631,7 @@ function results(res) {
       const total = sp.scenes.reduce((a, s) => a + s.duration_seconds, 0);
       return `<div class="timeline">${sp.scenes.map((s, i) => `<div class="tl" style="flex:${s.duration_seconds};--h:${(i * 57 + 255) % 360}"><b>${s.scene_id}</b><span>${fmtDur(s.duration_seconds)}</span></div>`).join("")}</div>
         <p class="hint" style="margin:8px 0 6px">${sp.scenes.length} scenes, ${fmtDur(total)} total${res.timing ? (res.timing.matches_target ? `, matches the ${fmtDur(res.timing.target_s)} target` : `, does NOT match the ${fmtDur(res.timing.target_s)} target`) : ""}</p>
+        ${requirementsSheetHtml(res.requirementsSheet)}
         ${feasibilityHtml(res.assetFeasibility)}
         ${sp.scenes.map((s) => `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.start_time)} to ${fmtDur(s.start_time + s.duration_seconds)}</span></div>
           <div class="sub">${esc(s.shot.shot_size.replaceAll("_", " "))}, ${esc(s.shot.camera_motion.replaceAll("_", " "))}: ${esc(s.shot.visual_action)}</div>
@@ -670,6 +671,23 @@ function results(res) {
   return `${header}<div class="card"><div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? "on" : ""}" role="tab" data-action="tab" data-tab="${k}">${l}</button>`).join("")}</div><div style="padding-top:16px">${body[tab]()}</div></div>
     ${bar}
     ${finished}`;
+}
+
+function requirementsSheetHtml(req) {
+  if (!req) return "";
+  const a = req.assets, f = req.fonts, s = req.sound;
+  return `<div class="card" style="margin:10px 0;background:rgba(255,255,255,.04);border-left:3px solid var(--accent)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <b>Gate 1 Story Requirements Sheet</b>
+      <span class="chip ${req.ready_for_review ? 'ok' : 'warn'}">${req.ready_for_review ? 'ready for review' : 'needs attention'}</span>
+    </div>
+    <div class="sub" style="margin-bottom:8px">${esc(req.summary)}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;font-size:12px;color:var(--muted)">
+      <div><b>Assets:</b> ${a.supplied_count} supplied, ${a.graphics_count} graphics, ${a.needs_external_count} external</div>
+      <div><b>Typography:</b> ${esc(f.face)} (${esc(f.weight)}, ${esc(f.scale)})</div>
+      <div><b>Sound:</b> ${s.voiceover_scenes.length} VO scene(s), ${s.audio_cues.length} cue(s)</div>
+    </div>
+  </div>`;
 }
 
 /** What the scenes need: blockers stop production, warnings (placeholders, open decisions) need the user's eye. */

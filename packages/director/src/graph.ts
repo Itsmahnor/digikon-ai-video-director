@@ -2,7 +2,7 @@ import { Annotation, Command, END, MemorySaver, START, StateGraph, interrupt } f
 import {
   ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE, productionBindingOf,
   type AdvisoryReport, type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type CompiledEditPlan, type EditPlan, type Escalation, type ProductionDecisionPlan, type Project, type ReviewDecision, type ScenePlan, type Treatment,
-  type VideoTypeProposal,
+  type VideoTypeProposal, type Gate1RequirementsSheet,
 } from "@digikon/contracts";
 import type { ProjectKit } from "@digikon/contracts";
 import { currentEditPlan, currentEvidenceHash, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
@@ -14,6 +14,7 @@ import {
   type Deps, type IntakeOut,
 } from "./nodes.js";
 import { videoTypeNode } from "./video-types.js";
+import { produceGate1Requirements } from "./requirements.js";
 
 /** `awaiting_approval` covers both human gates; `gate` in the state says which one. `approved` means both gates passed, not that rendering is allowed: only `assertRenderable` decides that. */
 export type DirectorStatus =
@@ -42,6 +43,8 @@ export const DirectorState = Annotation.Root({
   editPlan: Annotation<EditPlan | null>(),
   /** Gate 1 advisory: can the storyboard's production requirements plausibly be met by what is live now? Selects nothing and approves nothing. Absent without a production port. */
   advisory: Annotation<AdvisoryReport | null>(),
+  /** Gate 1 requirements sheet: what the story needs from assets, fonts, and sound. */
+  requirementsSheet: Annotation<Gate1RequirementsSheet | null>(),
   /** After Gate 1: the production decision plan for the edit plan, and its compiled operations. Shown at Gate 2 (a later stage binds them to the approval). Absent without a production port. */
   productionPlan: Annotation<ProductionDecisionPlan | null>(),
   compiledPlan: Annotation<CompiledEditPlan | null>(),
@@ -168,7 +171,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const raw = interrupt({
         kind: `${stage}_approval`, stage, plan_version: cur.version, plan_hash: cur.hash,
         treatment: s.treatmentDoc, scenePlan: s.scenePlan, editPlan: stage === "edit_plan" ? s.editPlan : null,
-        advisory: stage === "storyboard" ? s.advisory ?? null : null, productionPlan: stage === "edit_plan" ? prod.plan : null, compiledPlan: stage === "edit_plan" ? prod.compiled : null,
+        advisory: stage === "storyboard" ? s.advisory ?? null : null, requirementsSheet: stage === "storyboard" ? s.requirementsSheet ?? null : null, productionPlan: stage === "edit_plan" ? prod.plan : null, compiledPlan: stage === "edit_plan" ? prod.compiled : null,
         revisions_used: s.revisions[stage], max_revisions: MAX_REVISIONS, earlier_requests: earlier, refused_previous: refused,
         question: stage === "storyboard" ? "Approve this storyboard so the edit plan can be made?" : "Approve this edit plan?",
       });
@@ -254,8 +257,9 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       // Advisory only: what the storyboard requires, against what is live now. It selects no recipe or engine and never blocks the gate.
       const live = deps.production?.capabilities();
       const advisory = live ? adviseFeasibility(live.snapshot, { scenePlan: r.value, assets: s.assets, aspect_ratio: s.project.aspect_ratio, available_engines: live.available_engines }) : null;
+      const requirementsSheet = produceGate1Requirements(r.value, s.treatmentDoc!, s.assets, s.kit);
       return {
-        scenePlan: r.value, editPlan: null, advisory, productionPlan: null, compiledPlan: null, pendingRevision: null, gate: "storyboard" as const, status: "awaiting_approval" as const,
+        scenePlan: r.value, editPlan: null, advisory, requirementsSheet, productionPlan: null, compiledPlan: null, pendingRevision: null, gate: "storyboard" as const, status: "awaiting_approval" as const,
         skillsUsed: r.skills, referencesUsed: r.references, citations: r.citations,
         trace: [`storyboard: version ${version}, ${r.value.scenes.length} scenes in ${r.attempts} attempt(s)`],
       };

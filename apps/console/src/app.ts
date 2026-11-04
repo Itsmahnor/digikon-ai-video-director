@@ -1143,5 +1143,6 @@ function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipe
     renderable: check.ok ? { ok: true, reasons: [] as string[] } : { ok: false, reasons: plainReasons(check.reasons) },
     citations: s["citations"] ?? [], skillsUsed: s["skillsUsed"] ?? [], referencesUsed: s["referencesUsed"] ?? [], trace: s["trace"] ?? [], notes: s["notes"] ?? [],
     videoType: s["chosenVideoType"] ?? null, proposedVideoTypes: s["proposedVideoTypes"] ?? [],
+    requirementsSheet: s["requirementsSheet"] ?? null,
   };
 }

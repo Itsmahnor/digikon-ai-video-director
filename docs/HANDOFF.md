@@ -2,7 +2,7 @@
 
 Written so that a session with **zero context** can continue the work. Keep it current: update the status table and the "next steps" after every step or commit. Never put a secret in this file or anywhere in git.
 
-_Last updated for D1 (video-type step), 2026-11-04._
+_Last updated for D2 (needs analysis), 2026-11-04._
 
 ## 1. What this project is, and the rules that never loosen
 
@@ -37,8 +37,8 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 | C5 | Deterministic completeness check | done | `e061aad` |
 | C6 | Question module (typed questions replace free-text questions in `IntakeOut`) | done | `ea2c45d` |
 | Phase C | Guided intake and question module | **done** | `ea2c45d` |
-| D1 | Video-type step: propose 2-3 types, user choice, audit record, node before treatment (bump `director-graph/5`), UI card | done | pending |
-| D2 | Needs analysis | not started | |
+| D1 | Video-type step: propose 2-3 types, user choice, audit record, node before treatment (bump `director-graph/5`), UI card | done | `5b5dd72` |
+| D2 | Needs analysis: Gate 1 requirements sheet (assets, fonts, sound) | done | `94c04de` |
 | D3 | Story from the chosen type | not started | |
 | E to G | see `docs/PLAN_PHASES_D-G.md` | not started | |
 
@@ -89,11 +89,9 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 
 ## 7. Next steps, in order
 
-1. **D2 needs analysis:** produce the Gate 1 requirements sheet (what the story needs from assets, fonts, sound); the contract fields already exist.
-2. **D3 story from the chosen type:** treatment and storyboard follow that category's skills. Done when golden briefs for three categories (`evals/golden-briefs.json`) produce different, category-appropriate stories and the Gate 1 tests are unchanged.
-3. **Real Postgres server** once Digikon directly approves the install: install, migrate 0001-0003, run `pg.integration.test.ts` with `DATABASE_URL`, `db:health`, import the skills into it, run the console and `eval:skills` against it, record versions here.
-4. **Skills to `approved`** once Digikon directly says so (record "approved by Digikon on <date>, their message in the project thread" in `examples/skills/REVIEW.md`, update `skills-library.test.ts` and `docs/SKILLS.md`).
-5. **Phases E, F, G:** E1 to E7; then F1 to F3; G later (see `docs/PLAN_PHASES_D-G.md`). Check the plan text before starting each step.
+1. **D3 story from the chosen type:** treatment and storyboard follow that category's skills. Done when golden briefs for three categories (`evals/golden-briefs.json`) produce different, category-appropriate stories and the Gate 1 tests are unchanged.
+2. **Real Postgres server** once Digikon directly approves the install: install, migrate 0001-0003, run `pg.integration.test.ts` with `DATABASE_URL`, `db:health`, import the skills into it, run the console and `eval:skills` against it, record versions here.
+3. **Phases E, F, G:** E1 to E7; then F1 to F3; G later (see `docs/PLAN_PHASES_D-G.md`). Check the plan text before starting each step.
 
 ## 8. Known gotchas
 
