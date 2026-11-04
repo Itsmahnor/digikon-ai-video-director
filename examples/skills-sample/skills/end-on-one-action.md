@@ -1,7 +1,8 @@
-﻿---
+---
 id: end-on-one-action
 title: End on one action
-category: cta_end
+category: ecommerce
+topic: cta-offer
 funnel_stage: conversion
 platform: youtube
 grade: b

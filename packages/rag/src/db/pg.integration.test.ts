@@ -113,10 +113,13 @@ describe.skipIf(!available)("Postgres + pgvector integration", () => {
     await expect(db.query("INSERT INTO assets_library (id, kind, file, licence, source) VALUES ('f','font','f.ttf','','x')")).rejects.toThrow();
     await store.upsertSkillSource({ id: "s1", repo: "acme/skills", url: "https://example.test", licence: "MIT", attribution: null, checked_on: "2026-11-04" });
     expect(await store.getSkillSource("s1")).toMatchObject({ licence: "MIT", checked_on: "2026-11-04" });
-    const sk = (id: string, over: Record<string, unknown> = {}) => ({ id, category: "hook", funnel_stage: "awareness", platform: ["tiktok"], grade: "a", status: "approved" as const, title: id, body: "text", content_hash: "h", source_id: "s1", ...over });
-    await store.upsertSkill(sk("k1")); await store.upsertSkill(sk("k2", { category: "cta_end", platform: ["youtube"] })); await store.upsertSkill(sk("k1", { title: "K1 v2" }));
+    const sk = (id: string, over: Record<string, unknown> = {}) => ({ id, category: "saas", topic: "hook", scope: "both" as const, funnel_stage: "awareness", platform: ["tiktok"], grade: "a", status: "approved" as const, title: id, body: "text", content_hash: "h", source_id: "s1", ...over });
+    await store.upsertSkill(sk("k1")); await store.upsertSkill(sk("k2", { category: "ecommerce", platform: ["youtube"], scope: "editor" })); await store.upsertSkill(sk("k3", { category: "all", topic: "pacing", scope: "director" })); await store.upsertSkill(sk("k1", { title: "K1 v2" }));
     expect((await store.getSkill("k1"))!.title).toBe("K1 v2");
-    expect((await store.listSkills({ category: "hook" })).map((s) => s.id)).toEqual(["k1"]);
+    expect((await store.listSkills({ category: "saas" })).map((s) => s.id)).toEqual(["k1", "k3"]);
+    expect((await store.listSkills({ category: "ecommerce" })).map((s) => s.id)).toEqual(["k2", "k3"]);
+    expect((await store.listSkills({ topic: "pacing" })).map((s) => s.id)).toEqual(["k3"]);
+    expect((await store.listSkills({ scope: "editor" })).map((s) => s.id)).toEqual(["k1", "k2"]);
     expect((await store.listSkills({ platform: "youtube" })).map((s) => s.id)).toEqual(["k2"]);
     await store.upsertSkillEmbedding({ skill_id: "k1", model: "m", model_version: "1", vector: [1, 0, 0] });
     await store.upsertSkillEmbedding({ skill_id: "k2", model: "m", model_version: "1", vector: [0, 1, 0] });

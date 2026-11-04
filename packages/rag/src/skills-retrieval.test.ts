@@ -5,14 +5,16 @@ import { HybridRetriever, skillVectorIndex } from "./hybrid.js";
 import { ScopedRetriever } from "./scopes.js";
 import { skillDoc } from "./skills.js";
 
-const row = (id: string, category: string, text: string, over: Partial<SkillRow> = {}): SkillRow => ({ id, category, funnel_stage: "awareness", platform: ["tiktok"], grade: "A", status: "approved", title: id.replace(/-/g, " "), body: text, content_hash: id, source_id: "s", ...over });
+const row = (id: string, category: string, text: string, over: Partial<SkillRow> = {}): SkillRow => ({ id, category, topic: "hook", scope: "both", funnel_stage: "awareness", platform: ["tiktok"], grade: "A", status: "approved", title: id.replace(/-/g, " "), body: text, content_hash: id, source_id: "s", ...over });
 const ROWS = [
-  row("open-on-a-question", "hook", "Open the video on a question the viewer cannot ignore."),
-  row("open-on-the-result", "hook", "Open on the finished result before explaining how it was made.", { platform: ["youtube"] }),
-  row("end-on-one-action", "cta_end", "Close the video with one clear action held on screen.", { grade: "B" }),
-  row("show-the-product-screen", "ui_demo", "Open the video on the real product screen and move the cursor to the key control."),
-  row("draft-hook-idea", "hook", "Open the video with a draft idea.", { status: "draft" }),
-  row("retired-hook", "hook", "Open the video with a retired idea.", { status: "retired" }),
+  row("open-on-a-question", "saas", "Open the video on a question the viewer cannot ignore."),
+  row("open-on-the-result", "saas", "Open on the finished result before explaining how it was made.", { platform: ["youtube"] }),
+  row("end-on-one-action", "ecommerce", "Close the video with one clear action held on screen.", { grade: "B" }),
+  row("show-the-product-screen", "general-promo", "Open the video on the real product screen and move the cursor to the key control."),
+  row("draft-hook-idea", "saas", "Open the video with a draft idea.", { status: "draft" }),
+  row("always-hold-the-claim-source", "all", "Open the video only with claims you can source.", { topic: "claims-safety", scope: "director" }),
+  row("cut-on-the-beat", "all", "Open the video cuts on the beat of the music.", { topic: "pacing", scope: "editor" }),
+  row("retired-hook", "saas", "Open the video with a retired idea.", { status: "retired" }),
 ];
 
 async function build() {
@@ -32,11 +34,21 @@ describe("skills retrieval", () => {
     const { docs } = await build();
     expect(docs.map((d) => d.id)).not.toContain("retired-hook");
   });
-  it("a category query returns only that category", async () => {
+  it("a category query returns that category and the cross-cutting `all` skills, never another category", async () => {
     const { hybrid } = await build();
-    const hits = await hybrid.retrieve({ text: "open the video", collection: "skills", k: 10, filter: { category: "hook" } });
-    expect(hits.length).toBeGreaterThan(0);
-    expect(hits.every((h) => h.doc.metadata.skill_category === "hook")).toBe(true);
+    for (const [category, allowed] of [["saas", ["saas", "all"]], ["ecommerce", ["ecommerce", "all"]], ["general-promo", ["general-promo", "all"]]] as const) {
+      const hits = await hybrid.retrieve({ text: "open the video", collection: "skills", k: 10, filter: { category } });
+      expect(hits.length).toBeGreaterThan(0);
+      expect(hits.every((h) => (allowed as readonly string[]).includes(h.doc.metadata.skill_category!))).toBe(true);
+      expect(hits.some((h) => h.doc.metadata.skill_category === category)).toBe(true);
+    }
+    const all = await hybrid.retrieve({ text: "open the video", collection: "skills", k: 10, filter: { category: "all" } });
+    expect(all.every((h) => h.doc.metadata.skill_category === "all")).toBe(true);
+  });
+  it("filters by topic", async () => {
+    const { hybrid } = await build();
+    const hits = await hybrid.retrieve({ text: "open the video", collection: "skills", k: 10, filter: { topic: "pacing" } });
+    expect(hits.map((h) => h.doc.id)).toEqual(["cut-on-the-beat"]);
   });
   it("filters by platform and grade, and keeps drafts out unless allowed", async () => {
     const { hybrid } = await build();
@@ -46,14 +58,18 @@ describe("skills retrieval", () => {
     expect(await ids({})).not.toContain("draft-hook-idea");
     expect(await ids({ include_draft: true })).toContain("draft-hook-idea");
   });
-  it("both agents may read skills, through their scope", async () => {
+  it("each agent reads skills scoped to it or to both", async () => {
     const { hybrid } = await build();
-    for (const agent of ["director", "editor"] as const) {
+    const read = async (agent: "director" | "editor") => {
       const scoped = new ScopedRetriever(hybrid, agent);
-      const hits = await scoped.retrieve({ text: "open the video", collection: "skills", k: 5, filter: { category: "hook" } });
-      expect(hits.length).toBeGreaterThan(0);
+      const hits = await scoped.retrieve({ text: "open the video", collection: "skills", k: 20, filter: { category: "saas" } });
       expect(scoped.records[0]!.filter).not.toHaveProperty("out_of_scope");
-    }
+      return hits.map((h) => h.doc.id);
+    };
+    const d = await read("director"), e = await read("editor");
+    expect(d).toContain("always-hold-the-claim-source"); expect(d).not.toContain("cut-on-the-beat");
+    expect(e).toContain("cut-on-the-beat"); expect(e).not.toContain("always-hold-the-claim-source");
+    expect(d).toContain("open-on-a-question"); expect(e).toContain("open-on-a-question");
   });
   it("the store-backed vector index returns skills", async () => {
     const { store, emb } = await build();

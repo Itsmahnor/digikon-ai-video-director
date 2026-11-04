@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Data access for the Postgres + pgvector library. Everything above this file talks to `DataStore`; there are two implementations: `MemoryDataStore`
  * (tests, and any run with no DATABASE_URL) and `PgDataStore` (a real database, behind the small `SqlClient` interface so the driver is swappable).
  */
@@ -18,9 +18,9 @@ export interface CategoryRow { id: string; name: string; parent_id: string | nul
 export interface ReviewRow { template_id: string; reviewer: string; verdict: "approved" | "rejected" | "needs_changes"; notes: string }
 
 export interface SkillSourceRow { id: string; repo: string; url: string; licence: string; attribution: string | null; checked_on: string }
-export interface SkillRow { id: string; category: string; funnel_stage: string; platform: string[]; grade: string; status: "draft" | "reviewed" | "approved" | "retired"; title: string; body: unknown; content_hash: string; source_id: string }
+export interface SkillRow { id: string; category: string; topic: string; scope: "director" | "editor" | "both"; funnel_stage: string; platform: string[]; grade: string; status: "draft" | "reviewed" | "approved" | "retired"; title: string; body: unknown; content_hash: string; source_id: string }
 export interface SkillEmbeddingRow { skill_id: string; model: string; model_version: string; vector: number[] }
-export interface SkillFilter { category?: string; status?: SkillRow["status"]; grade?: string; platform?: string }
+export interface SkillFilter { category?: string; topic?: string; scope?: SkillRow["scope"]; status?: SkillRow["status"]; grade?: string; platform?: string }
 export interface AssetLibraryRow { id: string; kind: "font" | "sound" | "music"; file: string; licence: string; source: string }
 export interface SkillNeighbour { skill_id: string; score: number }
 
@@ -90,7 +90,7 @@ export class MemoryDataStore implements DataStore {
   }
   async getSkill(id: string) { const s = this.skills.get(id); return s ? structuredClone(s) : null; }
   async listSkills(f: SkillFilter = {}) {
-    return [...this.skills.values()].filter((s) => (!f.category || s.category === f.category) && (!f.status || s.status === f.status) && (!f.grade || s.grade === f.grade) && (!f.platform || s.platform.includes(f.platform)))
+    return [...this.skills.values()].filter((s) => (!f.category || s.category === f.category || s.category === "all") && (!f.topic || s.topic === f.topic) && (!f.scope || s.scope === f.scope || s.scope === "both") && (!f.status || s.status === f.status) && (!f.grade || s.grade === f.grade) && (!f.platform || s.platform.includes(f.platform)))
       .sort((a, b) => a.id.localeCompare(b.id)).map((s) => structuredClone(s));
   }
   async upsertSkillEmbedding(row: SkillEmbeddingRow) {
@@ -167,14 +167,14 @@ export class PgDataStore implements DataStore {
   async upsertSkill(s: SkillRow) {
     if (!(await this.getSkillSource(s.source_id))) throw new MissingLicenceError(`skill ${s.id} (source ${s.source_id} not recorded)`);
     await this.sql.query(
-      `INSERT INTO skills (id, category, funnel_stage, platform, grade, status, title, body, content_hash, source_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10)
-       ON CONFLICT (id) DO UPDATE SET category=$2, funnel_stage=$3, platform=$4, grade=$5, status=$6, title=$7, body=$8::jsonb, content_hash=$9, source_id=$10, updated_at=now()`,
-      [s.id, s.category, s.funnel_stage, s.platform, s.grade, s.status, s.title, JSON.stringify(s.body), s.content_hash, s.source_id]);
+      `INSERT INTO skills (id, category, topic, scope, funnel_stage, platform, grade, status, title, body, content_hash, source_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12)
+       ON CONFLICT (id) DO UPDATE SET category=$2, topic=$3, scope=$4, funnel_stage=$5, platform=$6, grade=$7, status=$8, title=$9, body=$10::jsonb, content_hash=$11, source_id=$12, updated_at=now()`,
+      [s.id, s.category, s.topic, s.scope, s.funnel_stage, s.platform, s.grade, s.status, s.title, JSON.stringify(s.body), s.content_hash, s.source_id]);
   }
   async getSkill(id: string) { const r = await this.sql.query("SELECT * FROM skills WHERE id=$1", [id]); return r.rows[0] ? toSkill(r.rows[0]) : null; }
   async listSkills(f: SkillFilter = {}) {
-    const r = await this.sql.query("SELECT * FROM skills WHERE ($1::text IS NULL OR category=$1) AND ($2::text IS NULL OR status=$2) AND ($3::text IS NULL OR grade=$3) AND ($4::text IS NULL OR $4 = ANY(platform)) ORDER BY id",
-      [f.category ?? null, f.status ?? null, f.grade ?? null, f.platform ?? null]);
+    const r = await this.sql.query("SELECT * FROM skills WHERE ($1::text IS NULL OR category=$1 OR category='all') AND ($2::text IS NULL OR status=$2) AND ($3::text IS NULL OR grade=$3) AND ($4::text IS NULL OR $4 = ANY(platform)) AND ($5::text IS NULL OR topic=$5) AND ($6::text IS NULL OR scope=$6 OR scope='both') ORDER BY id",
+      [f.category ?? null, f.status ?? null, f.grade ?? null, f.platform ?? null, f.topic ?? null, f.scope ?? null]);
     return r.rows.map(toSkill);
   }
   async upsertSkillEmbedding(e: SkillEmbeddingRow) {
@@ -254,7 +254,7 @@ export class PgDataStore implements DataStore {
   }
   async close() { await this.sql.end(); }
 }
-const toSkill = (r: Record<string, unknown>): SkillRow => ({ id: String(r["id"]), category: String(r["category"]), funnel_stage: String(r["funnel_stage"]), platform: (r["platform"] as string[] | null) ?? [], grade: String(r["grade"]), status: r["status"] as SkillRow["status"], title: String(r["title"]), body: r["body"], content_hash: String(r["content_hash"]), source_id: String(r["source_id"]) });
+const toSkill = (r: Record<string, unknown>): SkillRow => ({ id: String(r["id"]), category: String(r["category"]), topic: String(r["topic"]), scope: r["scope"] as SkillRow["scope"], funnel_stage: String(r["funnel_stage"]), platform: (r["platform"] as string[] | null) ?? [], grade: String(r["grade"]), status: r["status"] as SkillRow["status"], title: String(r["title"]), body: r["body"], content_hash: String(r["content_hash"]), source_id: String(r["source_id"]) });
 const toTemplate = (r: Record<string, unknown>): TemplateRow => ({ id: String(r["id"]), category_id: (r["category_id"] as string | null) ?? null, title: String(r["title"]), family: (r["family"] as string | null) ?? null, variant_of: (r["variant_of"] as string | null) ?? null, archetype: (r["archetype"] as string | null) ?? null, tags: (r["tags"] as string[] | null) ?? [], status: r["status"] as TemplateRow["status"], body: r["body"], content_hash: String(r["content_hash"]) });
 
 /**

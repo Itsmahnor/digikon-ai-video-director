@@ -62,6 +62,7 @@ export class ScopedRetriever implements Retriever {
   private narrow(collection: Collection, filter: RetrieveFilter = {}): RetrieveFilter | null {
     if (!this.scope.collections.includes(collection)) return null;
     const out: RetrieveFilter = { ...filter, include_draft: !!this.opts.allowDraft && !!filter.include_draft };
+    if (collection === "skills") out.skill_scope = this.scope.agent;
     if (NOTE_COLLECTIONS.includes(collection)) {
       const topics = filter.topics?.length ? filter.topics.filter((t) => this.scope.topics.includes(t)) : [...this.scope.topics];
       if (topics.length === 0) return null;

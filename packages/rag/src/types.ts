@@ -39,6 +39,8 @@ export interface Doc {
     topics?: string[];
     /** skills only. */
     skill_category?: string;
+    skill_topic?: string;
+    skill_scope?: "director" | "editor" | "both";
     skill_funnel_stage?: string;
     skill_platforms?: string[];
     /** skills only: the library grade as stored (free text, compared case-insensitively). */
@@ -59,8 +61,12 @@ export interface RetrieveFilter {
   media?: string[];
   /** Hybrid retrieval only: the film being directed. What this film has already used is ranked lower. */
   film_id?: string;
-  /** skills only: keep only this skill category. */
+  /** skills only: keep skills for this video category (saas, ecommerce, general-promo) plus the cross-cutting ones marked `all`. */
   category?: string;
+  /** skills only: keep only this concept (hook, pacing, claims-safety, ...). */
+  topic?: string;
+  /** skills only: the reading agent. Keeps skills scoped to it or to both. Set by ScopedRetriever. */
+  skill_scope?: "director" | "editor";
   /** skills only: keep only skills for this platform. */
   platform?: string;
   /** skills only: keep only skills of this grade. */

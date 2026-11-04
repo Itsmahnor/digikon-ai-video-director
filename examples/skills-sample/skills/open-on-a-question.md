@@ -1,7 +1,8 @@
-﻿---
+---
 id: open-on-a-question
 title: Open on a question
-category: hook
+category: saas
+topic: hook
 funnel_stage: awareness
 platform: tiktok, reels
 grade: a

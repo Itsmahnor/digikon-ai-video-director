@@ -70,7 +70,7 @@ export function skillDoc(row: SkillRow): Doc | null {
   return {
     id: row.id, collection: "skills", title: row.title, text: `${row.title}. ${typeof row.body === "string" ? row.body : JSON.stringify(row.body)}`,
     source: `skill ${row.id} (source ${row.source_id})`,
-    metadata: { status: row.status === "draft" ? "draft" : "reviewed", skill_category: row.category, skill_funnel_stage: row.funnel_stage, skill_platforms: row.platform, skill_grade: row.grade, topics: [row.category, row.funnel_stage] },
+    metadata: { status: row.status === "draft" ? "draft" : "reviewed", skill_category: row.category, skill_topic: row.topic, skill_scope: row.scope, skill_funnel_stage: row.funnel_stage, skill_platforms: row.platform, skill_grade: row.grade, topics: [row.topic, row.category, row.funnel_stage] },
   };
 }
 
@@ -82,7 +82,7 @@ export interface ImportResult {
   rejected: { file: string; problems: string[] }[];
 }
 
-const skillText = (r: SkillRecord): string => [r.title, r.category.replace(/-/g, " "), r.funnel_stage.replace(/-/g, " "), r.platform.join(" "), r.body].join(". ");
+const skillText = (r: SkillRecord): string => [r.title, r.topic.replace(/[-_]/g, " "), r.category.replace(/-/g, " "), r.funnel_stage.replace(/-/g, " "), r.platform.join(" "), r.body].join(". ");
 
 const stripBom = (s: string): string => s.replace(/^\uFEFF/, "");
 
@@ -136,7 +136,7 @@ export async function importSkills(store: DataStore, embedder: Embedder, dir: st
       if (n.skill_id !== record.id && n.score >= NEAR_DUPLICATE_THRESHOLD && (!dup || n.score > dup.similarity)) dup = { of: n.skill_id, similarity: n.score };
     }
     if (dup) { res.duplicates.push({ id: record.id, of: dup.of, similarity: Number(dup.similarity.toFixed(4)) }); continue; }
-    const row: SkillRow = { id: record.id, category: record.category, funnel_stage: record.funnel_stage, platform: record.platform, grade: record.grade, status: record.status, title: record.title, body: record.body, content_hash: hash, source_id: source.id };
+    const row: SkillRow = { id: record.id, category: record.category, topic: record.topic, scope: record.scope, funnel_stage: record.funnel_stage, platform: record.platform, grade: record.grade, status: record.status, title: record.title, body: record.body, content_hash: hash, source_id: source.id };
     await store.upsertSkill(row);
     await store.upsertSkillEmbedding({ skill_id: record.id, model: embedder.model, model_version: embedder.version, vector: vector! });
     kept.set(record.id, vector!);

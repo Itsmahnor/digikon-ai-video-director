@@ -8,6 +8,10 @@ import { z } from "zod";
 const slug = z.string().regex(/^[a-z0-9]+([-_][a-z0-9]+)*$/);
 const text = z.string().trim().min(1);
 
+/** The video category a skill serves. `all` marks a cross-cutting skill that applies to any category. */
+export const SKILL_CATEGORIES = ["saas", "ecommerce", "general-promo", "all"] as const;
+export const SKILL_SCOPES = ["director", "editor", "both"] as const;
+
 export const SKILL_STATUSES = ["draft", "reviewed", "approved", "retired"] as const;
 
 export const SkillSource = z.object({
@@ -24,7 +28,10 @@ export const SkillRecord = z.object({
   format_version: z.literal(1).default(1),
   id: slug,
   title: text,
-  category: slug,
+  category: z.enum(SKILL_CATEGORIES),
+  /** The concept the skill teaches (hook, pacing, claims-safety, motion, ...). */
+  topic: slug,
+  scope: z.enum(SKILL_SCOPES).default("both"),
   funnel_stage: slug,
   platform: z.array(slug).default([]),
   grade: text,

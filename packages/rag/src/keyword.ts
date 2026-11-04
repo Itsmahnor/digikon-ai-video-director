@@ -25,7 +25,9 @@ export function eligible(d: Doc, f: RetrieveFilter = {}): boolean {
   if (f.min_grade && (!m.grade || m.grade > f.min_grade)) return false;
   switch (d.collection) {
     case "skills":
-      if (f.category && m.skill_category !== f.category) return false;
+      if (f.category && m.skill_category !== f.category && m.skill_category !== "all") return false;
+      if (f.topic && m.skill_topic !== f.topic) return false;
+      if (f.skill_scope && m.skill_scope !== "both" && m.skill_scope !== f.skill_scope) return false;
       if (f.platform && !(m.skill_platforms ?? []).includes(f.platform)) return false;
       if (f.skill_grade && (m.skill_grade ?? "").toLowerCase() !== f.skill_grade.toLowerCase()) return false;
       return true;

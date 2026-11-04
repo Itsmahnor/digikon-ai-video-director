@@ -7,7 +7,7 @@ import { HashEmbedder } from "./embeddings.js";
 import { checkLicence, detectLicence, importSkills, parseSkillFile } from "./skills.js";
 
 const MIT_TEXT = "MIT License\n\nPermission is hereby granted, free of charge, to any person obtaining a copy";
-const skillMd = (id: string, body: string, extra = "") => `---\nid: ${id}\ntitle: ${id.replace(/-/g, " ")}\ncategory: hook\nfunnel_stage: awareness\nplatform: tiktok, reels\ngrade: a\nstatus: approved\n${extra}---\n${body}\n`;
+const skillMd = (id: string, body: string, extra = "") => `---\nid: ${id}\ntitle: ${id.replace(/-/g, " ")}\ncategory: saas\ntopic: hook\nfunnel_stage: awareness\nplatform: tiktok, reels\ngrade: a\nstatus: approved\n${extra}---\n${body}\n`;
 
 function folder(manifest: object | null, license: string | null, skills: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), "skills-"));
