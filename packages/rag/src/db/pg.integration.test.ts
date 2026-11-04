@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { connectPgSingle, PgDataStore, type SqlClient, type TemplateRow } from "./store.js";
 import { readMigrations, runMigrations } from "./migrate.js";
 import { HashEmbedder } from "../embeddings.js";
@@ -14,6 +14,7 @@ import { ScopedRetriever } from "../scopes.js";
  * It is skipped only if neither is available. The backend that ran is printed, so a PGlite pass is never mistaken for a server pass.
  */
 const url = process.env["DATABASE_URL"];
+vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 }); // a real server over a socket is slower than in-process PGlite: migrations and the skills import take seconds
 type Db = SqlClient & { connect(): Promise<void> };
 interface PGliteLike { query(t: string, p?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>; exec(t: string): Promise<{ rows: Record<string, unknown>[] }[]>; close(): Promise<void> }
 

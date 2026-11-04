@@ -21,6 +21,7 @@
     "eval:retrieval": "tsx packages/evals/src/retrieval-cli.ts",
     "eval:hybrid": "tsx packages/evals/src/hybrid-cli.ts",
     "eval:skills": "tsx packages/evals/src/skills-cli.ts",
+    "eval:skills:db": "tsx packages/evals/src/skills-db-cli.ts",
     "console:demo": "tsx apps/console/src/server.ts --demo",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",

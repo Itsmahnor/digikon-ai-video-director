@@ -30,7 +30,7 @@ class CompositeIndex implements VectorIndex {
 export async function createDbBackedRetriever(store: SkillVectors, embedder: Embedder, baseDocs: readonly Doc[], opts: HybridOptions = {}): Promise<(docs: Doc[]) => Retriever> {
   const vectors = new Map<string, readonly number[]>();
   const embed = baseDocs.filter((d) => d.collection !== "skills");
-  const vs = await embedder.embed(embed.map((d) => `${d.title}. ${d.title}. ${d.text}`));
+  const vs = embed.length ? await embedder.embed(embed.map((d) => `${d.title}. ${d.title}. ${d.text}`)) : [];
   embed.forEach((d, i) => vectors.set(key(d), vs[i]!));
   return (docs: Doc[]) => {
     const memory = new MemoryVectorIndex();
