@@ -40,6 +40,8 @@ export interface EditorDeps {
   skills: SkillLibrary;
   /** The shared retriever. The Editor only ever reads it through the Editor scope. */
   retriever: Retriever;
+  /** Let draft skills reach the Editor (SKILLS_INCLUDE_DRAFT=1 in the console). Off by default; it changes only what may be read. */
+  skillsIncludeDraft?: boolean;
   /** Optional advisory model. Without one, only the deterministic checks run. */
   llm?: LlmClient;
   renderers?: RendererRegistry;
@@ -105,7 +107,7 @@ export interface EditorFindings {
  * The deterministic part of the Editor: operations, conflicts and revision requests from the handoff alone, plus Editor-scoped
  * retrieval. It does not verify the handoff (runEditor does) and does not look at any file.
  */
-export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "recipes" | "retriever" | "audio_production">): Promise<EditorFindings> {
+export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "recipes" | "retriever" | "audio_production" | "skillsIncludeDraft">): Promise<EditorFindings> {
   const scenes = new Map(h.storyboard.scenes.map((s) => [s.scene_id, s]));
   const assets = new Map(h.assets.map((a) => [a.asset_id, a]));
   const conflicts: EditorConflict[] = [];
@@ -192,7 +194,7 @@ export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "re
   h.asset_feasibility.blockers.forEach((b, n) => conflict({ conflict_id: `K-asset-${n + 1}`, kind: "missing_information", description: b }));
 
   // ----- Editor knowledge, through the Editor scope only -----
-  const scoped = new ScopedRetriever(deps.retriever, "editor");
+  const scoped = new ScopedRetriever(deps.retriever, "editor", { allowDraft: !!deps.skillsIncludeDraft });
   const knowledge: Hit[] = [];
   for (const type of [...new Set(operations.map((o) => o.operation_type))]) {
     const r = await scoped.retrieveOrReport({ text: KNOWLEDGE_QUERY[type], collection: "directing_principles", k: 3, max_tokens: 700 });
@@ -202,6 +204,9 @@ export async function planEditorWork(h: EditorSource, deps: Pick<EditorDeps, "re
   const specs = await scoped.retrieveOrReport({ text: `${h.constraints.platform} ${h.constraints.aspect_ratio}`, collection: "platform_specs", k: 3, max_tokens: 500 });
   if (specs.missing) missing_inputs.push(`no verified platform specification for ${h.constraints.platform} (${h.constraints.aspect_ratio}) in the knowledge base`);
   else notes.push(`verified platform specification(s) found: ${specs.hits.map((x) => x.doc.id).join(", ")}; their values are text, not machine-readable fields`);
+  // Skills for the project's video category (plus the cross-cutting ones), Editor scope: skills marked Director-only never arrive here. Absent skills are not a conflict: they only add craft guidance.
+  const skillHits = await scoped.retrieve({ text: [...new Set(operations.map((o) => KNOWLEDGE_QUERY[o.operation_type]))].join(" ") || "editing pacing captions audio", collection: "skills", k: 3, max_tokens: 700, filter: { category: h.project.video_category ?? "all", include_draft: !!deps.skillsIncludeDraft } });
+  knowledge.push(...skillHits.filter((x) => !knowledge.some((y) => y.doc.id === x.doc.id)));
   missing_inputs.push("target resolution and frame rate: the handoff carries only the aspect ratio");
 
   return { operations, conflicts, revision_requests, notes, missing_inputs, retrievals: scoped.records, knowledge };

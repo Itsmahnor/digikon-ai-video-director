@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   Asset, DirectorHandoff, EditorOutput, handoffContentHash, type EditorOperation, type Recipe,
 } from "@digikon/contracts";
-import { AGENT_SCOPES, KeywordRetriever, recipeDocs } from "@digikon/rag";
+import { AGENT_SCOPES, KeywordRetriever, loadSkillDocs, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, resolveParams } from "@digikon/recipes";
 import {
   EDITOR_SKILLS, NO_RENDERERS, RunStore, ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, checkEditorOutput, planEditorWork,
@@ -287,6 +287,26 @@ describe("what the Editor reports instead of inventing", () => {
     expect(f.retrievals.every((x) => x.agent === "editor")).toBe(true);
     // The same plan with the shipped knowledge finds guidance for all four, and says nothing.
     expect((await planEditorWork(t.handoff, t.editor)).conflicts).toEqual([]);
+  });
+
+  it("reads skills for the project's category through the Editor scope: none unless drafts are allowed, never Director-only ones", async () => {
+    const t = await approved("e-skills");
+    const skillDocs = loadSkillDocs(root("examples/skills"));
+    const retriever = new KeywordRetriever([...recipeDocs(allRecipes), ...knowledge, ...skillDocs]);
+    const h = structuredClone(t.handoff) as DirectorHandoff;
+    h.project.video_category = "saas";
+    const byId = new Map(skillDocs.map((d) => [d.id, d]));
+    const skillIds = (f: { knowledge: { doc: { id: string; collection: string } }[] }) => f.knowledge.filter((k) => k.doc.collection === "skills").map((k) => k.doc.id);
+    expect(skillIds(await planEditorWork(h, { ...t.editor, retriever }))).toEqual([]); // drafts are off by default
+    const f = await planEditorWork(h, { ...t.editor, retriever, skillsIncludeDraft: true });
+    const ids = skillIds(f);
+    expect(ids.length).toBeGreaterThan(0);
+    for (const id of ids) {
+      expect(["saas", "all"]).toContain(byId.get(id)!.metadata.skill_category);
+      expect(byId.get(id)!.metadata.skill_scope).not.toBe("director");
+    }
+    expect(f.retrievals.filter((r) => r.collection === "skills").every((r) => r.agent === "editor")).toBe(true);
+    expect(f.conflicts).toEqual([]); // skills only add guidance; they never add a conflict
   });
 
   it("reports unrecorded audio licences and unmet asset blockers, and notes (but does not block on) an undeclared product screen", async () => {
