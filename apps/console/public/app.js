@@ -369,6 +369,8 @@ function setSendBusy(b) {
 }
 
 // ---------- director run ----------
+/** The chosen kind of video, or null when the select is left unset. */
+function videoCategory() { const v = $("#video-category")?.value; return v === "saas" || v === "ecommerce" || v === "general-promo" ? v : null; }
 function factsLines() { return $("#facts").value.split("\n").map((s) => s.trim()).filter(Boolean).slice(0, 20); }
 
 async function buildPlan() {
@@ -381,7 +383,7 @@ async function buildPlan() {
   const order = STEPS.map(([k]) => k);
   try {
     let res;
-    try { res = await fetch(`/api/sessions/${state.sid}/direct`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ facts: factsLines() }) }); } catch { throw offlineError(); }
+    try { res = await fetch(`/api/sessions/${state.sid}/direct`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ facts: factsLines(), video_category: videoCategory() }) }); } catch { throw offlineError(); }
     if (!res.ok) { const b = await res.json().catch(() => ({})); const er = new Error(b.message || `Request failed (${res.status})`); er.code = b.error; throw er; }
     const reader = res.body.getReader(), dec = new TextDecoder(); let buf = "";
     for (;;) {

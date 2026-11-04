@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Transcript } from "@digikon/contracts";
 import { DemoClient, RunStore, SkillLibrary } from "@digikon/director";
-import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
+import { KeywordRetriever, loadKnowledge, loadSkillDocs, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import type { SpeechEngine } from "@digikon/speech";
 import { createApp, type AppContext } from "./app.js";
@@ -138,6 +138,42 @@ describe("routing and the Director run", () => {
     const events = await readSse(res);
     return { app, id, events, state: events.find((e) => e.event === "state")!.data };
   }
+  describe("kind of video (video_category) on the intake", () => {
+    const skillDocs = loadSkillDocs(join(repo, "examples/skills"));
+    const byId = new Map(skillDocs.map((d) => [d.id, d]));
+    const withSkills = (includeDraft: boolean) => build({ retriever: new KeywordRetriever([...recipeDocs(recipes), ...loadKnowledge(join(repo, "knowledge")), ...skillDocs]), ...(includeDraft ? { skillsIncludeDraft: true } : {}) });
+    const run = async (app: ReturnType<typeof build>, body: Record<string, unknown>) => {
+      const id = await newSession(app);
+      await app.request(`/api/sessions/${id}/route`, json({ text: "A 12 second Instagram ad for my coffee roaster." }));
+      const res = await app.request(`/api/sessions/${id}/direct`, json(body));
+      return { res, events: res.headers.get("content-type")?.includes("event-stream") ? await readSse(res) : [] };
+    };
+    const skillCites = (events: { event: string; data: any }[]) => (events.find((e) => e.event === "state")!.data.citations as string[]).filter((c) => byId.has(c));
+
+    it("offers the choice in the form, with the three kinds and an unset option", () => {
+      const html = readFileSync(join(repo, "apps/console/public/index.html"), "utf8");
+      expect(html).toContain('id="video-category"');
+      for (const v of ["saas", "ecommerce", "general-promo"]) expect(html).toContain(`value="${v}"`);
+      expect(html).toContain('<option value="">');
+      expect(readFileSync(join(repo, "apps/console/public/app.js"), "utf8")).toContain("video_category: videoCategory()");
+    });
+    it("the chosen kind reaches the Director: only that kind's skills and the cross-cutting ones are cited", async () => {
+      const { events } = await run(withSkills(true), { facts: [], video_category: "ecommerce" });
+      const cited = skillCites(events);
+      expect(cited.length).toBeGreaterThan(0);
+      for (const id of cited) expect(["ecommerce", "all"]).toContain(byId.get(id)!.metadata.skill_category);
+    });
+    it("unset means only the cross-cutting skills; an unknown kind is refused", async () => {
+      const unset = skillCites((await run(withSkills(true), { facts: [] })).events);
+      for (const id of unset) expect(byId.get(id)!.metadata.skill_category).toBe("all");
+      const bad = await run(withSkills(true), { facts: [], video_category: "gaming" });
+      expect(bad.res.status).toBeGreaterThanOrEqual(400);
+    });
+    it("with drafts not allowed (the default) no skill is cited, whatever the kind", async () => {
+      expect(skillCites((await run(withSkills(false), { facts: [], video_category: "saas" })).events)).toEqual([]);
+    });
+  });
+
   const decide = (app: ReturnType<typeof build>, id: string, body: Record<string, unknown>) => app.request(`/api/sessions/${id}/approve`, json(body));
   const decided = async (res: Response) => (await res.json()) as any;
 

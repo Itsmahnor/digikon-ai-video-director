@@ -121,7 +121,11 @@ const CorrectionBody = z.object({
   /** The user says this is a real capture of their product, so it is shown without a concept label. */
   genuine_product_ui: z.boolean().nullable().optional(),
 }).strict();
-const DirectBody = z.object({ facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]) });
+const DirectBody = z.object({
+  facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]),
+  /** Kind of video, which decides the skills read. Unset (or null) means only the cross-cutting skills are used. */
+  video_category: z.enum(["saas", "ecommerce", "general-promo"]).nullable().default(null),
+});
 
 class HttpError extends Error {
   constructor(readonly status: 400 | 404 | 409 | 413 | 422 | 503, readonly code: string, message: string) { super(message); }
@@ -580,7 +584,8 @@ export function createApp(ctx: AppContext) {
     s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
-    const project = request.project;
+    // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
+    const project = { ...request.project, video_category: body.video_category ?? request.project.video_category ?? null };
     const assets = s.assets;
     const facts = s.facts;
     await Promise.allSettled([...s.pending.values()]); // measurements and transcripts must be ready before planning

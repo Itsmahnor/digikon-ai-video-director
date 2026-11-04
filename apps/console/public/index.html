@@ -61,6 +61,15 @@
       <div id="assets" class="assets" aria-live="polite"></div>
       <section id="gallery" class="gallery" aria-live="polite"></section>
 
+      <label class="field-label" for="video-category">Kind of video <span class="hint">optional</span></label>
+      <select id="video-category" aria-label="Kind of video">
+        <option value="">Not specified (only general guidance is used)</option>
+        <option value="saas">Software / SaaS</option>
+        <option value="ecommerce">E-commerce / product</option>
+        <option value="general-promo">General promotion</option>
+      </select>
+      <p class="hint">Chooses which production skills the Director and Editor read. Leave it unset and only the ones that apply to every kind of video are used.</p>
+
       <details class="facts">
         <summary>Approved brand facts <span class="hint">optional, one per line</span></summary>
         <textarea id="facts" rows="3" aria-label="Approved brand facts, one per line" placeholder="Beans are roasted weekly in small batches.&#10;Orders ship within two days of roasting."></textarea>
