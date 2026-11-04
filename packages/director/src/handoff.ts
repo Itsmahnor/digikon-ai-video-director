@@ -11,6 +11,7 @@ import { checkRenderable, type ApprovalState } from "./approvals.js";
 import { editIssues, planIssues } from "./nodes.js";
 import type { EditorSource } from "./editor-agent.js";
 import type { SkillLibrary } from "./skills.js";
+import { skillRef } from "./skill-ref.js";
 
 /** The Director state a handoff is built from. Everything else in the graph state stays inside the Director. */
 export interface HandoffState extends ApprovalState {
@@ -155,13 +156,7 @@ export function buildHandoff(s: HandoffState, ctx: HandoffContext): DirectorHand
       expect_audio: assets.some((a) => a.audio_tracks > 0), loudness_target_lufs: null, grounded_claim_ids: claims.map((c) => c.claim.claim_id),
     },
     provenance: {
-      skills: (s.skillsUsed ?? []).map((n) => {
-        try {
-          return `${n}@${ctx.skills.get(n).version}`;
-        } catch {
-          return `${n}@1.0.0`;
-        }
-      }),
+      skills: (s.skillsUsed ?? []).map((n) => skillRef(ctx.skills, n)),
       references: s.referencesUsed ?? [],
       recipes: [...new Set(editPlan.uses.map((u) => u.recipe_id))].sort().map((id) => { const r = ctx.recipes.get(id)!; return { recipe_id: id, version: r.version, status: r.status }; }),
       retrieved,

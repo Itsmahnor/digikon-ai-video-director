@@ -2,6 +2,7 @@ import type { DirectorStateType } from "./graph.js";
 import { currentEditPlan, currentStoryboard } from "./approvals.js";
 import type { RecipeLibrary } from "@digikon/recipes";
 import type { SkillLibrary } from "./skills.js";
+import { skillRef } from "./skill-ref.js";
 
 /** Everything needed to reproduce or audit a run: which model, skills, recipes and documents shaped the plan, and who approved which version. */
 export function buildRunRecord(
@@ -19,14 +20,7 @@ export function buildRunRecord(
     model: ctx.model,
     video_type: state.chosenVideoType ?? null,
     proposed_video_types: state.proposedVideoTypes ?? [],
-    skills: state.skillsUsed.map((n) => {
-      try {
-        const s = ctx.skills.get(n);
-        return `${n}@${s.version}`;
-      } catch {
-        return `${n}@1.0.0`;
-      }
-    }),
+    skills: state.skillsUsed.map((n) => skillRef(ctx.skills, n)),
     references: state.referencesUsed,
     recipes_used: used,
     retrieved_ids: state.citations,

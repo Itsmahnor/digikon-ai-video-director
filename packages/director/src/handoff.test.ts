@@ -58,7 +58,12 @@ describe("Director handoff", () => {
     expect(h.qa).toMatchObject({ target_duration_s: 12, aspect_ratio: "9:16", grounded_claim_ids: ["C01"], loudness_target_lufs: null });
     expect(h.qa.scene_spans).toEqual([{ scene_id: "S01", start: 0, end: 4 }, { scene_id: "S02", start: 4, end: 9 }, { scene_id: "S03", start: 9, end: 12 }]);
     expect(h.provenance.recipes.map((r) => r.recipe_id)).toEqual(["crossfade", "end-card-cta", "loudness-normalise", "pan-reframe", "slow-push-in"]);
-    expect(h.provenance.skills.every((s) => /@\d+\.\d+\.\d+$/.test(s))).toBe(true);
+    // A skill the library holds carries its real version; any other name (a skills-collection id such as a video-type playbook) is recorded as unknown, never with an invented version.
+    for (const s of h.provenance.skills) {
+      const [name, version] = s.split("@") as [string, string];
+      let known = true; try { t.ctx.skills.get(name); } catch { known = false; }
+      expect(known ? /^\d+\.\d+\.\d+$/.test(version) : version === "unknown", s).toBe(true);
+    }
     expect(h.run).toEqual({ run_id: "h-ok", model: "scripted", recipe_library_mode: "draft" });
   });
 
