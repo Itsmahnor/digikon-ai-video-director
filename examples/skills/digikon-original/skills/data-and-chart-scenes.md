@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the story depends on a number, a trend or a comparison.
 

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** after a few self-iterations of any short video, before final render.
 

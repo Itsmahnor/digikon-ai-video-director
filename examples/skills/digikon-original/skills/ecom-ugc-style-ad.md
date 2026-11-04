@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the platform rewards native, person-to-camera content.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Do not script fake reviews or fake personal experience; if the footage is a paid creator, include the required disclosure. Do not generate a synthetic person to pose as a real customer.
 
 **Example:** "I kept losing my keys" then the product clipped to the bag.
+
+**Check:** the creator's words must be their own and truthful; never put a scripted claim in a real person's mouth without their agreement.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

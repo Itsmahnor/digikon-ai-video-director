@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** choosing how one scene hands over to the next.
 

@@ -14,7 +14,7 @@
   "chosen": {
     "bm25_idf_floor": 0.2,
     "hybrid": {
-      "min_similarity": 0.6,
+      "min_similarity": 0.5,
       "lexical_min_similarity": 0.5,
       "abstain_below": 0.65,
       "min_idf_coverage": 0,
@@ -28,22 +28,22 @@
     {
       "name": "BM25 + idf floor 0.2",
       "test": 1.0721,
-      "old": 1.2595
+      "old": 1.1447
     },
     {
-      "name": "hybrid (min_sim 0.6) + floor (abstain below 0.65, keyword-only sim >= 0.5, idf >= 0)",
-      "test": 0.964,
-      "old": 1.3401
+      "name": "hybrid (min_sim 0.5) + floor (abstain below 0.65, keyword-only sim >= 0.5, idf >= 0)",
+      "test": 1.0158,
+      "old": 1.327
     },
     {
-      "name": "hybrid (min_sim 0.6) + keyword abstention (require a keyword hit, idf >= 0.1)",
-      "test": 0.9649,
-      "old": 1.3408
+      "name": "hybrid (min_sim 0.5) + keyword abstention (require a keyword hit, idf >= 0.1)",
+      "test": 1.0135,
+      "old": 1.3276
     },
     {
       "name": "hybrid (min_sim 0.6) + keyword abstention only (idf >= 0.2, no vector gate) [fixed variant, not tuned]",
-      "test": 1.2105000000000001,
-      "old": 1.3027
+      "test": 1.2037,
+      "old": 1.1486
     }
   ],
   "results": {
@@ -52,7 +52,7 @@
         "n": 37,
         "p_at_1": 0.4865,
         "recall_at_3": 0.6486,
-        "mrr": 0.6217,
+        "mrr": 0.6203,
         "ndcg_at_3": 0.5817,
         "neg_empty": "1/6",
         "neg_rate": 0.16666666666666666
@@ -61,17 +61,17 @@
         "n": 73,
         "p_at_1": 0.5616,
         "recall_at_3": 0.7123,
-        "mrr": 0.6775,
+        "mrr": 0.6758,
         "ndcg_at_3": 0.6513,
         "neg_empty": "3/12",
         "neg_rate": 0.25
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.8511,
+        "p_at_1": 0.8723,
         "recall_at_3": 0.9149,
-        "mrr": 0.8855,
-        "ndcg_at_3": 0.8886,
+        "mrr": 0.8957,
+        "ndcg_at_3": 0.8964,
         "neg_empty": "0/4",
         "neg_rate": 0
       }
@@ -90,27 +90,27 @@
         "n": 73,
         "p_at_1": 0.5479,
         "recall_at_3": 0.6986,
-        "mrr": 0.6283,
-        "ndcg_at_3": 0.6394,
-        "neg_empty": "10/12",
-        "neg_rate": 0.8333333333333334
+        "mrr": 0.626,
+        "ndcg_at_3": 0.6376,
+        "neg_empty": "9/12",
+        "neg_rate": 0.75
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.8511,
+        "p_at_1": 0.8723,
         "recall_at_3": 0.9149,
-        "mrr": 0.8845,
-        "ndcg_at_3": 0.8886,
-        "neg_empty": "3/4",
-        "neg_rate": 0.75
+        "mrr": 0.8947,
+        "ndcg_at_3": 0.8964,
+        "neg_empty": "2/4",
+        "neg_rate": 0.5
       }
     },
     "hybrid (min_sim 0.6), no floor": {
       "independent TEST": {
         "n": 37,
-        "p_at_1": 0.6486,
-        "recall_at_3": 0.8108,
-        "mrr": 0.7523,
+        "p_at_1": 0.6216,
+        "recall_at_3": 0.8378,
+        "mrr": 0.7351,
         "ndcg_at_3": 0.7403,
         "neg_empty": "1/6",
         "neg_rate": 0.16666666666666666
@@ -118,76 +118,76 @@
       "independent ALL": {
         "n": 73,
         "p_at_1": 0.6712,
-        "recall_at_3": 0.8219,
-        "mrr": 0.7693,
-        "ndcg_at_3": 0.7573,
+        "recall_at_3": 0.8493,
+        "mrr": 0.7726,
+        "ndcg_at_3": 0.7728,
         "neg_empty": "3/12",
         "neg_rate": 0.25
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.8511,
+        "p_at_1": 0.8298,
         "recall_at_3": 0.9362,
-        "mrr": 0.9039,
-        "ndcg_at_3": 0.9048,
+        "mrr": 0.8908,
+        "ndcg_at_3": 0.8969,
         "neg_empty": "0/4",
         "neg_rate": 0
       }
     },
-    "hybrid (min_sim 0.6) + floor (abstain below 0.65, keyword-only sim >= 0.5, idf >= 0)": {
+    "hybrid (min_sim 0.5) + floor (abstain below 0.65, keyword-only sim >= 0.5, idf >= 0)": {
       "independent TEST": {
         "n": 37,
-        "p_at_1": 0.4054,
-        "recall_at_3": 0.4865,
-        "mrr": 0.464,
-        "ndcg_at_3": 0.453,
+        "p_at_1": 0.4595,
+        "recall_at_3": 0.5676,
+        "mrr": 0.5158,
+        "ndcg_at_3": 0.5171,
         "neg_empty": "6/6",
         "neg_rate": 1
       },
       "independent ALL": {
         "n": 73,
-        "p_at_1": 0.5205,
-        "recall_at_3": 0.6164,
-        "mrr": 0.579,
-        "ndcg_at_3": 0.5739,
+        "p_at_1": 0.5479,
+        "recall_at_3": 0.6575,
+        "mrr": 0.6067,
+        "ndcg_at_3": 0.6081,
         "neg_empty": "12/12",
         "neg_rate": 1
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.7872,
+        "p_at_1": 0.766,
         "recall_at_3": 0.8723,
-        "mrr": 0.8401,
-        "ndcg_at_3": 0.8409,
+        "mrr": 0.827,
+        "ndcg_at_3": 0.8331,
         "neg_empty": "4/4",
         "neg_rate": 1
       }
     },
-    "hybrid (min_sim 0.6) + keyword abstention (require a keyword hit, idf >= 0.1)": {
+    "hybrid (min_sim 0.5) + keyword abstention (require a keyword hit, idf >= 0.1)": {
       "independent TEST": {
         "n": 37,
-        "p_at_1": 0.4054,
-        "recall_at_3": 0.4865,
-        "mrr": 0.4649,
-        "ndcg_at_3": 0.453,
+        "p_at_1": 0.4595,
+        "recall_at_3": 0.5676,
+        "mrr": 0.5135,
+        "ndcg_at_3": 0.5171,
         "neg_empty": "6/6",
         "neg_rate": 1
       },
       "independent ALL": {
         "n": 73,
-        "p_at_1": 0.5068,
-        "recall_at_3": 0.6027,
-        "mrr": 0.5686,
-        "ndcg_at_3": 0.5602,
+        "p_at_1": 0.5342,
+        "recall_at_3": 0.6438,
+        "mrr": 0.5938,
+        "ndcg_at_3": 0.5944,
         "neg_empty": "12/12",
         "neg_rate": 1
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.7872,
+        "p_at_1": 0.766,
         "recall_at_3": 0.8723,
-        "mrr": 0.8408,
-        "ndcg_at_3": 0.8409,
+        "mrr": 0.8276,
+        "ndcg_at_3": 0.8331,
         "neg_empty": "4/4",
         "neg_rate": 1
       }
@@ -195,30 +195,30 @@
     "hybrid (min_sim 0.6) + keyword abstention only (idf >= 0.2, no vector gate) [fixed variant, not tuned]": {
       "independent TEST": {
         "n": 37,
-        "p_at_1": 0.6486,
-        "recall_at_3": 0.7568,
-        "mrr": 0.7105,
-        "ndcg_at_3": 0.7027,
+        "p_at_1": 0.6216,
+        "recall_at_3": 0.7297,
+        "mrr": 0.7037,
+        "ndcg_at_3": 0.6863,
         "neg_empty": "6/6",
         "neg_rate": 1
       },
       "independent ALL": {
         "n": 73,
-        "p_at_1": 0.6301,
-        "recall_at_3": 0.8082,
-        "mrr": 0.7134,
-        "ndcg_at_3": 0.7264,
-        "neg_empty": "10/12",
-        "neg_rate": 0.8333333333333334
+        "p_at_1": 0.6164,
+        "recall_at_3": 0.7945,
+        "mrr": 0.7079,
+        "ndcg_at_3": 0.7162,
+        "neg_empty": "9/12",
+        "neg_rate": 0.75
       },
       "old set (51, untouched by tuning)": {
         "n": 47,
-        "p_at_1": 0.8723,
+        "p_at_1": 0.8298,
         "recall_at_3": 0.9787,
-        "mrr": 0.9277,
-        "ndcg_at_3": 0.9395,
-        "neg_empty": "3/4",
-        "neg_rate": 0.75
+        "mrr": 0.8986,
+        "ndcg_at_3": 0.9182,
+        "neg_empty": "2/4",
+        "neg_rate": 0.5
       }
     }
   },
@@ -228,55 +228,55 @@
       "n": 36,
       "p_at_1": 0.6389,
       "recall_at_3": 0.7778,
-      "mrr": 0.7347,
+      "mrr": 0.7328,
       "ndcg_at_3": 0.7229,
       "neg_empty": "2/6",
       "neg_rate": 0.3333333333333333,
-      "score": 0.9013666666666666
+      "score": 0.8994666666666666
     },
     {
       "idf": 0.1,
       "n": 36,
       "p_at_1": 0.6389,
       "recall_at_3": 0.7778,
-      "mrr": 0.7284,
+      "mrr": 0.726,
       "ndcg_at_3": 0.7229,
       "neg_empty": "2/6",
       "neg_rate": 0.3333333333333333,
-      "score": 0.8950666666666667
+      "score": 0.8926666666666666
     },
     {
       "idf": 0.2,
       "n": 36,
       "p_at_1": 0.6111,
       "recall_at_3": 0.75,
-      "mrr": 0.6861,
-      "ndcg_at_3": 0.6987,
-      "neg_empty": "4/6",
-      "neg_rate": 0.6666666666666666,
-      "score": 1.0194333333333334
+      "mrr": 0.6815,
+      "ndcg_at_3": 0.6951,
+      "neg_empty": "3/6",
+      "neg_rate": 0.5,
+      "score": 0.9315
     },
     {
       "idf": 0.3,
       "n": 36,
       "p_at_1": 0.4444,
-      "recall_at_3": 0.4722,
-      "mrr": 0.4583,
-      "ndcg_at_3": 0.462,
+      "recall_at_3": 0.5,
+      "mrr": 0.4676,
+      "ndcg_at_3": 0.4759,
       "neg_empty": "5/6",
       "neg_rate": 0.8333333333333334,
-      "score": 0.8749666666666667
+      "score": 0.8842666666666668
     },
     {
       "idf": 0.4,
       "n": 36,
       "p_at_1": 0.2222,
-      "recall_at_3": 0.2222,
-      "mrr": 0.2222,
-      "ndcg_at_3": 0.2222,
+      "recall_at_3": 0.25,
+      "mrr": 0.2361,
+      "ndcg_at_3": 0.2397,
       "neg_empty": "6/6",
       "neg_rate": 1,
-      "score": 0.7222
+      "score": 0.7361
     },
     {
       "idf": 0.5,

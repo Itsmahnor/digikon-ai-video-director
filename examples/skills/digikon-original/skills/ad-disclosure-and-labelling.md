@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** any ad, creator video, testimonial, giveaway or video using generated people or voices.
 
@@ -20,5 +20,7 @@ status: draft
 **Claims:** only claims backed by facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims for review.
 
 **Example:** a creator video for a product sent free carries the platform's paid-partnership label and a spoken "gifted" line.
+
+**Check:** before approval, list every person, voice and gifted product in the video and write beside each whether it needs a label or a release.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

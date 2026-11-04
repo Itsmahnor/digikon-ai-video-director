@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a prospect needs proof from someone like them.
 

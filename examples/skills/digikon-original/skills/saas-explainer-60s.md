@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the audience does not yet understand the category or the problem.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Stakes must be phrased as the user's own facts or as a plain feeling, not a made-up number.
 
 **Example:** "Late invoices are a process problem" explained with a queue analogy.
+
+**Check:** read the script aloud; if it runs more than about ten percent over the target length, cut a beat instead of speeding up.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

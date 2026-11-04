@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** any scene with a pointer-led action.
 
@@ -18,5 +18,7 @@ status: draft
 **Click:** an asymmetric compress and expand (the press about half as long as the release) reads as a real tap. Keep one cursor look per film, large at video scale, with a soft shadow, above all scene content.
 
 **Caution:** copy a brand's pointer only when the product is the subject and the pointer is recognisable.
+
+**Rule:** every cursor move has a destination and a cause; a pointer that wanders without a purpose is worse than none.
 
 _Condensed and modified adaptation of hyperframes motion doctrines and skills (https://github.com/heygen-com/hyperframes), Apache-2.0, Copyright 2026 HeyGen, Inc.. Not a copy; changes were made (rewritten, shortened, re-scoped). See the source and its LICENSE for the full method._

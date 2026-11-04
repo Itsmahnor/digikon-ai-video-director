@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** when writing or reviewing the closing beat of any ad.
 

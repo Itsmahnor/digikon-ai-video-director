@@ -7,7 +7,7 @@ scope: director
 funnel_stage: retention
 platform: youtube, linkedin, landing, tiktok
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** one common customer question deserves a clear 30 to 60 second answer.
 

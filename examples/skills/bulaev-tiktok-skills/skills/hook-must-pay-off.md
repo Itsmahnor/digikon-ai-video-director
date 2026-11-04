@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, youtube
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** reviewing any hook before approving the script.
 

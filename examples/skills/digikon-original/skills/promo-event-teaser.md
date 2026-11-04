@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, feed
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** an upcoming event or launch needs attention before the date.
 

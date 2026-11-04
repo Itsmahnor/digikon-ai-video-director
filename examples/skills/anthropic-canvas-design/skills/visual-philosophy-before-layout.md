@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **General visual-design skill (not video-specific).**
 

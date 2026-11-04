@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** captioning talking-head, launch or explainer video.
 

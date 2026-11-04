@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: tiktok, reels, shorts, feed
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a time-bound or limited offer should drive immediate purchase.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Prices, percentages, deadlines and stock levels must come from the user and be accurate; never create false urgency. Add required terms (exclusions, "while stocks last") if supplied.
 
 **Example:** "20% off until Sunday, code SPRING" only when those details were provided.
+
+**Check:** read the terms card aloud against the clock; if it cannot be read in the time it is on screen, shorten the text or hold it longer.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

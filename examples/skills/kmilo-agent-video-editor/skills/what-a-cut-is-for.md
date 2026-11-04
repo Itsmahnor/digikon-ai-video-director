@@ -7,11 +7,11 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** editing or reviewing a cut.
 
-**Rule:** a cut is justified when it removes dead time (a pause, a false start, a wait), changes the information (a new angle, the thing being discussed, a reaction), or follows the action (cut on movement so the motion hides the cut). A cut that does none of these is noise. Never cut in the middle of a word; avoid cutting mid-movement unless you cut on the action.
+**Rule:** a cut is justified when it removes dead time (a pause, a false start, a wait), changes the information (a new angle, the thing being discussed, a reaction), or follows the action (cutting on a movement lets the motion cover the join). A cut that serves none of these three jobs adds nothing. Do not cut through a word, and avoid cutting through a movement unless the cut is made on that action.
 
 **Shot length:** the average in current film is about 4 to 5 seconds; treat it as a reference, not a target. J and L cuts (audio leading or trailing the picture) smooth speech edits.
 

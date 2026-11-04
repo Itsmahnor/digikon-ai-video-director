@@ -32,6 +32,7 @@
     "templates": "tsx scripts/templates.mts",
     "skills": "tsx scripts/skills.mts",
     "skills:demo": "tsx scripts/skills-demo.mts",
+    "skills:review": "tsx scripts/review-skills.mts",
     "new-template": "tsx scripts/new-template.mts"
   },
   "devDependencies": {

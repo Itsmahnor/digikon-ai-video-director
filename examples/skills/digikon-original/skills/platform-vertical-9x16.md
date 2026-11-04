@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: tiktok, reels, shorts
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** any vertical short.
 
@@ -20,5 +20,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review.
 
 **Example:** 20 s clip with captions in the middle third and the CTA above the lower interface band.
+
+**Check first:** the exact interface areas to avoid and the length limits change; confirm them in the verified platform_specs before delivery.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

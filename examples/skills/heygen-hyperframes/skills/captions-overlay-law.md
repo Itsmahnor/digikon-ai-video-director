@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** composing any frame that will carry captions.
 

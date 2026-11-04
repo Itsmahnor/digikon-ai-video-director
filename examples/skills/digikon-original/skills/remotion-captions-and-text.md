@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** subtitles or animated text in a Remotion video.
 
@@ -18,5 +18,7 @@ status: draft
 **Check:** verify the caption timing against the audio at several points, and look at the longest line on the narrowest aspect ratio.
 
 **Licence warning:** Remotion has its own licence; check remotion.dev/license before commercial use.
+
+**Check:** render a still at the end of the longest caption group and at the start of the next; text should neither overlap nor linger.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: retention
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the viewer is already a customer.
 
@@ -24,5 +24,7 @@ status: draft
 **Example:** a 30-second tip on scheduling recurring invoices.
 
 **Handoff:** retention videos work best as a short series with a predictable format, so users learn what to expect. Ask the user which feature or behaviour they want customers to adopt next, and tie each video to one measurable action, for example turning on a setting or inviting a teammate.
+
+**Check:** ask whether the viewer could act on the tip today; if not, the video is too vague for the retention stage.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: linkedin, youtube, feed, tiktok
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** attracting candidates to a company or a role.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims for review. Salaries, perks, growth and culture statements must be supplied and current; never imply openings that do not exist.
 
 **Example:** two team members describe a typical Tuesday, then the careers page.
+
+**Check:** every employee shown has agreed to appear, and every benefit mentioned is currently offered.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

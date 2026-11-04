@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the user will run several variants and wants to know what to compare.
 

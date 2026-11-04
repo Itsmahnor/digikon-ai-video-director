@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** any scene that shows the product.
 
@@ -16,5 +16,7 @@ status: draft
 **Technical note:** when a flat page is placed in a 3D perspective, rasterise it at native resolution; blurry text usually comes from the texture chain, not the camera.
 
 **Ask first:** if the user has not supplied captures or confirmed that screens are genuine, ask rather than fabricate.
+
+**Claims:** numbers, names and labels visible inside a capture count as claims; check them against supplied facts, and blur or replace anything personal or unapproved.
 
 _Condensed and modified adaptation of video-shotcraft (https://github.com/Vincentwei1021/video-shotcraft), Apache-2.0, Copyright 2026 Wei Yihao. Not a copy; changes were made (rewritten, shortened, re-scoped). See the source and its LICENSE for the full method._

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** any time a statement about the product, price, results or people is written.
 
@@ -18,5 +18,7 @@ status: draft
 **Report instead of invent:** when a claim is wanted but unsupported, list it as a missing input so the user can supply the source.
 
 **Example:** the user wants "saves 10 hours a week"; no source is supplied; use "less time on invoicing" or ask for the source.
+
+**Rule:** keep a short list of every claim in the film beside its source; a claim with no source line is removed or rephrased before approval.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

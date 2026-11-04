@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a scene is authored as a scene graph and must be drawn by Remotion.
 
@@ -18,5 +18,7 @@ status: draft
 **Check:** compare a rendered still against the expected layout at the start, middle and end of the scene.
 
 **Licence warning:** Remotion has its own licence; check remotion.dev/license before commercial use.
+
+**Check:** compare the number of elements in the graph with the layers drawn; any difference should be listed as a reported problem.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

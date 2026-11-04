@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** planning any short vertical video for a ranked feed.
 

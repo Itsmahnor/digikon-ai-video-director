@@ -7,13 +7,13 @@ scope: editor
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** an explainer built script-first.
 
 **Math:** clear, friendly narration runs about 2.3 words per second (roughly 140 words per minute); slow technical lines to about 2.0. Scene seconds = words / 2.3, plus about 0.4 s of breathing room. A scene with no voice-over still needs at least 1.0 s to register. Runtime shares for the script: problem about 20%, solution about 15%, how about 45%, payoff about 20%.
 
-**Rule:** write the voice-over first in spoken language (contractions, short sentences), read it aloud and time it before building anything. Never rush a read to fit a slot; re-time the scene instead.
+**Rule:** draft the narration first, the way people actually talk and in short sentences, and speak it out loud against a stopwatch before any scene is built. Never rush a read to fit a slot; re-time the scene instead.
 
 **Example:** a 138-word script gives a 60-second video; the 'how' section gets about 27 seconds.
 

@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the video will be localised or the audience reads another language.
 
@@ -18,5 +18,7 @@ status: draft
 **Caution:** do not machine-translate legal or regulated claims without review.
 
 **Claims:** only claims backed by facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims for review.
+
+**Rule:** keep copy in a data file separate from the layout, so each language is a data change and not a redesign.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

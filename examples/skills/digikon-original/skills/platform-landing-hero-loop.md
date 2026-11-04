@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a background or hero video on a website.
 
@@ -22,5 +22,7 @@ status: draft
 **Example:** an 8 s loop of a dashboard being used, with the headline in static HTML text over it.
 
 **Review checklist:** the loop point is invisible; the video is compressed for the web; the poster frame communicates the same message; the page text stays readable over every frame; the page still works if the video fails to load.
+
+**Check first:** loop length, file size and autoplay rules change; confirm the current guidance for the site and browsers in use before delivery.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** when preparing the post copy for a TikTok video.
 
@@ -16,5 +16,7 @@ status: draft
 **Claims warning:** if the video is promotional, set the commercial-content disclosure; never leave a paid or brand video marked as organic.
 
 **Example:** "Three invoice mistakes that delay payment. Which one have you made?" plus four hashtags.
+
+**Check:** read the first line on its own; does it give a reason to read on or to comment?
 
 _Condensed adaptation of tiktok-skills (https://github.com/sergebulaev/tiktok-skills), MIT licence, Copyright (c) 2026 Sergey Bulaev. Not a copy; see the source for the full method._

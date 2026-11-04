@@ -7,11 +7,11 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** before building the master timeline of any multi-scene film.
 
-**Ledger:** one row per seam with the cut time, the exit vector and the entry vector (axis plus signed direction; depth rows carry the scale sign), the elements involved and the technique. Exit and entry must match; if a row mismatches, fix the plan, not the easing.
+**Ledger:** one row per seam with the cut time, the exit vector and the entry vector (axis plus signed direction; depth rows carry the scale sign), the elements involved and the technique. A row whose two vectors disagree means the plan is wrong, so correct the plan rather than adjusting the easing.
 
 **Gate (checks per seam):** exit still moving at the cut; entry already mid-flight, never from rest; measured direction equals the ledger; entry and exit speeds match; zero overlap, so only one side is visible per frame because a cut is not a dissolve; the depth sign rule; carrier continuity.
 

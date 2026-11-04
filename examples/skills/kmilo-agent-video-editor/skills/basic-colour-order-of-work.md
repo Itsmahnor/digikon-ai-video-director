@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** correcting footage for a short video.
 
@@ -16,5 +16,7 @@ status: draft
 **LUTs:** a conversion LUT belongs to its camera and profile; a creative LUT on unbalanced footage amplifies errors; never stack LUTs blindly or trust one LUT across different cameras.
 
 **Caution:** no target numbers for skin or exposure; read the scopes.
+
+**Rule:** correct before you stylise, and judge by the scopes, not by how a screen looks in a bright room.
 
 _Condensed adaptation of agent-video-editor (https://github.com/kmilo93sd/agent-video-editor), MIT licence, Copyright (c) 2026 kmilo93sd. Not a copy; see the source for the full method._

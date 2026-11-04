@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** at the start of motion design for any multi-scene film.
 
@@ -16,5 +16,7 @@ status: draft
 **Example:** a SaaS film moves left between feature scenes, rises for the result slide, and pulls back for the logo arrival.
 
 **Caution:** spending a reserved vector on a routine cut cheapens it.
+
+**Check:** list the direction of every seam in order; any departure from the film's main direction should have a stated reason.
 
 _Condensed and modified adaptation of hyperframes skills and motion doctrines (https://github.com/heygen-com/hyperframes), Apache-2.0, Copyright 2026 HeyGen, Inc.. Not a copy; changes were made (rewritten, shortened, re-scoped). See the source and its LICENSE for the full method._

@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** setting durations, delays and animation timing.
 
@@ -18,5 +18,9 @@ status: draft
 **Check:** render a still at the first, middle and last frame of each scene.
 
 **Licence warning:** Remotion has its own licence; check remotion.dev/license before commercial use.
+
+**Rule:** keep the frame rate in one place and derive every duration from it, so changing the rate changes nothing else.
+
+**Check:** add up the frame counts of all scenes and compare with the composition duration before rendering.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

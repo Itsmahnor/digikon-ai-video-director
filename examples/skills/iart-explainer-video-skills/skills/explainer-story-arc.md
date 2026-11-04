@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a 30 to 90 second product, how-it-works or onboarding explainer.
 

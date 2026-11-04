@@ -169,8 +169,8 @@ describe("routing and the Director run", () => {
       const bad = await run(withSkills(true), { facts: [], video_category: "gaming" });
       expect(bad.res.status).toBeGreaterThanOrEqual(400);
     });
-    it("with drafts not allowed (the default) no skill is cited, whatever the kind", async () => {
-      expect(skillCites((await run(withSkills(false), { facts: [], video_category: "saas" })).events)).toEqual([]);
+    it("with drafts not allowed (the default) only reviewed skills are cited, whatever the kind", async () => {
+      for (const id of skillCites((await run(withSkills(false), { facts: [], video_category: "saas" })).events)) expect(byId.get(id)!.metadata.status).toBe("reviewed");
     });
   });
 

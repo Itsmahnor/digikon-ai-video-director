@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: consideration
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** when editing or timing an explainer.
 

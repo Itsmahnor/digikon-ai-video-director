@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** implementing a velocity-matched cut.
 
@@ -18,5 +18,7 @@ status: draft
 **Blur:** about 10 px for text-scale subjects (more smears the letterforms), 18 to 20 px only for full-frame surfaces; same peak blur on both sides, applied to the wrapper.
 
 **Stage:** paint an opaque stage behind the scenes.
+
+**Rule:** use the default boundary unless the story earns a special seam, and use the same parameters across the film so the cuts feel related.
 
 _Condensed and modified adaptation of hyperframes motion doctrines and skills (https://github.com/heygen-com/hyperframes), Apache-2.0, Copyright 2026 HeyGen, Inc.. Not a copy; changes were made (rewritten, shortened, re-scoped). See the source and its LICENSE for the full method._

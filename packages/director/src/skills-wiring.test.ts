@@ -12,11 +12,16 @@ const asCategory = (c: "saas" | "ecommerce" | "general-promo" | null) => Project
 const skillCites = (cites: string[]) => cites.filter((c) => byId.has(c));
 
 describe("skills in the Director", () => {
-  it("retrieves no skill by default, because every shipped skill is a draft, and adds nothing to the prompt", async () => {
-    const llm = new ScriptedClient([treatment]);
-    const r = await treatmentNode(withSkills(llm, false), asCategory("saas"), facts);
-    expect(skillCites(r.citations)).toEqual([]);
-    expect(llm.calls[0]!.user).not.toContain("Production skills");
+  it("by default only reviewed skills are retrieved, and no draft skill ever is", async () => {
+    const draftIds = new Set(skillDocs.filter((d) => d.metadata.status === "draft").map((d) => d.id));
+    expect(draftIds.size).toBeGreaterThan(0);
+    for (const cat of ["saas", "ecommerce", "general-promo"] as const) {
+      const llm = new ScriptedClient([treatment]);
+      const r = await treatmentNode(withSkills(llm, false), asCategory(cat), facts);
+      const used = skillCites(r.citations);
+      expect(used.length, cat).toBeGreaterThan(0); // reviewed skills are visible without SKILLS_INCLUDE_DRAFT
+      for (const id of used) { expect(draftIds.has(id), id).toBe(false); expect(byId.get(id)!.metadata.status).toBe("reviewed"); }
+    }
   });
 
   it("with drafts allowed, treatment cites skills of the project''s category and the cross-cutting ones, in Director scope, and shows them to the model", async () => {

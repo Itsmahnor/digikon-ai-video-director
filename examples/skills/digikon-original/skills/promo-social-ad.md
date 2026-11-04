@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: tiktok, reels, shorts, feed
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a paid or organic ad for any service where the offer is simple.
 

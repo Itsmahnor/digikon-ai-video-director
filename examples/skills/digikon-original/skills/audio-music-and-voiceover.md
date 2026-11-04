@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** deciding sound for a video.
 
@@ -18,5 +18,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review.
 
 **Example:** a calm bed under the narrator for an explainer, dropping 8 dB when the narrator speaks.
+
+**Check:** play the mix on a phone speaker and with the sound off; the film must work in both.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: tiktok, reels, shorts, feed
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the shopper needs to see the product clearly and want it.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Never show features, materials, sizes or certifications that are not on the product page.
 
 **Example:** a water bottle: hero spin, insulated lid label, pour shot, in-bag shot, CTA.
+
+**Check:** freeze on each shot; the product should be clear, in focus and the same colour as in real life.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

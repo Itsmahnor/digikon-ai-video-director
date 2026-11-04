@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: youtube, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the audience should understand who the brand is and why it exists.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Founding dates, awards, customer counts and origin claims must be supplied.
 
 **Example:** a bakery's origin story using the owner's own photos and one approved line.
+
+**Check:** every statement about the company's history should be traceable to something the owner told you or a document they supplied.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

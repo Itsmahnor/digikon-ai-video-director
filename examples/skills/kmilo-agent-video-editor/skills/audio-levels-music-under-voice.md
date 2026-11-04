@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** at the mix stage of any video with speech and music.
 
@@ -16,5 +16,7 @@ status: draft
 **Claims warning:** platform loudness behaviour is not always published; these are working targets, not guarantees.
 
 **Example:** voice at -16 LUFS, music bed at about -38 LUFS, ducked a further 8 dB under speech.
+
+**Check:** play the mix on a phone speaker and in headphones; the voice must stay clear in both.
 
 _Condensed adaptation of agent-video-editor (https://github.com/kmilo93sd/agent-video-editor), MIT licence, Copyright (c) 2026 kmilo93sd. Not a copy; see the source for the full method._

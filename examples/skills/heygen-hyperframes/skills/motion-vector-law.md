@@ -7,11 +7,11 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** whenever a multi-scene video is composed or a cut is planned.
 
-**Rule:** how scene A exits decides how scene B enters. Same axis (x stays x, y stays y, depth stays depth), same direction, matched speed, and the cut lands mid-motion on both sides. On depth, direction is the sign of the scale change: a growing exit (push) needs a growing entry; a shrinking exit (pull) needs a shrinking entry. A receding exit answered by a grow-from-small entry is the most common violation, because grow-from-small is the default element entrance.
+**Rule:** how scene A exits decides how scene B enters. Same axis (x stays x, y stays y, depth stays depth), same direction, matched speed, and the cut lands mid-motion on both sides. On depth, direction is the sign of the scale change: a growing exit (push) needs a growing entry; a shrinking exit (pull) needs a shrinking entry. A receding exit answered by a grow-from-small entry is an easy mistake to make, because elements usually enter by growing from small.
 
 **Pacing:** mirror the eases (exit ease-in, entry ease-out, same distance and duration) so velocity matches at the cut. Settling to rest before a cut, or starting from rest after it, is a dead beat.
 

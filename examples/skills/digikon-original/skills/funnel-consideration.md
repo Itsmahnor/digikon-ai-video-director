@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the viewer knows the problem and is comparing options.
 

@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** rendering a Remotion composition to a file.
 
@@ -18,5 +18,7 @@ status: draft
 **Cost and time:** render stills first for review; render the full video only after approval, as the project's render gate requires.
 
 **Licence warning:** Remotion has its own licence; check remotion.dev/license before commercial use.
+
+**Check:** render the same frame twice; the two images should be identical, otherwise something non-deterministic is in the composition.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

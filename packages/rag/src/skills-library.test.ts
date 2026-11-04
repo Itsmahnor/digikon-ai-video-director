@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -12,6 +12,7 @@ import { ScopedRetriever } from "./scopes.js";
 const ROOT = resolve(import.meta.dirname, "..", "..", "..", "examples", "skills");
 const sources = readdirSync(ROOT).map((n) => join(ROOT, n)).filter((p) => statSync(p).isDirectory() && existsSync(join(p, "skills-source.json")));
 
+const review = new Map((JSON.parse(readFileSync(resolve(ROOT, "REVIEW.json"), "utf8")) as { skills: { id: string; status_after: string; result: string }[] }).skills.map((e) => [e.id, e.status_after]));
 const store = new MemoryDataStore();
 const results: ImportResult[] = [];
 const emb = new HashEmbedder();
@@ -36,7 +37,8 @@ describe("shipped skill library", () => {
       expect(["saas", "ecommerce", "general-promo", "all"]).toContain(s.category);
       expect(["director", "editor", "both"]).toContain(s.scope);
       expect(s.topic.length).toBeGreaterThan(0);
-      expect(s.status).toBe("draft");
+      expect(["draft", "reviewed"]).toContain(s.status); // nothing is ever "approved" by the review script; that is for a human
+      expect(s.status, `${s.id} status must match docs/SKILL_REVIEW.md results`).toBe(review.get(s.id));
       expect(s.grade).toBe("C");
     }
   });

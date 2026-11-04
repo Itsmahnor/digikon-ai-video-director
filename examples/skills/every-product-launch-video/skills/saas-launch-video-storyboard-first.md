@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: tiktok, reels, shorts, linkedin, landing
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a 15 to 30 second launch, feature demo or before/after clip for social and landing pages.
 

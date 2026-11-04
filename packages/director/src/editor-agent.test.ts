@@ -289,7 +289,7 @@ describe("what the Editor reports instead of inventing", () => {
     expect((await planEditorWork(t.handoff, t.editor)).conflicts).toEqual([]);
   });
 
-  it("reads skills for the project's category through the Editor scope: none unless drafts are allowed, never Director-only ones", async () => {
+  it("reads skills for the project's category through the Editor scope: only reviewed ones unless drafts are allowed, never Director-only ones", async () => {
     const t = await approved("e-skills");
     const skillDocs = loadSkillDocs(root("examples/skills"));
     const retriever = new KeywordRetriever([...recipeDocs(allRecipes), ...knowledge, ...skillDocs]);
@@ -297,7 +297,9 @@ describe("what the Editor reports instead of inventing", () => {
     h.project.video_category = "saas";
     const byId = new Map(skillDocs.map((d) => [d.id, d]));
     const skillIds = (f: { knowledge: { doc: { id: string; collection: string } }[] }) => f.knowledge.filter((k) => k.doc.collection === "skills").map((k) => k.doc.id);
-    expect(skillIds(await planEditorWork(h, { ...t.editor, retriever }))).toEqual([]); // drafts are off by default
+    const reviewedOnly = skillIds(await planEditorWork(h, { ...t.editor, retriever })); // drafts are off by default; reviewed skills are visible
+    expect(reviewedOnly.length).toBeGreaterThan(0);
+    for (const id of reviewedOnly) expect(byId.get(id)!.metadata.status).toBe("reviewed");
     const f = await planEditorWork(h, { ...t.editor, retriever, skillsIncludeDraft: true });
     const ids = skillIds(f);
     expect(ids.length).toBeGreaterThan(0);

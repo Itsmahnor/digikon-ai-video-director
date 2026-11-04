@@ -144,8 +144,10 @@ describe.skipIf(!available)("Postgres + pgvector integration", () => {
     const retriever = build(docs);
     const q = (agent: "director" | "editor", category: string, draft: boolean) =>
       new ScopedRetriever(retriever, agent, { allowDraft: draft }).retrieve({ text: "how to open the video and structure the scenes", collection: "skills", k: 20, filter: { category, include_draft: draft } });
-    expect(await q("director", "saas", false)).toEqual([]); // every shipped skill is a draft, so none is returned unless drafts are allowed
     const byId = new Map(rows.map((r) => [r.id, r]));
+    const noDraft = await q("director", "saas", false); // drafts not allowed: only reviewed skills come back
+    expect(noDraft.length).toBeGreaterThan(0);
+    for (const h of noDraft) expect(byId.get(h.doc.id)!.status).toBe("reviewed");
     const d = await q("director", "saas", true);
     expect(d.length).toBeGreaterThan(0);
     for (const h of d) { const r = byId.get(h.doc.id)!; expect(["saas", "all"]).toContain(r.category); expect(r.scope).not.toBe("editor"); }

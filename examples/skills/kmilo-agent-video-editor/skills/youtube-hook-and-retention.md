@@ -7,7 +7,7 @@ scope: director
 funnel_stage: awareness
 platform: youtube, shorts
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** YouTube videos and Shorts, especially tutorials and talking heads.
 
@@ -18,5 +18,7 @@ status: draft
 **Claims warning:** a hook that over-promises hurts retention; only promise what the video delivers.
 
 **Example:** tutorial opens on the finished result for three seconds, then restarts at step one.
+
+**Check first:** the timings here are creator practice for the first seconds and the first 30 seconds; confirm current platform guidance before quoting a number to the user.
 
 _Condensed adaptation of agent-video-editor (https://github.com/kmilo93sd/agent-video-editor), MIT licence, Copyright (c) 2026 kmilo93sd. Not a copy; see the source for the full method._

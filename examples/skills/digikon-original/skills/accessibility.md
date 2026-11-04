@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** every video.
 
@@ -18,5 +18,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review.
 
 **Example:** a muted playthrough that still delivers the message because captions and key text carry it.
+
+**Rule:** accessibility is not a final polish step. Decide caption style, contrast and motion limits at the storyboard stage so they do not force a redesign later.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

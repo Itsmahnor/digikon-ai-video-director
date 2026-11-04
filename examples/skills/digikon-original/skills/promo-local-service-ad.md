@@ -7,7 +7,7 @@ scope: director
 funnel_stage: conversion
 platform: tiktok, reels, feed, youtube
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** a local business (cleaning, repair, salon, clinic admin, trades) wants calls or bookings.
 

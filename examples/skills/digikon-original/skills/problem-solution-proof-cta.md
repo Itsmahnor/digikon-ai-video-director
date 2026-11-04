@@ -7,13 +7,13 @@ scope: director
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** the default structure for any promotional video under two minutes.
 
 **Structure:** problem (the viewer's pain), solution (the product doing the job), proof (a result, a customer, a demonstration), CTA (one action).
 
-**Time split for 30 s:** problem 25 %, solution 35 %, proof 25 %, CTA 15 %. For 15 s, merge problem into the hook and keep one proof; for 60 s, add a second proof or a "how it works" step.
+**Starting split for 30 s (a guide, not a rule):** problem 25 %, solution 35 %, proof 25 %, CTA 15 %. For 15 s, merge problem into the hook and keep one proof; for 60 s, add a second proof or a "how it works" step.
 
 **Rule:** every beat earns the next one; remove any beat that does not move the viewer toward the CTA.
 

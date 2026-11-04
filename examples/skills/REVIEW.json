@@ -1,0 +1,5159 @@
+{
+ "reviewed_on": "2026-11-04",
+ "reviewer": "the agent that wrote the skills (needs a human spot-check)",
+ "checklist": "docs/SKILL_REVIEW.md",
+ "sources_checked": true,
+ "total": 117,
+ "passed": 111,
+ "kept_draft": 6,
+ "skills": [
+  {
+   "id": "ab-test-hook-first",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "testing",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "96 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ab-testing-metrics-and-batch-rhythm",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "testing",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "136 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "accessibility",
+   "source": "digikon/digikon-original",
+   "topic": "accessibility",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "164 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ad-body-structures",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "206 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ad-creative-brief-first",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "brief",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "149 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ad-disclosure-and-labelling",
+   "source": "digikon/digikon-original",
+   "topic": "claims-safety",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "190 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "asset-gaps-questions",
+   "source": "digikon/digikon-original",
+   "topic": "asset-gaps",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "153 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "audio-levels-music-under-voice",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "audio",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "135 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "audio-music-and-voiceover",
+   "source": "digikon/digikon-original",
+   "topic": "audio",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "168 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "basic-colour-order-of-work",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "visual-design",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "131 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "beat-hit-limits",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "141 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "beat-sync-music-to-grid",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "audio",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "98 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "brand-consistency",
+   "source": "digikon/digikon-original",
+   "topic": "brand",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "155 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "caption-sync-spec",
+   "source": "iart-ai/explainer-video-skills",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 iart.ai"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "107 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "captions-drop-rail-embed",
+   "source": "heygen-com/hyperframes",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "102 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "captions-overlay-law",
+   "source": "heygen-com/hyperframes",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "138 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "carriers-and-causal-motion",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "190 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "changelog-video-visualize-dont-list",
+   "source": "heygen-com/hyperframes",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "102 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cover-frame-and-first-frame",
+   "source": "digikon/digikon-original",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "159 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cta-and-offer-clarity",
+   "source": "digikon/digikon-original",
+   "topic": "cta-offer",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "164 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cta-patterns-by-funnel-intent",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "cta-offer",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "139 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cursor-entry-click-and-tip-targeting",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "164 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cut-the-curve-parameters",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "205 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cut-the-curve-seams",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "118 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "cutdowns-and-versions",
+   "source": "digikon/digikon-original",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "154 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "data-and-chart-scenes",
+   "source": "digikon/digikon-original",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "155 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "distinctive-type-and-hero-first",
+   "source": "anthropics/skills (main/skills/frontend-design)",
+   "topic": "visual-design",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Anthropic, PBC (anthropics/skills, skills/frontend-design). "
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "117 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-collection-lookbook",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "156 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-comparison",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "169 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-offer-sale",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "171 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-product-showcase",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "165 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-ugc-style-ad",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "167 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ecom-unboxing",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "155 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "explainer-pacing-per-beat",
+   "source": "iart-ai/explainer-video-skills",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 iart.ai"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "99 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "explainer-story-arc",
+   "source": "iart-ai/explainer-video-skills",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 iart.ai"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "142 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "explainer-style-system-consistency",
+   "source": "iart-ai/explainer-video-skills",
+   "topic": "visual-design",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 iart.ai"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "93 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "explainer-vo-timing-math",
+   "source": "iart-ai/explainer-video-skills",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 iart.ai"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "125 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "film-current-direction",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "135 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "final-review-independent-pass",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "quality",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "126 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "funnel-awareness",
+   "source": "digikon/digikon-original",
+   "topic": "funnel",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "175 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "funnel-consideration",
+   "source": "digikon/digikon-original",
+   "topic": "funnel",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "168 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "funnel-conversion",
+   "source": "digikon/digikon-original",
+   "topic": "funnel",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "157 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "funnel-retention",
+   "source": "digikon/digikon-original",
+   "topic": "funnel",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "166 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "graphics-text-timing-and-safe-zones",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "157 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "hook-formulas-pattern-question-claim",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "162 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "hook-must-pay-off",
+   "source": "sergebulaev/tiktok-skills",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Sergey Bulaev"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "140 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "hook-patterns",
+   "source": "digikon/digikon-original",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "175 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "hyperframes-film-workflow",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "161 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "hyperframes-render-work-loop",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "143 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "launch-hard-won-lessons",
+   "source": "EveryInc/product-launch-video",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Every Media, Inc."
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "157 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "launch-multi-critic-review",
+   "source": "EveryInc/product-launch-video",
+   "topic": "quality",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Every Media, Inc."
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "123 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "map-every-feature-to-a-shot",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "structure",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "112 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "media-use-assets-and-audio",
+   "source": "heygen-com/hyperframes",
+   "topic": "asset-gaps",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": false,
+     "note": "needs at least two labelled sections besides When to use, Example and the caution lines (has 1)"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: the opening and source table were read, not the resolve, ledger or mixing references"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "motion-anti-patterns",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "170 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "motion-vector-law",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "147 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "multi-format-platform-guide",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "147 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "multi-language-and-text-expansion",
+   "source": "digikon/digikon-original",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "159 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "one-offer-one-motion",
+   "source": "matt-j-penny/ai-video-marketing",
+   "topic": "cta-offer",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Matt Penny"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "140 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "one-theme-applied-consistently",
+   "source": "anthropics/skills (main/skills/theme-factory)",
+   "topic": "visual-design",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Anthropic, PBC (anthropics/skills, skills/theme-factory). Li"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "114 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "onscreen-text-and-captions",
+   "source": "digikon/digikon-original",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "152 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "oversized-cursor-causal-motion",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "139 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "pacing-by-video-type",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "180 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "pacing-slower-with-room-to-breathe",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "172 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "platform-landing-hero-loop",
+   "source": "digikon/digikon-original",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "184 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "platform-linkedin-feed-1x1-4x5",
+   "source": "digikon/digikon-original",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "159 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "platform-vertical-9x16",
+   "source": "digikon/digikon-original",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "152 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "platform-youtube-16x9",
+   "source": "digikon/digikon-original",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "155 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "port-remotion-to-hyperframes",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "126 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "problem-solution-proof-cta",
+   "source": "digikon/digikon-original",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "158 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "product-closeup-and-brand-finale",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "ecommerce",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "102 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-announcement",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "152 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-brand-story",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "170 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-creation-mode-choice",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "137 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: the three modes were read in outline; the guided-creation reference was not read"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "promo-event-teaser",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "150 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-local-service-ad",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "166 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-pipeline-understand-then-shoot",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "128 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-recruitment-employer-brand",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "157 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "promo-social-ad",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "164 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "proof-and-claims-safety",
+   "source": "digikon/digikon-original",
+   "topic": "claims-safety",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "160 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "real-captures-not-mock-ui",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "claims-safety",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "126 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "registry-before-hand-building",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": false,
+     "note": "needs at least two labelled sections besides When to use, Example and the caution lines (has 1); 76 words, expected 80 to 350"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: only the skill description and opening were read, not the registry's block catalogue"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "remotion-captions-and-text",
+   "source": "digikon/digikon-original",
+   "topic": "text-captions",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "159 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "remotion-composition-structure",
+   "source": "digikon/digikon-original",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "150 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "remotion-render-and-determinism",
+   "source": "digikon/digikon-original",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "150 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "remotion-scene-graph-mapping",
+   "source": "digikon/digikon-original",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "169 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "remotion-timing-in-frames",
+   "source": "digikon/digikon-original",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "169 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "render-audit-stills-first",
+   "source": "EveryInc/product-launch-video",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Every Media, Inc."
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "111 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "reverse-any-video-rebuild-and-compare",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": false,
+     "note": "needs at least two labelled sections besides When to use, Example and the caution lines (has 1)"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: the opening and method were read; the people, animated and billing references were not"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "saas-explainer-60s",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "172 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-faq-support-short",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "160 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-feature-launch",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "150 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-launch-video-storyboard-first",
+   "source": "EveryInc/product-launch-video",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Every Media, Inc."
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "156 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-onboarding-walkthrough",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "160 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-product-demo",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "179 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "saas-testimonial-case-study",
+   "source": "digikon/digikon-original",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "saas",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "157 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "scene-beat-design-and-pacing",
+   "source": "digikon/digikon-original",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "187 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "seam-render-white-flash-guard",
+   "source": "heygen-com/hyperframes",
+   "topic": "renderer",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "96 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "ship-platform-sizes-and-deliverable-pack",
+   "source": "EveryInc/product-launch-video",
+   "topic": "platform-rules",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Every Media, Inc."
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "138 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "single-hero-and-stable-camera",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "106 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "slideshow-vs-rendered-video",
+   "source": "heygen-com/hyperframes",
+   "topic": "video-type-playbook",
+   "scope": "director",
+   "category": "general-promo",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": false,
+     "note": "needs at least two labelled sections besides When to use, Example and the caution lines (has 1); 73 words, expected 80 to 350"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: only the skill description was read"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "sound-design-riser-impact-sparkle",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "audio",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "108 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "sound-sourcing-local-files-and-credits",
+   "source": "Vincentwei1021/video-shotcraft",
+   "topic": "audio",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 Wei Yihao. Licensed under the Apache License,"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "164 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "stat-and-authority-hook",
+   "source": "creatify-ai/video-ad-generator",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Creatify AI"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "133 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "stillness-before-climax-and-timing-intents",
+   "source": "heygen-com/hyperframes",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "146 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "storyboard-shot-table",
+   "source": "digikon/digikon-original",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "190 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "style-sampling-proven-styles",
+   "source": "heygen-com/hyperframes",
+   "topic": "visual-design",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": false,
+     "note": "needs at least two labelled sections besides When to use, Example and the caution lines (has 1)"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": false,
+     "note": "source read in outline only: only the skill description was read; the five styles' grammar was not"
+    }
+   },
+   "result": "fail",
+   "status_after": "draft"
+  },
+  {
+   "id": "sustained-motion-no-idle-wobble",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "129 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "tiktok-caption-supports-the-video",
+   "source": "sergebulaev/tiktok-skills",
+   "topic": "text-captions",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Sergey Bulaev"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "123 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "tiktok-completion-first",
+   "source": "sergebulaev/tiktok-skills",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Sergey Bulaev"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "152 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "tiktok-loop-and-clean-ending",
+   "source": "sergebulaev/tiktok-skills",
+   "topic": "structure",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Sergey Bulaev"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "120 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "tiktok-three-layer-hook",
+   "source": "sergebulaev/tiktok-skills",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Sergey Bulaev"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "148 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "vector-ledger-and-seam-gate",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "172 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "visual-philosophy-before-layout",
+   "source": "anthropics/skills (main/skills/canvas-design)",
+   "topic": "visual-design",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Anthropic, PBC (anthropics/skills, skills/canvas-design). Li"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "99 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "voice-over-script-writing",
+   "source": "digikon/digikon-original",
+   "topic": "structure",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 Digikon"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "156 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "original footer"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "waterfall-entry-and-nudge-curve",
+   "source": "heygen-com/hyperframes",
+   "topic": "motion",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "Apache-2.0; Copyright 2026 HeyGen, Inc.. Licensed under the Apache Licen"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "114 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "what-a-cut-is-for",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "pacing",
+   "scope": "editor",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "not an advice topic"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "no platform figures"
+    },
+    "C6": {
+     "pass": true,
+     "note": "128 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  },
+  {
+   "id": "youtube-hook-and-retention",
+   "source": "kmilo93sd/agent-video-editor",
+   "topic": "hook",
+   "scope": "director",
+   "category": "all",
+   "status_before": "draft",
+   "checks": {
+    "C1": {
+     "pass": true,
+     "note": "MIT; Copyright (c) 2026 kmilo93sd"
+    },
+    "C2": {
+     "pass": true,
+     "note": "longest verbatim run 0 words"
+    },
+    "C3": {
+     "pass": true,
+     "note": "advice skill needs a claims or caution line"
+    },
+    "C4": {
+     "pass": true,
+     "note": "no unmarked figures"
+    },
+    "C5": {
+     "pass": true,
+     "note": "platform figures flagged as defaults"
+    },
+    "C6": {
+     "pass": true,
+     "note": "168 words"
+    },
+    "C7": {
+     "pass": true,
+     "note": "footer names source, licence and holder"
+    },
+    "C8": {
+     "pass": true,
+     "note": "source read closely (author's account)"
+    }
+   },
+   "result": "pass",
+   "status_after": "reviewed"
+  }
+ ]
+}

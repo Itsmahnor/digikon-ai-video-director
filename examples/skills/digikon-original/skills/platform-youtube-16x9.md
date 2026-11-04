@@ -7,7 +7,7 @@ scope: director
 funnel_stage: all
 platform: youtube
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** landscape videos for YouTube, websites and presentations.
 

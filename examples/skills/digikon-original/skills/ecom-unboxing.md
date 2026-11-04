@@ -7,7 +7,7 @@ scope: director
 funnel_stage: consideration
 platform: tiktok, reels, youtube
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** packaging and first impressions are part of the appeal.
 
@@ -22,5 +22,7 @@ status: draft
 **Claims:** only claims backed by the facts the user supplied; no invented statistics, prices, customer names or testimonials; flag regulated claims (health, finance, legal) for review. Show what is actually in the box; do not imply extras, bonuses or free gifts that are not included.
 
 **Example:** a skincare set: seal, lid, three products laid out, one close-up per item.
+
+**Check:** the reveal should match the real contents exactly, including what is not included.
 
 _Original Digikon skill (MIT, Copyright (c) 2026 Digikon). Working guidance, not a benchmarked rule: check platform figures against the verified platform_specs before relying on them._

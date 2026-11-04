@@ -7,7 +7,7 @@ scope: editor
 funnel_stage: all
 platform: all
 grade: C
-status: draft
+status: reviewed
 ---
 **When to use:** inside a scene, with no cut.
 
@@ -18,5 +18,7 @@ status: draft
 **Pacing:** keep the stagger short enough that the last element lands while the first is still readable.
 
 **Example:** four feature bullets cascade in at about 80 ms apart; the group then nudges left to reveal a screenshot.
+
+**Rule:** use a cascade only for arrivals that earn attention (titles, openers, list intros), and keep ordinary content simple.
 
 _Condensed and modified adaptation of hyperframes skills and motion doctrines (https://github.com/heygen-com/hyperframes), Apache-2.0, Copyright 2026 HeyGen, Inc.. Not a copy; changes were made (rewritten, shortened, re-scoped). See the source and its LICENSE for the full method._
