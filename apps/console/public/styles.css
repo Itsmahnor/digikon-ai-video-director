@@ -250,3 +250,34 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
 .g-fix select, .g-fix textarea { width: 100%; margin-top: 4px; box-sizing: border-box; background: var(--panel-solid); color: var(--text); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px 8px; font: inherit; }
 .g-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .g-chips button { font-size: 12px; padding: 4px 8px; }
+
+/* ---------- guided setup wizard ---------- */
+.wizard { border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 18px; background: rgba(255, 255, 255, .03); }
+.wz-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.wz-head h3 { font-size: 15px; font-weight: 700; }
+.wz-progress { height: 5px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.wz-progress span { display: block; height: 100%; background: var(--grad); transition: width .25s; }
+.wz-count { margin: 6px 0 10px; }
+.wz-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0 0 14px; }
+.wz-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 12px 4px 6px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 13px; }
+.wz-chip .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--line); font-size: 12px; }
+.wz-chip.current { border-color: var(--violet); color: var(--text); }
+.wz-chip.done .n { background: rgba(52, 211, 153, .2); color: var(--green); }
+.wz-chip.skipped .n { background: rgba(251, 191, 36, .16); color: var(--amber); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.wz-title { font-size: 15px; margin: 4px 0 10px; }
+.wizard input[type="text"], .wizard input[type="url"], .wizard select, .wizard textarea { width: 100%; margin-bottom: 12px; }
+.wizard input[type="file"] { margin-bottom: 6px; max-width: 100%; }
+.wz-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.wz-row input, .wz-row select { flex: 1 1 200px; width: auto; }
+.wz-actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.wz-actions .primary { margin-left: auto; }
+.wz-error { color: var(--rose); font-size: 13.5px; min-height: 1.2em; margin-top: 4px; }
+.wz-note { background: rgba(251, 191, 36, .1); border: 1px solid rgba(251, 191, 36, .35); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; margin-top: 8px; }
+.wz-found { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 12px; margin-top: 10px; }
+.wz-cands { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.wz-cand { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.wz-cand.wide { flex: 1 1 100%; align-items: flex-start; }
+.wz-cand .sw { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--line-strong); }
+.wz-saved { border-bottom: 1px solid var(--line); margin-bottom: 12px; padding-bottom: 6px; }
+@media (max-width: 560px) { .wz-chip { padding-right: 8px; } .wz-actions .primary { width: 100%; } }

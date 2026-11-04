@@ -30,6 +30,14 @@
     <section class="panel input" aria-labelledby="in-title">
       <div class="panel-head"><h2 id="in-title">Your request</h2><button class="link" id="reset" type="button">Start over</button></div>
 
+      <section class="wizard" id="wizard" aria-labelledby="wz-title" hidden>
+        <div class="wz-head"><h3 id="wz-title">Guided setup</h3><span class="hint">answer what you can, skip the rest</span></div>
+        <div id="wz-progress-wrap"></div>
+        <div id="wz-steps"></div>
+        <div id="wz-body"></div>
+        <div class="wz-actions"><button type="button" class="ghost" id="wz-back">Back</button><button type="button" class="ghost" id="wz-skip">Skip this step</button><button type="button" class="primary sm" id="wz-next">Continue</button></div>
+      </section>
+
       <label class="field-label" for="prompt">Describe the video you want, or what to change in yours <span class="hint">any language</span></label>
       <div class="prompt-wrap">
         <textarea id="prompt" rows="5" maxlength="4000" placeholder="e.g. A 15-second Instagram Reels ad for my coffee roaster. Warm tone, end with an invitation to order.&#10;Or: cut the silent parts of my reel and add captions."></textarea>

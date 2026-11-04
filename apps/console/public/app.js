@@ -1,4 +1,5 @@
 // Director Console: plain ES module, no build step. All model and user text goes through esc() before it reaches the DOM.
+import { mountWizard } from "./wizard.js";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const fmtDur = (s) => (s == null ? "" : s >= 60 ? `${Math.floor(s / 60)}m ${Math.round(s % 60)}s` : `${(Math.round(s * 10) / 10).toString()}s`);
@@ -784,5 +785,18 @@ async function init() {
     setInterval(refreshHealth, 8000);
   } catch (e) { fail(e); renderPills(); }
   renderAll();
+  if (state.sid) {
+    // Guided setup: its answers fill the request, facts and kind-of-video boxes below; the user reviews them and presses Send as before.
+    const wiz = mountWizard({
+      $, esc, api, post, toast, uploadFiles, getAssets: () => state.assets, getSid: () => state.sid,
+      onFinish: ({ prompt, facts, video_category }) => {
+        if (prompt) { $("#prompt").value = prompt; updateCount(); }
+        $("#facts").value = facts.join("\n"); if (facts.length) $("details.facts").open = true;
+        $("#video-category").value = video_category ?? "";
+        $("#prompt").focus({ preventScroll: false });
+      },
+    });
+    await wiz.start();
+  }
 }
 init();
