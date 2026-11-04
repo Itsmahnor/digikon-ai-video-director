@@ -13,11 +13,11 @@ status: draft
 
 **Method:** one idea per scene. Give each scene a purpose line, a duration, a visual, on-screen text and a transition in. Typical shot lengths: 1 to 3 s for fast social, 3 to 6 s for demos and explainers, 6 to 10 s for atmospheric brand moments.
 
-**Reading time:** allow about 0.25 seconds per word of on-screen text plus 0.5 seconds of reaction; no card under 1.5 seconds.
+**Reading time for on-screen text:** a shot that carries text lasts at least max(1.5 s, words x 0.33 s + 0.5 s), so a six-word card needs at least 2.5 s. A scene with no text or voice still needs about 1 s to register.
 
-**Rhythm:** vary scene length; fast, fast, slow gives the slow beat weight. Land key information, then hold it a moment before moving on.
+**Rhythm:** vary scene length; fast, fast, slow gives the slow beat weight. Land key information, then hold it a moment before moving on. Voice-over scenes follow the word count (about 2.3 words per second).
 
-**Check:** the sum of scene durations equals the target length; no scene lacks a visual.
+**Check:** the sum of scene durations equals the target length; no scene lacks a visual; no card is shorter than its reading time.
 
 **Example (20 s):** 2 + 3 + 3 + 4 + 4 + 4 seconds with the longest hold on the result.
 
