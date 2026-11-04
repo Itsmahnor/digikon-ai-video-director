@@ -39,6 +39,8 @@ export interface AppContext {
   whisper: () => WhisperStatus;
   skills: SkillLibrary;
   retriever: Retriever;
+  /** Tests only: lets the website reader reach a local fixture server. The console never sets it. */
+  websiteOptions?: ReadOptions;
   /** Let draft skills reach the Director and Editor (SKILLS_INCLUDE_DRAFT=1). Off by default, because every shipped skill is a draft. Only affects which skills may be read. */
   skillsIncludeDraft?: boolean;
   /**
@@ -66,6 +68,9 @@ export interface AppContext {
   ocr?: readonly OcrEngine[];
 }
 
+import { registerKitRoutes, type Extraction } from "./kit-routes.js";
+import { approvedFacts, type ProjectKit } from "@digikon/contracts";
+import type { ReadOptions } from "@digikon/media";
 import { PLAIN_CANNOT_PRODUCE, PLAIN_PLAN_CHANGED, plainEscalation, plainReasons, publicApprovals } from "./public-view.js";
 type Graph = ReturnType<typeof buildDirectorGraph>;
 /** Measurements and speech for one uploaded file. Built in the background after upload. */
@@ -91,6 +96,9 @@ interface Session {
   deciding?: boolean;
   /** True while a preview render runs, so two requests cannot render the same run at once. */
   rendering?: boolean;
+  /** The guided-intake project kit and anything extracted from a website or file that the user has not confirmed yet. */
+  kit?: ProjectKit;
+  extractions?: Partial<Record<"website" | "guideline", Extraction>>;
 }
 
 const SettingsBody = z.object({ settings: z.record(z.unknown()).optional() });
@@ -204,6 +212,8 @@ export function createApp(ctx: AppContext) {
     sessions.set(id, { id, dir, assets: [], turns: [], route: null, facts: [], analysis: new Map(), pending: new Map() });
     return c.json({ id });
   });
+
+  const kits = registerKitRoutes(app, { session: (id) => session(id), fail: (status, code, message) => { throw new HttpError(status, code, message); }, storageDir: ctx.storageDir, ...(ctx.websiteOptions ? { websiteOptions: ctx.websiteOptions } : {}) });
 
   const reviewFile = (s: Session, assetId: string) => join(s.dir, "reviews", `${assetId}.json`);
   /** The same review keyed by the picture's SHA-256: another project that uploads the same bytes finds it, and a different picture never does. */
@@ -578,14 +588,18 @@ export function createApp(ctx: AppContext) {
     const request = s.route.request;
     if (request.mode === "edit_existing" || !request.project) throw new HttpError(409, "edit_mode", "This is an edit request. The editing agent is the next milestone, so there is no plan to build yet.");
 
-    s.facts = body.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "entered in the console" }));
+    // Facts typed in the form, plus facts in the guided-intake kit that are the user's own or that they confirmed. Nothing extracted and unconfirmed is ever included.
+    const typed = body.facts.map((text, i) => BrandFact.parse({ fact_id: `F${String(i + 1).padStart(2, "0")}`, text, source: "entered in the console" }));
+    const kitFacts = approvedFacts(kits.kitOf(s)).filter((f) => !typed.some((t) => t.text === f.text));
+    s.facts = [...typed, ...kitFacts.map((f, i) => BrandFact.parse({ ...f, fact_id: `F${String(typed.length + i + 1).padStart(2, "0")}` }))];
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
     s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
-    const project = { ...request.project, video_category: body.video_category ?? request.project.video_category ?? null };
+    const kit = kits.kitOf(s);
+    const project = { ...request.project, video_category: body.video_category ?? kit.video_category ?? request.project.video_category ?? null, brand_id: kit.brand_id ?? request.project.brand_id ?? null };
     const assets = s.assets;
     const facts = s.facts;
     await Promise.allSettled([...s.pending.values()]); // measurements and transcripts must be ready before planning
