@@ -262,4 +262,23 @@ describe("kit routes", () => {
     expect((await app.request(`/api/sessions/${b}/kit/load-brand`, post({ brand_id: "brand_000000000000" }))).status).toBe(404);
     expect(existsSync(join(dir, "brand-kits", `${saved.brand_id}.json`))).toBe(true);
   });
+  it("proposes video types for category and records user choice", async () => {
+    const app = build(), id = await newSession(app);
+    await app.request(`/api/sessions/${id}/kit/category`, post({ video_category: "saas" }));
+    const types = await j(await app.request(`/api/sessions/${id}/video-types`));
+    expect(types.video_category).toBe("saas");
+    expect(types.proposals).toHaveLength(3);
+    expect(types.proposals[0].id).toBe("saas-product-demo");
+    expect(types.chosen).toBeNull();
+
+    // User chooses a type
+    const picked = await j(await app.request(`/api/sessions/${id}/video-type`, post({ video_type: "saas-feature-launch" })));
+    expect(picked.ok).toBe(true);
+    expect(picked.chosen).toBe("saas-feature-launch");
+    expect(picked.kit.video_type).toBe("saas-feature-launch");
+
+    // Invalid type rejected
+    const bad = await app.request(`/api/sessions/${id}/video-type`, post({ video_type: "invalid-type" }));
+    expect(bad.status).toBe(422);
+  });
 });

@@ -24,6 +24,8 @@ export const Project = z.object({
   brand_id: z.string().nullable().default(null),
   /** The kind of video, which decides which skills the Director and Editor read (plus the cross-cutting ones). Null means not stated: only cross-cutting skills are used. */
   video_category: z.enum(["saas", "ecommerce", "general-promo"]).nullable().default(null),
+  /** The chosen video type playbook id (e.g. saas-product-demo, ecom-product-showcase). Null means not yet chosen. */
+  video_type: z.string().nullable().default(null),
   approval_status: ApprovalStatus.default("draft"),
 });
 

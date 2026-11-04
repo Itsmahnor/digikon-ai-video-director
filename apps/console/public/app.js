@@ -18,7 +18,7 @@ const MODES = {
   edit_existing: { tag: "C", icon: ICON.cut, title: "Edit an existing video", text: "You have a reel. Tell me what to change and the editing agent will do it." },
 };
 const STEPS = [
-  ["intake", "Understand the brief"], ["analyse_assets", "Check your files"], ["treatment", "Write the treatment and claims"],
+  ["intake", "Understand the brief"], ["analyse_assets", "Check your files"], ["video_type_step", "Choose video type"], ["treatment", "Write the treatment and claims"],
   ["storyboard", "Storyboard the scenes"], ["storyboard_gate", "Your approval of the storyboard"],
   ["edit_plan", "Choose a recipe for every edit"], ["edit_plan_gate", "Your approval of the edit plan"],
 ];
@@ -26,7 +26,7 @@ const PHASES = ["Describe", "Understand", "Plan", "Approve"];
 
 const state = {
   sid: null, health: null, offline: false, assets: [], analysis: {}, turns: [], route: null, busy: false,
-  fromVoice: false, language: null,
+  fromVoice: false, language: null, videoType: null, proposedVideoTypes: [],
   run: null, // { steps: {node: {status, lines}}, result, error }
   approval: null, gateNotes: "", tab: "treatment", transcripts: {}, mic: null,
 };
@@ -374,6 +374,47 @@ function setSendBusy(b) {
 function videoCategory() { const v = $("#video-category")?.value; return v === "saas" || v === "ecommerce" || v === "general-promo" ? v : null; }
 function factsLines() { return $("#facts").value.split("\n").map((s) => s.trim()).filter(Boolean).slice(0, 20); }
 
+async function refreshVideoTypes() {
+  if (!state.sid) return;
+  const card = $("#video-type-card");
+  const options = $("#video-type-options");
+  if (!card || !options) return;
+  try {
+    const data = await api(`/api/sessions/${state.sid}/video-types`);
+    state.proposedVideoTypes = data.proposals ?? [];
+    if (data.chosen) state.videoType = data.chosen;
+    else if (!state.videoType && state.proposedVideoTypes.length) {
+      state.videoType = state.proposedVideoTypes.find((p) => p.recommended)?.id ?? state.proposedVideoTypes[0]?.id ?? null;
+    }
+    if (!state.proposedVideoTypes.length) {
+      card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+    options.innerHTML = state.proposedVideoTypes.map((p) => `
+      <div class="video-type-option ${p.id === state.videoType ? "active" : ""}" data-type-id="${esc(p.id)}">
+        <div class="head"><b>${esc(p.title)}</b>${p.recommended ? '<span class="chip ok">recommended</span>' : ""}</div>
+        <div class="desc">${esc(p.description)}</div>
+        <div class="ex">Example: "${esc(p.example)}"</div>
+      </div>
+    `).join("");
+    options.querySelectorAll(".video-type-option").forEach((el) => {
+      el.addEventListener("click", async () => {
+        const typeId = el.dataset.typeId;
+        state.videoType = typeId;
+        options.querySelectorAll(".video-type-option").forEach((opt) => opt.classList.toggle("active", opt.dataset.typeId === typeId));
+        try {
+          await post(`/api/sessions/${state.sid}/video-type`, { video_type: typeId });
+        } catch (e) {
+          toast(e.message, "warn");
+        }
+      });
+    });
+  } catch {
+    card.hidden = true;
+  }
+}
+
 async function buildPlan() {
   if (state.busy) return;
   state.busy = true;
@@ -384,7 +425,7 @@ async function buildPlan() {
   const order = STEPS.map(([k]) => k);
   try {
     let res;
-    try { res = await fetch(`/api/sessions/${state.sid}/direct`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ facts: factsLines(), video_category: videoCategory() }) }); } catch { throw offlineError(); }
+    try { res = await fetch(`/api/sessions/${state.sid}/direct`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ facts: factsLines(), video_category: videoCategory(), video_type: state.videoType }) }); } catch { throw offlineError(); }
     if (!res.ok) { const b = await res.json().catch(() => ({})); const er = new Error(b.message || `Request failed (${res.status})`); er.code = b.error; throw er; }
     const reader = res.body.getReader(), dec = new TextDecoder(); let buf = "";
     for (;;) {
@@ -822,8 +863,13 @@ async function init() {
   drop.addEventListener("drop", (e) => uploadFiles([...e.dataTransfer.files]));
   $("#reset").addEventListener("click", async () => {
     try { await post(`/api/sessions/${state.sid}/reset`); } catch { /* session may be gone */ }
-    Object.assign(state, { turns: [], route: null, run: null, approval: null, transcripts: {}, fromVoice: false, language: null });
+    Object.assign(state, { turns: [], route: null, run: null, approval: null, transcripts: {}, fromVoice: false, language: null, videoType: null, proposedVideoTypes: [] });
     $("#prompt").value = ""; $("#lang-chip").hidden = true; updateCount(); micStatus("Speak instead of typing. Runs locally with Whisper."); renderAll();
+    refreshVideoTypes();
+  });
+  $("#video-category")?.addEventListener("change", async () => {
+    try { await post(`/api/sessions/${state.sid}/kit/category`, { video_category: videoCategory() }); } catch {}
+    await refreshVideoTypes();
   });
   drawWave(false);
   try {
@@ -840,11 +886,13 @@ async function init() {
         if (prompt) { $("#prompt").value = prompt; updateCount(); }
         $("#facts").value = facts.join("\n"); if (facts.length) $("details.facts").open = true;
         $("#video-category").value = video_category ?? "";
+        refreshVideoTypes();
         $("#prompt").focus({ preventScroll: false });
       },
     });
     state.wiz = wiz;
     await wiz.start();
+    await refreshVideoTypes();
   }
 }
 init();

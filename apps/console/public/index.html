@@ -78,6 +78,11 @@
       </select>
       <p class="hint">Chooses which production skills the Director and Editor read. Leave it unset and only the ones that apply to every kind of video are used.</p>
 
+      <div id="video-type-card" class="card video-type-card" style="margin-top:12px;" hidden>
+        <div class="field-label" style="margin-bottom:6px;"><strong>Proposed video types</strong> <span class="hint">pick one or keep the recommended</span></div>
+        <div id="video-type-options" class="video-type-options"></div>
+      </div>
+
       <details class="facts">
         <summary>Approved brand facts <span class="hint">optional, one per line</span></summary>
         <textarea id="facts" rows="3" aria-label="Approved brand facts, one per line" placeholder="Beans are roasted weekly in small batches.&#10;Orders ship within two days of roasting."></textarea>

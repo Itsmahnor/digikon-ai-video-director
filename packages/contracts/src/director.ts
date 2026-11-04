@@ -82,6 +82,26 @@ export const Claim = z.object({
   safe_alternative: z.string().max(300).nullable().default(null),
 });
 
+/** A candidate video type proposed for a video category, derived from category playbooks/skills. */
+export const VideoTypeProposal = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  category: z.enum(["saas", "ecommerce", "general-promo"]),
+  description: z.string().min(1),
+  example: z.string().min(1),
+  recommended: z.boolean().default(false),
+});
+export type VideoTypeProposal = z.infer<typeof VideoTypeProposal>;
+
+/** An audit record of the user's video type selection for the project run. */
+export const VideoTypeChoice = z.object({
+  video_type_id: z.string().min(1),
+  title: z.string().optional(),
+  category: z.enum(["saas", "ecommerce", "general-promo"]).optional(),
+  chosen_at: z.string().datetime().optional(),
+});
+export type VideoTypeChoice = z.infer<typeof VideoTypeChoice>;
+
 export const Treatment = z.object({
   logline: z.string().min(1),
   hook: z.string().min(1),

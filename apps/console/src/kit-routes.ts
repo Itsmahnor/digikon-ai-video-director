@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { Hono } from "hono";
 import { z } from "zod";
 import { Answer, AnswerRefused, applyAnswer, questionsFor, KIT_FIELDS, KitFact, ProjectKit, VideoCategory, approvedFacts, completeness, confirmField, emptyKit, getField, provide, skip, unconfirmed, unset, type Asset, type KitField } from "@digikon/contracts";
+import { proposeVideoTypes } from "@digikon/director";
 import { MAX_GUIDELINE_BYTES, readGuideline, readWebsite, type ReadOptions, type WebsiteReading } from "@digikon/media";
 import { createHash } from "node:crypto";
 
@@ -90,6 +91,30 @@ export function registerKitRoutes(app: Hono, deps: KitRouteDeps) {
     const s = deps.session(c.req.param("id")), b = await body(c, CategoryBody);
     setKit(s, guard(() => ProjectKit.parse({ ...kitOf(s), video_category: b.video_category })));
     return c.json(view(s));
+  });
+
+  // ---------- video type proposals and selection ----------
+  /** Proposes 2 to 3 video types for the project's video category, with one-line description and reference example. */
+  app.get("/api/sessions/:id/video-types", (c) => {
+    const s = deps.session(c.req.param("id"));
+    const kit = kitOf(s);
+    const cat = kit.video_category ?? null;
+    const goal = getField(kit, "goal").value as string | null;
+    const proposals = proposeVideoTypes(cat, goal ?? "");
+    return c.json({ video_category: cat, proposals, chosen: kit.video_type ?? null });
+  });
+
+  /** Stores the user's video type choice in the session kit for run audit. */
+  app.post("/api/sessions/:id/video-type", async (c) => {
+    const s = deps.session(c.req.param("id"));
+    const b = await body(c, z.object({ video_type: z.string().trim().min(1) }));
+    const kit = kitOf(s);
+    const cat = kit.video_category ?? null;
+    const proposals = proposeVideoTypes(cat);
+    const matched = proposals.find((p) => p.id === b.video_type);
+    if (!matched) deps.fail(422, "invalid_video_type", `${b.video_type} is not one of the available video types for category ${cat ?? "general-promo"}`);
+    setKit(s, guard(() => ProjectKit.parse({ ...kit, video_type: b.video_type })));
+    return c.json({ ok: true, chosen: b.video_type, ...view(s) });
   });
 
   // ---------- typed questions ----------

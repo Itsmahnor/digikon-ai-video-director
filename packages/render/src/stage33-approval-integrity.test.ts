@@ -322,7 +322,7 @@ describe("no-port workflows are unchanged", () => {
     expect(done.status).toBe("approved");
   });
   it("the checkpoint format and graph version are unchanged", () => {
-    expect(DIRECTOR_GRAPH_VERSION).toBe("director-graph/4");
+    expect(DIRECTOR_GRAPH_VERSION).toBe("director-graph/5");
   });
 });
 

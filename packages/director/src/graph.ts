@@ -2,6 +2,7 @@ import { Annotation, Command, END, MemorySaver, START, StateGraph, interrupt } f
 import {
   ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE, productionBindingOf,
   type AdvisoryReport, type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type CompiledEditPlan, type EditPlan, type Escalation, type ProductionDecisionPlan, type Project, type ReviewDecision, type ScenePlan, type Treatment,
+  type VideoTypeProposal,
 } from "@digikon/contracts";
 import type { ProjectKit } from "@digikon/contracts";
 import { currentEditPlan, currentEvidenceHash, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
@@ -12,13 +13,14 @@ import {
   analyseAssets, editPlanNode, escalationFor, intakeNode, produceFor, storyboardNode, treatmentNode,
   type Deps, type IntakeOut,
 } from "./nodes.js";
+import { videoTypeNode } from "./video-types.js";
 
 /** `awaiting_approval` covers both human gates; `gate` in the state says which one. `approved` means both gates passed, not that rendering is allowed: only `assertRenderable` decides that. */
 export type DirectorStatus =
   | "running" | "needs_clarification" | "awaiting_approval" | "approved" | "escalated";
 
 /** Identifies the graph's shape (nodes, gates, state). A saved checkpoint from any other version is refused, never adapted. */
-export const DIRECTOR_GRAPH_VERSION = "director-graph/4"; // 3: scenes carry production fields, claims a kind. 4: assets carry licence and genuine-product-UI declarations
+export const DIRECTOR_GRAPH_VERSION = "director-graph/5"; // 3: scenes carry production fields, claims a kind. 4: assets carry licence and genuine-product-UI declarations. 5: video_type_step proposes category video types, records user choice for audit
 
 /** How many change requests one gate accepts. The next one escalates. */
 export const MAX_REVISIONS = MAX_REVISIONS_PER_GATE;
@@ -53,6 +55,10 @@ export const DirectorState = Annotation.Root({
   pendingRevision: Annotation<{ stage: ApprovalStage; notes: string } | null>(),
   /** Change requests used so far at each gate. */
   revisions: Annotation<Counts>({ reducer: (_old, next) => next, default: () => ({ storyboard: 0, edit_plan: 0 }) }),
+  /** Category video types proposed after intake. */
+  proposedVideoTypes: Annotation<VideoTypeProposal[]>(),
+  /** Chosen video type playbook id, stored for run audit. */
+  chosenVideoType: Annotation<string | null>(),
   /** Skills actually loaded per step, for the audit record. */
   skillsUsed: Annotation<string[]>({ reducer: union, default: () => [] }),
   /** Skill reference files shown to the model, as skill/file. */
@@ -69,6 +75,8 @@ export interface DirectorInput {
   facts?: BrandFact[];
   /** Pre-made asset notes (for example from a vision pass). Missing assets get metadata-only notes. */
   notes?: AssetNotes[];
+  /** Explicit choice of video type (optional; defaults to recommended proposal). */
+  chosenVideoType?: string | null;
 }
 
 const STAGE_LABEL: Record<ApprovalStage, string> = { storyboard: "storyboard", edit_plan: "edit plan" };
@@ -217,6 +225,15 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const notes = analyseAssets(s.assets, s.notes ?? []);
       return { notes, skillsUsed: ["cinematography"], trace: [`analyse_assets: ${notes.length} asset(s), ${notes.filter((n) => n.uncertain.length).length} with uncertainty`] };
     })
+    .addNode("video_type_step", async (s: DirectorStateType) => {
+      const out = await videoTypeNode(s.project, s.chosenVideoType ?? s.project.video_type ?? null);
+      return {
+        proposedVideoTypes: out.proposals,
+        chosenVideoType: out.chosen,
+        skillsUsed: out.skills,
+        trace: out.trace,
+      };
+    })
     .addNode("treatment", async (s: DirectorStateType) => {
       const { treatment, skills, references, citations } = await treatmentNode(deps, s.project, s.facts ?? [], s.notes ?? []);
       const unsupported = treatment.claims.filter((c) => c.brand_fact_id === null).length;
@@ -270,7 +287,8 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
     .addNode("edit_plan_gate", gateNode("edit_plan"))
     .addEdge(START, "intake")
     .addConditionalEdges("intake", (s: DirectorStateType) => (s.status === "needs_clarification" ? END : "analyse_assets"), ["analyse_assets", END])
-    .addEdge("analyse_assets", "treatment")
+    .addEdge("analyse_assets", "video_type_step")
+    .addEdge("video_type_step", "treatment")
     .addEdge("treatment", "storyboard")
     .addConditionalEdges("storyboard", (s: DirectorStateType) => (s.status === "escalated" ? END : "storyboard_gate"), ["storyboard_gate", END])
     .addConditionalEdges("storyboard_gate", (s: DirectorStateType) => (s.status === "escalated" ? END : s.pendingRevision?.stage === "storyboard" ? "storyboard" : "edit_plan"), ["storyboard", "edit_plan", END])

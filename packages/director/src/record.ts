@@ -17,7 +17,16 @@ export function buildRunRecord(
     finished_at: new Date().toISOString(),
     status: state.status,
     model: ctx.model,
-    skills: state.skillsUsed.map((n) => `${n}@${ctx.skills.get(n).version}`),
+    video_type: state.chosenVideoType ?? null,
+    proposed_video_types: state.proposedVideoTypes ?? [],
+    skills: state.skillsUsed.map((n) => {
+      try {
+        const s = ctx.skills.get(n);
+        return `${n}@${s.version}`;
+      } catch {
+        return `${n}@1.0.0`;
+      }
+    }),
     references: state.referencesUsed,
     recipes_used: used,
     retrieved_ids: state.citations,

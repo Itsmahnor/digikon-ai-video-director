@@ -134,6 +134,8 @@ const DirectBody = z.object({
   facts: z.array(z.string().trim().min(1).max(300)).max(20).default([]),
   /** Kind of video, which decides the skills read. Unset (or null) means only the cross-cutting skills are used. */
   video_category: z.enum(["saas", "ecommerce", "general-promo"]).nullable().default(null),
+  /** Chosen video type playbook. */
+  video_type: z.string().nullable().default(null),
 });
 
 class HttpError extends Error {
@@ -600,7 +602,7 @@ export function createApp(ctx: AppContext) {
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
     const kit = kits.kitOf(s);
-    const project = { ...request.project, video_category: body.video_category ?? kit.video_category ?? request.project.video_category ?? null, brand_id: kit.brand_id ?? request.project.brand_id ?? null };
+    const project = { ...request.project, video_category: body.video_category ?? kit.video_category ?? request.project.video_category ?? null, video_type: body.video_type ?? kit.video_type ?? request.project.video_type ?? null, brand_id: kit.brand_id ?? request.project.brand_id ?? null };
     const assets = s.assets;
     const facts = s.facts;
     await Promise.allSettled([...s.pending.values()]); // measurements and transcripts must be ready before planning
@@ -609,7 +611,7 @@ export function createApp(ctx: AppContext) {
     return streamSSE(c, async (stream) => {
       const send = (event: string, data: unknown) => stream.writeSSE({ event, data: JSON.stringify(data) });
       try {
-        await send("start", { nodes: ["intake", "analyse_assets", "treatment", "storyboard", "storyboard_gate", "edit_plan", "edit_plan_gate"] });
+        await send("start", { nodes: ["intake", "analyse_assets", "video_type_step", "treatment", "storyboard", "storyboard_gate", "edit_plan", "edit_plan_gate"] });
         for await (const chunk of await graph.stream({ project, assets, facts, notes, ...(kitIsStarted(kit) ? { kit } : {}) }, { ...config, streamMode: "updates" })) {
           for (const [node, update] of Object.entries(chunk as Record<string, unknown>)) {
             if (node === "__interrupt__") continue;
@@ -1140,5 +1142,6 @@ function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipe
     revisions: { used: s["revisions"] ?? { storyboard: 0, edit_plan: 0 }, max: MAX_REVISIONS },
     renderable: check.ok ? { ok: true, reasons: [] as string[] } : { ok: false, reasons: plainReasons(check.reasons) },
     citations: s["citations"] ?? [], skillsUsed: s["skillsUsed"] ?? [], referencesUsed: s["referencesUsed"] ?? [], trace: s["trace"] ?? [], notes: s["notes"] ?? [],
+    videoType: s["chosenVideoType"] ?? null, proposedVideoTypes: s["proposedVideoTypes"] ?? [],
   };
 }

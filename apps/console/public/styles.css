@@ -281,3 +281,11 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
 .wz-cand .sw { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--line-strong); }
 .wz-saved { border-bottom: 1px solid var(--line); margin-bottom: 12px; padding-bottom: 6px; }
 @media (max-width: 560px) { .wz-chip { padding-right: 8px; } .wz-actions .primary { width: 100%; } }
+
+.video-type-options { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.video-type-option { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: all .15s ease; background: rgba(255,255,255,.02); }
+.video-type-option:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.05); }
+.video-type-option.active { border-color: var(--accent); background: rgba(99, 102, 241, .12); }
+.video-type-option .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.video-type-option .desc { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+.video-type-option .ex { font-size: 12px; color: var(--muted); font-style: italic; }

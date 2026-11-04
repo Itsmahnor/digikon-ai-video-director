@@ -12,3 +12,4 @@ export * from "./demo-client.js";
 export * from "./asset-match.js";
 export * from "./production/index.js";
 export * from "./gateway.js";
+export * from "./video-types.js";

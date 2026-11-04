@@ -57,6 +57,7 @@ export const ProjectKit = z.object({
   /** The saved brand this kit was built from or saved to (Project.brand_id). */
   brand_id: z.string().nullable().default(null),
   video_category: VideoCategory.nullable().default(null),
+  video_type: z.string().nullable().default(null),
   goal: field(z.string().max(500)),
   audience: field(z.string().max(500)),
   platform: field(z.string().max(100)),
@@ -78,8 +79,8 @@ export type ProjectKit = z.infer<typeof ProjectKit>;
 export const KIT_FIELDS = ["goal", "audience", "platform", "brand.colours", "brand.fonts", "brand.logo", "brand.tone", "website", "guideline", "assets", "facts"] as const;
 export type KitField = (typeof KIT_FIELDS)[number];
 
-export function emptyKit(kit_id: string, init: { project_id?: string | null; brand_id?: string | null; video_category?: z.infer<typeof VideoCategory> | null } = {}): ProjectKit {
-  return ProjectKit.parse({ kit_id, project_id: init.project_id ?? null, brand_id: init.brand_id ?? null, video_category: init.video_category ?? null });
+export function emptyKit(kit_id: string, init: { project_id?: string | null; brand_id?: string | null; video_category?: z.infer<typeof VideoCategory> | null; video_type?: string | null } = {}): ProjectKit {
+  return ProjectKit.parse({ kit_id, project_id: init.project_id ?? null, brand_id: init.brand_id ?? null, video_category: init.video_category ?? null, video_type: init.video_type ?? null });
 }
 
 type Loose = { state: FieldState; value: unknown; source: FieldSource | null; confirmed: boolean };
