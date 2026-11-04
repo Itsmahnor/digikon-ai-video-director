@@ -58,7 +58,7 @@ async function main() {
 
   if (state.status === "needs_clarification") {
     console.log("\nThe brief needs answers before planning:");
-    for (const q of state.intakeResult?.questions ?? []) console.log(`  - ${q}`);
+    for (const q of state.intakeResult?.questions ?? []) console.log(`  - ${q.prompt}${q.skippable ? " (you can skip this)" : ""}`);
     return;
   }
   if (state.status === "escalated") {

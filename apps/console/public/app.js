@@ -1,5 +1,5 @@
 // Director Console: plain ES module, no build step. All model and user text goes through esc() before it reaches the DOM.
-import { mountWizard } from "./wizard.js";
+import { mountWizard, fileProblem } from "./wizard.js";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const fmtDur = (s) => (s == null ? "" : s >= 60 ? `${Math.floor(s / 60)}m ${Math.round(s % 60)}s` : `${(Math.round(s * 10) / 10).toString()}s`);
@@ -528,7 +528,53 @@ function planSection() {
     return pipe + `<div class="card"><h3>Needs a human decision</h3><div class="notice bad" style="margin-bottom:12px">${esc(e.what_failed)}</div>
       <dl class="kv"><dt>Evidence</dt><dd>${e.evidence.map((x) => `<div class="mono">${esc(x)}</div>`).join("")}</dd><dt>Tried</dt><dd>${e.what_was_tried.map(esc).join("; ")}</dd><dt>Options</dt><dd>${e.options_left.map(esc).join("; ")}</dd><dt>Decision</dt><dd>${esc(e.decision_needed)}</dd></dl></div>`;
   }
+  if (res.status === "needs_clarification") return pipe + err + questionsCard(res.intake?.questions ?? []);
   return pipe + err + results(res);
+}
+
+/** Typed questions from the Director: a text box, a choice or an upload each, with Skip where it is allowed. Questions tied to no field (older free text) are shown as notes. */
+const ACCEPT = { image: "image/*,.svg", pdf: "application/pdf,.pdf", video: "video/*", audio: "audio/*", any: "" };
+function questionsCard(qs) {
+  if (!qs.length) return `<div class="card"><h3>I need a little more</h3><p class="hint">Nothing specific was asked. Add detail to your request and send it again.</p></div>`;
+  const control = (q) => q.kind === "choice"
+    ? `<select id="qa-${esc(q.id)}" aria-label="${esc(q.prompt)}"><option value="">Choose...</option>${q.options.map((o) => `<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("")}</select>`
+    : q.kind === "upload"
+      ? `<input id="qa-${esc(q.id)}" type="file" ${q.accept === "any" || q.accept === "image" ? "multiple" : ""} accept="${esc(ACCEPT[q.accept] ?? "")}" aria-label="${esc(q.prompt)}">`
+      : `<input id="qa-${esc(q.id)}" type="text" placeholder="${esc(q.placeholder)}" aria-label="${esc(q.prompt)}">`;
+  return `<div class="card" id="qcard"><h3>I need a little more</h3>
+    <p class="hint" style="margin-bottom:10px">Answer what you can${qs.some((q) => q.skippable) ? "; where it says you can skip, skipping is fine" : ""}.</p>
+    ${qs.map((q) => q.field ? `<div class="q" data-qid="${esc(q.id)}" data-kind="${esc(q.kind)}" data-accept="${esc(q.accept ?? "")}" style="margin-bottom:14px"><label class="field-label" for="qa-${esc(q.id)}">${esc(q.prompt)}${q.level === "required" ? " <span class=\"hint\">required</span>" : ""}</label>${q.help ? `<p class="hint" style="margin-bottom:6px">${esc(q.help)}</p>` : ""}${control(q)}${q.skippable ? `<label class="hint" style="display:block;margin-top:6px"><input type="checkbox" class="q-skip"> Skip this</label>` : ""}</div>` : `<div class="notice warn" style="margin-bottom:10px">${esc(q.prompt)} <span class="hint">Add this to your request above and send it again.</span></div>`).join("")}
+    <p class="wz-error" id="q-error" role="alert"></p>
+    ${qs.some((q) => q.field) ? `<button class="primary sm" data-action="answer-questions" ${state.busy ? "disabled" : ""}>Send answers and continue</button>` : ""}</div>`;
+}
+async function answerQuestions() {
+  const err = (m) => { const e = $("#q-error"); if (e) e.textContent = m; };
+  const answers = [];
+  for (const b of document.querySelectorAll("#qcard .q")) {
+    const id = b.dataset.qid, kind = b.dataset.kind, input = b.querySelector("input:not(.q-skip), select");
+    if (b.querySelector(".q-skip")?.checked) { answers.push({ question_id: id, action: "skip" }); continue; }
+    if (kind === "upload") {
+      const files = [...(input.files ?? [])]; if (!files.length) continue;
+      if (b.dataset.accept === "pdf") {
+        const problem = fileProblem(files[0], "guideline"); if (problem) return err(problem);
+        const fd = new FormData(); fd.append("file", files[0], files[0].name);
+        try { await api(`/api/sessions/${state.sid}/guideline`, { method: "POST", body: fd }); } catch (e) { return err(e.message); }
+        continue; // the guideline route records the file in the kit itself
+      }
+      if (b.dataset.accept === "image") { const problem = fileProblem(files[0], "logo"); if (problem) return err(problem); }
+      const before = new Set(state.assets.map((a) => a.asset_id));
+      await uploadFiles(files);
+      const ids = state.assets.filter((a) => !before.has(a.asset_id)).map((a) => a.asset_id);
+      if (!ids.length) return err("That file was not accepted. Check it, or skip this question.");
+      answers.push({ question_id: id, action: "answer", value: ids });
+    } else {
+      const v = input.value.trim(); if (v) answers.push({ question_id: id, action: "answer", value: v });
+    }
+  }
+  if (!answers.length) return err("Answer at least one question, or tick Skip where it is allowed.");
+  try { await post(`/api/sessions/${state.sid}/kit/answers`, { answers }); } catch (e) { return err(e.message); }
+  await state.wiz?.reload?.();
+  buildPlan();
 }
 
 function results(res) {
@@ -751,6 +797,7 @@ document.addEventListener("click", async (e) => {
     else { try { state.transcripts[id] = await api(`/api/sessions/${state.sid}/assets/${id}/transcript`); } catch (er) { fail(er); } }
     renderAll();  } else if (a === "reply") sendText($("#reply").value);
   else if (a === "build") buildPlan();
+  else if (a === "answer-questions") answerQuestions();
   else if (a === "approve") decide("approved");
   else if (a === "revise") decide("revision_requested");
   else if (a === "tab") { state.tab = el.dataset.tab; renderStage(); }
@@ -796,6 +843,7 @@ async function init() {
         $("#prompt").focus({ preventScroll: false });
       },
     });
+    state.wiz = wiz;
     await wiz.start();
   }
 }

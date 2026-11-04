@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFile
 import { join } from "node:path";
 import type { Hono } from "hono";
 import { z } from "zod";
-import { KIT_FIELDS, KitFact, ProjectKit, VideoCategory, approvedFacts, completeness, confirmField, emptyKit, getField, provide, skip, unconfirmed, unset, type Asset, type KitField } from "@digikon/contracts";
+import { Answer, AnswerRefused, applyAnswer, questionsFor, KIT_FIELDS, KitFact, ProjectKit, VideoCategory, approvedFacts, completeness, confirmField, emptyKit, getField, provide, skip, unconfirmed, unset, type Asset, type KitField } from "@digikon/contracts";
 import { MAX_GUIDELINE_BYTES, readGuideline, readWebsite, type ReadOptions, type WebsiteReading } from "@digikon/media";
 import { createHash } from "node:crypto";
 
@@ -32,6 +32,7 @@ export interface KitRouteDeps {
 
 const FieldBody = z.object({ field: z.enum(KIT_FIELDS), action: z.enum(["provide", "skip", "unset"]), value: z.unknown().optional() });
 const CategoryBody = z.object({ video_category: VideoCategory.nullable() });
+const AnswersBody = z.object({ answers: z.array(Answer).min(1).max(20) });
 const WebsiteBody = z.object({ url: z.string().trim().min(1).max(2000) });
 const ConfirmBody = z.object({ source: z.enum(["website", "guideline"]), colours: z.array(z.string()).max(12).default([]), fonts: z.array(z.string()).max(6).default([]), fact_ids: z.array(z.string()).max(40).default([]) });
 const BrandBody = z.object({ name: z.string().trim().min(1).max(80) });
@@ -89,6 +90,28 @@ export function registerKitRoutes(app: Hono, deps: KitRouteDeps) {
     const s = deps.session(c.req.param("id")), b = await body(c, CategoryBody);
     setKit(s, guard(() => ProjectKit.parse({ ...kitOf(s), video_category: b.video_category })));
     return c.json(view(s));
+  });
+
+  // ---------- typed questions ----------
+  /** The questions still to ask, typed (upload, choice, text), from the kit and the completeness check. */
+  app.get("/api/sessions/:id/kit/questions", (c) => {
+    const s = deps.session(c.req.param("id")), v = view(s);
+    return c.json({ questions: questionsFor(v.kit), ready: v.completeness.ready });
+  });
+  /** Answers one or more questions. All or none: if any answer is refused nothing changes. An upload answer names files this session already has. */
+  app.post("/api/sessions/:id/kit/answers", async (c) => {
+    const s = deps.session(c.req.param("id")), b = await body(c, AnswersBody);
+    let kit = kitOf(s);
+    b.answers.forEach((a, i) => {
+      try {
+        if (a.action === "answer" && /^q_(assets|brand_logo)$/.test(a.question_id)) {
+          for (const id of Array.isArray(a.value) ? a.value : a.value ? [a.value] : []) if (!s.assets.some((x) => x.asset_id === id)) throw new AnswerRefused(`${id} is not one of this session's files`);
+        }
+        kit = applyAnswer(kit, a);
+      } catch (e) { deps.fail(422, e instanceof AnswerRefused ? "answer_refused" : "kit_invalid", `answer ${i + 1} (${a.question_id}): ${e instanceof z.ZodError ? e.issues.map((x) => x.message).join("; ") : e instanceof Error ? e.message : String(e)}`); }
+    });
+    setKit(s, kit);
+    return c.json({ ...view(s), questions: questionsFor(kit) });
   });
 
   // ---------- website ----------

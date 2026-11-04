@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { QuestionList, completeness, questionsFor, type ProjectKit } from "@digikon/contracts";
 import {
   ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
   type Asset, type VisualBlock, type VisualSystem, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
@@ -34,7 +35,8 @@ export interface Deps {
 
 export const IntakeOut = z.object({
   status: z.enum(["ready", "needs_clarification"]),
-  questions: z.array(z.string()).default([]),
+  /** Typed questions (an upload, a choice or a short text, each with Skip where allowed). Plain strings from older runs or a model are read as free-text questions. */
+  questions: QuestionList.default([]),
 });
 export type IntakeOut = z.infer<typeof IntakeOut>;
 
@@ -154,7 +156,16 @@ export function mediaOf(scene: { asset_ids: string[] }, assets: Asset[]): string
 
 // ---------- nodes ----------
 
-export async function intakeNode(deps: Deps, project: Project, assets: Asset[], notes: readonly AssetNotes[] = []) {
+/** True when the guided intake has been used: at least one kit field has an answer or a skip. */
+export const kitIsStarted = (kit: ProjectKit | null | undefined): kit is ProjectKit => !!kit && completeness(kit).items.some((i) => i.state !== "missing");
+
+export async function intakeNode(deps: Deps, project: Project, assets: Asset[], notes: readonly AssetNotes[] = [], kit: ProjectKit | null = null) {
+  // With a project kit the question is answered by plain code, not a model: the brief is ready when the kit's required fields are provided, and what to ask is the kit's missing fields, typed, required ones first.
+  if (kitIsStarted(kit)) {
+    const c = completeness(kit);
+    const out: IntakeOut = { status: c.ready ? "ready" : "needs_clarification", questions: c.ready ? [] : questionsFor(kit, { levels: ["required"] }) };
+    return { out, skills: [] as string[], references: [] as string[], citations: [] as string[] };
+  }
   const { system, skills, references } = deps.skills.systemFor("intake");
   const specs = await retrieve(deps, "platform_specs", `${project.platform} ${project.aspect_ratio}`, 3, {}, 600);
   const user = [

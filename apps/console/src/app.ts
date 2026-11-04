@@ -69,6 +69,7 @@ export interface AppContext {
 }
 
 import { registerKitRoutes, type Extraction } from "./kit-routes.js";
+import { kitIsStarted } from "@digikon/director";
 import { approvedFacts, type ProjectKit } from "@digikon/contracts";
 import type { ReadOptions } from "@digikon/media";
 import { PLAIN_CANNOT_PRODUCE, PLAIN_PLAN_CHANGED, plainEscalation, plainReasons, publicApprovals } from "./public-view.js";
@@ -609,7 +610,7 @@ export function createApp(ctx: AppContext) {
       const send = (event: string, data: unknown) => stream.writeSSE({ event, data: JSON.stringify(data) });
       try {
         await send("start", { nodes: ["intake", "analyse_assets", "treatment", "storyboard", "storyboard_gate", "edit_plan", "edit_plan_gate"] });
-        for await (const chunk of await graph.stream({ project, assets, facts, notes }, { ...config, streamMode: "updates" })) {
+        for await (const chunk of await graph.stream({ project, assets, facts, notes, ...(kitIsStarted(kit) ? { kit } : {}) }, { ...config, streamMode: "updates" })) {
           for (const [node, update] of Object.entries(chunk as Record<string, unknown>)) {
             if (node === "__interrupt__") continue;
             const trace = (update as { trace?: string[] } | null)?.trace ?? [];

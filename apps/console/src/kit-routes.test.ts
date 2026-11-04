@@ -71,6 +71,8 @@ describe("website step: extracted values are candidates until the user confirms 
     await app.request(`/api/sessions/${id}/route`, post({ text: "A 12 second Instagram ad for my coffee roaster." }));
     const ex = (await j(await app.request(`/api/sessions/${id}/website`, post({ url: base + "/" })))).extraction;
     await app.request(`/api/sessions/${id}/kit/confirm`, post({ source: "website", fact_ids: [ex.facts[0].id] }));
+    // the guided setup is in use, so the three required answers are needed before the Director plans
+    await app.request(`/api/sessions/${id}/kit/answers`, post({ answers: [{ question_id: "q_goal", action: "answer", value: "Drive first orders" }, { question_id: "q_audience", action: "answer", value: "Home coffee drinkers" }, { question_id: "q_platform", action: "answer", value: "Instagram Reels" }] }));
     const sse = await (await app.request(`/api/sessions/${id}/direct`, post({ facts: [] }))).text();
     const state = JSON.parse(/event: state\ndata: (.*)/.exec(sse)![1]!);
     const prompt = JSON.stringify(state);
@@ -160,6 +162,53 @@ describe("brand guideline step", () => {
     expect(res.status).toBe(413);
     expect((await j(res)).error).toBe("file_too_large");
     expect((await app.request(`/api/sessions/${id}/guideline`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status).toBe(400);
+  });
+});
+
+describe("typed questions (C6)", () => {
+  const answers = (app: ReturnType<typeof build>, id: string, list: unknown[]) => app.request(`/api/sessions/${id}/kit/answers`, post({ answers: list }));
+  const stateOf = async (res: Response) => JSON.parse(/event: state\ndata: (.*)/.exec(await res.text())![1]!);
+
+  it("asks the required questions first, typed, and only what is missing", async () => {
+    const app = build(), id = await newSession(app);
+    let q = await j(await app.request(`/api/sessions/${id}/kit/questions`));
+    expect(q.ready).toBe(false);
+    expect(q.questions.slice(0, 3).map((x: any) => [x.id, x.kind, x.skippable])).toEqual([["q_goal", "text", false], ["q_audience", "text", false], ["q_platform", "choice", false]]);
+    const r = await j(await answers(app, id, [{ question_id: "q_goal", action: "answer", value: "Get sign-ups" }, { question_id: "q_brand_logo", action: "skip" }]));
+    expect(r.questions.map((x: any) => x.id)).not.toContain("q_goal");
+    expect(r.questions.map((x: any) => x.id)).not.toContain("q_brand_logo");
+    q = await j(await app.request(`/api/sessions/${id}/kit/questions`));
+    expect(q.questions[0].id).toBe("q_audience");
+  });
+  it("answers are all-or-nothing, and a required question cannot be skipped", async () => {
+    const app = build(), id = await newSession(app);
+    const res = await answers(app, id, [{ question_id: "q_goal", action: "answer", value: "Fine" }, { question_id: "q_audience", action: "skip" }]);
+    expect(res.status).toBe(422);
+    expect((await j(res)).error).toBe("answer_refused");
+    expect((await j(await app.request(`/api/sessions/${id}/kit`))).kit.goal.state).toBe("missing"); // the first answer was not kept
+    for (const bad of [{ question_id: "q_nope", action: "answer", value: "x" }, { question_id: "q_goal", action: "answer", value: " " }, { question_id: "q_brand_colours", action: "answer", value: "red" }, { question_id: "q_brand_logo", action: "answer", value: ["asset_deadbeef"] }]) expect((await answers(app, id, [bad])).status, JSON.stringify(bad)).toBe(422);
+    expect((await app.request(`/api/sessions/${id}/kit/answers`, post({ answers: [] }))).status).toBe(400);
+  });
+  it("the Director run asks the open required questions, typed, then goes on to Gate 1 once they are answered", async () => {
+    const app = build(), id = await newSession(app);
+    await app.request(`/api/sessions/${id}/route`, post({ text: "A 12 second Instagram ad for my coffee roaster." }));
+    await answers(app, id, [{ question_id: "q_goal", action: "answer", value: "Drive first orders" }]);
+    let state = await stateOf(await app.request(`/api/sessions/${id}/direct`, post({ facts: [] })));
+    expect(state.status).toBe("needs_clarification");
+    expect(state.intake.questions.map((x: any) => x.id)).toEqual(["q_audience", "q_platform"]);
+    expect(state.intake.questions[1]).toMatchObject({ kind: "choice", skippable: false });
+    expect(state.treatment).toBeNull();
+    await answers(app, id, [{ question_id: "q_audience", action: "answer", value: "Home coffee drinkers" }, { question_id: "q_platform", action: "answer", value: "Instagram Reels" }]);
+    state = await stateOf(await app.request(`/api/sessions/${id}/direct`, post({ facts: [] })));
+    expect(state.status).toBe("awaiting_approval");
+    expect(state.gate).toBe("storyboard"); // the approval gate is unchanged
+    expect(state.editPlan).toBeNull();
+  });
+  it("without the guided setup the run behaves as before", async () => {
+    const app = build(), id = await newSession(app);
+    await app.request(`/api/sessions/${id}/route`, post({ text: "A 12 second Instagram ad for my coffee roaster." }));
+    const state = await stateOf(await app.request(`/api/sessions/${id}/direct`, post({ facts: [] })));
+    expect(state.status).toBe("awaiting_approval");
   });
 });
 

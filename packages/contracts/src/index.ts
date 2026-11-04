@@ -22,4 +22,5 @@ export * from "./template-record.js";
 export * from "./skill-record.js";
 export * from "./kit.js";
 export * from "./kit-completeness.js";
+export * from "./questions.js";
 

@@ -3,6 +3,7 @@ import {
   ApprovalRecord, ApprovalSubmission, MAX_REVISIONS_PER_GATE, productionBindingOf,
   type AdvisoryReport, type ApprovalStage, type Asset, type AssetNotes, type BrandFact, type CompiledEditPlan, type EditPlan, type Escalation, type ProductionDecisionPlan, type Project, type ReviewDecision, type ScenePlan, type Treatment,
 } from "@digikon/contracts";
+import type { ProjectKit } from "@digikon/contracts";
 import { currentEditPlan, currentEvidenceHash, currentStoryboard, requireStoryboardApproval } from "./approvals.js";
 import { adviseFeasibility } from "./production/advisory.js";
 import { verifyProductionIntegrity } from "./production/integrity.js";
@@ -32,6 +33,8 @@ export const DirectorState = Annotation.Root({
   facts: Annotation<BrandFact[]>(),
   notes: Annotation<AssetNotes[]>(),
   intakeResult: Annotation<IntakeOut | null>(),
+  /** The guided-intake project kit, when the user used it. Intake asks typed questions from it without a model call. */
+  kit: Annotation<ProjectKit | null>(),
   treatmentDoc: Annotation<Treatment | null>(),
   scenePlan: Annotation<ScenePlan | null>(),
   editPlan: Annotation<EditPlan | null>(),
@@ -203,7 +206,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
 
   const g = new StateGraph(DirectorState)
     .addNode("intake", async (s: DirectorStateType) => {
-      const { out, skills, references, citations } = await intakeNode(deps, s.project, s.assets, s.notes ?? []);
+      const { out, skills, references, citations } = await intakeNode(deps, s.project, s.assets, s.notes ?? [], s.kit ?? null);
       return {
         intakeResult: out, skillsUsed: skills, referencesUsed: references, citations,
         status: out.status === "ready" ? ("running" as const) : ("needs_clarification" as const),
