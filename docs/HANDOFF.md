@@ -109,9 +109,12 @@ npm run db:up; npm run db:migrate; npm run db:health   # Docker route (needs BIO
 
 ## 9. Where things are
 
+The full annotated tree (every directory, which plan step it belongs to, its status, and a "plan vs reality" table) is `docs/PROJECT_TREE.md`. **Regenerate it with `npm run tree`** after adding a directory, package or app; a test (`scripts/tree.test.ts`) fails until a new top-level directory, package or app has an entry in `scripts/tree.mts`.
+
+
 `packages/contracts` (schemas, `kit.ts`, `kit-completeness.ts`), `packages/director` (graph, nodes, editor agent), `packages/rag` (retrievers, skills importer, floor, DB-backed retriever), `packages/media` (assets, `website.ts`, `guideline.ts`), `packages/evals`, `apps/console` (server, routes, `kit-routes.ts`, `public/` UI incl. `wizard.js`), `examples/skills` (117 skills, one folder per source, `REVIEW.md`), `evals/` (benchmarks, baselines), `docs/` (`SKILLS.md`, `SKILL_REVIEW.md`, `PLAN_PHASES_A-C.md`, this file), `db/migrations`.
 
 - **Only one session may work in this folder at a time.** On 2026-11-04 two Claude sessions edited the same working tree: commits appeared that the other session did not make, and uncommitted edits were silently reverted. Check `git status` and `git log` before starting; commit only by explicit file path (never `git add -A` while another session is active); use a separate worktree for anything long (for example `git worktree add --detach D:\digikon-worktrees\verify <commit>`; node_modules must be copied without the `@digikon` junctions, which point at the main tree, and those junctions re-created inside the copy).
 - Two full-suite flakes under load, both pass alone: `apps/console/src/render.test.ts` ("needs a logo", timeout) and `apps/console/src/assets.test.ts` (120 s timeout, Windows temp-folder EPERM on cleanup).
 - The D1 video-type catalog (`packages/director/src/video-types.ts`) has example lines with invented figures ("get paid 4x faster", "5 seconds to prep salad"). They are shown to the user as reference examples, but they break the no-invented-statistics rule; rewrite them without numbers.
-- `handoff.ts` now falls back to version `1.0.0` for a skill id that is not in the SkillLibrary (video-type playbook ids are skills-collection ids, not SkillLibrary skills). That records a version that does not exist; prefer recording `null` or the skill's content hash.
+- Fixed: a skill id that the SkillLibrary does not hold (a video-type playbook id) is recorded as `name@unknown` in the audit record and the handoff (`packages/director/src/skill-ref.ts`), no longer as an invented `1.0.0`.
