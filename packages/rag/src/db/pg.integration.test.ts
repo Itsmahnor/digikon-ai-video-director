@@ -4,18 +4,44 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { connectPgSingle, PgDataStore, type SqlClient, type TemplateRow } from "./store.js";
 import { readMigrations, runMigrations } from "./migrate.js";
 
-/** Runs against a real Postgres with pgvector, in a throwaway schema. Skipped unless DATABASE_URL is set. */
+/**
+ * Runs against Postgres with pgvector, in a throwaway schema. With DATABASE_URL set it uses that server (the real thing: docker compose up postgres).
+ * Without it, it runs the same tests on PGlite (Postgres compiled to WebAssembly, with pgvector), in-process: same SQL and migrations, but not a server.
+ * It is skipped only if neither is available. The backend that ran is printed, so a PGlite pass is never mistaken for a server pass.
+ */
 const url = process.env["DATABASE_URL"];
+type Db = SqlClient & { connect(): Promise<void> };
+interface PGliteLike { query(t: string, p?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>; exec(t: string): Promise<{ rows: Record<string, unknown>[] }[]>; close(): Promise<void> }
+
+async function pgliteClient(): Promise<Db | null> {
+  let mod: { PGlite: { create(o: unknown): Promise<unknown> } }, vec: { vector: unknown };
+  const core = "@electric-sql/pglite", ext = "@electric-sql/pglite/vector";
+  try { mod = (await import(core)) as typeof mod; vec = (await import(ext)) as typeof vec; } catch { return null; }
+  const d = (await mod.PGlite.create({ extensions: { vector: vec.vector } })) as PGliteLike;
+  return {
+    // PGlite's extended protocol takes one statement; a migration is many, so statements without parameters go through exec.
+    query: async (text, params) => {
+      if (params && params.length) return { rows: (await d.query(text, [...params])).rows };
+      const r = await d.exec(text);
+      return { rows: r.length ? r[r.length - 1]!.rows : [] };
+    },
+    end: async () => d.close(),
+    connect: async () => undefined,
+  };
+}
+const pglite = url ? null : await pgliteClient();
+const available = !!url || !!pglite;
+console.log(`[pg.integration] backend: ${url ? "Postgres server via DATABASE_URL" : pglite ? "PGlite (in-process WebAssembly Postgres, NOT a server)" : "none available (skipped)"}`);
 const tpl = (id: string, over: Partial<TemplateRow> = {}): TemplateRow => ({ id, category_id: null, title: id, family: "kinetic", variant_of: null, archetype: null, tags: ["a", "b"], status: "draft", body: { id, nested: { n: 1 } }, content_hash: "h", ...over });
 
-describe.skipIf(!url)("Postgres + pgvector integration", () => {
+describe.skipIf(!available)("Postgres + pgvector integration", () => {
   const schema = `t_${randomBytes(4).toString("hex")}`;
   let db: SqlClient & { connect(): Promise<void> };
   let store: PgDataStore;
   const migrations = readMigrations(resolve(import.meta.dirname, "..", "..", "..", "..", "db", "migrations"));
 
   beforeAll(async () => {
-    db = await connectPgSingle(url!);
+    db = url ? await connectPgSingle(url) : pglite!;
     await db.query(`CREATE SCHEMA ${schema}`);
     await db.query(`SET search_path TO ${schema}, public`);
     store = new PgDataStore(db);
@@ -34,7 +60,7 @@ describe.skipIf(!url)("Postgres + pgvector integration", () => {
     expect(second.skipped).toEqual(migrations.map((m) => m.name));
     expect(await store.health()).toMatchObject({ ok: true, backend: "postgres", vector_extension: true });
     const t = await db.query("SELECT table_name FROM information_schema.tables WHERE table_schema=$1", [schema]);
-    for (const name of ["templates", "template_categories", "template_embeddings", "template_usage", "template_review", "capability_index", "retrieval_log", "model_calls", "render_jobs"]) {
+    for (const name of ["templates", "template_categories", "template_embeddings", "template_usage", "template_review", "capability_index", "retrieval_log", "model_calls", "render_jobs", "skill_sources", "skills", "skill_embeddings", "assets_library"]) {
       expect(t.rows.map((r) => r["table_name"])).toContain(name);
     }
   });
@@ -79,4 +105,23 @@ describe.skipIf(!url)("Postgres + pgvector integration", () => {
     await store.logRetrieval({ film_id: "film1", query: "q", collection: "shot_recipes", hits: [{ id: "x" }] });
     expect((await db.query("SELECT hits FROM retrieval_log")).rows[0]).toEqual({ hits: [{ id: "x" }] });
   });
-});
+
+  it("skills: a licence is required by the database itself, and skills round-trip with filters and vector search", async () => {
+    await expect(db.query("INSERT INTO skill_sources (id, repo, url, licence, checked_on) VALUES ('bad','r','u','  ','2026-11-04')")).rejects.toThrow();
+    await expect(store.upsertSkillSource({ id: "bad", repo: "r", url: "u", licence: "", attribution: null, checked_on: "2026-11-04" })).rejects.toThrow(/licence/);
+    await expect(db.query("INSERT INTO skills (id, category, funnel_stage, grade, title, body, content_hash, source_id) VALUES ('orphan','hook','awareness','a','t','\"x\"'::jsonb,'h','nosuch')")).rejects.toThrow();
+    await expect(db.query("INSERT INTO assets_library (id, kind, file, licence, source) VALUES ('f','font','f.ttf','','x')")).rejects.toThrow();
+    await store.upsertSkillSource({ id: "s1", repo: "acme/skills", url: "https://example.test", licence: "MIT", attribution: null, checked_on: "2026-11-04" });
+    expect(await store.getSkillSource("s1")).toMatchObject({ licence: "MIT", checked_on: "2026-11-04" });
+    const sk = (id: string, over: Record<string, unknown> = {}) => ({ id, category: "hook", funnel_stage: "awareness", platform: ["tiktok"], grade: "a", status: "approved" as const, title: id, body: "text", content_hash: "h", source_id: "s1", ...over });
+    await store.upsertSkill(sk("k1")); await store.upsertSkill(sk("k2", { category: "cta_end", platform: ["youtube"] })); await store.upsertSkill(sk("k1", { title: "K1 v2" }));
+    expect((await store.getSkill("k1"))!.title).toBe("K1 v2");
+    expect((await store.listSkills({ category: "hook" })).map((s) => s.id)).toEqual(["k1"]);
+    expect((await store.listSkills({ platform: "youtube" })).map((s) => s.id)).toEqual(["k2"]);
+    await store.upsertSkillEmbedding({ skill_id: "k1", model: "m", model_version: "1", vector: [1, 0, 0] });
+    await store.upsertSkillEmbedding({ skill_id: "k2", model: "m", model_version: "1", vector: [0, 1, 0] });
+    await store.upsertSkillEmbedding({ skill_id: "k1", model: "m", model_version: "1", vector: [1, 0, 0] });
+    expect((await store.nearestSkills({ model: "m", model_version: "1", vector: [1, 0, 0], k: 2 })).map((h) => h.skill_id)).toEqual(["k1", "k2"]);
+    await store.upsertLibraryAsset({ id: "inter", kind: "font", file: "Inter.ttf", licence: "OFL-1.1", source: "rsms.me/inter" });
+    expect((await store.listLibraryAssets("font")).map((a) => a.id)).toEqual(["inter"]);
+  });});
