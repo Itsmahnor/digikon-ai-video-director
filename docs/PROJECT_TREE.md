@@ -17,8 +17,8 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |-- package-lock.json
 |-- package.json
 |-- tsconfig.base.json
-|-- apps/                                       22 files  [done; base, B3, C2-C6, D1] The console: server, routes and browser UI
-|   |-- console/                                22 files  [done; base, B3, C2-C6, D1] Hono server + plain-JS UI (no build step)
+|-- apps/                                       22 files  [done; base, B3, C2-C6, D1, E2-E6] The console: server, routes and browser UI
+|   |-- console/                                22 files  [done; base, B3, C2-C6, D1, E2-E6] Hono server + plain-JS UI (no build step)
 |   |   |-- public/                              4 files  [done; C4, C6, D1] UI: guided-intake wizard (C4), typed question card (C6), video-type card (D1)
 |   |   |-- src/                                16 files  [done; B3, C2-C6, D1] Routes; kit-routes.ts holds the kit, website, guideline and question routes
 |-- capabilities/                               35 files  [base] Capability registry: what each renderer can really do, with validation evidence
@@ -63,11 +63,11 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |-- ad_playbooks/                            5 files
 |   |-- directing_principles/                    9 files
 |   |-- platform_specs/                          1 files
-|-- packages/                                  308 files  [done; base, A-D] Workspace packages
+|-- packages/                                  324 files  [done; base, A-D] Workspace packages
 |   |-- contracts/                              41 files  [done; A2, B1, C1, C5, C6, D1, D2] Schemas: SkillRecord, ProjectKit, completeness, typed questions, video types, Gate 1 requirements
 |   |   |-- src/                                39 files
-|   |-- director/                               47 files  [partial; B3, C6, D1, D2, D3] Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model
-|   |   |-- src/                                45 files
+|   |-- director/                               52 files  [partial; B3, C6, D1, D2, D3, E4-E6] Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model
+|   |   |-- src/                                50 files
 |   |-- evals/                                  15 files  [done; B3] Benchmark runners (eval:skills, eval:skills:db, eval:hybrid)
 |   |   |-- src/                                13 files
 |   |-- media/                                  21 files  [done; base, C2, C3] Asset analysis; website reader (C2) and guideline PDF reader (C3)
@@ -78,12 +78,12 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |   |-- src/                                25 files
 |   |-- recipes/                                 7 files  [base] Recipe library
 |   |   |-- src/                                 5 files
-|   |-- render/                                106 files  [partial; base, E (planned)] Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts, E2 per-scene previews and E3 UI previews are planned
-|   |   |-- fonts/                               6 files
+|   |-- render/                                117 files  [partial; base, E1, E2, E7 (part)] Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts and E2 per-scene previews done; E3 UI previews held for a decision; E7 narration and music not installed
+|   |   |-- fonts/                              13 files
 |   |   |-- remotion-compositions/               2 files
 |   |   |-- remotion-project/                    2 files
 |   |   |-- remotion-scene-graph/                2 files
-|   |   |-- src/                                92 files
+|   |   |-- src/                                96 files
 |   |-- router/                                  5 files  [base] Request router
 |   |   |-- src/                                 3 files
 |   |-- speech/                                  6 files  [base] Speech recognition

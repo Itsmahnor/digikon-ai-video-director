@@ -40,7 +40,13 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 | D1 | Video-type step: propose 2-3 types, user choice, audit record, node before treatment (bump `director-graph/5`), UI card | done | `5b5dd72` |
 | D2 | Needs analysis: Gate 1 requirements sheet (assets, fonts, sound) | done | `94c04de` |
 | D3 | Story from the chosen type | done (stub model only) | see git log; test `category-stories.test.ts` |
-| E to G | see `docs/PLAN_PHASES_D-G.md` | not started | |
+| E1 | Fonts: one OFL typeface per face (Inter variable, EB Garamond, JetBrains Mono) with licence records in `packages/render/fonts/fonts.json`; stages load the face the visual system chose; sans measured from its own file; 14 visual capabilities re-validated by real renders | done (Digikon approved the 2.7 MB download) | `cf6df75` |
+| E2 | Per-scene preview cached by a hash of job, asset bytes, fonts and sound; `POST /api/sessions/:id/scenes/:sceneId/preview` | done (real renders tested) | `8375a5a`, console test in the E2 follow-up commit |
+| E3 | Preview in the UI with a plain-language outcome | **held**: the plan says "before Gate 2", which would render before the second approval; Digikon was asked (decision card), no UI built yet | |
+| E4 | Temporary template picker (3 to 5 per scene, a hint only) | done (API and edit-plan prompt; no UI card yet) | `8d812e6` |
+| E5 | Editor advisory model review | done (stub model in demo; real model only with `EDITOR_MODEL_REVIEW=1`) | `fa268af` |
+| E6 | Change-request routing (look to Editor and gate 2, story to Director and gate 1, unsure asks one question) | done as routing only: `POST /api/sessions/:id/change-request` edits nothing; reopening a gate from a finished run is not wired | `b098856` |
+| E7 | Audio, no-install part: scene previews carry the scene's sound; a sound that cannot be made still stops Gate 2 (test) | partial. Not done: Kokoro narration and ACE-Step music (installs, need Digikon's yes). The kmilo library holds skill text only (MIT), no audio files, so there are no CC0 effects to adopt; effects stay synthesised and labelled generated | `52a05ea` |
 
 **Unproven, say so in every report:** (1) a real Postgres **server** run; (2) any **real LLM** run (every demo uses the stub model, `DemoClient`); (3) **human-written** benchmark queries (the 85 independent queries were written by the same agent that wrote the skills); (4) a **human spot-check** of the skill review; (5) the wizard has no automated browser test (Playwright is not installed here; it was checked by driving the built-in browser).
 
@@ -123,3 +129,5 @@ The full annotated tree (every directory, which plan step it belongs to, its sta
 odes.ts); DemoClient answers by category (saas, ecommerce, general promo) using only blocks the category's visual system allows. Unproven: how the real model uses the chosen type; that needs a real Claude run (off for now). Gates untouched.
 
 - Phase D close-out: the full suite at b476f65 showed 1 failing test in one run (output lost, so it is unidentified) and passed 116 files / 1813 tests with 0 failures on a re-run at the same commit. It did not reproduce; the known load flakes above are the likely cause, but that is unconfirmed.
+
+- Phase E notes (stub model only, no real Claude run): Inter is one variable font, so FFmpeg draws it at regular weight only (browsers pick the weight). Serif and mono layout still use generous width estimates because the compiled scene graph is validated with the same estimate; measuring them exactly made the quote block's overlap check fail. The Editor model review is off for a real model unless `EDITOR_MODEL_REVIEW=1`.

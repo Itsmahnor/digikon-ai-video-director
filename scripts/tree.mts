@@ -16,8 +16,8 @@ export interface Annotation { path: string; steps: string; status: Status; note:
  * Longest matching prefix wins; a directory with no entry of its own shows its nearest annotated parent.
  */
 export const ANNOTATIONS: Annotation[] = [
-  { path: "apps", steps: "base, B3, C2-C6, D1", status: "done", note: "The console: server, routes and browser UI" },
-  { path: "apps/console", steps: "base, B3, C2-C6, D1", status: "done", note: "Hono server + plain-JS UI (no build step)" },
+  { path: "apps", steps: "base, B3, C2-C6, D1, E2-E6", status: "done", note: "The console: server, routes and browser UI" },
+  { path: "apps/console", steps: "base, B3, C2-C6, D1, E2-E6", status: "done", note: "Hono server + plain-JS UI (no build step)" },
   { path: "apps/console/public", steps: "C4, C6, D1", status: "done", note: "UI: guided-intake wizard (C4), typed question card (C6), video-type card (D1)" },
   { path: "apps/console/src", steps: "B3, C2-C6, D1", status: "done", note: "Routes; kit-routes.ts holds the kit, website, guideline and question routes" },
   { path: "capabilities", steps: "base", status: "base", note: "Capability registry: what each renderer can really do, with validation evidence" },
@@ -36,13 +36,13 @@ export const ANNOTATIONS: Annotation[] = [
   { path: "knowledge", steps: "base", status: "base", note: "Directing, ad-playbook and platform-spec notes the retriever reads" },
   { path: "packages", steps: "base, A-D", status: "done", note: "Workspace packages" },
   { path: "packages/contracts", steps: "A2, B1, C1, C5, C6, D1, D2", status: "done", note: "Schemas: SkillRecord, ProjectKit, completeness, typed questions, video types, Gate 1 requirements" },
-  { path: "packages/director", steps: "B3, C6, D1, D2, D3", status: "partial", note: "Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model" },
+  { path: "packages/director", steps: "B3, C6, D1, D2, D3, E4-E6", status: "partial", note: "Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model" },
   { path: "packages/evals", steps: "B3", status: "done", note: "Benchmark runners (eval:skills, eval:skills:db, eval:hybrid)" },
   { path: "packages/media", steps: "base, C2, C3", status: "done", note: "Asset analysis; website reader (C2) and guideline PDF reader (C3)" },
   { path: "packages/qa", steps: "base", status: "base", note: "Video QA checks" },
   { path: "packages/rag", steps: "A2-A4, B3", status: "done", note: "Retrievers, skills importer, off-topic floor, database-backed retriever, stores" },
   { path: "packages/recipes", steps: "base", status: "base", note: "Recipe library" },
-  { path: "packages/render", steps: "base, E (planned)", status: "partial", note: "Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts, E2 per-scene previews and E3 UI previews are planned" },
+  { path: "packages/render", steps: "base, E1, E2, E7 (part)", status: "partial", note: "Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts and E2 per-scene previews done; E3 UI previews held for a decision; E7 narration and music not installed" },
   { path: "packages/router", steps: "base", status: "base", note: "Request router" },
   { path: "packages/speech", steps: "base", status: "base", note: "Speech recognition" },
   { path: "packages/templates", steps: "base, G (releases 2-3 planned)", status: "partial", note: "Template library tooling and release 1" },
