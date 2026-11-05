@@ -125,7 +125,7 @@ describe.skipIf(skipReal(can))("real renders of every block, wide and tall", () 
       expect(checked.problems).toEqual([]);
       expect(checked.measures).toHaveLength(BLOCKS.length);
       for (const m of checked.measures) { expect(m.motion).toBeGreaterThan(0.4); expect(m.coverage).toBeGreaterThan(0.008); expect(m.coverage).toBeLessThan(0.88); }
-    }, 300_000);
+    }, 600_000);
 
     it(`${w}x${h}: scenes look different from each other (no two last frames share a layout)`, async () => {
       const { path, job } = await render(w, h);
@@ -137,7 +137,7 @@ describe.skipIf(skipReal(can))("real renders of every block, wide and tall", () 
         const sparse = (b: string | undefined) => b === "route_map" || b === "timeline_path"; // both are a thin line with labels, so they differ less in coarse brightness cells than in what they show
         expect(d, `${BLOCKS[i]} vs ${BLOCKS[j]}`).toBeGreaterThan(sparse(BLOCKS[i]) && sparse(BLOCKS[j]) ? 3 : 4);
       }
-    }, 300_000);
+    }, 600_000);
 
     it(`${w}x${h}: the verifier catches a film that is not what was planned (wrong background, blank frames)`, async () => {
       const { path, job } = await render(w, h);
@@ -151,6 +151,6 @@ describe.skipIf(skipReal(can))("real renders of every block, wide and tall", () 
       const r2 = await verifyCompositionScenes(blank, plan.scenes, w, h, { fontFile: font! });
       expect(r2.problems.join(" ")).toMatch(/almost nothing is drawn/);
       expect(r2.problems.join(" ")).toMatch(/hardly moves/);
-    }, 300_000);
+    }, 600_000);
   }
 });

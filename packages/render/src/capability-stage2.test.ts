@@ -17,10 +17,10 @@ const reg = build();
 const codes = (r: CapabilityRegistry, id: string) => r.diagnosticsFor(id).map((d) => d.code);
 const clone = (id: string): Recipe => structuredClone(recipes.find((r) => r.recipe_id === id)!);
 
-describe("all 54 reconciled entries satisfy the ladder invariants", () => {
-  it("there are exactly 54: 40 recipes and 14 visual blocks", () => {
-    expect(reg.snapshot.capabilities.length).toBe(54);
-    expect(reg.snapshot.capabilities.filter((c) => c.variant_of !== null).length).toBe(14);
+describe("all 55 reconciled entries satisfy the ladder invariants", () => {
+  it("there are exactly 55: 40 recipes and 15 visual blocks", () => {
+    expect(reg.snapshot.capabilities.length).toBe(55);
+    expect(reg.snapshot.capabilities.filter((c) => c.variant_of !== null).length).toBe(15);
   });
   for (const c of reg.snapshot.capabilities) {
     it(`${c.capability_id}: status, evidence and hash are consistent`, () => {

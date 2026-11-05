@@ -48,8 +48,8 @@
   ],
   "status": "validated",
   "validated": {
-    "at": "2026-11-05T09:33:30.637Z",
-    "fingerprint": "f107f2519cdb55ab",
+    "at": "2026-11-05T10:20:08.860Z",
+    "fingerprint": "0d88e300af1ab44e",
     "remotion": "4.0.539",
     "browser": "chrome via remotion",
     "remotion_renderer": "4.0.539",
@@ -366,8 +366,73 @@
           "edge_ink": 0
         }
       ]
+    },
+    {
+      "at": "2026-11-05T09:33:30.637Z",
+      "fingerprint": "f107f2519cdb55ab",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "remotion_renderer": "4.0.539",
+      "ffmpeg": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+      "chrome": "156.0.4314.58",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "f364fcdfd4502d87",
+          "art_direction_hash": "c3aa39a53400555f",
+          "overlay_text": "Three days on the Atlantic coast."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "f364fcdfd4502d87",
+          "art_direction_hash": "c3aa39a53400555f",
+          "overlay_text": "Three days on the Atlantic coast."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "409c3a575b33af9a55357885d2c8cf39bc9c54660471f2a18fe4148f90da6059",
+          "bytes": 2440138,
+          "frames": 1350,
+          "film_scene": "S12 of a 15-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "5ab661302c40f6037f118cdcde29c4e2e31dd02166e1d1514ab614d8ff2fc221",
+          "bytes": 2295722,
+          "frames": 1350,
+          "film_scene": "S12 of a 15-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 15-scene film; background on the approved palette, 3% of the frame drawn, nothing on the frame edge, headline area inked, motion 3.7 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 15-scene film; background on the approved palette, 3% of the frame drawn, nothing on the frame edge, headline area inked, motion 3.7 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.029,
+          "motion": 3.74,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.028,
+          "motion": 3.68,
+          "edge_ink": 0
+        }
+      ]
     }
   ],
   "failure": null,
-  "record_hash": "631f3e469c733d35eeb6b403b5abb1717dca19d1949c2bbdbee490a776c388d6"
+  "record_hash": "720e7c20a2271d5d92d4b1e3c59695336b8454ea0280697676bc9794acde8256"
 }

@@ -13,8 +13,8 @@ const reg = build();
 const v = (r: CapabilityRegistry, id: string) => r.get(id)!.verification;
 
 describe("verification state on every capability", () => {
-  it("every one of the 54 entries carries a valid verification, and current_execution is always not_performed", () => {
-    expect(reg.snapshot.capabilities.length).toBe(54);
+  it("every one of the 55 entries carries a valid verification, and current_execution is always not_performed", () => {
+    expect(reg.snapshot.capabilities.length).toBe(55);
     for (const c of reg.snapshot.capabilities) {
       expect(CapabilityVerification.safeParse(c.verification).success, c.capability_id).toBe(true);
       expect(c.verification.current_execution).toBe("not_performed");

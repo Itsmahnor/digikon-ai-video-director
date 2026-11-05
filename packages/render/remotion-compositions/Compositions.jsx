@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SceneGraphLayer } from "../remotion-scene-graph/SceneGraph.jsx";
+import { SceneGraphScene } from "../remotion-scene-graph/SceneGraph.jsx";
 import { AbsoluteFill, Img, Sequence, cancelRender, continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // The scene-composition template. Every number here was planned and checked beforehand (packages/render/src/composition.ts); this only
@@ -548,8 +548,8 @@ const AssetLayer = ({ layer: l, frame, scene }) => {
 
 const AssetStage = () => null;
 
-// A composition: the plan's own layout, planned and validated into a scene graph (composition.ts), drawn by the scene-graph engine over this film's backdrop. display and body use the visual system's face; mono is the mono face.
-const Composed = ({ scene }) => <SceneGraphLayer graph={scene.geom.graph} palette={scene.palette} font_family={fam(scene)} fonts={{ display: fam(scene), body: fam(scene), mono: FACES.mono }} />;
+// A composition: the plan's own layout, planned and validated into a scene graph (composition.ts), drawn by the scene-graph engine over this film's backdrop (the graph scene's own background is made transparent here, so the scene-graph file itself stays unchanged: the template library's stored look vectors are keyed by its hash). display and body use the visual system's face; mono is the mono face.
+const Composed = ({ scene }) => (<div className="sg-clear" style={{ position: "absolute", inset: 0 }}><style>{`.sg-clear > div { background: transparent !important; }`}</style><SceneGraphScene graph={scene.geom.graph} palette={scene.palette} font_family={fam(scene)} fonts={{ display: fam(scene), body: fam(scene), mono: FACES.mono }} /></div>);
 
 const BLOCKS = { message_thread: MessageThread, ui_demo: UiDemo, process_flow: ProcessFlow, data_chart: DataChart, kinetic_type: KineticType, layered_cards: LayeredCards, end_card: EndCard, title_plate: TitlePlate, quote_statement: QuoteStatement, spec_callouts: SpecCallouts, split_panels: SplitPanels, route_map: RouteMap, timeline_path: TimelinePath, closing_signature: ClosingSignature, asset_stage: AssetStage, composition: Composed };
 const SELF_SET = new Set(["kinetic_type", "end_card", "title_plate", "quote_statement", "split_panels", "closing_signature", "composition"]);

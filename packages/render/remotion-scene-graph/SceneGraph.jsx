@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { AbsoluteFill, cancelRender, continueRender, delayRender, staticFile, useCurrentFrame } from "remotion";
 import { compileScene, maskClip, sampleScene } from "../src/scene-graph/compile.ts";
 
@@ -72,8 +72,8 @@ const useFaces = (faces) => {
   }, [handle]);
 };
 
-/** The graph's elements and camera, with no background of its own, so a film can lay it over its own backdrop (the composition block does). */
-export const SceneGraphLayer = ({ graph, palette, font_family, fonts }) => {
+export const SceneGraphScene = ({ graph, palette, font_family, fonts, font_faces }) => {
+  useFaces(font_faces);
   const frame = useCurrentFrame();
   const compiled = React.useMemo(() => compileScene(graph), [graph]);
   const sampled = sampleScene(compiled, frame);
@@ -82,19 +82,10 @@ export const SceneGraphLayer = ({ graph, palette, font_family, fonts }) => {
   for (const e of graph.elements) { const k = e.parent; if (!byParent.has(k)) byParent.set(k, []); byParent.get(k).push(e); }
   const cam = sampled.camera;
   return (
-    <AbsoluteFill style={{ overflow: "hidden" }}>
+    <AbsoluteFill style={{ background: palette.background, overflow: "hidden" }}>
       <AbsoluteFill style={{ transformOrigin: "50% 50%", transform: `translate(${cam.x}px, ${cam.y}px) scale(${cam.scale}) rotate(${cam.rotate}deg)` }}>
         {(byParent.get(null) ?? []).map((e) => <Node key={e.id} e={e} state={state} byParent={byParent} palette={palette} family={font_family} fonts={fonts} />)}
       </AbsoluteFill>
-    </AbsoluteFill>
-  );
-};
-
-export const SceneGraphScene = ({ graph, palette, font_family, fonts, font_faces }) => {
-  useFaces(font_faces);
-  return (
-    <AbsoluteFill style={{ background: palette.background, overflow: "hidden" }}>
-      <SceneGraphLayer graph={graph} palette={palette} font_family={font_family} fonts={fonts} />
     </AbsoluteFill>
   );
 };
