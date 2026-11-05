@@ -234,3 +234,31 @@ describe.skipIf(skipReal(can && !!remotionBrowser))("automatic capability learni
     expect(res.status).toBe(409);
   });
 });
+
+describe.skipIf(skipReal(can))("a preview of one scene through the console", () => {
+  it("is refused before both approvals, renders one scene after them, serves it, and serves the same scene from the cache the second time", async () => {
+    const app = build();
+    film = MIXED;
+    const early = (await body(await app.request("/api/sessions", { method: "POST" }))).id as string;
+    await app.request(`/api/sessions/${early}/route`, json({ text: "A 12 second YouTube explainer for my online course." }));
+    await sse(await app.request(`/api/sessions/${early}/direct`, json({})));
+    expect((await app.request(`/api/sessions/${early}/scenes/S01/preview`, json({ settings: SETTINGS }))).status, "nothing is rendered before the approvals").toBe(409);
+
+    const id = await approvedRun(app, MIXED);
+    const first = await app.request(`/api/sessions/${id}/scenes/S01/preview`, json({ settings: SETTINGS }));
+    const a = await body(first);
+    expect(first.status, JSON.stringify(a)).toBe(200);
+    expect(a).toMatchObject({ scene_id: "S01", cached: false, engine: "ffmpeg", sound: false });
+    const video = await app.request(a.video);
+    expect(video.status).toBe(200);
+    expect(video.headers.get("content-type")).toContain("video/mp4");
+    expect((await video.arrayBuffer()).byteLength).toBe(a.bytes);
+    const second = await body(await app.request(`/api/sessions/${id}/scenes/S01/preview`, json({ settings: SETTINGS })));
+    expect(second).toMatchObject({ cached: true, key: a.key, video: a.video });
+    // another scene is a different clip; a scene that is not in the plan is refused
+    const other = await body(await app.request(`/api/sessions/${id}/scenes/S02/preview`, json({ settings: SETTINGS })));
+    expect(other.key).not.toBe(a.key);
+    expect((await app.request(`/api/sessions/${id}/scenes/S99/preview`, json({ settings: SETTINGS }))).status).toBe(409);
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/preview/${"0".repeat(32)}.mp4`)).status).toBe(404);
+  });
+});
