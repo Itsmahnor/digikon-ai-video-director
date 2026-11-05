@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { planAudio } from "./audio.js";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -129,6 +130,25 @@ describe.skipIf(!hasReal)("Gate 2 is reached only by a production plan the rende
     expect(done.status).toBe("approved");
   });
 
+  it("a sound that cannot be made still stops Gate 2: the problem is shown to the model and the run escalates when it remains", async () => {
+    const { port } = realPort();
+    const withAudio: ProductionPort = { ...port, audio: (req) => planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.feel }, { tts: null }).unresolved.map((u) => `${u.scene_id}: ${u.detail}`) };
+    const crowd = learnStoryboard({ S03: { overlay: text("Everything in one place."), audio_cues: ["the crowd roars"] }, S04: { overlay: text("Your progress, at a glance.") }, S05: { overlay: text("Learn at your own pace.") } });
+    const llm = new ScriptedClient([ready, learnTreatment(), crowd, GOOD_EDIT, GOOD_EDIT]);
+    const g = build(llm, withAudio);
+    const gate1 = await g.invoke(learnInput, cfg("pg-sound"));
+    const after = await g.invoke(approveCurrent(gate1), cfg("pg-sound"));
+    expect(after.status).toBe("escalated");
+    expect(after.gate).toBeNull();
+    expect(after.productionPlan ?? null).toBeNull();
+    expect(after.escalation!.evidence.join(" ")).toContain("the crowd roars");
+    // and the same plan with a sound that can be made (a chime) reaches Gate 2
+    const chime = learnStoryboard({ S03: { overlay: text("Everything in one place."), audio_cues: ["a soft chime"] }, S04: { overlay: text("Your progress, at a glance.") }, S05: { overlay: text("Learn at your own pace.") } });
+    const g2 = build(new ScriptedClient([ready, learnTreatment(), chime, GOOD_EDIT]), withAudio);
+    const ok1 = await g2.invoke(learnInput, cfg("pg-sound-ok"));
+    const ok2 = await g2.invoke(approveCurrent(ok1), cfg("pg-sound-ok"));
+    expect((ok2.escalation?.evidence ?? []).join(" ")).not.toContain("names no sound that can be made"); // a chime is makeable, so audio is no reason to stop
+  });
   it("an unsupported plan cannot reach Gate 2: the model is shown the problems, and the run escalates when they remain", async () => {
     const { port } = realPort();
     const llm = new ScriptedClient([ready, learnTreatment(), learnStoryboard(), learnEdit, learnEdit]);

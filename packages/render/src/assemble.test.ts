@@ -10,7 +10,7 @@ import { probeFile } from "@digikon/media";
 import { cfg, deps, knowledge, root } from "../../director/src/fixtures.js";
 import {
   AdapterRegistry, DeliveryReport, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, findChrome, findRemotionBrowser, loadCapabilityRegistry, planAssembly, rawFrame, registryDir, renderAssembly,
-  renderScenePreview, scenePreviewKey, runRenderQa, saveDeliveryReport, loadDeliveryReport, type AssembleDeps, type LoadedRegistry, type RenderAdapter,
+  planAudio, renderScenePreview, scenePreviewKey, runRenderQa, saveDeliveryReport, loadDeliveryReport, type AssembleDeps, type LoadedRegistry, type RenderAdapter,
 } from "./index.js";
 import { realPrerequisites, skipReal } from "./test-env.js";
 
@@ -434,6 +434,25 @@ describe.skipIf(skipReal(can))("a preview of one scene is cached by what shapes 
     expect(new Set(["S01", "S02", "S03", "S04"].map((id) => key(a, id))).size).toBe(4);
   });
 
+  it("lays the scene's own sound under its preview, labelled generated, and the sound is part of the key", async () => {
+    // a chime is asked for in S01 (a plan whose own audio recipe has no renderer here cannot be previewed, so the sound plan is made from the storyboard directly)
+    const caps = { tts: null };
+    const base = planOf(mixed);
+    const plan = { ...base, audio: planAudio({ scenes: mixed.handoff.storyboard.scenes.map((s) => (s.scene_id === "S01" ? { ...s, audio_cues: ["a soft chime"] } : s)), assets: mixed.handoff.assets, feel: "calm" }, caps) };
+    const silent = await renderScenePreview(plan, "S01", { cacheDir: join(tmp, "scene-previews-silent"), fontFile: font! });
+    const sounded = await renderScenePreview(plan, "S01", { cacheDir: join(tmp, "scene-previews-sound"), fontFile: font!, audio: caps });
+    if (!silent.ok || !sounded.ok) throw new Error(JSON.stringify([silent, sounded]));
+    expect([silent.sound, sounded.sound]).toEqual([false, true]);
+    expect(silent.key).not.toBe(sounded.key);
+    expect(sounded.notes.join(" ")).toContain("synthesised on this computer"); // the chime is generated, and says so
+    const streams = (p: string) => execFileSync("ffprobe", ["-v", "error", "-show_entries", "stream=codec_type", "-of", "csv=p=0", p]).toString().trim().split(/\s+/).sort();
+    expect(streams(silent.path)).toEqual(["video"]);
+    expect(streams(sounded.path)).toEqual(["audio", "video"]);
+    // a scene with no sound of its own and no music has nothing to mix
+    const other = await renderScenePreview(plan, "S03", { cacheDir: join(tmp, "scene-previews-sound"), fontFile: font!, audio: caps });
+    if (!other.ok) throw new Error(other.reason);
+    expect(other.sound).toBe(false);
+  });
   it("a different font file is a different key", () => {
     const plan = planOf(mixed);
     expect(scenePreviewKey(plan, "S01", font!)).not.toBe(scenePreviewKey(plan, "S01", process.execPath));

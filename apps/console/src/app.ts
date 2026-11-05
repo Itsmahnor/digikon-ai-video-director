@@ -1011,9 +1011,9 @@ export function createApp(ctx: AppContext) {
     const p = await prepare(s, body.settings);
     if (!p.assembly) throw new HttpError(409, "no_assembly", "Nothing here can plan a scene preview yet: there is no render engine on this machine.");
     if (!p.assembly.ok) return c.json({ error: "cannot_plan", reasons: plainReasons(p.assembly.reasons.map((r) => scrub(r, scrubRoots(s)))) }, 409);
-    const r = await renderScenePreview(p.assembly.plan, sceneId, { cacheDir: join(p.dirs.out, "scene-previews"), fontFile: ctx.renderFont });
+    const r = await renderScenePreview(p.assembly.plan, sceneId, { cacheDir: join(p.dirs.out, "scene-previews"), fontFile: ctx.renderFont, audio: ctx.audio ?? null });
     if (!r.ok) return c.json({ error: "scene_not_renderable", scene_id: sceneId, reason: scrub(r.reason, scrubRoots(s)) }, 409);
-    return c.json({ scene_id: sceneId, key: r.key, cached: r.cached, engine: r.engine, notes: r.notes.map((n) => scrub(n, scrubRoots(s))), bytes: r.bytes, video: `/api/sessions/${s.id}/scenes/${sceneId}/preview/${r.key.slice(0, 32)}.mp4` });
+    return c.json({ scene_id: sceneId, key: r.key, cached: r.cached, engine: r.engine, notes: r.notes.map((n) => scrub(n, scrubRoots(s))), bytes: r.bytes, sound: r.sound, video: `/api/sessions/${s.id}/scenes/${sceneId}/preview/${r.key.slice(0, 32)}.mp4` });
   });
   app.get("/api/sessions/:id/scenes/:sceneId/preview/:file", async (c) => {
     const s = session(c.req.param("id"));
