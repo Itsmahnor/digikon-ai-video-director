@@ -210,6 +210,21 @@ describe("routing and the Director run", () => {
     expect((await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" })).status).toBe(409); // cannot approve twice
   });
 
+  it("offers 3 to 5 templates per scene, takes a pick or a skip as a hint only, and refuses a template that was not offered or a pick after gate 1", async () => {
+    const { app, id } = await atGate1();
+    const list = await decided(await app.request(`/api/sessions/${id}/scenes/S01/templates`));
+    expect(list).toMatchObject({ scene_id: "S01", can_pick: true, temporary: true, picked: null });
+    expect(list.options.length).toBeGreaterThanOrEqual(3);
+    expect(list.options.length).toBeLessThanOrEqual(5);
+    const pick = list.options[0].recipe_id;
+    expect(await decided(await app.request(`/api/sessions/${id}/scenes/S01/template-hint`, json({ recipe_id: pick })))).toMatchObject({ picked: pick, hint_only: true });
+    expect((await decided(await app.request(`/api/sessions/${id}/scenes/S01/templates`))).picked).toBe(pick);
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/template-hint`, json({ recipe_id: "no-such-recipe" }))).status).toBe(400);
+    expect(await decided(await app.request(`/api/sessions/${id}/scenes/S01/template-hint`, json({ recipe_id: null })))).toMatchObject({ picked: null });
+    expect((await app.request(`/api/sessions/${id}/scenes/S99/templates`)).status).toBe(404);
+    await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" });
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/template-hint`, json({ recipe_id: pick }))).status).toBe(409); // the edit plan is already written
+  });
   it("routes a change request by what it changes, and a look change never alters the approved storyboard", async () => {
     const { app, id } = await atGate1();
     const ask = (text: string) => app.request(`/api/sessions/${id}/change-request`, json({ text }));

@@ -16,3 +16,4 @@ export * from "./gateway.js";
 export * from "./video-types.js";
 export * from "./requirements.js";
 export * from "./change-request.js";
+export * from "./template-picker.js";

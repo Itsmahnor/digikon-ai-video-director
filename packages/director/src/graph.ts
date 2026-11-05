@@ -56,6 +56,8 @@ export const DirectorState = Annotation.Root({
   approvals: Annotation<ApprovalRecord[]>({ reducer: concat, default: () => [] }),
   /** A change request on its way back to the step that must act on it. */
   pendingRevision: Annotation<{ stage: ApprovalStage; notes: string } | null>(),
+  /** TEMPORARY: recipe ids the user picked per scene in the template picker. A hint to the edit plan only. */
+  templateHints: Annotation<Record<string, string> | undefined>(),
   /** Change requests used so far at each gate. */
   revisions: Annotation<Counts>({ reducer: (_old, next) => next, default: () => ({ storyboard: 0, edit_plan: 0 }) }),
   /** Category video types proposed after intake. */
@@ -273,7 +275,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const rev = s.pendingRevision?.stage === "edit_plan" ? s.pendingRevision : null;
       const previous = s.editPlan;
       const version = rev && previous ? previous.version + 1 : 1;
-      const r = await editPlanNode(deps, s.project, s.assets, s.scenePlan!, version, rev && previous ? { notes: rev.notes, previous } : undefined, s.treatmentDoc ?? undefined);
+      const r = await editPlanNode(deps, s.project, s.assets, s.scenePlan!, version, rev && previous ? { notes: rev.notes, previous } : undefined, s.treatmentDoc ?? undefined, s.templateHints);
       if ("escalation" in r && r.escalation) {
         return { escalation: r.escalation, pendingRevision: null, gate: null, status: "escalated" as const, skillsUsed: r.skills, referencesUsed: r.references, trace: ["edit_plan: escalated (no recipes available)"] };
       }

@@ -443,7 +443,7 @@ export function editIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "re
   return issues;
 }
 
-export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1, revision?: Revision<EditPlan>, treatment?: Treatment) {
+export async function editPlanNode(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan, version = 1, revision?: Revision<EditPlan>, treatment?: Treatment, templateHints?: Record<string, string>) {
   const { system, skills, references } = deps.skills.systemFor("edit_plan");
   const candidates = await candidateRecipes(deps, project, assets, plan);
   if (candidates.length === 0) {
@@ -462,6 +462,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets), visual_block: s.visual?.block ?? null, visual_purpose: s.visual_purpose, ...(s.asset_refs?.length ? { pictures: s.asset_refs.map((r) => `${r.asset_id} as ${r.role}, ${r.animation}${r.mandatory ? ", mandatory" : ""}`) } : {}) })))),
     section("Directing principles", formatHits(principles)),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
+    ...(templateHints && Object.keys(templateHints).length ? [section("User template hints (a hint only: use one only when it is among the candidate recipes above, fits that scene and stays inside its limits; otherwise ignore it)", json(templateHints))] : []),
     `Return uses as {use_id (U01, U02, ...), scene_id, recipe_id, params, rationale}. Omit a parameter to use its default. Each non-final scene whose transition_out is crossfade, dip_to_black or wipe needs the matching transition recipe. Respect max uses per film across the whole plan. Add loudness-normalise once on the last scene only if it is listed among the candidate recipes above (it is listed only when the storyboard has voiceover, audio cues or audio assets). Never plan an audio operation for a brief that asked for no voiceover, music or sound effects. Do not request any operation that is not a candidate recipe. A scene with a visual_block is drawn entirely by the scene-composition recipe (no parameters): give it that one use and no text, camera or end-card recipe; give its transition recipe as usual. A scene without a visual_block never uses scene-composition.`,
     ...(revision ? [revisionSection("edit plan", revision)] : []),
   ].join("\n\n");

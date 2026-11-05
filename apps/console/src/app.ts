@@ -17,6 +17,7 @@ import {
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
   type DirectorStateType, type ProductionPort, type LlmClient, type SkillLibrary,
   classifyChange,
+  templateOptions,
 } from "@digikon/director";
 import {
   AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
@@ -936,6 +937,34 @@ export function createApp(ctx: AppContext) {
   };
 
   /** Runs the Editor on the verified handoff. Deterministic checks only: no model is called. */
+  /**
+   * TEMPORARY template picker: 3 to 5 recipes for a scene from retrieval, and the user's pick (or skip). A pick is stored as a hint for the edit plan only, so it can be made
+   * only while the storyboard is waiting at gate 1 (before the edit plan is written), cannot name a recipe that is not offered, and changes no plan or approval.
+   */
+  const sceneOf = async (s: Session, sceneId: string) => {
+    if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no storyboard yet.");
+    const config = { configurable: { thread_id: s.threadId } };
+    const state = (await s.graph.getState(config)).values as DirectorStateType;
+    const scene = state.scenePlan?.scenes.find((x) => x.scene_id === sceneId);
+    if (!state.scenePlan || !scene) throw new HttpError(404, "no_scene", `There is no scene ${sceneId} in the storyboard.`);
+    return { config, state, scene, options: await templateOptions({ retriever: liveRetriever, recipes: ctx.recipes }, state.project, state.assets, scene) };
+  };
+  app.get("/api/sessions/:id/scenes/:sceneId/templates", async (c) => {
+    const s = session(c.req.param("id"));
+    const { state, options } = await sceneOf(s, c.req.param("sceneId"));
+    return c.json({ scene_id: c.req.param("sceneId"), options, picked: state.templateHints?.[c.req.param("sceneId")] ?? null, can_pick: state.status === "awaiting_approval" && state.gate === "storyboard", temporary: true });
+  });
+  app.post("/api/sessions/:id/scenes/:sceneId/template-hint", async (c) => {
+    const s = session(c.req.param("id"));
+    const body = z.object({ recipe_id: z.string().max(120).nullable() }).parse(await c.req.json().catch(() => ({})));
+    const { config, state, options } = await sceneOf(s, c.req.param("sceneId"));
+    if (state.status !== "awaiting_approval" || state.gate !== "storyboard") throw new HttpError(409, "too_late", "A template can only be suggested while the storyboard is waiting for your approval, before the edit plan is written.");
+    if (body.recipe_id !== null && !options.some((o) => o.recipe_id === body.recipe_id)) throw new HttpError(400, "not_offered", "That template is not one of the options offered for this scene.");
+    const next = { ...(state.templateHints ?? {}) };
+    if (body.recipe_id === null) delete next[c.req.param("sceneId")]; else next[c.req.param("sceneId")] = body.recipe_id;
+    await s.graph!.updateState(config, { templateHints: next });
+    return c.json({ scene_id: c.req.param("sceneId"), picked: body.recipe_id, hint_only: true });
+  });
   /**
    * Where a change request goes: a look change to the Editor (gate 2 only), a story change to the Director (gate 1), and one question when it is unclear. It only decides the
    * route: it edits no plan and no approval, and the approved storyboard (version and hash) is returned as it was, before and after.
