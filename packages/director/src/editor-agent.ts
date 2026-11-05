@@ -324,7 +324,7 @@ export async function runEditor(raw: unknown, deps: EditorDeps): Promise<EditorR
     const review = await modelReview(h, f, skillNames, deps);
     conflicts = [...conflicts, ...review.conflicts];
     revision_requests = [...revision_requests, ...review.revision_requests];
-    notes.push(...review.notes);
+    notes.push(...review.notes, `advisory model review ran (it cannot change an operation): ${review.conflicts.length} conflict(s) and ${review.revision_requests.length} revision request(s) added`);
   }
 
   const status = revision_requests.length ? "needs_director_revision" : conflicts.length ? "blocked" : "ready";

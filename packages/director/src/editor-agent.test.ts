@@ -10,6 +10,7 @@ import { RecipeLibrary, resolveParams } from "@digikon/recipes";
 import {
   EDITOR_SKILLS, NO_RENDERERS, RunStore, ScriptedClient, SkillLibrary, approveCurrent, buildDirectorGraph, buildHandoff, checkEditorOutput, planEditorWork,
   runEditor, type DirectorStateType, type EditorDeps, type RendererRegistry,
+  DemoClient,
 } from "./index.js";
 import { cfg, deps, knowledge, learnEdit, learnInput, learnStoryboard, learnTreatment, recipes as allRecipes, root } from "./fixtures.js";
 
@@ -388,7 +389,20 @@ describe("the optional model review", () => {
     const t = await approved("e-nollm");
     const a = await must(t.handoff, t.editor);
     const b = await must(t.handoff, { ...t.editor, llm: new ScriptedClient([{ conflicts: [], revision_requests: [] }]) });
-    expect(JSON.stringify(b.output)).toBe(JSON.stringify(a.output));
+    // the model is advisory: the operations, the verdict and the findings are the same; the only difference is the note that a review ran
+    expect(JSON.stringify(b.output.operations)).toBe(JSON.stringify(a.output.operations));
+    expect([b.output.status, b.output.conflicts, b.output.revision_requests]).toEqual([a.output.status, a.output.conflicts, a.output.revision_requests]);
+    const extra = b.output.execution.notes.filter((n) => !a.output.execution.notes.includes(n));
+    expect(extra).toEqual(["advisory model review ran (it cannot change an operation): 0 conflict(s) and 0 revision request(s) added"]);
+  });
+
+  it("works with the stub (demo) model, which has no opinions, and the Editor skills still reach provenance", async () => {
+    const t = await approved("e-demo");
+    const a = await must(t.handoff, t.editor);
+    const b = await must(t.handoff, { ...t.editor, llm: new DemoClient() });
+    expect(JSON.stringify(b.output.operations)).toBe(JSON.stringify(a.output.operations));
+    expect(b.output.provenance.skills).toEqual(a.output.provenance.skills);
+    expect(b.output.provenance.skills.length).toBeGreaterThan(0);
   });
 });
 
