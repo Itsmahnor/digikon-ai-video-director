@@ -3,7 +3,7 @@ import { completeness, emptyKit, provide, skip, type KitField, type ProjectKit }
 
 // The wizard's logic lives in a plain browser module with no DOM at import time, so it is tested here in Node.
 const W = (await import(new URL("../public/wizard.js", import.meta.url).href)) as any;
-const { STEPS, stepStatus, canSkipStep, parseColours, parseList, fileProblem, composePrompt, factsFromKit, firstOpenStep, GUIDELINE_MAX_BYTES } = W;
+const { STEPS, stepStatus, canSkipStep, parseColours, parseList, fileProblem, composePrompt, factsFromKit, firstOpenStep, GUIDELINE_MAX_BYTES, kitSummary, stepLevel, FIELD_LABELS } = W;
 
 const step = (id: string) => STEPS.find((s: any) => s.id === id);
 const kitWith = (fields: Partial<Record<KitField, unknown>>, category: ProjectKit["video_category"] = null) => Object.entries(fields).reduce((k, [f, v]) => provide(k, f as KitField, v), emptyKit("k", { video_category: category }));
@@ -91,3 +91,41 @@ describe("wizard: what it hands to the request", () => {
     expect(factsFromKit(emptyKit("k"))).toEqual([]);
   });
 });
+
+describe("wizard: the kit as one readiness view", () => {
+  it("groups every field as required, recommended or optional and says what is still needed", () => {
+    const s = kitSummary(completeness(emptyKit("k")));
+    expect(s.groups.required.map((r: any) => r.field)).toEqual(["goal", "audience", "platform"]);
+    expect(s.groups.required.every((r: any) => r.status === "needed")).toBe(true);
+    expect(s.ready).toBe(false);
+    expect(s.verdict).toBe("Still needed before I can plan: Goal, Audience, Platform.");
+    expect(Object.values(s.groups).flat()).toHaveLength(11); // every kit field appears once
+    expect(s.counts.required).toEqual({ done: 0, total: 3 });
+  });
+  it("is ready when the required fields are in; a skipped optional field is a choice, not a gap", () => {
+    let k = kitWith(REQ);
+    k = skip(k, "brand.fonts");
+    const s = kitSummary(completeness(k));
+    expect(s.ready).toBe(true);
+    expect(s.verdict).toBe("Everything required is in. You can send it to the Director.");
+    expect(s.groups.optional.find((r: any) => r.field === "brand.fonts").status).toBe("skipped");
+    expect(s.groups.recommended.find((r: any) => r.field === "brand.logo").status).toBe("open");
+  });
+  it("asks the user to confirm what was read from a website before it is used", () => {
+    const k = provide(kitWith(REQ), "brand.colours", ["#112233"], "website");
+    const s = kitSummary(completeness(k));
+    expect(s.confirm).toEqual(["Brand colours"]);
+    expect(s.verdict).toContain("Confirm what was found for: Brand colours");
+    expect(s.groups.recommended.find((r: any) => r.field === "brand.colours").needsConfirmation).toBe(true);
+  });
+  it("a step shows the strongest level among its fields, and every field has a plain name", () => {
+    const c = completeness(emptyKit("k"));
+    expect([stepLevel(step("goal"), c), stepLevel(step("brand"), c), stepLevel(step("website"), c)]).toEqual(["required", "recommended", "optional"]);
+    for (const f of Object.values(s2(c))) expect(typeof FIELD_LABELS[f as string]).toBe("string");
+  });
+  it("the recommended level follows the video category (a shop wants pictures and an offer)", () => {
+    const s = kitSummary(completeness({ ...emptyKit("k"), video_category: "ecommerce" } as ProjectKit));
+    expect(s.groups.recommended.map((r: any) => r.field)).toEqual(expect.arrayContaining(["assets", "facts", "website"]));
+  });
+});
+const s2 = (c: { items: { field: string }[] }) => c.items.map((i) => i.field);

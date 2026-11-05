@@ -85,6 +85,36 @@ export function firstOpenStep(completeness) {
 export const nextStepIndex = (i) => Math.min(STEPS.length - 1, i + 1);
 export const prevStepIndex = (i) => Math.max(0, i - 1);
 
+/** Plain names for the kit fields, as the user knows them. */
+export const FIELD_LABELS = {
+  goal: "Goal", audience: "Audience", platform: "Platform", "brand.colours": "Brand colours", "brand.fonts": "Fonts", "brand.logo": "Logo", "brand.tone": "Tone of voice",
+  website: "Website", guideline: "Brand guideline", facts: "Facts about the business", assets: "Your files",
+};
+const LEVEL_ORDER = ["required", "recommended", "optional"];
+export const stepIndexOfField = (field) => { const i = STEPS.findIndex((s) => s.fields.includes(field)); return i < 0 ? null : i; };
+/** The strongest level among a step's fields, so the step can say whether it is required. */
+export function stepLevel(step, completeness) {
+  const levels = step.fields.map((f) => item(completeness, f)?.level ?? "optional");
+  return LEVEL_ORDER.find((l) => levels.includes(l)) ?? "optional";
+}
+/** The kit as one readiness view: every field in its group (required, recommended, optional) with what is known, and a one-line verdict. No model, no guessing. */
+export function kitSummary(completeness) {
+  const groups = { required: [], recommended: [], optional: [] };
+  for (const it of completeness.items) {
+    const status = it.state === "provided" ? "provided" : it.state === "skipped" ? "skipped" : it.level === "required" ? "needed" : "open";
+    groups[it.level].push({ field: it.field, label: FIELD_LABELS[it.field] ?? it.field, status, needsConfirmation: it.needs_confirmation, step: stepIndexOfField(it.field) });
+  }
+  const needed = groups.required.filter((r) => r.status !== "provided").map((r) => r.label);
+  const confirm = completeness.items.filter((i) => i.needs_confirmation).map((i) => FIELD_LABELS[i.field] ?? i.field);
+  const n = (g, s) => groups[g].filter((r) => r.status === s).length;
+  const verdict = needed.length
+    ? `Still needed before I can plan: ${needed.join(", ")}.`
+    : confirm.length ? `Everything required is in. Confirm what was found for: ${confirm.join(", ")}.` : "Everything required is in. You can send it to the Director.";
+  return {
+    groups, ready: completeness.ready && !needed.length, verdict, needed, confirm,
+    counts: { required: { done: n("required", "provided"), total: groups.required.length }, recommended: { done: n("recommended", "provided"), skipped: n("recommended", "skipped"), total: groups.recommended.length }, optional: { done: n("optional", "provided"), skipped: n("optional", "skipped"), total: groups.optional.length } },
+  };
+}
 // ---------------------------------------------------------------- DOM
 const KEY = "digikon.wizard.v1";
 const store = {
@@ -167,16 +197,22 @@ export function mountWizard(deps) {
     const facts = ex.facts.map((f) => `<label class="wz-cand wide"><input type="checkbox" data-kind="fact" value="${esc(f.id)}">${esc(f.text)}</label>`).join("");
     return `<div class="wz-found" role="group" aria-label="Found on ${esc(ex.from)}"><p><strong>Found in ${esc(ex.source === "website" ? "the website" : "the guideline")}.</strong> <span class="hint">Nothing is used until you tick it and press Use selected.</span></p>
       ${sw ? `<p class="hint">Colours</p><div class="wz-cands">${sw}</div>` : ""}${fonts ? `<p class="hint">Fonts</p><div class="wz-cands">${fonts}</div>` : ""}${facts ? `<p class="hint">Possible facts about the business</p><div class="wz-cands">${facts}</div>` : ""}
-      <button type="button" class="ghost" data-wz="confirm" data-source="${esc(ex.source)}">Use selected</button></div>`;
+      <div class="wz-row"><button type="button" class="ghost" data-wz="tick-all">Tick all</button><button type="button" class="ghost" data-wz="tick-none">Clear</button><button type="button" class="primary sm" data-wz="confirm" data-source="${esc(ex.source)}">Use selected</button></div></div>`;
   }
 
   const saved = () => (w.brands.length ? `<div class="wz-saved"><label class="field-label" for="wz-saved-brand">Welcome back? Start from a saved brand</label><div class="wz-row"><select id="wz-saved-brand"><option value="">Choose a saved brand...</option>${w.brands.map((b) => `<option value="${esc(b.brand_id)}">${esc(b.name)}</option>`).join("")}</select><button type="button" class="ghost" data-wz="load-brand">Use it</button></div></div>` : "");
 
+  const STATUS_TEXT = { provided: "Provided", skipped: "Skipped", needed: "Needed", open: "Not answered" };
+  function summaryHtml(open) {
+    const s = kitSummary(comp());
+    const group = (g, title) => `<div class="wz-group"><h4>${title} <span class="hint">${s.counts[g].done} of ${s.counts[g].total} provided${s.counts[g].skipped ? `, ${s.counts[g].skipped} skipped` : ""}</span></h4><ul>${s.groups[g].map((r) => `<li class="${r.status}"><span class="wz-st ${r.status}">${STATUS_TEXT[r.status]}</span> ${r.step === null ? esc(r.label) : `<button type="button" class="wz-link" data-wz="goto" data-i="${r.step}">${esc(r.label)}</button>`}${r.needsConfirmation ? ' <span class="wz-st warn">Confirm what was found</span>' : ""}</li>`).join("")}</ul></div>`;
+    return `<details class="wz-summary" ${open ? "open" : ""}><summary><span class="wz-st ${s.ready ? "provided" : "needed"}">${s.ready ? "Ready" : "Not ready"}</span> Your kit: ${esc(s.verdict)}</summary>${group("required", "Required")}${group("recommended", "Recommended")}${group("optional", "Optional")}<p class="hint">Skipping is a choice, not a gap: I will use neutral choices for anything you skip and say so. Facts you add in the box below the wizard count too.</p></details>`;
+  }
   function render() {
     if (!w.view) return;
     const step = STEPS[w.idx], last = w.idx === STEPS.length - 1, canSkip = canSkipStep(step, comp());
     root.hidden = false;
-    root.querySelector("#wz-body").innerHTML = `${w.idx === 0 ? saved() : ""}<h3 class="wz-title">${esc(step.title)} <span class="hint">step ${w.idx + 1} of ${STEPS.length}${canSkip ? "" : ", required"}</span></h3>${bodies[step.id]()}<p class="wz-error" id="wz-error" role="alert">${esc(w.error)}</p>`;
+    root.querySelector("#wz-body").innerHTML = `${w.idx === 0 ? saved() : ""}<h3 class="wz-title">${esc(step.title)} <span class="wz-level ${stepLevel(step, comp())}">${stepLevel(step, comp())}</span> <span class="hint">step ${w.idx + 1} of ${STEPS.length}</span></h3>${bodies[step.id]()}<p class="wz-error" id="wz-error" role="alert">${esc(w.error)}</p>${summaryHtml(last)}`;
     root.querySelector("#wz-steps").innerHTML = chips();
     root.querySelector("#wz-progress-wrap").innerHTML = progress();
     root.querySelector("#wz-back").disabled = w.idx === 0 || w.busy;
@@ -231,6 +267,7 @@ export function mountWizard(deps) {
   root.addEventListener("click", (e) => {
     const b = e.target.closest("[data-wz]"); if (!b || w.busy) return;
     const a = b.dataset.wz;
+    if (a === "tick-all" || a === "tick-none") { root.querySelectorAll(".wz-found input[type=checkbox]").forEach((c) => { c.checked = a === "tick-all"; }); return; }
     guarded(async () => {
       if (a === "goto") { await saveStep().catch(() => {}); await go(Number(b.dataset.i)); }
       else if (a === "back") { await saveStep().catch(() => {}); await go(prevStepIndex(w.idx)); }

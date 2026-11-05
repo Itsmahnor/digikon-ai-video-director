@@ -289,3 +289,52 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
 .video-type-option .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .video-type-option .desc { font-size: 13px; color: var(--text); margin-bottom: 4px; }
 .video-type-option .ex { font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* kit readiness (required / recommended / optional) */
+.wz-level { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line-strong); vertical-align: middle; }
+.wz-level.required { color: var(--rose); border-color: rgba(251, 113, 133, .5); }
+.wz-level.recommended { color: var(--amber); border-color: rgba(251, 191, 36, .45); }
+.wz-level.optional { color: var(--muted); }
+.wz-summary { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; background: rgba(255, 255, 255, .02); }
+.wz-summary > summary { cursor: pointer; padding: 10px 0; font-size: 13.5px; line-height: 1.4; list-style-position: inside; }
+.wz-summary > summary:focus-visible, .wz-link:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 6px; }
+.wz-group { margin: 6px 0 10px; }
+.wz-group h4 { font-size: 12.5px; margin: 0 0 4px; text-transform: uppercase; letter-spacing: .05em; }
+.wz-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.wz-group li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13.5px; }
+.wz-st { display: inline-block; min-width: 86px; text-align: center; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--line); color: var(--muted); }
+.wz-st.provided { background: rgba(52, 211, 153, .16); color: var(--green); }
+.wz-st.skipped { background: rgba(251, 191, 36, .14); color: var(--amber); }
+.wz-st.needed, .wz-st.warn { background: rgba(251, 113, 133, .16); color: var(--rose); }
+.wz-link { background: none; border: 0; padding: 4px 2px; min-height: 28px; color: var(--text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+.wz-found .wz-row { margin-top: 8px; }
+select { color-scheme: dark; }
+@media (max-width: 560px) { .wz-st { min-width: 0; } .wz-group li { font-size: 14px; } }
+
+/* one look for every text field, dropdown and file picker in the console (they were browser defaults) */
+input[type="text"], input[type="url"], input[type="search"], input[type="number"], input:not([type]), select {
+  background: rgba(0, 0, 0, .28); color: var(--text); border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 12px; min-height: 42px; font: inherit; line-height: 1.4;
+  transition: border-color .2s, box-shadow .2s;
+}
+input::placeholder { color: var(--faint); }
+input[type="text"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="number"]:focus, input:not([type]):focus, select:focus { outline: none; border-color: rgba(124, 92, 255, .7); box-shadow: 0 0 0 4px rgba(124, 92, 255, .15); }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 34px; }
+select option { background: var(--panel-solid, #151a2b); color: var(--text); }
+input[type="file"] { color: var(--muted); font: inherit; font-size: 13px; }
+input[type="file"]::file-selector-button { background: var(--line); color: var(--text); border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 14px; margin-right: 10px; font: inherit; cursor: pointer; }
+input[type="file"]::file-selector-button:hover { background: var(--line-strong); }
+input[type="checkbox"] { accent-color: var(--violet); width: 18px; height: 18px; }
+.wizard .field-label { margin-top: 4px; }
+
+/* phone width: a grid track of 1fr will not shrink below its widest content, so the page scrolled sideways */
+@media (max-width: 960px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.grid > * { min-width: 0; }
+@media (max-width: 560px) { .panel { padding: 16px; } .wz-head .hint { flex-basis: 100%; } .panel-head { flex-wrap: wrap; gap: 6px; } }
+input, select, textarea { max-width: 100%; box-sizing: border-box; }
+#video-category { width: 100%; }
+html, body { overflow-x: clip; } /* the decorative aurora layer is wider than the screen on purpose */
+.why { margin-top: 6px; font-size: 13.5px; }
+.why summary { cursor: pointer; color: var(--muted); }
+.why ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; color: var(--text); }
+/* on a phone the sticky approval bar would cover the plan it is asking about: it flows after the plan instead, with the buttons full width */
+@media (max-width: 700px) { .approve-bar { position: static; } .approve-bar.gate .row { width: 100%; margin-left: 0; } .approve-bar.gate .row > button { flex: 1 1 auto; } }
