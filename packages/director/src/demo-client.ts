@@ -220,7 +220,7 @@ export class DemoClient implements LlmClient {
             overlay: null, transition_out: "cut",
           };
         }),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on free trial call to action", visual: { block: "end_card", wordmark: null, button: "Start free trial", subline: "Works with Google Calendar and Outlook", camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Trial sign-up end card"), overlay: { text: "Start your free trial today", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on free trial call to action", visual: { block: "end_card", wordmark: null, button: "Start free trial", subline: "Works with Google Calendar and Outlook", camera: "push_in", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "slow_push_in", "Trial sign-up end card"), overlay: { text: "Start your free trial today", safe_area: "platform_safe" }, transition_out: "cut" },
       ];
     } else if (category === "ecommerce") {
       const hookVis = hookVideo.asset_ids.length || !this.opts.creative ? {} : {
@@ -245,7 +245,7 @@ export class DemoClient implements LlmClient {
             overlay: null, transition_out: "cut",
           };
         }),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on store visit call to action", visual: { block: "end_card", wordmark: null, button: "Visit store today", subline: "Available in all sizes", camera: "static", reveal: "none", backdrop: "flat" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Store visit end card"), overlay: { text: "Visit store today", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on store visit call to action", visual: { block: "end_card", wordmark: null, button: "Visit store today", subline: "Available in all sizes", camera: "push_in", reveal: "none", backdrop: "flat" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "slow_push_in", "Store visit end card"), overlay: { text: "Visit store today", safe_area: "platform_safe" }, transition_out: "cut" },
       ];
     } else {
       // General promo
@@ -271,11 +271,12 @@ export class DemoClient implements LlmClient {
             overlay: this.opts.creative && !v.asset_ids.length && i % 2 ? { text: "Fresh to the last cup", safe_area: "platform_safe" } : null, transition_out: "cut",
           };
         }),
-        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on invitation to order", visual: { block: "closing_signature", wordmark: null, action: "Order your first bag", subline: null, camera: "static", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "static", "Brand end card"), overlay: { text: "Order your first bag", safe_area: "platform_safe" }, transition_out: "cut" },
+        { scene_id: `S${String(middleScenes.length + 2).padStart(2, "0")}`, purpose: "Call to action", ...(this.opts.creative ? { visual_purpose: "Close on invitation to order", visual: { block: "closing_signature", wordmark: null, action: "Order your first bag", subline: null, camera: "push_in", reveal: "none", backdrop: "gradient" } } : {}), duration_seconds: ctaDur, asset_ids: [], required_assets: [{ need: "End card graphics", kind: "graphics", availability: "generate_graphics" }], shot: shot("wide", "slow_push_in", "Brand end card"), overlay: { text: "Order your first bag", safe_area: "platform_safe" }, transition_out: "cut" },
       ];
     }
 
-    return this.placePictures({ scenes }, user);
+    // when the checker sends the storyboard back because the brief asked for sound, the stub answers the way a model would: a short voiceover and a chime in the first scene
+    if (/audio_requested/.test(user) && scenes.length) scenes[0] = { ...scenes[0], voiceover: "Welcome. Here is the short version.", audio_cues: ["a soft chime"] };    return this.placePictures({ scenes }, user);
   }
 
   /** Canned placement for the demo: each usable picture takes over a scene, a logo the opening one. What reaches the scene is only what the manifest listed. */
