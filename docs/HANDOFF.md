@@ -121,3 +121,5 @@ The full annotated tree (every directory, which plan step it belongs to, its sta
 
 - D3 (stub model only, no real Claude run): the chosen video type and its category flow into the treatment and storyboard prompts (graph.ts, 
 odes.ts); DemoClient answers by category (saas, ecommerce, general promo) using only blocks the category's visual system allows. Unproven: how the real model uses the chosen type; that needs a real Claude run (off for now). Gates untouched.
+
+- Phase D close-out: the full suite at b476f65 showed 1 failing test in one run (output lost, so it is unidentified) and passed 116 files / 1813 tests with 0 failures on a re-run at the same commit. It did not reproduce; the known load flakes above are the likely cause, but that is unconfirmed.
