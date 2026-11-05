@@ -49,7 +49,7 @@ export function createHyperframesStageAdapter(opts: HyperframesAdapterOptions): 
       } catch (e) {
         await rm(job.output_path, { force: true });
         throw e instanceof Error && /^hyperframes /.test(e.message) ? e : new Error(`hyperframes failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 500)}`);
-      } finally { await rm(dir, { recursive: true, force: true }); }
+      } finally { await rm(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); }
       return { notes: [`hyperframes drew the uploaded pictures in ${basename(chrome)}`] };
     },
   };

@@ -138,7 +138,7 @@ export function createHyperframesAdapter(opts: HyperframesAdapterOptions): Rende
         if (job.signal.aborted) throw new Error("hyperframes was stopped");
         throw e instanceof Error && /^hyperframes /.test(e.message) ? e : new Error(`hyperframes failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 500)}`);
       } finally {
-        await rm(dir, { recursive: true, force: true });
+        await rm(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
       }
       return { notes };
     },
