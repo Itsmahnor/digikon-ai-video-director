@@ -34,8 +34,8 @@
   ],
   "status": "validated",
   "validated": {
-    "at": "2026-11-03T09:47:23.031Z",
-    "fingerprint": "4806e0d3ba5b542e",
+    "at": "2026-11-05T07:37:08.557Z",
+    "fingerprint": "dc406de871f2fad6",
     "remotion": "4.0.539",
     "browser": "chrome via remotion",
     "remotion_renderer": "4.0.539",
@@ -65,35 +65,35 @@
       {
         "width": 960,
         "height": 540,
-        "sha256": "cb2b799f13fc502a4821c7631583cb236b3aac10349fcc77a3f7f39ad6178b33",
-        "bytes": 2254238,
+        "sha256": "240973adb6c8c486de29ff1c7c9d8646f91418897f3e2855181a356945afb5d2",
+        "bytes": 2356660,
         "frames": 1260,
         "film_scene": "S09 of a 14-scene film"
       },
       {
         "width": 540,
         "height": 960,
-        "sha256": "6f3f919d5f7719479e748aa533fda177a907d52a0781088ad07395a22c0dec6f",
-        "bytes": 2054071,
+        "sha256": "93e22275e84c4b2bf4132c762706d01352005417244dd05395358a1a5c50abb5",
+        "bytes": 2214670,
         "frames": 1260,
         "film_scene": "S09 of a 14-scene film"
       }
     ],
     "checks": [
-      "960x540: rendered by remotion in a 14-scene film; background on the approved palette, 4% of the frame drawn, nothing on the frame edge, headline area inked, motion 7.1 of 255 between frames, file probed as 960x540",
-      "540x960: rendered by remotion in a 14-scene film; background on the approved palette, 3% of the frame drawn, nothing on the frame edge, headline area inked, motion 4.9 of 255 between frames, file probed as 540x960"
+      "960x540: rendered by remotion in a 14-scene film; background on the approved palette, 4% of the frame drawn, nothing on the frame edge, headline area inked, motion 6.1 of 255 between frames, file probed as 960x540",
+      "540x960: rendered by remotion in a 14-scene film; background on the approved palette, 3% of the frame drawn, nothing on the frame edge, headline area inked, motion 5.2 of 255 between frames, file probed as 540x960"
     ],
     "measures": [
       {
         "width": 960,
-        "coverage": 0.04,
-        "motion": 7.09,
+        "coverage": 0.041,
+        "motion": 6.15,
         "edge_ink": 0
       },
       {
         "width": 540,
         "coverage": 0.034,
-        "motion": 4.91,
+        "motion": 5.15,
         "edge_ink": 0
       }
     ]
@@ -222,8 +222,73 @@
           "edge_ink": 0
         }
       ]
+    },
+    {
+      "at": "2026-11-05T07:03:50.328Z",
+      "fingerprint": "4806e0d3ba5b542e",
+      "remotion": "4.0.539",
+      "browser": "chrome via remotion",
+      "remotion_renderer": "4.0.539",
+      "ffmpeg": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+      "chrome": "156.0.4314.58",
+      "inputs": [
+        {
+          "width": 960,
+          "height": 540,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "841ad6a6d896a814",
+          "art_direction_hash": "c3aa39a53400555f",
+          "overlay_text": "Make fewer things, and make them to last a lifetime."
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "fps": 30,
+          "duration_s": 3,
+          "spec_hash": "841ad6a6d896a814",
+          "art_direction_hash": "c3aa39a53400555f",
+          "overlay_text": "Make fewer things, and make them to last a lifetime."
+        }
+      ],
+      "renders": [
+        {
+          "width": 960,
+          "height": 540,
+          "sha256": "cb2b799f13fc502a4821c7631583cb236b3aac10349fcc77a3f7f39ad6178b33",
+          "bytes": 2254238,
+          "frames": 1260,
+          "film_scene": "S09 of a 14-scene film"
+        },
+        {
+          "width": 540,
+          "height": 960,
+          "sha256": "6f3f919d5f7719479e748aa533fda177a907d52a0781088ad07395a22c0dec6f",
+          "bytes": 2054071,
+          "frames": 1260,
+          "film_scene": "S09 of a 14-scene film"
+        }
+      ],
+      "checks": [
+        "960x540: rendered by remotion in a 14-scene film; background on the approved palette, 4% of the frame drawn, nothing on the frame edge, headline area inked, motion 7.1 of 255 between frames, file probed as 960x540",
+        "540x960: rendered by remotion in a 14-scene film; background on the approved palette, 3% of the frame drawn, nothing on the frame edge, headline area inked, motion 4.9 of 255 between frames, file probed as 540x960"
+      ],
+      "measures": [
+        {
+          "width": 960,
+          "coverage": 0.04,
+          "motion": 7.09,
+          "edge_ink": 0
+        },
+        {
+          "width": 540,
+          "coverage": 0.034,
+          "motion": 4.91,
+          "edge_ink": 0
+        }
+      ]
     }
   ],
   "failure": null,
-  "record_hash": "579d67fa346f2261144b9f1c0cf4ab9599f1415e4db9b8002283c3d99d526588"
+  "record_hash": "52a971cbe8932ebaf1a5f7834587588d0b57f93f60f5a5ec472c15f7784a0342"
 }

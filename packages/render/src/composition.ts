@@ -70,12 +70,14 @@ export type CompositionPlan = { ok: true; scenes: CompositionScene[]; total_fram
 /** The blocks that set the scene's overlay text themselves, instead of beside the picture as a headline. */
 export const SELF_SET_TEXT: ReadonlySet<SceneVisual["block"]> = new Set(["kinetic_type", "end_card", "title_plate", "quote_statement", "split_panels", "closing_signature"]);
 
-/** Face files are web fonts, so they cannot be measured here. Their widths are estimated on the generous side: EB Garamond runs narrower than this, and JetBrains Mono is exactly 0.6 em. */
+/**
+ * The serif and mono faces are laid out with generous estimates (EB Garamond runs narrower than this, JetBrains Mono is exactly 0.6 em): the compiled scene graph is validated
+ * with the same estimate, so a tighter measure here would let the layout place text the validator then rejects as overlapping. The sans face is measured from its own file.
+ */
 const FACE_METER: Readonly<Record<Exclude<TypeFace, "sans">, TextMeter>> = {
   serif: ESTIMATE_METER,
   mono: { kind: "estimate", width: (text, px) => Array.from(text).length * px * 0.61 },
 };
-
 export interface CompositionPlanOptions {
   outputRoot: string;
   /** Measures text with the real font. Without it widths are estimated, generously. */

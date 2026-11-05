@@ -1,4 +1,5 @@
 import { copyFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { FONTS_DIR, faceFiles, sansMeter } from "./fonts.js";
 import { statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, resolve } from "node:path";
@@ -10,7 +11,6 @@ import { composedCapabilities, planComposedScenes, type ComposedTemplate } from 
 import { verifyComposedScenes } from "./web-composed-verify.js";
 import { CONCEPT_BADGE, planWebScenes, type WebTemplate } from "./web-scenes.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes } from "./composition.js";
-import { loadFontMeter } from "./font-metrics.js";
 import type { AssetLayer } from "./asset-layers.js";
 import { verifyCompositionScenes } from "./composition-verify.js";
 
@@ -59,8 +59,7 @@ const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-proj
 export const COMPOSITIONS_ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "remotion-compositions", "index.jsx");
 
 /** Typefaces that ship with the renderer (SIL Open Font License, see fonts/), [regular, bold]. The film's visual system chooses among them and the machine's own sans. */
-const FONTS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "fonts");
-const FACE_FILES = { serif: ["EBGaramond-400.woff2", "EBGaramond-700.woff2"], mono: ["JetBrainsMono-400.woff2", "JetBrainsMono-700.woff2"] } as const;
+const FACE_FILES = { ...faceFiles(), ...(faceFiles(undefined, "ttf").sans ? { sans: faceFiles(undefined, "ttf").sans! } : {}) }; // from fonts/fonts.json, which also holds each font's licence record
 
 /**
  * The Remotion adapter. It bundles the fixed React composition in `remotion-project/` together with the font and the supplied
@@ -78,7 +77,7 @@ export function createRemotionAdapter(opts: RemotionAdapterOptions): RenderAdapt
     throw new Error(`no compatible browser is installed for Remotion (nothing is downloaded)${seen ? `. Looked at: ${seen}` : ""}`);
   }
   for (const l of opts.learned ?? []) if (!l.template.startsWith("remotion/")) throw new Error(`${l.template} is not a Remotion template, so the Remotion adapter will not run it`);
-  const meter = loadFontMeter(opts.fontFile);
+  const meter = sansMeter(opts.fontFile);
   const planOpts = { renderer: "remotion" as const, templates: REMOTION_TEMPLATES, outputRoot: opts.outputRoot };
   const composedTemplates = Object.fromEntries((opts.learned ?? []).map((l) => [l.template, l]));
   /** A film that uses any learned template is planned as composed scenes; otherwise as the plain text and image scenes. The two are not mixed in one film yet. */

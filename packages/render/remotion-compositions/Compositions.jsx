@@ -7,14 +7,14 @@ import { AbsoluteFill, Img, Sequence, cancelRender, continueRender, delayRender,
 const FAMILY = "DigikonFont";
 const CHAR = 0.56;
 
-const FACES = { sans: `${FAMILY}, sans-serif`, serif: "DigikonSerif, Georgia, serif", mono: "DigikonMono, monospace" };
+const FACES = { sans: `DigikonSans, ${FAMILY}, sans-serif`, serif: "DigikonSerif, Georgia, serif", mono: "DigikonMono, monospace" };
 const fam = (scene) => FACES[scene.type.face] ?? FACES.sans;
 
 const useFont = (file, faces) => {
   const [handle] = useState(() => delayRender("font"));
   useEffect(() => {
     const loading = [new FontFace(FAMILY, `url(${staticFile(file)})`)];
-    if (faces) for (const [name, files] of [["DigikonSerif", faces.serif], ["DigikonMono", faces.mono]]) files.forEach((f, i) => loading.push(new FontFace(name, `url(${staticFile(f)})`, { weight: i ? "700" : "400" })));
+    if (faces) for (const [name, files] of [["DigikonSans", faces.sans], ["DigikonSerif", faces.serif], ["DigikonMono", faces.mono]]) if (files) files.forEach((f, i) => { if (name === "DigikonSans") { if (!i) loading.push(new FontFace(name, `url(${staticFile(f)})`, { weight: "100 900" })); } else loading.push(new FontFace(name, `url(${staticFile(f)})`, { weight: i ? "700" : "400" })); });
     Promise.all(loading.map((f) => f.load())).then((all) => { all.forEach((f) => document.fonts.add(f)); continueRender(handle); }).catch((e) => cancelRender(e));
   }, [file, faces, handle]);
 };

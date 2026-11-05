@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { copyFaceFonts } from "./face-fonts.js";
 import { copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, resolve } from "node:path";
@@ -39,6 +40,7 @@ export function createHyperframesStageAdapter(opts: HyperframesAdapterOptions): 
       const dir = await mkdtemp(join(opts.workRoot ?? tmpdir(), "hyperframes-stage-"));
       try {
         await copyFile(opts.fontFile, join(dir, "font.ttf"));
+    await copyFaceFonts(dir, opts.fontFile);
         const name = (i: number, k: number, l: AssetLayer) => `s${i}a${k}${extname(l.source)}`;
         for (const [i, sc] of s.scenes.entries()) for (const [k, l] of sc.asset_layers.entries()) await copyFile(l.source, join(dir, name(i, k, l)));
         await writeFile(join(dir, "index.html"), buildStageComposition(s.scenes, width, height, fps, s.total_frames, name), "utf8");

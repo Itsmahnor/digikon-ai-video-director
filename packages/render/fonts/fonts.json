@@ -1,0 +1,115 @@
+{
+    "note":  "Typefaces shipped with the renderer, all SIL Open Font License 1.1 (the licence text sits beside each family). woff2 files are for browser engines (Remotion, HyperFrames); ttf files are for FFmpeg drawtext and the text-width measuring, which cannot read woff2. Inter is one variable font: its regular and bold records point to the same file, so FFmpeg draws it at the default (regular) weight and browsers choose the weight.",
+    "fonts":  [
+                  {
+                      "file":  "EBGaramond-400.woff2",
+                      "family":  "EB Garamond",
+                      "face":  "serif",
+                      "weight":  400,
+                      "format":  "woff2",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-eb-garamond.txt",
+                      "source":  "https://github.com/octaviopardo/EBGaramond12",
+                      "sha256":  "b63448e2680a0dbde70ebb2f3de78f6c515122835491f938e8a8595b46f29210"
+                  },
+                  {
+                      "file":  "EBGaramond-700.woff2",
+                      "family":  "EB Garamond",
+                      "face":  "serif",
+                      "weight":  700,
+                      "format":  "woff2",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-eb-garamond.txt",
+                      "source":  "https://github.com/octaviopardo/EBGaramond12",
+                      "sha256":  "5d0f8a497a48fd2a3611d07acc844f65c9fbb35419eafa4e1295f5f0f95f86e4"
+                  },
+                  {
+                      "file":  "JetBrainsMono-400.woff2",
+                      "family":  "JetBrains Mono",
+                      "face":  "mono",
+                      "weight":  400,
+                      "format":  "woff2",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-jetbrains-mono.txt",
+                      "source":  "https://github.com/JetBrains/JetBrainsMono",
+                      "sha256":  "14425ba9c695763c1547f48a206b7aa60350a33ae23de09f0407877f3fcd89eb"
+                  },
+                  {
+                      "file":  "JetBrainsMono-700.woff2",
+                      "family":  "JetBrains Mono",
+                      "face":  "mono",
+                      "weight":  700,
+                      "format":  "woff2",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-jetbrains-mono.txt",
+                      "source":  "https://github.com/JetBrains/JetBrainsMono",
+                      "sha256":  "d0d4e818808f2a0ba39b2b09d1989366f63494e295f003c7ef436697378507e8"
+                  },
+                  {
+                      "file":  "EBGaramond-400.ttf",
+                      "family":  "EB Garamond",
+                      "face":  "serif",
+                      "weight":  400,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-eb-garamond.txt",
+                      "source":  "https://github.com/octaviopardo/EBGaramond12",
+                      "sha256":  "2028dc06d3c130b4761693481436a32a8e35ed500bf58c25c53de004106125b8"
+                  },
+                  {
+                      "file":  "EBGaramond-700.ttf",
+                      "family":  "EB Garamond",
+                      "face":  "serif",
+                      "weight":  700,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-eb-garamond.txt",
+                      "source":  "https://github.com/octaviopardo/EBGaramond12",
+                      "sha256":  "0cfed122e51e3fd44ccedaef7637efed6d5bdc4ad89a6117d70241510309a186"
+                  },
+                  {
+                      "file":  "JetBrainsMono-400.ttf",
+                      "family":  "JetBrains Mono",
+                      "face":  "mono",
+                      "weight":  400,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-jetbrains-mono.txt",
+                      "source":  "https://github.com/JetBrains/JetBrainsMono",
+                      "sha256":  "e6fd0d7e91550b3ed2b735d4312474362c4716edc4fc0577a0f61ed782d5aed1"
+                  },
+                  {
+                      "file":  "JetBrainsMono-700.ttf",
+                      "family":  "JetBrains Mono",
+                      "face":  "mono",
+                      "weight":  700,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-jetbrains-mono.txt",
+                      "source":  "https://github.com/JetBrains/JetBrainsMono",
+                      "sha256":  "d22c4f3821d725eb01210d278d95dfcfcaadc34699a06658d47c8a5cc5830ada"
+                  },
+                  {
+                      "file":  "InterVariable.ttf",
+                      "family":  "Inter",
+                      "face":  "sans",
+                      "weight":  400,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-inter.txt",
+                      "source":  "https://github.com/rsms/inter",
+                      "sha256":  "4989b125924991b90d05b2d16e0e388c48f7d5bb8b30539bbf9c755278d0ccaf"
+                  },
+                  {
+                      "file":  "InterVariable.ttf",
+                      "family":  "Inter",
+                      "face":  "sans",
+                      "weight":  700,
+                      "format":  "ttf",
+                      "licence":  "OFL-1.1",
+                      "licence_file":  "OFL-inter.txt",
+                      "source":  "https://github.com/rsms/inter",
+                      "sha256":  "4989b125924991b90d05b2d16e0e388c48f7d5bb8b30539bbf9c755278d0ccaf"
+                  }
+              ]
+}

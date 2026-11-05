@@ -7,6 +7,7 @@ import type { RenderJob } from "./adapter.js";
 import { COMPOSITION_TEMPLATE, planCompositionScenes, type CompositionScene } from "./composition.js";
 import { rectAt, type AssetLayer } from "./asset-layers.js";
 import type { TextMeter } from "./font-metrics.js";
+import { FACE_CSS, FACE_RULES, copyFaceFonts } from "./face-fonts.js";
 
 const run = promisify(execFile);
 
@@ -62,7 +63,7 @@ function sceneGraph(sc: CompositionScene, i: number, first: number, fps: number)
     prev = `s${i}b${k + 1}`;
   });
   const h = sc.headline;
-  const texts = h ? h.lines.map((_, j) => `drawtext=fontfile=font.ttf:textfile=s${i}t${j}.txt:expansion=none:fontcolor=${ff(sc.palette.text)}:fontsize=${h.font_px}:x=${n(h.box.x)}:y=${n(h.box.y + j * h.font_px * 1.15)}`) : [];
+  const texts = h ? h.lines.map((_, j) => `drawtext=fontfile=font-${sc.type.face}.ttf:textfile=s${i}t${j}.txt:expansion=none:fontcolor=${ff(sc.palette.text)}:fontsize=${h.font_px}:x=${n(h.box.x)}:y=${n(h.box.y + j * h.font_px * 1.15)}`) : [];
   const scrim = sc.headline_scrim ? [`drawbox=x=${n(sc.headline_scrim.x)}:y=${n(sc.headline_scrim.y)}:w=${n(sc.headline_scrim.w)}:h=${n(sc.headline_scrim.h)}:color=${ff(sc.palette.background)}@0.84:t=fill`] : [];
   chains.push(`[${prev}]${[...scrim, ...texts, `fps=${fps}`, "format=yuv420p"].join(",")}[s${i}]`);
   return chains.join(";");
@@ -74,6 +75,7 @@ export async function renderFfmpegStage(job: RenderJob, scenes: readonly Composi
   const dir = await mkdtemp(join(opts.workRoot ?? tmpdir(), "asset-stage-"));
   try {
     await copyFile(opts.fontFile, join(dir, "font.ttf"));
+    await copyFaceFonts(dir, opts.fontFile);
     const inputs: string[] = [], graphs: string[] = [];
     let index = 0;
     for (const [i, sc] of scenes.entries()) {
@@ -120,15 +122,17 @@ export function buildStageComposition(scenes: readonly CompositionScene[], width
     const h = sc.headline, sb = sc.headline_scrim;
     if (sb) parts.push(`<div class="box" style="left:${sb.x}px;top:${sb.y}px;width:${sb.w}px;height:${sb.h}px;background:${sc.palette.background};opacity:.84"></div>`);
     if (h) parts.push(`<div class="box" style="left:${h.box.x}px;top:${h.box.y}px;width:${h.box.w}px;font-size:${h.font_px}px;line-height:1.15;color:${sc.palette.text};font-weight:${sc.type.bold ? 700 : 400}">${h.lines.map(esc).join("<br/>")}</div>`);
-    body.push(`<div id="s${i}" class="scene clip" data-start="${sec(sc.from_frame, fps)}" data-duration="${sec(sc.frames, fps)}" data-track-index="0" style="background:${sc.palette.background}">${parts.join("")}</div>`);
+    body.push(`<div id="s${i}" class="scene clip face-${sc.type.face}" data-start="${sec(sc.from_frame, fps)}" data-duration="${sec(sc.frames, fps)}" data-track-index="0" style="background:${sc.palette.background}">${parts.join("")}</div>`);
   });
   return `<!doctype html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=${width}, height=${height}"/>
 <style>
 @font-face{font-family:DigikonStage;src:url(font.ttf)}
+${FACE_CSS}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:${width}px;height:${height}px;overflow:hidden;background:#000}
 .scene{position:absolute;left:0;top:0;width:${width}px;height:${height}px;overflow:hidden;font-family:DigikonStage,sans-serif}
+${FACE_RULES}
 .box{position:absolute}
 ${css.join("\n")}
 </style></head><body>
