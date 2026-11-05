@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it , vi } from "vitest";
 import type { EditorOperation, SceneAssetRef } from "@digikon/contracts";
 import type { RenderJob } from "./adapter.js";
 import { containRect, planLayers, plateColour, rectAt, type ResolvedAssetFile } from "./asset-layers.js";
@@ -17,6 +17,7 @@ import { createHyperframesStageAdapter } from "./hyperframes-stage.js";
 import { createRemotionAdapter } from "./remotion.js";
 import { realPrerequisites, skipReal } from "./test-env.js";
 import { rawFrame } from "./verify.js";
+vi.setConfig({ testTimeout: 180_000 }); // real renders: HyperFrames can take over a minute when the whole suite is running
 
 const font = ["C:\\Windows\\Fonts\\arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"].find((f) => existsSync(f)) ?? null;
 const hasRemotion = !!font && !!findRemotionBrowser();
