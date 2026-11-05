@@ -24,3 +24,5 @@ export * from "./kit.js";
 export * from "./kit-completeness.js";
 export * from "./questions.js";
 
+export * from "./composition-grounding.js";
+export * from "./composition-blocks.js";

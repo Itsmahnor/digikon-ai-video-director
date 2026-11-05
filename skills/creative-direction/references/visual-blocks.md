@@ -21,3 +21,14 @@ Each scene's `visual` is one of these blocks. Fields shown with their limits; ev
 - **asset_stage**: `backdrop` only. Draws the scene's `asset_refs`, the uploaded pictures; camera and reveal are fixed (the pictures carry their own animation). Use for: anything the user supplied a real picture of: a logo, a product, a screen, a team. May repeat across neighbouring scenes. Always preferred over a drawn concept when a real picture exists.
 
 Limits: three typefaces (sans, serif, mono); no supplied footage inside a block; any other block may carry one small picture through `asset_refs`, in a corner or along the top; sound comes from the storyboard's voiceover and audio_cues, not from a block; one block per scene and one engine per scene.
+
+## Composing a scene yourself (the `composition` visual)
+
+The blocks above are starting points, not a menu you must pick from. A scene's `visual` may instead be `{"block":"composition","intent":"...","elements":[...]}`, a layout you write for this film: text and shape elements placed on the frame with their own type, colour and motion. Use it when no block fits the scene's idea, and always when two scenes would otherwise look alike.
+
+- Positions and widths are shares of the frame (0 to 1). A text `size` is a share of the shorter side (0.03 label, 0.05 body, 0.08 to 0.12 headline). Give a `portrait` override when 9:16 needs another position or size.
+- Colours are the film's palette tokens (text, muted, accent, accent_2, surface, background). Fonts are roles: display, body, mono.
+- Every element has its own `motion`: enter (none, fade, rise, drop, slide_left, slide_right, scale_in, wipe), delay and duration as shares of the scene, easing, and for text a stagger by line, word or character. Everything must be fully shown for at least 0.8 s before the scene ends.
+- Every word must come from the scene's overlay text, voiceover, its claims, the brand facts, the brief or the treatment's own lines. No new copy and no new figures: the checker rejects them and sends the storyboard back.
+- Nothing may leave the frame, overlap other text, or be illegible on its background. Pictures are not elements: place supplied pictures with `asset_refs`.
+- Compose the layout from the idea: a sequence that draws itself, a line with moments on it, a form with labelled parts, a frame cut into panels, one huge word. Do not reuse one layout in two scenes.

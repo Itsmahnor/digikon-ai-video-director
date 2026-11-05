@@ -140,7 +140,7 @@ export function rankVisualSystems(text: string): SystemRank[] {
 /** Pictures that read alike at a glance. Two neighbours of one family look like the same scene even when the block differs. */
 export const BLOCK_FAMILY: Readonly<Record<VisualBlock, string>> = {
   message_thread: "interface", ui_demo: "interface", process_flow: "diagram", data_chart: "diagram", spec_callouts: "diagram", route_map: "path", timeline_path: "path",
-  kinetic_type: "type", title_plate: "type", quote_statement: "type", layered_cards: "panels", split_panels: "panels", end_card: "closing", closing_signature: "closing", asset_stage: "picture",
+  kinetic_type: "type", title_plate: "type", quote_statement: "type", layered_cards: "panels", split_panels: "panels", end_card: "closing", closing_signature: "closing", asset_stage: "picture", composition: "composed",
 };
 
 export interface BlockRank { block: VisualBlock; score: number; reasons: string[] }
@@ -167,12 +167,12 @@ export function rankVisualBlocks(c: BlockContext, candidates: readonly VisualBlo
     const reasons: string[] = [];
     let score = 0;
     if (block === "asset_stage") { if (!c.has_pictures) continue; score += 4; reasons.push("a real picture was supplied"); }
-    else if (!sys || sys.blocks.includes(block)) { score += 3; if (sys) reasons.push(`part of ${sys.title}`); }
+    else if (!sys || block === "composition" || sys.blocks.includes(block)) { score += 3; if (sys) reasons.push(`part of ${sys.title}`); }
     else { score -= 3; reasons.push(`not part of ${sys.title}`); }
     if (r === "validated" || r === "reviewed" || r === "production") { score += 2; reasons.push(`readiness ${r}`); } else reasons.push(`readiness ${r}: not validated`);
-    if (prev && prev === block && block !== "asset_stage") { score -= 3; reasons.push("the scene before uses it"); }
-    else if (prev && BLOCK_FAMILY[prev] === BLOCK_FAMILY[block] && block !== "asset_stage") { score -= 1; reasons.push(`looks like the scene before (${BLOCK_FAMILY[block]})`); }
-    const n = c.used.filter((b) => b === block).length;
+    if (prev && prev === block && block !== "asset_stage" && block !== "composition") { score -= 3; reasons.push("the scene before uses it"); }
+    else if (prev && BLOCK_FAMILY[prev] === BLOCK_FAMILY[block] && block !== "asset_stage" && block !== "composition") { score -= 1; reasons.push(`looks like the scene before (${BLOCK_FAMILY[block]})`); }
+    const n = block === "composition" ? 0 : c.used.filter((b) => b === block).length;
     if (n) { score -= n * 0.5; reasons.push(`used ${n} time${n === 1 ? "" : "s"} already`); }
     ranks.push({ block, score, reasons });
   }

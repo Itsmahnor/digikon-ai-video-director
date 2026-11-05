@@ -71,7 +71,7 @@ const speech = new WhisperEngine({ cacheDir: process.env.WHISPER_CACHE_DIR ? res
 let whisper: WhisperStatus = { state: "loading" };
 speech.warmUp().then(() => { whisper = { state: "ready" }; console.log(`Whisper ready (${speech.model})`); }).catch((e) => { whisper = { state: "error", error: e instanceof Error ? e.message : String(e) }; console.error("Whisper failed to load:", whisper.error); });
 
-const llm = demo ? new DemoClient({ creative: true }) : process.env.ANTHROPIC_API_KEY ? new AnthropicClient() : null;
+const llm = demo ? new DemoClient({ creative: true, compose: true }) : process.env.ANTHROPIC_API_KEY ? new AnthropicClient() : null;
 if (!llm) console.warn("No ANTHROPIC_API_KEY: the console runs, but routing and planning need a key (or --demo).");
 
 // The preview renderer draws text with one font file. RENDER_FONT_FILE names it; otherwise a common system font is used if present.

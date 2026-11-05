@@ -23,6 +23,7 @@ import {
   AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
   directoryStamp, KeyedCache,
+  checkComposition,
   renderDraftScene,
   renderScenePreview,
 } from "@digikon/render";
@@ -780,6 +781,7 @@ export function createApp(ctx: AppContext) {
   const productionPortFor = (sessionId: string): ProductionPort | undefined => ctx.capabilitiesDir ? {
     capabilities: () => { const l = liveCapabilities(); return { snapshot: l.registry.snapshot, available_engines: l.engines }; },
     preflight: (req) => { const l = liveCapabilities(); return runAdapterPreflight(req, { adapters: l.adapters, outputRoot: tmpdir(), assetFiles: (id, role) => assets.renderFile(sessionId, id, role) }); },
+    composition: (req) => checkComposition(req.visual, { art_direction: req.art_direction, aspect_ratio: req.aspect_ratio, duration_seconds: req.duration_seconds }),
     ...(ctx.audio ? { audio: (req: { scenePlan: { scenes: readonly Parameters<typeof planAudio>[0]["scenes"][number][] }; assets: readonly Asset[]; feel: Parameters<typeof planAudio>[0]["feel"] }) => planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.feel }, ctx.audio!).unresolved.map((u) => `${u.scene_id}: ${u.detail}`) } : {}),
   } : undefined;
   let liveIndex: { hash: string; retriever: Retriever } | null = null;

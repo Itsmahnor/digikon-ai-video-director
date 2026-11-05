@@ -81,11 +81,13 @@ export type ArtDirection = z.infer<typeof ArtDirection>;
 
 // ---------- scene visual spec ----------
 
-export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card", "title_plate", "quote_statement", "spec_callouts", "split_panels", "route_map", "timeline_path", "closing_signature", "asset_stage"] as const;
+export const VISUAL_BLOCKS = ["message_thread", "ui_demo", "process_flow", "data_chart", "kinetic_type", "layered_cards", "end_card", "title_plate", "quote_statement", "spec_callouts", "split_panels", "route_map", "timeline_path", "closing_signature", "asset_stage", "composition"] as const;
 export type VisualBlock = (typeof VISUAL_BLOCKS)[number];
 /** The blocks drawn entirely from data. asset_stage is not one: it needs uploaded pictures, so it is validated against real files, not example specs. */
 export type DrawnBlock = Exclude<VisualBlock, "asset_stage">;
 export const DRAWN_BLOCKS = VISUAL_BLOCKS.filter((b): b is DrawnBlock => b !== "asset_stage");
+/** The fixed blocks the visual systems list. `composition` is not one of them: it is available in every system, because the Director composes it for the film. */
+export type SystemBlock = Exclude<DrawnBlock, "composition">;
 
 const Common = {
   /** A drawn camera over the whole composition. */
@@ -210,6 +212,80 @@ export const ClosingSignature = z.object({
   ...Common,
 });
 
+// ---------- free composition (written per scene by the Director, drawn by the scene-graph engine) ----------
+
+const Frac = (min: number, max: number) => z.number().min(min).max(max);
+const Ident = z.string().regex(/^[A-Za-z][A-Za-z0-9_]{0,31}$/, "an id is letters, digits and underscores, starting with a letter");
+const Token = z.enum(["text", "muted", "accent", "accent_2", "surface", "background"]);
+/**
+ * Where an element sits, as shares of the frame (0 to 1), so one plan draws at every size and aspect. `size` on text is a share of the frame's shorter side.
+ * A portrait frame may override any of it (`portrait`), because a layout for 16:9 is rarely the right one for 9:16.
+ */
+const Place = z.object({ x: Frac(-0.2, 1.2), y: Frac(-0.2, 1.2), w: Frac(0.01, 1.4), h: Frac(0, 1.4).optional() });
+const Motion = z.object({
+  /** How it arrives. `rise` and `drop` move a little; `wipe` uncovers it left to right. */
+  enter: z.enum(["none", "fade", "rise", "drop", "slide_left", "slide_right", "scale_in", "wipe"]).default("fade"),
+  /** When it starts and how long it takes, as shares of the scene. Everything must finish early enough to be read. */
+  delay: Frac(0, 0.9).default(0),
+  duration: Frac(0.03, 1).default(0.2),
+  easing: z.enum(["ease_out", "ease_in_out", "spring"]).default("ease_out"),
+  /** Text only: lines, words or characters arrive one after another, `each` of the scene apart. */
+  stagger: z.object({ unit: z.enum(["line", "word", "char"]), each: Frac(0.002, 0.2) }).optional(),
+}).default({});
+const Override = z.object({ x: Frac(-0.2, 1.2).optional(), y: Frac(-0.2, 1.2).optional(), w: Frac(0, 1.4).optional(), h: Frac(0, 1.4).optional(), size: Frac(0.012, 0.35).optional() });
+
+export const CompText = z.object({
+  id: Ident, kind: z.literal("text"),
+  text: Txt(160),
+  at: Place.pick({ x: true, y: true, w: true }),
+  size: Frac(0.012, 0.35),
+  weight: z.enum(["regular", "bold"]).default("bold"),
+  align: z.enum(["left", "center", "right"]).default("left"),
+  upper: z.boolean().default(false),
+  color: Token.default("text"),
+  /** The film's font roles: display for headlines, body for running text, mono for labels and figures. Absent: the visual system's face. */
+  font: z.enum(["display", "body", "mono"]).optional(),
+  line_height: Frac(0.8, 1.8).default(1.15),
+  motion: Motion,
+  portrait: Override.optional(),
+});
+export const CompShape = z.object({
+  id: Ident, kind: z.literal("shape"),
+  shape: z.enum(["rect", "ellipse", "line"]),
+  at: Place.required({ h: true }).extend({ w: Frac(0, 1.4), h: Frac(0, 1.4) }),
+  fill: Token.optional(),
+  stroke: Token.optional(),
+  /** Stroke width as a share of the shorter side. */
+  stroke_w: Frac(0, 0.03).default(0),
+  /** Corner radius as a share of the shorter side. */
+  radius: Frac(0, 0.5).default(0),
+  opacity: Frac(0, 1).default(1),
+  motion: Motion,
+  portrait: Override.optional(),
+});
+export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape]);
+export type CompElement = z.infer<typeof CompElement>;
+
+/**
+ * A scene composed for this film: elements placed on the frame with their own type, colour, layout and motion, instead of one of the fixed blocks. The Director writes it
+ * from the approved story; code checks it (bounds, legibility, timing, evidence: every word must come from the scene's approved text or facts) before it can reach Gate 1.
+ * Nothing in it is executable: text is drawn as text and colours are the film's palette. Pictures are not elements: a scene's supplied pictures are placed with asset_refs and drawn over the composition.
+ */
+export const Composition = z.object({
+  block: z.literal("composition"),
+  /** What this layout does for the story, in one sentence. The reviewer reads it beside the picture. */
+  intent: Txt(200),
+  elements: z.array(CompElement).min(1).max(40),
+  ...Common,
+});
+
+/** Structure problems of a composition that the schema cannot express (the union needs a plain object): repeated ids, and no words at all. */
+export function compositionStructureIssues(c: z.infer<typeof Composition>): string[] {
+  const out: string[] = [], seen = new Set<string>();
+  for (const e of c.elements) { if (seen.has(e.id)) out.push(`duplicate element id ${e.id}`); seen.add(e.id); }
+  if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");
+  return out;
+}
 /**
  * A scene built from uploaded pictures: the scene's asset_refs say what goes where, and the overlay text is its headline. The pictures carry their own motion
  * (each ref's animation), so there is no whole-frame camera or reveal: a moved or masked frame could not be checked against the uploaded file.
@@ -221,7 +297,7 @@ export const AssetStage = z.object({
   backdrop: Common.backdrop,
 });
 
-export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard, TitlePlate, QuoteStatement, SpecCallouts, SplitPanels, RouteMap, TimelinePath, ClosingSignature, AssetStage]);
+export const SceneVisual = z.discriminatedUnion("block", [MessageThread, UiDemo, ProcessFlow, DataChart, KineticType, LayeredCards, EndCard, TitlePlate, QuoteStatement, SpecCallouts, SplitPanels, RouteMap, TimelinePath, ClosingSignature, AssetStage, Composition]);
 export type SceneVisual = z.infer<typeof SceneVisual>;
 
 /** Every string a visual shows, for checks that read the text (claims, characters). */
@@ -242,6 +318,7 @@ export function visualTexts(v: SceneVisual): string[] {
     case "timeline_path": return v.marks.flatMap((m) => [m.when, m.label]);
     case "closing_signature": return [...(v.wordmark ? [v.wordmark] : []), v.action, ...(v.subline ? [v.subline] : [])];
     case "asset_stage": return [];
+    case "composition": return v.elements.flatMap((e) => (e.kind === "text" ? [e.text] : []));
   }
 }
 
@@ -277,10 +354,10 @@ export function creativeIssues(
     if (s.visual.block === "asset_stage" && placed.size === 0) issues.push({ scene_id: s.scene_id, code: "asset_stage_empty", message: "asset_stage draws the scene's asset_refs, and there are none" });
     const prev = scenes[i - 1]?.visual;
     // a run of pictures is a sequence, not a repeated layout: each shows a different file, so the block itself does not make them alike
-    if (prev && prev.block === s.visual.block && s.visual.block !== "asset_stage") issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
+    if (prev && prev.block === s.visual.block && s.visual.block !== "asset_stage" && s.visual.block !== "composition") issues.push({ scene_id: s.scene_id, code: "repeated_block", message: `${s.visual.block} is used again straight after ${scenes[i - 1]!.scene_id}; a neighbouring scene needs a different kind of picture` });
     if (s.visual.block === "kinetic_type" && !s.overlay) issues.push({ scene_id: s.scene_id, code: "kinetic_without_text", message: "kinetic_type animates the scene's overlay text, so the scene needs overlay text" });
     if ((s.visual.block === "title_plate" || s.visual.block === "quote_statement") && !s.overlay) issues.push({ scene_id: s.scene_id, code: "type_without_text", message: `${s.visual.block} sets the scene's overlay text, so the scene needs overlay text` });
-    if (system && s.visual.block !== "asset_stage" && !system.blocks.includes(s.visual.block as DrawnBlock)) issues.push({ scene_id: s.scene_id, code: "off_system_block", message: `${s.visual.block} is not a picture the ${system.title} system uses (${system.blocks.join(", ")}); choose one of those, or change the visual system in the treatment` });
+    if (system && s.visual.block !== "asset_stage" && s.visual.block !== "composition" && !system.blocks.includes(s.visual.block as DrawnBlock)) issues.push({ scene_id: s.scene_id, code: "off_system_block", message: `${s.visual.block} is not a picture the ${system.title} system uses (${system.blocks.join(", ")}); choose one of those, or change the visual system in the treatment` });
     if (s.visual.block === "ui_demo" && s.visual.cursor_target !== null && s.visual.cursor_target >= s.visual.rows.length) issues.push({ scene_id: s.scene_id, code: "cursor_out_of_range", message: `cursor_target ${s.visual.cursor_target} is not a row (there are ${s.visual.rows.length})` });
     if (s.visual.block === "layered_cards" && s.visual.held) {
       const h = s.visual.held, src = scenes[i - 1];
@@ -303,7 +380,7 @@ export function creativeIssues(
     for (const s of scenes) if (s.visual) counts.set(s.visual.block, (counts.get(s.visual.block) ?? 0) + 1);
     // A system has a narrow vocabulary on purpose: a rhythm of one kind of picture is its language, so the rule is a half there, not the third that used to force every film through the same rotation.
     const limit = system ? Math.ceil(scenes.length / 2) : Math.ceil(scenes.length / 3);
-    for (const [block, n] of counts) if (block !== "asset_stage" && n > limit) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than ${system ? "half" : "a third"} of a film` });
+    for (const [block, n] of counts) if (block !== "asset_stage" && block !== "composition" && n > limit) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than ${system ? "half" : "a third"} of a film` });
   }
   return issues;
 }

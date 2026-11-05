@@ -1,4 +1,4 @@
-import type { ArtDirection, SceneVisual } from "@digikon/contracts";
+import { SceneVisual, processFlow, type ArtDirection } from "@digikon/contracts";
 
 /**
  * One representative example per visual block, and the art direction they share. They are the inputs the block capabilities were
@@ -95,7 +95,20 @@ export const EXAMPLE_VISUALS: Record<Exclude<SceneVisual["block"], "asset_stage"
     creative_use: "Lay a history, a roadmap or the chapters of a story along one line.",
     limitations: ["Two to five marks; a mark's date or word has at most 12 characters.", "A real date or figure needs an approved claim behind the scene.", "Runs across a wide frame and down a tall one."],
   },
-  closing_signature: {
+  composition: {
+    // a free layout: a headline of the scene's own words above steps that draw themselves in order, built from the elements library but placed and timed as the plan says
+    visual: SceneVisual.parse({
+      block: "composition", camera: "static", reveal: "none", backdrop: "flat",
+      intent: "Walk the viewer from request to booked slot in three beats, the headline above and the steps arriving in order.",
+      elements: [
+        { id: "headline", kind: "text", text: "From request to booked.", at: { x: 0.08, y: 0.04, w: 0.84 }, size: 0.055, motion: { enter: "rise", delay: 0, duration: 0.2 } },
+        ...processFlow([{ label: "Share times", detail: "Your open slots" }, { label: "Client picks", detail: "One tap" }, { label: "Booked", detail: "Confirmed" }]),
+      ],
+    }),
+    overlay_text: "From request to booked.",
+    creative_use: "A scene whose layout is composed for the story rather than chosen from the fixed blocks.",
+    limitations: ["Text and shapes only; pictures are placed with asset_refs and drawn over it.", "Every word must come from the scene's approved text, claims or facts.", "Everything must finish early enough to be read before the scene ends."],
+  },  closing_signature: {
     visual: { block: "closing_signature", wordmark: "Maison Vael", action: "Visit the atelier", subline: "By appointment", camera: "static", reveal: "none", backdrop: "vignette" },
     overlay_text: "Made slowly.",
     creative_use: "Close quietly: the name, a thin rule, one line to follow, for a film that should not end on a button.",

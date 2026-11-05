@@ -1,4 +1,5 @@
 import type { GenerateRequest, LlmClient } from "./llm.js";
+import { composeScene } from "./demo-compose.js";
 import { detectCategory } from "./video-types.js";
 
 /**
@@ -7,7 +8,7 @@ import { detectCategory } from "./video-types.js";
  */
 export class DemoClient implements LlmClient {
   /** `creative` answers with art direction and drawn visuals, the way the real Director now must. Without it the canned answers are the older, plainer ones. */
-  constructor(private readonly opts: { creative?: boolean } = {}) {}
+  constructor(private readonly opts: { creative?: boolean; compose?: boolean } = {}) {}
   get predatesArtDirection(): boolean { return !this.opts.creative; }
   readonly model = "demo-scripted (not Claude)";
   async generate<T>(req: GenerateRequest<T>): Promise<T> {
@@ -275,7 +276,19 @@ export class DemoClient implements LlmClient {
       ];
     }
 
-    // when the checker sends the storyboard back because the brief asked for sound, the stub answers the way a model would: a short voiceover and a chime in the first scene
+    // asked to compose: each drawn scene gets a layout of its own, written from the film's own words, instead of a fixed block
+    if (this.opts.compose && this.opts.creative) {
+      const tr = (() => { const i = user.indexOf("## Treatment" + String.fromCharCode(10) + "{"); if (i < 0) return null; const j = user.indexOf(String.fromCharCode(10, 10) + "## ", i); try { return JSON.parse(user.slice(i + 13, j < 0 ? undefined : j)) as { logline: string; hook: string; cta: string }; } catch { return null; } })();
+      if (tr) {
+        scenes = scenes.map((sc, i) => {
+          if ((sc["asset_ids"] as string[] | undefined)?.length || !sc["visual"]) return sc;
+          const kind = i === 0 ? "open" : i === scenes.length - 1 ? "close" : "middle";
+          const shot = sc["shot"] as { camera_motion: string };
+          const overlay = (sc["overlay"] as { text: string } | null)?.text ?? null;
+          return { ...sc, visual: composeScene(kind, i, shot.camera_motion, { logline: tr.logline, hook: tr.hook, cta: tr.cta, overlay }) };
+        });
+      }
+    }    // when the checker sends the storyboard back because the brief asked for sound, the stub answers the way a model would: a short voiceover and a chime in the first scene
     if (/audio_requested/.test(user) && scenes.length) scenes[0] = { ...scenes[0], voiceover: "Welcome. Here is the short version.", audio_cues: ["a soft chime"] };    return this.placePictures({ scenes }, user);
   }
 

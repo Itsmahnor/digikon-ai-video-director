@@ -1,6 +1,6 @@
 import {
   COMPILED_PLAN_VERSION, CompiledEditPlan, canonicalJson, compiledPlanHash, productionSelectionHash,
-  type Asset, type CapabilitySnapshot, type CompileDiagnostic, type EditPlan, type EditorOperation, type ProductionDecisionPlan, type Renderer, type RevisionRequest, type ScenePlan, type Treatment,
+  type Asset, type CapabilitySnapshot, type CompileDiagnostic, type EditPlan, type EditorOperation, type ProductionDecisionPlan, type Renderer, type RevisionRequest, type ScenePlan, type SceneVisual, type Treatment,
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
 import type { Retriever } from "@digikon/rag";
@@ -24,6 +24,8 @@ export interface ProductionPort {
    * What the machine's audio stage cannot make for this plan, as ordinary sentences. Requested sound that cannot be produced stops Gate 2 rather than being dropped.
    * Absent: this system has no audio stage, and audio stays an open, reported requirement.
    */
+  /** Problems with a composed scene (bounds, legibility, timing), judged by the renderer's own validator, so they go back to the Director before Gate 1. */
+  composition?(request: { visual: Extract<SceneVisual, { block: "composition" }>; duration_seconds: number; art_direction: Treatment["art_direction"] | null; aspect_ratio: "16:9" | "9:16" | "1:1" }): string[];
   audio?(request: { scenePlan: ScenePlan; assets: readonly Asset[]; feel: NonNullable<Treatment["art_direction"]>["motion_language"]["feel"] | null }): string[];
 }
 

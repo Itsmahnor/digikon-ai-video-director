@@ -1,4 +1,6 @@
 import { basename, isAbsolute, relative, resolve } from "node:path";
+import { authorGraph } from "./scene-graph/author.js";
+import { validateSceneGraph } from "./scene-graph/validate.js";
 import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, VISUAL_SYSTEMS, contrastRatio, type Finish, type Palette, type SceneAssetRef, type TypeFace } from "@digikon/contracts";
 import { planLayers, type AssetFileResolver, type AssetLayer, type ResolvedAssetFile } from "./asset-layers.js";
 import type { RenderJob } from "./adapter.js";
@@ -68,7 +70,7 @@ export interface CompositionScene {
 export type CompositionPlan = { ok: true; scenes: CompositionScene[]; total_frames: number } | { ok: false; issues: string[] };
 
 /** The blocks that set the scene's overlay text themselves, instead of beside the picture as a headline. */
-export const SELF_SET_TEXT: ReadonlySet<SceneVisual["block"]> = new Set(["kinetic_type", "end_card", "title_plate", "quote_statement", "split_panels", "closing_signature"]);
+export const SELF_SET_TEXT: ReadonlySet<SceneVisual["block"]> = new Set(["kinetic_type", "end_card", "title_plate", "quote_statement", "split_panels", "closing_signature", "composition"]);
 
 /**
  * The serif and mono faces are laid out with generous estimates (EB Garamond runs narrower than this, JetBrains Mono is exactly 0.6 em): the compiled scene graph is validated
@@ -354,7 +356,15 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
       case "asset_stage":
         // the pictures are the scene: they are laid out below, in the area the headline leaves
         break;
-      case "title_plate": {
+      case "composition": {
+        // a layout written for this film: the plan's own positions, type and motion, drawn by the scene-graph engine. It is validated like any scene graph (bounds, legibility, timing) and refused as a whole when it fails.
+        const g = authorGraph(visual, { width: s.width, height: s.height, fps: s.fps, duration_s: frames / s.fps });
+        const verdict = validateSceneGraph(g, { palette, meter });
+        if (!verdict.ok) { for (const i of verdict.issues.slice(0, 8)) issues.push(`${at}: composition: ${i}`); break; }
+        box = { x: margin, y: margin, w: inner, h: s.height - 2 * margin };
+        geom = { graph: g };
+        break;
+      }      case "title_plate": {
         if (!headlineText) { issues.push(`${at}: a title plate sets the scene's overlay text, and there is none`); break; }
         const w = inner * 0.86;
         const f = fitPx([headlineText], w, Math.round(short * (portrait ? 0.125 : 0.15) * scaleMult), minPx, portrait ? 6 : 3);
