@@ -2,7 +2,8 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
-import { extname } from "node:path";
+import { basename, extname } from "node:path";
+import { DRAFT_PREFIX } from "./draft-label.js";
 import { promisify } from "node:util";
 import { RenderOutput, type RenderSettings } from "@digikon/contracts";
 
@@ -31,6 +32,8 @@ export type OutputCheck = { ok: true; output: RenderOutput } | { ok: false; issu
  * shell); nothing is taken from the adapter. A missing, empty, unreadable or mismatching file is a list of issues, never a pass.
  */
 export async function validateOutput(path: string, settings: RenderSettings, audioRequired: boolean, now: () => Date = () => new Date()): Promise<OutputCheck> {
+  // a draft preview (made before the second approval, see draft-preview.ts) is never a render: it is refused here by its name, so it cannot be passed off as a final output
+  if (basename(path).startsWith(DRAFT_PREFIX)) return { ok: false, issues: ["this file is a DRAFT preview, not a render of an approved plan"] };
   let bytes: number;
   try {
     const st = await stat(path);

@@ -26,7 +26,7 @@ const PHASES = ["Describe", "Understand", "Plan", "Approve"];
 
 const state = {
   sid: null, health: null, offline: false, assets: [], analysis: {}, turns: [], route: null, busy: false,
-  fromVoice: false, language: null, videoType: null, proposedVideoTypes: [],
+  fromVoice: false, language: null, videoType: null, proposedVideoTypes: [], previews: {},
   run: null, // { steps: {node: {status, lines}}, result, error }
   approval: null, gateNotes: "", tab: "treatment", transcripts: {}, mic: null,
 };
@@ -644,7 +644,7 @@ function results(res) {
     },
     edits: () => `<div class="notice info" style="margin-bottom:12px">Built on storyboard version ${res.versions.storyboard} <span class="mono">(${esc(String(res.hashes.storyboard).slice(0, 12))})</span>, which you approved. Edit plan version ${res.versions.edit_plan}.</div>` + sp.scenes.map((s) => {
       const uses = ep.uses.filter((u) => u.scene_id === s.scene_id);
-      return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}</div>`;
+      return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}${scenePreviewHtml(res, s)}</div>`;
     }).join(""),
     claims: () => `<table><thead><tr><th>Claim</th><th>Text</th><th>Status</th><th>Used in</th></tr></thead><tbody>${(res.claimsAudit ?? []).map((c) => {
       const chip = c.status === "supported" ? `<span class="chip ok">supported by ${esc(c.fact?.fact_id ?? "")}</span>` : c.status === "illustrative" ? '<span class="chip warn">illustrative concept, not a verified fact</span>' : '<span class="chip bad">unsupported factual claim, blocked</span>';
@@ -673,6 +673,44 @@ function results(res) {
     ${finished}`;
 }
 
+// ---------- scene previews ----------
+// Before Gate 2 the preview is a DRAFT made by its own route (it is not the render and is never accepted as the final film); after both approvals it is a preview of the approved plan.
+const ENGINE_NAME = { ffmpeg: "FFmpeg", remotion: "Remotion", hyperframes: "HyperFrames" };
+function previewSettings(res) {
+  const frame = { "16:9": [1280, 720], "9:16": [720, 1280], "1:1": [900, 900] }[res.aspectRatio ?? "16:9"] ?? [1280, 720];
+  return { aspect_ratio: res.aspectRatio ?? "16:9", width: frame[0], height: frame[1], fps: 30, duration_s: res.scenePlan.scenes.reduce((a, s) => a + s.duration_seconds, 0), container: "mp4", video_codec: "h264", audio_codec: null };
+}
+function previewOutcome(p, draft) {
+  const lines = [];
+  lines.push(draft
+    ? "This is a <b>DRAFT</b> of this scene, drawn from the edit plan that is still waiting for your approval. It is not approved and it is not the final film: the video itself says DRAFT."
+    : "This is a preview of this scene as approved. It is a single scene, not the final film.");
+  lines.push(`Drawn by ${esc(ENGINE_NAME[p.engine] ?? p.engine)}.${p.cached ? " Nothing in this scene changed since the last preview, so the saved clip is shown." : ""}`);
+  lines.push(p.sound ? "It has sound for this scene (any generated sound is labelled below)." : "This scene has no sound of its own in the plan.");
+  return `<div class="notice ${draft ? "warn" : "info"}" style="margin:0">${lines.map((l) => `<div style="margin:2px 0">${l}</div>`).join("")}${(p.notes ?? []).map((n) => `<div class="hint" style="margin-top:4px">${esc(n)}</div>`).join("")}</div>`;
+}
+function scenePreviewHtml(res, s) {
+  const gate2 = res.status === "awaiting_approval" && res.gate === "edit_plan", approved = res.status === "approved";
+  if (!gate2 && !approved) return "";
+  const p = state.previews[s.scene_id] ?? {}, draft = gate2;
+  const button = `<button class="ghost sm" data-action="scene-preview" data-scene="${esc(s.scene_id)}" ${p.busy ? "disabled" : ""}>${p.busy ? "Drawing the scene..." : p.result ? "Preview again" : draft ? "Preview this scene (DRAFT)" : "Preview this scene"}</button>`;
+  const shown = p.result ? `<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
+      <div style="flex:1 1 320px;max-width:640px"><div class="chip warn" style="margin-bottom:6px">${draft ? "DRAFT, not approved, not the final film" : "preview of the approved scene"}</div><video controls loop playsinline preload="metadata" src="${esc(p.result.video)}" style="width:100%;border-radius:12px;background:#000" aria-label="${draft ? "Draft preview" : "Preview"} of scene ${esc(s.scene_id)}"></video></div>
+      <div style="flex:1 1 240px">${previewOutcome(p.result, draft)}</div></div>` : "";
+  const err = p.error ? `<div class="notice bad" style="margin-top:8px">${esc(p.error)}</div>` : "";
+  return `<div style="margin-top:10px">${button}${err}${shown}</div>`;
+}
+async function previewScene(sceneId) {
+  const res = state.run?.result;
+  if (!res || state.previews[sceneId]?.busy) return;
+  const draft = res.status === "awaiting_approval" && res.gate === "edit_plan";
+  state.previews[sceneId] = { busy: true }; renderAll();
+  try {
+    const r = await post(`/api/sessions/${state.sid}/scenes/${sceneId}/${draft ? "draft-preview" : "preview"}`, draft ? {} : { settings: previewSettings(res) });
+    state.previews[sceneId] = { result: r };
+  } catch (e) { state.previews[sceneId] = { error: e?.message ? `This scene could not be previewed: ${e.message}` : "This scene could not be previewed." }; }
+  renderAll();
+}
 function requirementsSheetHtml(req) {
   if (!req) return "";
   const a = req.assets, f = req.fonts, s = req.sound;
@@ -859,6 +897,7 @@ document.addEventListener("click", async (e) => {
   else if (a === "answer-questions") answerQuestions();
   else if (a === "approve") decide("approved");
   else if (a === "revise") decide("revision_requested");
+  else if (a === "scene-preview") previewScene(el.dataset.scene);
   else if (a === "tab") { state.tab = el.dataset.tab; renderStage(); }
 });
 
@@ -881,7 +920,7 @@ async function init() {
   drop.addEventListener("drop", (e) => uploadFiles([...e.dataTransfer.files]));
   $("#reset").addEventListener("click", async () => {
     try { await post(`/api/sessions/${state.sid}/reset`); } catch { /* session may be gone */ }
-    Object.assign(state, { turns: [], route: null, run: null, approval: null, transcripts: {}, fromVoice: false, language: null, videoType: null, proposedVideoTypes: [] });
+    Object.assign(state, { turns: [], route: null, run: null, approval: null, transcripts: {}, fromVoice: false, language: null, videoType: null, proposedVideoTypes: [], previews: {} });
     $("#prompt").value = ""; $("#lang-chip").hidden = true; updateCount(); micStatus("Speak instead of typing. Runs locally with Whisper."); renderAll();
     refreshVideoTypes();
   });

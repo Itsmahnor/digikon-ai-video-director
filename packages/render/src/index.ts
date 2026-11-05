@@ -44,3 +44,5 @@ export * from "./scene-graph/index.js";
 export * from "./scene-preview.js";
 export * from "./fonts.js";
 export * from "./face-fonts.js";
+export * from "./draft-label.js";
+export * from "./draft-preview.js";

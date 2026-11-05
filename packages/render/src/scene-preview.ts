@@ -20,7 +20,7 @@ const sha = (b: Buffer | string) => createHash("sha256").update(b).digest("hex")
 const fileHash = (p: string) => { try { return sha(readFileSync(p)); } catch { return "unreadable"; } };
 
 /** The sound that belongs to one scene, with its times counted from the scene's own start; the music bed (if any) runs under it. */
-export function sceneSound(plan: Pick<AssemblyPlan, "scenes" | "audio">, sceneId: string): AudioPlan | null {
+export function sceneSound(plan: { scenes: readonly { scene_id: string; start_s: number }[]; audio: AudioPlan | null }, sceneId: string): AudioPlan | null {
   const sp = plan.scenes.find((s) => s.scene_id === sceneId);
   if (!plan.audio || !sp) return null;
   const tracks: AudioTrack[] = plan.audio.tracks.flatMap((t): AudioTrack[] => t.kind === "music" ? [t] : t.scene_id !== sceneId ? [] : t.kind === "narration" ? [{ ...t, start_s: Math.max(0, t.start_s - sp.start_s) }] : [{ ...t, at_s: Math.max(0, t.at_s - sp.start_s) }]);

@@ -8,7 +8,8 @@ import { Transcript } from "@digikon/contracts";
 import { DemoClient, SkillLibrary, type GenerateRequest } from "@digikon/director";
 import { KeywordRetriever, loadKnowledge, recipeDocs } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
-import { findChrome, findRemotionBrowser } from "@digikon/render";
+import { RenderSettings } from "@digikon/contracts";
+import { findChrome, findRemotionBrowser, validateOutput } from "@digikon/render";
 import type { SpeechEngine } from "@digikon/speech";
 import { createApp } from "./app.js";
 import { realPrerequisites, skipReal } from "../../../packages/render/src/test-env.js";
@@ -260,5 +261,98 @@ describe.skipIf(skipReal(can))("a preview of one scene through the console", () 
     expect(other.key).not.toBe(a.key);
     expect((await app.request(`/api/sessions/${id}/scenes/S99/preview`, json({ settings: SETTINGS }))).status).toBe(409);
     expect((await app.request(`/api/sessions/${id}/scenes/S01/preview/${"0".repeat(32)}.mp4`)).status).toBe(404);
+  });
+});
+
+describe.skipIf(skipReal(can))("a DRAFT preview of one scene before Gate 2 (Digikon's decision, 2026-11-05) leaves the production gate exactly as strict", () => {
+  /** Directed and approved at Gate 1; the edit plan is waiting at Gate 2. */
+  async function atGate2(app: App) {
+    film = MIXED;
+    const id = (await body(await app.request("/api/sessions", { method: "POST" }))).id as string;
+    await app.request(`/api/sessions/${id}/route`, json({ text: "A 12 second YouTube explainer for my online course." }));
+    await sse(await app.request(`/api/sessions/${id}/direct`, json({})));
+    const a1 = await approve(app, id, "storyboard");
+    expect(a1.status).toBe(200);
+    return id;
+  }
+  const storyboardOf = async (app: App, id: string) => (await body(await app.request(`/api/sessions/${id}/change-request`, json({ text: "Make the title bigger" })))).approved_storyboard;
+  const rawPixel = (file: string, x: number, y: number) => execFileSync("ffmpeg", ["-v", "error", "-i", file, "-frames:v", "1", "-vf", `crop=2:2:${x}:${y},format=rgb24`, "-f", "rawvideo", "-"], { maxBuffer: 1024 });
+
+  it("makes a labelled draft before Gate 2, in its own folder, without touching any approval, render record or report", async () => {
+    const app = build();
+    const id = await atGate2(app);
+    const before = await storyboardOf(app, id);
+    const first = await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({}));
+    const a = await body(first);
+    expect(first.status, JSON.stringify(a)).toBe(200);
+    expect(a).toMatchObject({ draft: true, final: false, scene_id: "S01", cached: false, engine: "ffmpeg" });
+    expect(a.label).toContain("DRAFT");
+    expect(a.video).toMatch(/\/draft-preview\/draft-[a-f0-9]{32}\.mp4$/);
+    const video = await app.request(a.video);
+    expect(video.status).toBe(200);
+    expect(video.headers.get("content-type")).toContain("video/mp4");
+    expect(video.headers.get("x-draft-preview")).toBe("true");
+    const bytes = Buffer.from(await video.arrayBuffer());
+    expect(bytes.byteLength).toBe(a.bytes);
+    // the label is burned into the picture: red box top-left of the first frame (the white text sits below this row)
+    const file = join(dir, a.video.split("/").pop() as string);
+    writeFileSync(file, bytes);
+    const px = rawPixel(file, 12, 8); // inside the box padding, above the text
+    expect(px[0]! > 150 && px[1]! < 100, `a red label box, got ${[...px]}`).toBe(true);
+    // a second request is served from the cache
+    expect(await body(await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({})))).toMatchObject({ cached: true, key: a.key, video: a.video });
+    // nothing was recorded as a render, a delivery or an approval
+    expect((await body(await app.request(`/api/sessions/${id}/renders`))).renders ?? []).toEqual([]);
+    expect((await body(await app.request(`/api/sessions/${id}/deliveries`))).deliveries).toEqual([]);
+    expect(await storyboardOf(app, id)).toEqual(before);
+    expect((await app.request(`/api/sessions/${id}/scenes/S99/draft-preview`, json({}))).status).toBe(409);
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/draft-preview/draft-${"0".repeat(32)}.mp4`)).status).toBe(404);
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/draft-preview/..%2F..%2Fsecret.mp4`)).status).toBe(404);
+  });
+
+  it("the production render still refuses without Gate 2, with or without a draft having been made", async () => {
+    const app = build();
+    const id = await atGate2(app);
+    const refuse = async (what: string) => {
+      const r = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
+      expect(r.status, what).toBe(409);
+      return body(r);
+    };
+    await refuse("before any draft");
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({}))).status).toBe(200);
+    const after = await refuse("after a draft");
+    expect(JSON.stringify(after)).not.toMatch(/draft-[a-f0-9]{32}/);
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/preview`, json({ settings: SETTINGS }))).status, "the approved-plan scene preview needs both approvals too").toBe(409);
+    expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status).toBe(409);
+    expect((await app.request(`/api/sessions/${id}/handoff`)).status).toBe(409);
+    // only the real second approval opens the gate, and the draft changed nothing about it
+    expect((await approve(app, id, "edit_plan")).status).toBe(200);
+    expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status).toBe(200);
+    // once both approvals are in, a draft is no longer offered: the approved plan has its own preview
+    expect((await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({}))).status).toBe(409);
+  });
+
+  it("a draft file cannot be passed as final: the output validator refuses its name, and the render video route never serves it", async () => {
+    const app = build();
+    const id = await atGate2(app);
+    const a = await body(await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({})));
+    const file = join(dir, a.video.split("/").pop() as string);
+    writeFileSync(file, Buffer.from(await (await app.request(a.video)).arrayBuffer()));
+    const verdict = await validateOutput(file, RenderSettings.parse({ ...SETTINGS, duration_s: 4, width: 1280, height: 720, source: { kind: "user_approved", reference: "test" } }), false);
+    expect(verdict).toMatchObject({ ok: false });
+    expect(JSON.stringify(verdict)).toContain("DRAFT");
+    expect((await app.request(`/api/sessions/${id}/renders/${(a.video as string).split("/").pop()!.replace(".mp4", "")}/video`)).status).toBe(404);
+  });
+
+  it("a look change never alters the approved storyboard hash, whether or not drafts were made", async () => {
+    const app = build();
+    const id = await atGate2(app);
+    const before = await storyboardOf(app, id);
+    expect(before).toMatchObject({ version: 1 });
+    await app.request(`/api/sessions/${id}/scenes/S01/draft-preview`, json({}));
+    const look = await body(await app.request(`/api/sessions/${id}/change-request`, json({ text: "Use a warmer colour palette and a bigger title" })));
+    expect(look).toMatchObject({ route: "editor", reopens: "edit_plan" });
+    expect(look.approved_storyboard).toEqual(before);
+    expect(await storyboardOf(app, id)).toEqual(before);
   });
 });

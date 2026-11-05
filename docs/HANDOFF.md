@@ -42,7 +42,7 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 | D3 | Story from the chosen type | done (stub model only) | see git log; test `category-stories.test.ts` |
 | E1 | Fonts: one OFL typeface per face (Inter variable, EB Garamond, JetBrains Mono) with licence records in `packages/render/fonts/fonts.json`; stages load the face the visual system chose; sans measured from its own file; 14 visual capabilities re-validated by real renders | done (Digikon approved the 2.7 MB download) | `cf6df75` |
 | E2 | Per-scene preview cached by a hash of job, asset bytes, fonts and sound; `POST /api/sessions/:id/scenes/:sceneId/preview` | done (real renders tested) | `8375a5a`, console test in the E2 follow-up commit |
-| E3 | Preview in the UI with a plain-language outcome | **held**: the plan says "before Gate 2", which would render before the second approval; Digikon was asked (decision card), no UI built yet | |
+| E3 | Scene preview in the UI with a plain-language outcome beside it | done as a separate DRAFT preview before Gate 2 (Digikon's decision, 2026-11-05, see section 4a); after both approvals the same card previews the approved plan (E2 route). Checked in a real browser in demo mode (real Remotion render) | see git log |
 | E4 | Temporary template picker (3 to 5 per scene, a hint only) | done (API and edit-plan prompt; no UI card yet) | `8d812e6` |
 | E5 | Editor advisory model review | done (stub model in demo; real model only with `EDITOR_MODEL_REVIEW=1`) | `fa268af` |
 | E6 | Change-request routing (look to Editor and gate 2, story to Director and gate 1, unsure asks one question) | done as routing only: `POST /api/sessions/:id/change-request` edits nothing; reopening a gate from a finished run is not wired | `b098856` |
@@ -61,6 +61,20 @@ Never loosen, bypass or add an escape hatch to: the two approval gates, the rend
 - Retrieval defaults (`packages/rag/src/skills-defaults.ts`): hybrid ranking (BM25 + vectors) with an off-topic floor that returns nothing when no distinctive word matches (a keyword-coverage rule: sensitive to skill wording, answers most but not all off-topic queries). Without a database the console uses BM25 with the same floor. Chosen after seeing test numbers; see `evals/baselines/skills-hybrid-vs-bm25-*.md`.
 - `SKILLS_INCLUDE_DRAFT=1` lets `draft` skills be retrieved (default off). `reviewed`/`approved` skills are always retrievable. It only widens what may be read; no approval or render gate looks at it.
 - The project kit (C1): every field is `provided | skipped | missing`; values from a website or a guideline are **never approved facts until the user confirms them item by item**; only user-typed or confirmed facts reach `approvedFacts`.
+
+
+## 4a. Deliberate decision: draft scene previews before Gate 2 (Digikon, 2026-11-05)
+
+Digikon chose "separate draft preview before Gate 2" (decision card, 2026-11-05 07:56 UTC). The project rule is that rendering is only permitted after the second approval, so this is how the gate stays intact:
+
+- It is a different code path and place: `POST /api/sessions/:id/scenes/:sceneId/draft-preview` calls `renderDraftScene` (`packages/render/src/draft-preview.ts`), which uses its own adapters whose output root is `draft-previews/work` inside the session folder, never the production output folder.
+- It is labelled DRAFT in three places: the red label is burned into every frame, the file is named `draft-<key>.mp4` with a sidecar saying `final: false`, and the UI shows a DRAFT chip beside the video.
+- It cannot become the final film: `validateOutput` (the check every production render must pass) refuses any file named `draft-...`; nothing in assembly accepts a pre-made file; the production render-video route serves only validated render records.
+- It reads and writes no approval, render record or delivery report, and `production-gate.ts` and the approval code are unchanged. The production render (`POST .../render`), the Editor, the handoff and the approved-plan scene preview all still return 409 until both approvals exist.
+- It is offered only while the edit plan waits at Gate 2 (a compiled plan exists); after both approvals it answers 409 and the approved-plan preview (E2) is used.
+- Tests (`apps/console/src/assembly.test.ts`, real renders): (a) a labelled draft before Gate 2 with its own cache and nothing recorded; (b) the production render, Editor, handoff and approved-plan preview still refuse without Gate 2, with and without a draft, and only the real second approval opens them; (c) the validator refuses a draft file and the render video route never serves it; (d) a look change leaves the approved storyboard version and hash unchanged.
+
+**Gotcha found while checking the UI:** port 4173 can already hold a console running in REAL-model mode (not demo). Starting `npm run console:demo` on it fails with EADDRINUSE, and the browser then talks to the real-mode console, which tries a real Claude call. Always start the demo on a free port (`$env:PORT="4199"`) and confirm `/api/health` says `"model":"demo-scripted (not Claude)"` before using it.
 
 ## 5. How to run everything (Windows, PowerShell)
 

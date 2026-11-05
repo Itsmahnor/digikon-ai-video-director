@@ -4,7 +4,7 @@ import { createWriteStream } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { extname, join, relative } from "node:path";
+import { basename, extname, join, relative } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { Hono, type Context } from "hono";
@@ -23,6 +23,7 @@ import {
   AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
   directoryStamp, KeyedCache,
+  renderDraftScene,
   renderScenePreview,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
@@ -938,6 +939,46 @@ export function createApp(ctx: AppContext) {
 
   /** Runs the Editor on the verified handoff. Deterministic checks only: no model is called. */
   /**
+   * DELIBERATE DECISION (Digikon, 2026-11-05): a separate DRAFT preview of one scene may be made before Gate 2, while the edit plan is waiting for approval. It is not the render:
+   * it plans and draws one scene into its own folder (`draft-previews`, never the production output), the file is named `draft-...` and carries a burned-in DRAFT label, and
+   * validateOutput refuses that name, so it can never be assembled into or accepted as the final film. It reads no approval and writes no approval, render record or delivery
+   * report. The production render (`POST .../render`) still needs both approvals and the hash-bound production record; nothing here satisfies or bypasses it.
+   */
+  const draftDirOf = (s: Session) => join(s.dir, "draft-previews");
+  app.post("/api/sessions/:id/scenes/:sceneId/draft-preview", async (c) => {
+    const s = session(c.req.param("id"));
+    const sceneId = c.req.param("sceneId");
+    if (!ctx.renderFont || !ctx.ffmpegOk) throw new HttpError(503, "no_render", "This machine cannot render, so no draft preview can be made.");
+    if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no plan to preview yet.");
+    const state = (await s.graph.getState({ configurable: { thread_id: s.threadId } })).values as DirectorStateType;
+    if (state.status !== "awaiting_approval" || state.gate !== "edit_plan" || !state.compiledPlan || !state.productionPlan || !state.scenePlan) {
+      throw new HttpError(409, "no_draft_available", "A draft preview can be made only while the edit plan is waiting for your approval. After both approvals use the scene preview of the approved plan; before the edit plan exists there is nothing to draw.");
+    }
+    const templates: Record<string, string> = {};
+    for (const op of state.compiledPlan.operations) { const d = state.productionPlan.decisions.find((x) => x.use_id === op.source_use_id); if (d?.implementation_ref) templates[op.operation_id] = d.implementation_ref; }
+    const draftDir = draftDirOf(s);
+    const { registry, available } = registryFor(join(draftDir, "work"));
+    if (!available) throw new HttpError(409, "no_engine", "No render engine is available on this machine.");
+    const r = await renderDraftScene(
+      { scenePlan: state.scenePlan, assets: state.assets, art_direction: state.treatmentDoc?.art_direction ?? null, operations: state.compiledPlan.operations, templates, aspect_ratio: state.project.aspect_ratio },
+      sceneId,
+      { adapters: registry, draftDir, fontFile: ctx.renderFont, assetFiles: (id, role) => assets.renderFile(s.id, id, role), audio: ctx.audio ?? null },
+    );
+    if (!r.ok) return c.json({ error: "scene_not_renderable", draft: true, scene_id: sceneId, reason: scrub(r.reason, scrubRoots(s)) }, 409);
+    return c.json({ draft: true, final: false, label: r.label, scene_id: sceneId, key: r.key, cached: r.cached, engine: r.engine, sound: r.sound, notes: r.notes.map((n) => scrub(n, scrubRoots(s))), bytes: r.bytes, video: `/api/sessions/${s.id}/scenes/${sceneId}/draft-preview/${basename(r.path)}` });
+  });
+  app.get("/api/sessions/:id/scenes/:sceneId/draft-preview/:file", async (c) => {
+    const s = session(c.req.param("id"));
+    const m = /^(draft-[a-f0-9]{32}\.mp4)$/.exec(c.req.param("file"));
+    if (!m) throw new HttpError(404, "no_video", "There is no such draft preview.");
+    const dir = draftDirOf(s), path = join(dir, m[1]!);
+    const meta = existsSync(`${path}.json`) ? (JSON.parse(readFileSync(`${path}.json`, "utf8")) as { bytes: number; sha256: string }) : null;
+    if (!meta) throw new HttpError(404, "no_video", "There is no such draft preview.");
+    const res = await serveVideo(c, dir, path, meta.bytes, meta.sha256);
+    res.headers.set("x-draft-preview", "true");
+    return res;
+  });
+  /**
    * TEMPORARY template picker: 3 to 5 recipes for a scene from retrieval, and the user's pick (or skip). A pick is stored as a hint for the edit plan only, so it can be made
    * only while the storyboard is waiting at gate 1 (before the edit plan is written), cannot name a recipe that is not offered, and changes no plan or approval.
    */
@@ -1215,5 +1256,6 @@ function summarise(state: Record<string, unknown>, ctx: Pick<AppContext, "recipe
     citations: s["citations"] ?? [], skillsUsed: s["skillsUsed"] ?? [], referencesUsed: s["referencesUsed"] ?? [], trace: s["trace"] ?? [], notes: s["notes"] ?? [],
     videoType: s["chosenVideoType"] ?? null, proposedVideoTypes: s["proposedVideoTypes"] ?? [],
     requirementsSheet: s["requirementsSheet"] ?? null,
+    aspectRatio: (s["project"] as { aspect_ratio?: string } | undefined)?.aspect_ratio ?? null,
   };
 }
