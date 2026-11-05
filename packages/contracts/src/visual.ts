@@ -222,7 +222,7 @@ const Token = z.enum(["text", "muted", "accent", "accent_2", "surface", "backgro
  * A portrait frame may override any of it (`portrait`), because a layout for 16:9 is rarely the right one for 9:16.
  */
 const Place = z.object({ x: Frac(-0.2, 1.2), y: Frac(-0.2, 1.2), w: Frac(0.01, 1.4), h: Frac(0, 1.4).optional() });
-const Motion = z.object({
+const MotionObject = z.object({
   /** How it arrives. `rise` and `drop` move a little; `wipe` uncovers it left to right. */
   enter: z.enum(["none", "fade", "rise", "drop", "slide_left", "slide_right", "scale_in", "wipe"]).default("fade"),
   /** When it starts and how long it takes, as shares of the scene. Everything must finish early enough to be read. */
@@ -231,7 +231,20 @@ const Motion = z.object({
   easing: z.enum(["ease_out", "ease_in_out", "spring"]).default("ease_out"),
   /** Text only: lines, words or characters arrive one after another, `each` of the scene apart. */
   stagger: z.object({ unit: z.enum(["line", "word", "char"]), each: Frac(0.002, 0.2) }).optional(),
-}).default({});
+});
+const Motion = MotionObject.default({});
+/**
+ * What the Editor may change about a composed scene: how its elements arrive (kind, delay, duration, easing, stagger) and nothing else. It is strict on purpose: a patch cannot
+ * carry text, position, size, colour, shape or a picture, so the copy, facts and layout the storyboard approved stay exactly as they were. Part of the edit plan, so Gate 2 approves it.
+ */
+export const MotionPatch = MotionObject.partial().extend({ stagger: MotionObject.shape.stagger.nullable() }).strict();
+export const CompositionMotionPlan = z.object({
+  scene_id: z.string().regex(/^S\d{2,}$/),
+  elements: z.array(z.object({ id: Ident, motion: MotionPatch })).min(1).max(40),
+  /** Why the motion is changed, for the reviewer. */
+  rationale: Txt(200),
+}).strict();
+export type CompositionMotionPlan = z.infer<typeof CompositionMotionPlan>;
 const Override = z.object({ x: Frac(-0.2, 1.2).optional(), y: Frac(-0.2, 1.2).optional(), w: Frac(0, 1.4).optional(), h: Frac(0, 1.4).optional(), size: Frac(0.012, 0.35).optional() });
 
 export const CompText = z.object({
@@ -284,6 +297,40 @@ export function compositionStructureIssues(c: z.infer<typeof Composition>): stri
   const out: string[] = [], seen = new Set<string>();
   for (const e of c.elements) { if (seen.has(e.id)) out.push(`duplicate element id ${e.id}`); seen.add(e.id); }
   if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");
+  return out;
+}
+/** The composition with the Editor's motion patches applied. Only the motion of the named elements changes; every other field is returned untouched. Ids the composition does not have are ignored here and reported by compositionMotionIssues. */
+export function applyCompositionMotion(c: z.infer<typeof Composition>, plan: readonly { elements: readonly { id: string; motion: z.infer<typeof MotionPatch> }[] }[]): z.infer<typeof Composition> {
+  const patches = new Map<string, z.infer<typeof MotionPatch>>();
+  for (const p of plan) for (const e of p.elements) patches.set(e.id, { ...(patches.get(e.id) ?? {}), ...e.motion });
+  if (!patches.size) return c;
+  return { ...c, elements: c.elements.map((e) => {
+    const p = patches.get(e.id);
+    if (!p) return e;
+    const { stagger, ...rest } = p;
+    const next = { ...e.motion, ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined)) } as typeof e.motion;
+    if (stagger !== undefined) { if (stagger === null || e.kind !== "text") delete (next as { stagger?: unknown }).stagger; else next.stagger = stagger; }
+    return { ...e, motion: next } as typeof e;
+  }) };
+}
+
+/** Problems with the Editor's motion plan that need only the storyboard: a scene that is not a composition, an element that is not in it, a stagger on a shape, a scene named twice. */
+export function compositionMotionIssues(plan: readonly CompositionMotionPlan[] | undefined, scenes: readonly { scene_id: string; visual: { block: string; elements?: readonly { id: string; kind: string }[] } | null }[]): string[] {
+  const out: string[] = [], seen = new Set<string>();
+  for (const p of plan ?? []) {
+    if (seen.has(p.scene_id)) out.push(`${p.scene_id}: composition_motion names this scene twice; give each scene one entry`);
+    seen.add(p.scene_id);
+    const s = scenes.find((x) => x.scene_id === p.scene_id);
+    if (!s || s.visual?.block !== "composition") { out.push(`${p.scene_id}: composition_motion names a scene that is not a composition; only composed scenes have motion to adjust`); continue; }
+    const els = new Map((s.visual.elements ?? []).map((e) => [e.id, e.kind]));
+    const ids = new Set<string>();
+    for (const e of p.elements) {
+      if (!els.has(e.id)) out.push(`${p.scene_id}: composition_motion names element ${e.id}, which the composition does not have (it has: ${[...els.keys()].join(", ")})`);
+      else if (e.motion.stagger && els.get(e.id) !== "text") out.push(`${p.scene_id}: ${e.id} is not text, so it cannot stagger`);
+      if (ids.has(e.id)) out.push(`${p.scene_id}: composition_motion names element ${e.id} twice`);
+      ids.add(e.id);
+    }
+  }
   return out;
 }
 /**

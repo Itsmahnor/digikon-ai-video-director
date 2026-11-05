@@ -559,9 +559,15 @@ export const drawnCameraMotion = (v: SceneVisual): string => STORYBOARD_CAMERA[v
 export const numberOrNull = num;
 
 /** The approved visual specs and art direction of a handoff, in the form a render job carries them. Only scenes that have a spec appear. */
-export function jobVisuals(h: { storyboard: { scenes: readonly { scene_id: string; visual: unknown; visual_purpose: string | null; overlay: { text: string } | null; asset_refs?: readonly SceneAssetRef[] }[] }; treatment: { art_direction: unknown } }, resolve?: AssetFileResolver): Pick<RenderJob, "scene_visuals" | "art_direction" | "scene_assets"> {
+export function jobVisuals(h: { storyboard: { scenes: readonly { scene_id: string; visual: unknown; visual_purpose: string | null; overlay: { text: string } | null; asset_refs?: readonly SceneAssetRef[] }[] }; treatment: { art_direction: unknown }; /** The approved edit plan's motion changes for composed scenes. */ edit_plan?: { composition_motion?: readonly CompositionMotionPlan[] } }, resolve?: AssetFileResolver): Pick<RenderJob, "scene_visuals" | "art_direction" | "scene_assets"> {
   const scene_visuals: NonNullable<RenderJob["scene_visuals"]> = {};
-  for (const s of h.storyboard.scenes) if (s.visual) scene_visuals[s.scene_id] = { visual: s.visual, overlay_text: s.overlay?.text ?? null, visual_purpose: s.visual_purpose };
+  const motion = h.edit_plan?.composition_motion ?? [];
+  for (const s of h.storyboard.scenes) if (s.visual) {
+    // a composed scene is drawn as the storyboard approved it, with the edit plan's motion changes laid over it (motion only: copy, layout and colour cannot be touched by a patch)
+    const parsed = SceneVisual.safeParse(s.visual);
+    const patched = parsed.success && parsed.data.block === "composition" ? applyCompositionMotion(parsed.data, motion.filter((m) => m.scene_id === s.scene_id)) : s.visual;
+    scene_visuals[s.scene_id] = { visual: patched, overlay_text: s.overlay?.text ?? null, visual_purpose: s.visual_purpose };
+  }
   const scene_assets: NonNullable<RenderJob["scene_assets"]> = {};
   for (const s of h.storyboard.scenes) {
     if (!s.asset_refs?.length) continue;

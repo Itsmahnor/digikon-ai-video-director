@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AssetKind, QAFinding } from "./schemas.js";
-import { ArtDirection } from "./visual.js";
+import { ArtDirection, CompositionMotionPlan } from "./visual.js";
 import { AssetManifestEntry } from "./assets.js";
 
 /** Time range inside a source asset, in seconds. */
@@ -132,6 +132,8 @@ export const EditPlan = z.object({
   project_id: z.string().min(1),
   version: z.number().int().positive(),
   uses: z.array(RecipeUse),
+  /** The Editor's changes to how composed scenes move (see CompositionMotionPlan). Absent on a plan with none, so earlier plans keep their hash. */
+  composition_motion: z.array(CompositionMotionPlan).optional(),
 });
 
 export const OwnerSkill = z.enum([
