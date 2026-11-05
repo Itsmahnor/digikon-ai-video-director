@@ -17,17 +17,17 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |-- package-lock.json
 |-- package.json
 |-- tsconfig.base.json
-|-- apps/                                       23 files  [done; base, B3, C2-C6, D1, E2-E6] The console: server, routes and browser UI
-|   |-- console/                                23 files  [done; base, B3, C2-C6, D1, E2-E6] Hono server + plain-JS UI (no build step)
+|-- apps/                                       24 files  [done; base, B3, C2-C6, D1, E2-E6] The console: server, routes and browser UI
+|   |-- console/                                24 files  [done; base, B3, C2-C6, D1, E2-E6] Hono server + plain-JS UI (no build step)
 |   |   |-- public/                              4 files  [done; C4, C6, D1] UI: guided-intake wizard (C4), typed question card (C6), video-type card (D1)
-|   |   |-- src/                                17 files  [done; B3, C2-C6, D1] Routes; kit-routes.ts holds the kit, website, guideline and question routes
-|-- capabilities/                               35 files  [base] Capability registry: what each renderer can really do, with validation evidence
+|   |   |-- src/                                18 files  [done; B3, C2-C6, D1] Routes; kit-routes.ts holds the kit, website, guideline and question routes
+|-- capabilities/                               36 files  [base] Capability registry: what each renderer can really do, with validation evidence
 |   |-- learned/                                 2 files
 |   |-- registry/                               18 files
 |   |   |-- ffmpeg/                              2 files
 |   |   |-- hyperframes/                         6 files
 |   |   |-- remotion/                           10 files
-|   |-- visual/                                 15 files
+|   |-- visual/                                 16 files
 |-- db/                                          3 files  [done; A1, A2, B1] SQL migrations
 |   |-- migrations/                              3 files  [done; A1, A2, B1] 0001 pgvector foundation (base), 0002 skills (A2), 0003 skill scope and topic (B1)
 |-- docs/                                      212 files  [done; base, B3, C, handoff] Design notes, the handoff guide, the plan text, skills and review docs
@@ -63,11 +63,11 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |-- ad_playbooks/                            5 files
 |   |-- directing_principles/                    9 files
 |   |-- platform_specs/                          1 files
-|-- packages/                                  327 files  [done; base, A-D] Workspace packages
-|   |-- contracts/                              41 files  [done; A2, B1, C1, C5, C6, D1, D2] Schemas: SkillRecord, ProjectKit, completeness, typed questions, video types, Gate 1 requirements
-|   |   |-- src/                                39 files
-|   |-- director/                               53 files  [partial; B3, C6, D1, D2, D3, E4-E6] Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model
-|   |   |-- src/                                51 files
+|-- packages/                                  334 files  [done; base, A-D] Workspace packages
+|   |-- contracts/                              43 files  [done; A2, B1, C1, C5, C6, D1, D2] Schemas: SkillRecord, ProjectKit, completeness, typed questions, video types, Gate 1 requirements
+|   |   |-- src/                                41 files
+|   |-- director/                               55 files  [partial; B3, C6, D1, D2, D3, E4-E6] Director graph and nodes, Editor agent; D3 (story from the chosen type) done with the stub model
+|   |   |-- src/                                53 files
 |   |-- evals/                                  15 files  [done; B3] Benchmark runners (eval:skills, eval:skills:db, eval:hybrid)
 |   |   |-- src/                                13 files
 |   |-- media/                                  21 files  [done; base, C2, C3] Asset analysis; website reader (C2) and guideline PDF reader (C3)
@@ -78,12 +78,12 @@ Status: **done** = built and tested; **partial** = some of it built, the rest pl
 |   |   |-- src/                                25 files
 |   |-- recipes/                                 7 files  [base] Recipe library
 |   |   |-- src/                                 5 files
-|   |-- render/                                119 files  [partial; base, E1, E2, E7 (part)] Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts and E2 per-scene previews done; E3 UI previews held for a decision; E7 narration and music not installed
+|   |-- render/                                122 files  [partial; base, E1, E2, E7 (part)] Renderers (FFmpeg, Remotion, HyperFrames); E1 fonts and E2 per-scene previews done; E3 UI previews held for a decision; E7 narration and music not installed
 |   |   |-- fonts/                              13 files
 |   |   |-- remotion-compositions/               2 files
 |   |   |-- remotion-project/                    2 files
 |   |   |-- remotion-scene-graph/                2 files
-|   |   |-- src/                                98 files
+|   |   |-- src/                               101 files
 |   |-- router/                                  5 files  [base] Request router
 |   |   |-- src/                                 3 files
 |   |-- speech/                                  6 files  [base] Speech recognition
