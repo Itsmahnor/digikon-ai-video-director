@@ -10,7 +10,7 @@ import { probeFile } from "@digikon/media";
 import { cfg, deps, knowledge, root } from "../../director/src/fixtures.js";
 import {
   AdapterRegistry, DeliveryReport, createFfmpegAdapter, createHyperframesAdapter, createRemotionAdapter, findChrome, findRemotionBrowser, loadCapabilityRegistry, planAssembly, rawFrame, registryDir, renderAssembly,
-  runRenderQa, saveDeliveryReport, loadDeliveryReport, type AssembleDeps, type LoadedRegistry, type RenderAdapter,
+  renderScenePreview, scenePreviewKey, runRenderQa, saveDeliveryReport, loadDeliveryReport, type AssembleDeps, type LoadedRegistry, type RenderAdapter,
 } from "./index.js";
 import { realPrerequisites, skipReal } from "./test-env.js";
 
@@ -402,5 +402,45 @@ describe.skipIf(skipReal(can))("an approved hard cut is the assembler's default 
     expect(r.report.transitions.every((t) => t.status === "applied")).toBe(true);
     expect(near(await frame(r.report.output!.path, 89), [22, 33, 62], 14)).toBe(true);  // last frame of S01
     expect(near(await frame(r.report.output!.path, 90), [30, 61, 47], 14)).toBe(true);  // first frame of S02: a cut, nothing in between
+  });
+});
+
+describe.skipIf(skipReal(can))("a preview of one scene is cached by what shapes its pixels", () => {
+  let reg: LoadedRegistry;
+  beforeAll(() => { reg = loadCapabilityRegistry(repoCaps(), { recipes: library }); });
+  const planOf = (r: Run) => { const p = planAssembly(inputFor(r), depsFor(r, reg)); if (!p.ok) throw new Error(p.reasons.join("; ")); return p.plan; };
+  const cacheDir = () => join(tmp, "scene-previews");
+
+  it("renders a scene once, then serves it from the cache without calling the adapter", async () => {
+    const plan = planOf(mixed);
+    const first = await renderScenePreview(plan, "S01", { cacheDir: cacheDir(), fontFile: font! });
+    if (!first.ok) throw new Error(first.reason);
+    expect(first.cached).toBe(false);
+    expect(first.bytes).toBeGreaterThan(1000);
+    const spy = plan.scenes.find((s) => s.scene_id === "S01")!;
+    const real = spy.adapter!.render.bind(spy.adapter!); let calls = 0; spy.adapter!.render = async (j) => { calls++; return real(j); };
+    const second = await renderScenePreview(plan, "S01", { cacheDir: cacheDir(), fontFile: font! });
+    spy.adapter!.render = real;
+    if (!second.ok) throw new Error(second.reason);
+    expect(second).toMatchObject({ cached: true, path: first.path, key: first.key, sha256: first.sha256 });
+    expect(calls).toBe(0);
+  });
+
+  it("a scene that did not change keeps its key; only the changed scene gets a new one", () => {
+    const a = planOf(mixed), b = planOf(withAudio);
+    const key = (p: typeof a, id: string) => scenePreviewKey(p, id, font!);
+    for (const id of ["S01", "S02", "S03"]) expect(key(a, id), id).toBe(key(b, id));
+    expect(key(a, "S04")).not.toBe(key(b, "S04")); // its text differs
+    expect(new Set(["S01", "S02", "S03", "S04"].map((id) => key(a, id))).size).toBe(4);
+  });
+
+  it("a different font file is a different key", () => {
+    const plan = planOf(mixed);
+    expect(scenePreviewKey(plan, "S01", font!)).not.toBe(scenePreviewKey(plan, "S01", process.execPath));
+  });
+
+  it("refuses a scene that is not in the plan", async () => {
+    const r = await renderScenePreview(planOf(mixed), "S99", { cacheDir: cacheDir(), fontFile: font! });
+    expect(r).toMatchObject({ ok: false });
   });
 });

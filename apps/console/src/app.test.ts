@@ -210,6 +210,23 @@ describe("routing and the Director run", () => {
     expect((await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" })).status).toBe(409); // cannot approve twice
   });
 
+  it("routes a change request by what it changes, and a look change never alters the approved storyboard", async () => {
+    const { app, id } = await atGate1();
+    const ask = (text: string) => app.request(`/api/sessions/${id}/change-request`, json({ text }));
+    const approved = async () => (await decided(await ask("Make the title bigger"))).approved_storyboard;
+    await decide(app, id, { stage: "storyboard", plan_version: 1, decision: "approved" });
+    await decide(app, id, { stage: "edit_plan", plan_version: 1, decision: "approved" });
+    const before = await approved();
+    expect(before).toMatchObject({ version: 1 });
+    expect(before.hash).toMatch(/^[a-f0-9]{16,}$/);
+    expect(await decided(await ask("Use a warmer colour palette"))).toMatchObject({ route: "editor", reopens: "edit_plan", question: null });
+    expect(await decided(await ask("Change the headline so it mentions the new offer"))).toMatchObject({ route: "director", reopens: "storyboard" });
+    const unsure = await decided(await ask("Make it better"));
+    expect(unsure).toMatchObject({ route: "ask", reopens: null });
+    expect(unsure.question).toMatch(/\?$/);
+    expect(await approved()).toEqual(before); // asking, and being routed, changed nothing that was approved
+    expect((await app.request(`/api/sessions/nosuchsession/change-request`, json({ text: "x" }))).status).toBe(404);
+  });
   it("serves the Editor handoff only after both approvals, and 409 with reasons before", async () => {
     const { app, id } = await atGate1();
     const early = await app.request(`/api/sessions/${id}/handoff`);

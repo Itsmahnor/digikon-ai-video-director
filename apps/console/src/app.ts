@@ -16,11 +16,13 @@ import {
   Command, HandoffRefusedError, matchAssetsToScenes, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
   type DirectorStateType, type ProductionPort, type LlmClient, type SkillLibrary,
+  classifyChange,
 } from "@digikon/director";
 import {
   AdapterRegistry, COMPOSITION_TEMPLATE, verifyProductionForRender, replanAtActualSettings, renderTimeProblems, type ProductionGate, CapabilityRegistry, buildAdapterRegistry, implementationsOf, runAdapterPreflight, DeliveryReport, FFMPEG_TEMPLATES, filmQuality, layoutConstraints, loadVisualCapabilities, logVisualQa, findCapabilityGaps, loadDeliveryReport, assemblyBlockers, planAssembly, planAudio, type AudioCapabilities, renderAssembly, saveDeliveryReport, type AssembleDeps, type AssemblePlanResult, learnGaps, loadCapabilityRegistry, HYPERFRAMES_TEMPLATES, NO_ADAPTERS, REMOTION_TEMPLATES, buildRenderEvidence, createFfmpegAdapter, createHyperframesStageAdapter, createRemotionAdapter, executeRender, loadRenderRecord, planRender, previewCoverage, runRenderQa, saveRenderEvidence, saveRenderRecord, selectRenderer,
   type PlanResult, type RenderAdapter,
   directoryStamp, KeyedCache,
+  renderScenePreview,
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
 import { ALL_EXTENSIONS, AssetRegistry, MEDIA_LIMITS, analyseContent, analyseMedia, buildAssetNotes, manifestEntry, measureImage, notesWithAnalysis, probeFile, understandAsset, type OcrEngine, type VisionModel } from "@digikon/media";
@@ -934,11 +936,25 @@ export function createApp(ctx: AppContext) {
   };
 
   /** Runs the Editor on the verified handoff. Deterministic checks only: no model is called. */
+  /**
+   * Where a change request goes: a look change to the Editor (gate 2 only), a story change to the Director (gate 1), and one question when it is unclear. It only decides the
+   * route: it edits no plan and no approval, and the approved storyboard (version and hash) is returned as it was, before and after.
+   */
+  app.post("/api/sessions/:id/change-request", async (c) => {
+    const s = session(c.req.param("id"));
+    const body = z.object({ text: z.string().max(2000) }).parse(await c.req.json().catch(() => ({})));
+    if (!s.graph || !s.threadId) throw new HttpError(409, "no_run", "There is no plan to change yet.");
+    const state = (await s.graph.getState({ configurable: { thread_id: s.threadId } })).values as DirectorStateType;
+    const storyboard = currentStoryboard(state);
+    return c.json({ ...classifyChange(body.text), approved_storyboard: storyboard ? { version: storyboard.version, hash: storyboard.hash } : null });
+  });
+  /** The Editor's advisory model review: on in demo mode (the stub model), and with a real model only when EDITOR_MODEL_REVIEW=1, so a real Claude call is never made by default. */
+  const editorModel = (): LlmClient | null => (ctx.llm && (ctx.demo || process.env["EDITOR_MODEL_REVIEW"] === "1") ? ctx.llm : null);
   app.post("/api/sessions/:id/editor", async (c) => {
     const s = session(c.req.param("id"));
     if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
     const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
-    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, ...(editorModel() ? { llm: editorModel()! } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
     if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
     saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
     return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });
@@ -954,6 +970,32 @@ export function createApp(ctx: AppContext) {
     return c.json(planView(s, await prepare(s, body.settings)));
   });
 
+  /**
+   * A preview of one scene at the film's final settings, cached by a hash of the scene's job, its assets and the fonts: a scene that did not change is served from the
+   * cache and nothing renders. Needs the same approvals as the film preview (planned from the stored Editor result) and changes nothing that was approved.
+   */
+  app.post("/api/sessions/:id/scenes/:sceneId/preview", async (c) => {
+    const s = session(c.req.param("id"));
+    const sceneId = c.req.param("sceneId");
+    const body = SettingsBody.parse(await c.req.json().catch(() => ({})));
+    if (!ctx.renderFont) throw new HttpError(503, "no_render", "This machine has no render font, so no preview can be made.");
+    const p = await prepare(s, body.settings);
+    if (!p.assembly) throw new HttpError(409, "no_assembly", "Nothing here can plan a scene preview yet: there is no render engine on this machine.");
+    if (!p.assembly.ok) return c.json({ error: "cannot_plan", reasons: plainReasons(p.assembly.reasons.map((r) => scrub(r, scrubRoots(s)))) }, 409);
+    const r = await renderScenePreview(p.assembly.plan, sceneId, { cacheDir: join(p.dirs.out, "scene-previews"), fontFile: ctx.renderFont });
+    if (!r.ok) return c.json({ error: "scene_not_renderable", scene_id: sceneId, reason: scrub(r.reason, scrubRoots(s)) }, 409);
+    return c.json({ scene_id: sceneId, key: r.key, cached: r.cached, engine: r.engine, notes: r.notes.map((n) => scrub(n, scrubRoots(s))), bytes: r.bytes, video: `/api/sessions/${s.id}/scenes/${sceneId}/preview/${r.key.slice(0, 32)}.mp4` });
+  });
+  app.get("/api/sessions/:id/scenes/:sceneId/preview/:file", async (c) => {
+    const s = session(c.req.param("id"));
+    const m = /^([a-f0-9]{32})\.mp4$/.exec(c.req.param("file"));
+    if (!m) throw new HttpError(404, "no_video", "There is no such scene preview.");
+    const dirs = renderDirs(s.dir, runIdOf(s));
+    const dir = join(dirs.out, "scene-previews"), path = join(dir, `${m[1]}.mp4`);
+    const meta = existsSync(`${path}.json`) ? (JSON.parse(readFileSync(`${path}.json`, "utf8")) as { bytes: number; sha256: string }) : null;
+    if (!meta) throw new HttpError(404, "no_video", "There is no such scene preview.");
+    return serveVideo(c, dir, path, meta.bytes, meta.sha256);
+  });
   /**
    * Renders the preview, but only when the render plan is executable and the approved plan is fully shown by it. Otherwise 409
    * with every reason and nothing is started. A record is written before the renderer starts and again when it ends.
