@@ -37,15 +37,15 @@
     "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
   },
   "validated": {
-    "at": "2026-11-03T07:31:55.856Z",
-    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "at": "2026-11-06T18:39:55.195Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
     "xfade_names": [],
-    "browser": "chrome.exe; hyperframes 0.8.207; scenes f71b8a2ec2ef28bf",
+    "browser": "msedge.exe; hyperframes 0.8.207; scenes 5c88f17bc5a9db47",
     "renders": [
       {
         "variant": "fixed",
-        "sha256": "4de2d6c2eb0c23674c7b36d856201cd89724c7bbfd8606a0fa1a09bb0fe10d8a",
-        "bytes": 13893,
+        "sha256": "f99635de2f5c4476549bcecd95ca665758a8f5f47f2eb95ee77b91a29003acb1",
+        "bytes": 14124,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -53,8 +53,8 @@
       },
       {
         "variant": "over_image",
-        "sha256": "59c9449f2f148e141e94629209e81a65352ff48219f3ce05451420bb11d3ce29",
-        "bytes": 64413,
+        "sha256": "1013d4c1e3b2b2543e4af678c3e8bc133d402596ee491dea2797ad9a91f5c8da",
+        "bytes": 64388,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -70,7 +70,7 @@
       "the text rises into place: 16.0px lower early in the entrance",
       "validateOutput passed: 640x360 at 30 fps, 3s, h264, no audio",
       "the adapter's own content check passed on the rendered scene",
-      "nothing is on screen before the approved delay (0.5s): 0 ink units against 1365 at the end",
+      "nothing is on screen before the approved delay (0.5s): 0 ink units against 1367 at the end",
       "the text has started 9 frames after the approved delay",
       "the text is complete once the approved entrance has finished",
       "the text rises into place: 16.0px lower early in the entrance",
@@ -132,8 +132,15 @@
       "outcome": "validated",
       "input_hash": "31e37e77542dcb2bafc7ced9da8a6ee306e20ab549b059a9f6da156db1f3225b",
       "reasons": []
+    },
+    {
+      "attempt_id": "a-b64511f3",
+      "at": "2026-11-06T18:39:55.195Z",
+      "outcome": "validated",
+      "input_hash": "45f220edbbcdcb5c49365e74a1a540d952515136bd9fffe8ba4bff52d2f121d9",
+      "reasons": []
     }
   ],
   "migrated_from": null,
-  "record_hash": "f73da42ca1703bdb15c7df69270e12b6b6e325e8262052a262aa4a3610f7b77b"
+  "record_hash": "4506288957eeda267a34d62b0d0df5cf8aa5d4b2cd5c309dcf3d359e4d2d77bf"
 }

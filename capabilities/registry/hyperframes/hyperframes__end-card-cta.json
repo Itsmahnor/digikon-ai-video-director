@@ -36,15 +36,15 @@
     "approval": "binds recipe version 0.1.0; the recipe itself is never rewritten by learning"
   },
   "validated": {
-    "at": "2026-11-03T07:33:15.270Z",
-    "ffmpeg_version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "at": "2026-11-06T18:41:12.709Z",
+    "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
     "xfade_names": [],
-    "browser": "chrome.exe; hyperframes 0.8.207; scenes f71b8a2ec2ef28bf",
+    "browser": "msedge.exe; hyperframes 0.8.207; scenes 5c88f17bc5a9db47",
     "renders": [
       {
         "variant": "brand",
-        "sha256": "662cc11d491a39a9fe5e435ce434c90f624ad35bbd986f272a24a7451537d41c",
-        "bytes": 21631,
+        "sha256": "cb253f01720c35ba0ac3da5f205e7db94f5b01a967280ea77d1589c98a9426bb",
+        "bytes": 22902,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -52,8 +52,8 @@
       },
       {
         "variant": "dark",
-        "sha256": "ae1f2d06bf6b13a2148d0f1384985f91e3777df408c0fd196690344279daad69",
-        "bytes": 17583,
+        "sha256": "43ff20769c53a3b747feb6d4763a39d0ab22100c9c689ed298c8f44d8271345a",
+        "bytes": 17790,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -61,8 +61,8 @@
       },
       {
         "variant": "light",
-        "sha256": "848713235816482d6f3f4a0f0da7e1aa0f80ab938c87c75dcc408b14d5cf0be0",
-        "bytes": 25420,
+        "sha256": "1987ba591a142b6be08e191456283cbb1419e1e1f9f229f303e977a834bcf102",
+        "bytes": 25327,
         "width": 640,
         "height": 360,
         "fps": 30,
@@ -139,8 +139,15 @@
       "outcome": "validated",
       "input_hash": "09d76eb8657bfc5b34db47fe2acd4c264033b1e55405479ea59df2abc293b9df",
       "reasons": []
+    },
+    {
+      "attempt_id": "a-2879e0e2",
+      "at": "2026-11-06T18:41:12.709Z",
+      "outcome": "validated",
+      "input_hash": "f9b9fb8ce4b8698c6facac41aa68fa603282df0e20a38d7307d27504b67730ad",
+      "reasons": []
     }
   ],
   "migrated_from": null,
-  "record_hash": "e7e5e514d8fa93e3433989f5758b90e16a0aa00474e9895a42a7fddb8aea1cba"
+  "record_hash": "97eb3a6384c22981c2738eb9925cb6b14299bc36b65d944575c8f3266f764069"
 }
