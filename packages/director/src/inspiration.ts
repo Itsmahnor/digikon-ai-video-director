@@ -8,12 +8,16 @@ export interface TemplateRef { template_id: string; title: string; family: strin
 
 export interface TemplateInspirationPort {
   suggest(q: { text: string; category?: string; film_id?: string; exclude_families?: string[]; k: number }): Promise<TemplateRef[]>;
-  /** Layout similarity (0..1) of one composed scene to each named template. */
+  /** Layout similarity (0..1) of one composed scene to each named template; an empty list means every template in the library. */
   compare(composition: unknown, template_ids: readonly string[]): Promise<{ template_id: string; similarity: number }[]>;
 }
 
-/** A composition whose layout matches a shown template at or above this share is reported. A first guess from the library's own distribution; calibrate before it blocks anything. */
-export const TOO_CLOSE = 0.6;
+/**
+ * A composition whose layout matches a template at or above this share is reported. Calibrated on the library itself and one real composition set (2026-11-06): the nearest
+ * different-family neighbour of a template has a layout similarity of median 0.69 and 90th percentile 0.83, and real compositions score 0.56 to 0.77 against their closest template.
+ * So 0.6 flags ordinary convergence; 0.85 means "as close as the library's own near-twins". Still warning-only, and based on one run: treat it as a starting point.
+ */
+export const TOO_CLOSE = 0.85;
 
 /** The template category a beat most likely wants, from its purpose; undefined when nothing fits (then no category filter is applied). */
 export function categoryForBeat(purpose: string, index: number, count: number): string | undefined {
@@ -53,16 +57,15 @@ export async function inspirationFor(port: TemplateInspirationPort, filmId: stri
   return { beats, shown, section };
 }
 
-export interface CloseMatch { scene_id: string; template_id: string; similarity: number }
+export interface CloseMatch { scene_id: string; template_id: string; similarity: number; was_shown: boolean }
 
-/** Compares every composed scene with the templates the Director was shown. Returns those at or above the threshold, closest first. */
+/** Compares every composed scene with the whole library (not only what the Director was shown: a layout can copy a template it never saw). Returns those at or above the threshold, closest first. */
 export async function closeMatches(port: TemplateInspirationPort, scenes: readonly { scene_id: string; visual: { block: string } | null }[], shown: readonly string[], threshold = TOO_CLOSE): Promise<CloseMatch[]> {
-  if (!shown.length) return [];
   const out: CloseMatch[] = [];
   for (const s of scenes) {
     if (s.visual?.block !== "composition") continue;
-    const best = (await port.compare(s.visual, shown)).filter((m) => m.similarity >= threshold).sort((a, b) => b.similarity - a.similarity)[0];
-    if (best) out.push({ scene_id: s.scene_id, template_id: best.template_id, similarity: Math.round(best.similarity * 1000) / 1000 });
+    const best = (await port.compare(s.visual, [])).filter((m) => m.similarity >= threshold).sort((a, b) => b.similarity - a.similarity)[0];
+    if (best) out.push({ scene_id: s.scene_id, template_id: best.template_id, similarity: Math.round(best.similarity * 1000) / 1000, was_shown: shown.includes(best.template_id) });
   }
   return out.sort((a, b) => b.similarity - a.similarity);
 }

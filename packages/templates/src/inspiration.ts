@@ -66,6 +66,7 @@ export async function buildInspiration(store: DataStore, embedder: Embedder): Pr
       });
     },
     async compare(composition, ids) {
+      if (!ids.length) return [...bodies].map(([id, t]) => ({ template_id: id, similarity: layoutSimilarity(composition as CompositionLike, t) }));
       return ids.flatMap((id) => { const t = bodies.get(id); return t ? [{ template_id: id, similarity: layoutSimilarity(composition as CompositionLike, t) }] : []; });
     },
   };

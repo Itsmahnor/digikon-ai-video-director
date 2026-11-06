@@ -1,105 +1,705 @@
 {
   "_readme": "Held-out retrieval queries, DRAFT. 100 queries: 40 briefs, 30 scene-level intents, 20 paraphrases, 10 off-topic. Written from how people phrase briefs and scenes, not from skill text, but by the same assistant that built the retriever and having seen the skill ids, so some author bias remains. Labels are NOT here: run `npm run heldout -- pool`, open evals/heldout/review.html, grade the pooled candidates, save the labels, then `npm run heldout -- lock`. After the lock this file and labels.json must not change (a test fails if they do). Fields: id, query, category (saas|ecommerce|general-promo|all), scope (director|editor), kind (brief|scene|paraphrase|off_topic).",
   "queries": [
-    ["H001", "A 45 second walkthrough for new users of our invoicing app, showing how to send a first invoice. Friendly, for freelancers who dislike accounting.", "saas", "director", "brief"],
-    ["H002", "We are launching dark mode next week and want a teaser that makes existing users feel they asked for it.", "saas", "director", "brief"],
-    ["H003", "Customer story video: a logistics company cut dispatch time in half with our routing tool, told by their operations lead.", "saas", "director", "brief"],
-    ["H004", "Ten second answer to the question we get most in support: how do I invite my team?", "saas", "director", "brief"],
-    ["H005", "Explain what our API monitoring product does in about a minute to a CTO who has never heard of us.", "saas", "director", "brief"],
-    ["H006", "Show how our weekly changelog items work by acting each one out instead of listing them.", "saas", "director", "brief"],
-    ["H007", "Product demo for a security dashboard, aimed at IT managers comparing vendors, ending with a booking link.", "saas", "director", "brief"],
-    ["H008", "Re-engage trial users who signed up two weeks ago and never connected their calendar.", "saas", "director", "brief"],
-    ["H009", "A launch clip for our mobile app update, storyboard agreed with the client before anything is built.", "saas", "director", "brief"],
-    ["H010", "Pitch our meeting-notes tool to team leads at a LinkedIn audience, square format.", "saas", "director", "brief"],
-    ["H011", "Collection lookbook for autumn knitwear, quiet and tactile, for Instagram.", "ecommerce", "director", "brief"],
-    ["H012", "Sixty percent off everything until Sunday, a loud short ad for a sneaker store.", "ecommerce", "director", "brief"],
-    ["H013", "Show the new espresso machine on a kitchen counter and make the viewer want it, close up and slow.", "ecommerce", "director", "brief"],
-    ["H014", "Two blenders compared on noise, speed and price so shoppers can pick one.", "ecommerce", "director", "brief"],
-    ["H015", "A handheld style review of a backpack that looks like a real customer filmed it on their phone.", "ecommerce", "director", "brief"],
-    ["H016", "Open the box of our subscription tea set on camera, first reaction included.", "ecommerce", "director", "brief"],
-    ["H017", "Mothers day gift guide in thirty seconds for a jewellery brand.", "ecommerce", "director", "brief"],
-    ["H018", "Hero loop for the top of a furniture store homepage, no sound, seamless.", "ecommerce", "director", "brief"],
-    ["H019", "Back to school bundle ad aimed at parents, vertical, with a countdown to the deadline.", "ecommerce", "director", "brief"],
-    ["H020", "Close up grammar for a watch campaign with a brand finale on the logo.", "ecommerce", "director", "brief"],
-    ["H021", "Our plumbing company wants a spot for the neighbourhood that makes people save the phone number.", "general-promo", "director", "brief"],
-    ["H022", "Announce that our gym is moving to a new building next month.", "general-promo", "director", "brief"],
-    ["H023", "Employer brand film for a hospital hiring nurses, honest rather than glossy.", "general-promo", "director", "brief"],
-    ["H024", "A teaser for the launch party of our new cafe, curiosity first.", "general-promo", "director", "brief"],
-    ["H025", "The story of how three friends started a brewery, for the about page and social.", "general-promo", "director", "brief"],
-    ["H026", "Short ad for a language school to run on social, ending with a free lesson offer.", "general-promo", "director", "brief"],
-    ["H027", "Our conference deck should become a video that plays on a loop at the booth.", "general-promo", "director", "brief"],
-    ["H028", "Thank you video for donors showing what their money did this year, no hard sell.", "general-promo", "director", "brief"],
-    ["H029", "A thirty second TikTok for an online course on budgeting, aimed at students.", "all", "director", "brief"],
-    ["H030", "YouTube pre-roll for a meal planning app where the viewer can skip after five seconds.", "all", "director", "brief"],
-    ["H031", "We need one master film and cutdowns for vertical, square and wide placements.", "all", "director", "brief"],
-    ["H032", "A video ad for a charity run with a clear sign up button, shown on several platforms.", "all", "director", "brief"],
-    ["H033", "We have a testimonial recording and a logo but no product footage. What do we do?", "all", "director", "brief"],
-    ["H034", "Paid partnership with a creator promoting our skincare line, content must be disclosed properly.", "all", "director", "brief"],
-    ["H035", "Make three versions of the same ad so we can test which opening works best.", "all", "director", "brief"],
-    ["H036", "A video for a landing page that explains the product and ends with one button.", "all", "director", "brief"],
-    ["H037", "Brand film for a bank that has to avoid promising returns or guarantees.", "all", "director", "brief"],
-    ["H038", "An explainer script read by a voice over, forty seconds, calm and clear.", "all", "director", "brief"],
-    ["H039", "Reels ad for a bakery, mostly pictures supplied by the owner, a few words on screen.", "all", "director", "brief"],
-    ["H040", "A product tour where every feature in the list gets its own shot.", "all", "director", "brief"],
-    ["H041", "Let the headline arrive word by word and stay readable on a busy background.", "all", "editor", "scene"],
-    ["H042", "The cursor should lead the viewer's eye to the button and then click it.", "all", "editor", "scene"],
-    ["H043", "Slide one scene out and the next in so it feels like one continuous move.", "all", "editor", "scene"],
-    ["H044", "Where do the captions go when the product is at the bottom of the frame?", "all", "editor", "scene"],
-    ["H045", "Quiet the music when the narrator starts and bring it back after.", "all", "editor", "scene"],
-    ["H046", "How long should the opening shot hold before the first cut?", "all", "editor", "scene"],
-    ["H047", "Show a bar chart growing without exaggerating the numbers.", "all", "editor", "scene"],
-    ["H048", "Cut to the drum hits but not on every single one.", "all", "editor", "scene"],
-    ["H049", "Make sure the picture does not flash white between two scenes.", "all", "editor", "scene"],
-    ["H050", "Add a rising sound before the logo appears and a hit when it lands.", "all", "editor", "scene"],
-    ["H051", "Fit German and Arabic translations into the same text boxes.", "all", "editor", "scene"],
-    ["H052", "Review one still of each scene before rendering the whole film.", "all", "editor", "scene"],
-    ["H053", "Keep text inside the safe area on a vertical phone screen.", "all", "editor", "scene"],
-    ["H054", "Stagger three cards so they arrive one after another with a gentle slow down.", "all", "editor", "scene"],
-    ["H055", "Pick one direction for movement across the whole film and stick to it.", "all", "editor", "scene"],
-    ["H056", "How should the voice over word count set the length of each scene?", "all", "editor", "scene"],
-    ["H057", "What makes a cut worth making?", "all", "editor", "scene"],
-    ["H058", "Normalise the colour of clips shot on different cameras before grading.", "all", "editor", "scene"],
-    ["H059", "Check loudness and levels before exporting the final mix.", "all", "editor", "scene"],
-    ["H060", "Convert a time in seconds to frames for the renderer.", "all", "editor", "scene"],
-    ["H061", "Let the key sentence stay on screen long enough to read it twice.", "all", "editor", "scene"],
-    ["H062", "Avoid motion that wobbles for no reason between beats.", "all", "editor", "scene"],
-    ["H063", "Use a real screen recording instead of drawing a fake interface.", "all", "editor", "scene"],
-    ["H064", "Match the exit of one shot to the entry of the next in speed and direction.", "all", "editor", "scene"],
-    ["H065", "Overlay captions that follow speech without covering the speaker.", "all", "editor", "scene"],
-    ["H066", "Open on one strong element and keep the camera still.", "all", "editor", "scene"],
-    ["H067", "Slow the pacing down a notch so the main point lands.", "all", "editor", "scene"],
-    ["H068", "Choose a typeface and colours once and keep them everywhere in the film.", "all", "editor", "scene"],
-    ["H069", "How do I record where each sound effect came from and its licence?", "all", "editor", "scene"],
-    ["H070", "Make a clean ending so a short video loops without a jolt.", "all", "editor", "scene"],
-    ["H071", "What should I say first so nobody scrolls past?", "all", "director", "paraphrase"],
-    ["H072", "Do not hint at a payoff in the opening that never comes.", "all", "director", "paraphrase"],
-    ["H073", "What are we allowed to claim and what evidence do we need?", "all", "director", "paraphrase"],
-    ["H074", "Say clearly that this video is paid or generated.", "all", "director", "paraphrase"],
-    ["H075", "The viewer has never heard of us. What matters?", "all", "director", "paraphrase"],
-    ["H076", "The viewer is weighing us against a rival and nearly decided.", "all", "director", "paraphrase"],
-    ["H077", "A customer has gone quiet after signing up. How do I bring them back?", "all", "director", "paraphrase"],
-    ["H078", "Which action do I ask for and in which words?", "all", "director", "paraphrase"],
-    ["H079", "Cut one long film down for other channels.", "all", "director", "paraphrase"],
-    ["H080", "We lack images and facts. What do I ask first?", "all", "director", "paraphrase"],
-    ["H081", "Write narration that sounds spoken and fits the time.", "all", "director", "paraphrase"],
-    ["H082", "A table of shots the client can sign.", "all", "director", "paraphrase"],
-    ["H083", "Problem, answer, proof, ask: in that order.", "all", "director", "paraphrase"],
-    ["H084", "Which sizes should I deliver for each placement?", "all", "director", "paraphrase"],
-    ["H085", "Test the opening first, changing one thing at a time.", "all", "director", "paraphrase"],
-    ["H086", "Fill in a creative brief before anyone shoots.", "all", "director", "paraphrase"],
-    ["H087", "Make the viewer keep watching until the end and want to share.", "all", "director", "paraphrase"],
-    ["H088", "Keep colour, font and logo the same across versions.", "all", "director", "paraphrase"],
-    ["H089", "Review a draft from four different points of view before rendering again.", "all", "director", "paraphrase"],
-    ["H090", "Open with a number or an expert opinion, and when that is safe.", "all", "director", "paraphrase"],
-    ["H091", "how to fix a flat bicycle tyre", "all", "director", "off_topic"],
-    ["H092", "capital gains tax rules for rental property", "all", "director", "off_topic"],
-    ["H093", "best hiking trails near Lake Tahoe", "all", "director", "off_topic"],
-    ["H094", "symptoms of vitamin D deficiency", "all", "director", "off_topic"],
-    ["H095", "python decorator syntax explained", "all", "director", "off_topic"],
-    ["H096", "how long to boil an egg", "all", "director", "off_topic"],
-    ["H097", "election results by county", "all", "director", "off_topic"],
-    ["H098", "mortgage rates this month", "all", "editor", "off_topic"],
-    ["H099", "chess opening for beginners", "all", "editor", "off_topic"],
-    ["H100", "dog vaccination schedule", "all", "editor", "off_topic"]
+    [
+      "H001",
+      "A 45 second walkthrough for new users of our invoicing app, showing how to send a first invoice. Friendly, for freelancers who dislike accounting.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H002",
+      "We are launching dark mode next week and want a teaser that makes existing users feel they asked for it.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H003",
+      "Customer story video: a logistics company cut dispatch time in half with our routing tool, told by their operations lead.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H004",
+      "Ten second answer to the question we get most in support: how do I invite my team?",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H005",
+      "Explain what our API monitoring product does in about a minute to a CTO who has never heard of us.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H006",
+      "Show how our weekly changelog items work by acting each one out instead of listing them.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H007",
+      "Product demo for a security dashboard, aimed at IT managers comparing vendors, ending with a booking link.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H008",
+      "Re-engage trial users who signed up two weeks ago and never connected their calendar.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H009",
+      "A launch clip for our mobile app update, storyboard agreed with the client before anything is built.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H010",
+      "Pitch our meeting-notes tool to team leads at a LinkedIn audience, square format.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H011",
+      "Collection lookbook for autumn knitwear, quiet and tactile, for Instagram.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H012",
+      "Sixty percent off everything until Sunday, a loud short ad for a sneaker store.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H013",
+      "Show the new espresso machine on a kitchen counter and make the viewer want it, close up and slow.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H014",
+      "Two blenders compared on noise, speed and price so shoppers can pick one.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H015",
+      "A handheld style review of a backpack that looks like a real customer filmed it on their phone.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H016",
+      "Open the box of our subscription tea set on camera, first reaction included.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H017",
+      "Mothers day gift guide in thirty seconds for a jewellery brand.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H018",
+      "Hero loop for the top of a furniture store homepage, no sound, seamless.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H019",
+      "Back to school bundle ad aimed at parents, vertical, with a countdown to the deadline.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H020",
+      "Close up grammar for a watch campaign with a brand finale on the logo.",
+      "ecommerce",
+      "director",
+      "brief"
+    ],
+    [
+      "H021",
+      "Our plumbing company wants a spot for the neighbourhood that makes people save the phone number.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H022",
+      "Announce that our gym is moving to a new building next month.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H023",
+      "Employer brand film for a hospital hiring nurses, honest rather than glossy.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H024",
+      "A teaser for the launch party of our new cafe, curiosity first.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H025",
+      "The story of how three friends started a brewery, for the about page and social.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H026",
+      "Short ad for a language school to run on social, ending with a free lesson offer.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H027",
+      "Our conference deck should become a video that plays on a loop at the booth.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H028",
+      "Thank you video for donors showing what their money did this year, no hard sell.",
+      "general-promo",
+      "director",
+      "brief"
+    ],
+    [
+      "H029",
+      "A thirty second TikTok for an online course on budgeting, aimed at students.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H030",
+      "YouTube pre-roll for a meal planning app where the viewer can skip after five seconds.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H031",
+      "We need one master film and cutdowns for vertical, square and wide placements.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H032",
+      "A video ad for a charity run with a clear sign up button, shown on several platforms.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H033",
+      "We have a testimonial recording and a logo but no product footage. What do we do?",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H034",
+      "Paid partnership with a creator promoting our skincare line, content must be disclosed properly.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H035",
+      "Make three versions of the same ad so we can test which opening works best.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H036",
+      "A video for a landing page that explains the product and ends with one button.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H037",
+      "Brand film for a bank that has to avoid promising returns or guarantees.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H038",
+      "An explainer script read by a voice over, forty seconds, calm and clear.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H039",
+      "Reels ad for a bakery, mostly pictures supplied by the owner, a few words on screen.",
+      "all",
+      "director",
+      "brief"
+    ],
+    [
+      "H040",
+      "A product tour where every feature in the list gets its own shot.",
+      "saas",
+      "director",
+      "brief"
+    ],
+    [
+      "H041",
+      "Let the headline arrive word by word and stay readable on a busy background.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H042",
+      "The cursor should lead the viewer's eye to the button and then click it.",
+      "saas",
+      "editor",
+      "scene"
+    ],
+    [
+      "H043",
+      "Slide one scene out and the next in so it feels like one continuous move.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H044",
+      "Where do the captions go when the product is at the bottom of the frame?",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H045",
+      "Quiet the music when the narrator starts and bring it back after.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H046",
+      "How long should the opening shot hold before the first cut?",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H047",
+      "Show a bar chart growing without exaggerating the numbers.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H048",
+      "Cut to the drum hits but not on every single one.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H049",
+      "Make sure the picture does not flash white between two scenes.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H050",
+      "Add a rising sound before the logo appears and a hit when it lands.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H051",
+      "Fit German and Arabic translations into the same text boxes.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H052",
+      "Review one still of each scene before rendering the whole film.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H053",
+      "Keep text inside the safe area on a vertical phone screen.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H054",
+      "Stagger three cards so they arrive one after another with a gentle slow down.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H055",
+      "Pick one direction for movement across the whole film and stick to it.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H056",
+      "How should the voice over word count set the length of each scene?",
+      "saas",
+      "editor",
+      "scene"
+    ],
+    [
+      "H057",
+      "What makes a cut worth making?",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H058",
+      "Normalise the colour of clips shot on different cameras before grading.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H059",
+      "Check loudness and levels before exporting the final mix.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H060",
+      "Convert a time in seconds to frames for the renderer.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H061",
+      "Let the key sentence stay on screen long enough to read it twice.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H062",
+      "Avoid motion that wobbles for no reason between beats.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H063",
+      "Use a real screen recording instead of drawing a fake interface.",
+      "saas",
+      "director",
+      "scene"
+    ],
+    [
+      "H064",
+      "Match the exit of one shot to the entry of the next in speed and direction.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H065",
+      "Overlay captions that follow speech without covering the speaker.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H066",
+      "Open on one strong element and keep the camera still.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H067",
+      "Slow the pacing down a notch so the main point lands.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H068",
+      "Choose a typeface and colours once and keep them everywhere in the film.",
+      "all",
+      "director",
+      "scene"
+    ],
+    [
+      "H069",
+      "How do I record where each sound effect came from and its licence?",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H070",
+      "Make a clean ending so a short video loops without a jolt.",
+      "all",
+      "editor",
+      "scene"
+    ],
+    [
+      "H071",
+      "What should I say first so nobody scrolls past?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H072",
+      "Do not hint at a payoff in the opening that never comes.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H073",
+      "What are we allowed to claim and what evidence do we need?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H074",
+      "Say clearly that this video is paid or generated.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H075",
+      "The viewer has never heard of us. What matters?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H076",
+      "The viewer is weighing us against a rival and nearly decided.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H077",
+      "A customer has gone quiet after signing up. How do I bring them back?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H078",
+      "Which action do I ask for and in which words?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H079",
+      "Cut one long film down for other channels.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H080",
+      "We lack images and facts. What do I ask first?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H081",
+      "Write narration that sounds spoken and fits the time.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H082",
+      "A table of shots the client can sign.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H083",
+      "Problem, answer, proof, ask: in that order.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H084",
+      "Which sizes should I deliver for each placement?",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H085",
+      "Test the opening first, changing one thing at a time.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H086",
+      "Fill in a creative brief before anyone shoots.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H087",
+      "Make the viewer keep watching until the end and want to share.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H088",
+      "Keep colour, font and logo the same across versions.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H089",
+      "Review a draft from four different points of view before rendering again.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H090",
+      "Open with a number or an expert opinion, and when that is safe.",
+      "all",
+      "director",
+      "paraphrase"
+    ],
+    [
+      "H091",
+      "how to fix a flat bicycle tyre",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H092",
+      "capital gains tax rules for rental property",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H093",
+      "best hiking trails near Lake Tahoe",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H094",
+      "symptoms of vitamin D deficiency",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H095",
+      "python decorator syntax explained",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H096",
+      "how long to boil an egg",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H097",
+      "election results by county",
+      "all",
+      "director",
+      "off_topic"
+    ],
+    [
+      "H098",
+      "mortgage rates this month",
+      "all",
+      "editor",
+      "off_topic"
+    ],
+    [
+      "H099",
+      "chess opening for beginners",
+      "all",
+      "editor",
+      "off_topic"
+    ],
+    [
+      "H100",
+      "dog vaccination schedule",
+      "all",
+      "editor",
+      "off_topic"
+    ]
   ]
 }

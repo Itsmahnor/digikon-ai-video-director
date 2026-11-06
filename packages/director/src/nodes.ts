@@ -385,7 +385,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     ],
   });
   // Warning only: compositions whose layout is too close to a template the Director was shown. Recorded for the reviewer; it blocks nothing.
-  const close = deps.templates && inspiration?.shown.length && result.value ? await closeMatches(deps.templates, result.value.scenes, inspiration.shown).catch(() => []) : [];
+  const close = deps.templates && inspiration && result.value ? await closeMatches(deps.templates, result.value.scenes, inspiration.shown).catch(() => []) : [];
   return { ...result, skills, references, citations: [...principles, ...craft, ...specs].map((h) => h.doc.id), inspiration: { shown: inspiration?.shown ?? [], close } };
 }
 

@@ -41,14 +41,14 @@ describe("template inspiration", () => {
     const calls: { exclude?: string[] }[] = [];
     const port: TemplateInspirationPort = {
       async suggest(q) { calls.push({ exclude: q.exclude_families }); const fam = ["f1", "f2", "f3"].find((f) => !(q.exclude_families ?? []).includes(f)); return fam ? [mk(`t-${fam}`, fam)] : []; },
-      async compare(_c, ids) { return ids.map((id) => ({ template_id: id, similarity: id === "t-f1" ? 0.7 : 0.2 })); },
+      async compare(_c, ids) { const all = ids.length ? ids : ["t-f1", "t-f2", "t-f3", "t-unseen"]; return all.map((id) => ({ template_id: id, similarity: id === "t-f1" ? 0.9 : id === "t-unseen" ? 0.88 : 0.2 })); },
     };
     const r = await inspirationFor(port, "film", { tone: "warm", beats: [{ beat: "a", purpose: "open" }, { beat: "b", purpose: "show the app" }, { beat: "c", purpose: "sign up now" }] });
     expect(r.shown).toEqual(["t-f1", "t-f2", "t-f3"]);
     expect(calls[1]!.exclude).toEqual(["f1"]);
     expect(r.section).toContain("NOT a menu to fill in");
     const close = await closeMatches(port, [{ scene_id: "S01", visual: { block: "composition" } }, { scene_id: "S02", visual: { block: "ui_demo" } }], r.shown);
-    expect(close).toEqual([{ scene_id: "S01", template_id: "t-f1", similarity: 0.7 }]);
+    expect(close).toEqual([{ scene_id: "S01", template_id: "t-f1", similarity: 0.9, was_shown: true }]);
   });
 });
 

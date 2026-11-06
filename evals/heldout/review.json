@@ -2914,14 +2914,9 @@
   "id": "H040",
   "query": "A product tour where every feature in the list gets its own shot.",
   "kind": "brief",
-  "category": "all",
+  "category": "saas",
   "scope": "director",
   "candidates": [
-   {
-    "id": "funnel-awareness",
-    "title": "Awareness stage: what the video should say",
-    "excerpt": "Awareness stage: what the video should say. **When to use:** the viewer does not know the brand or may not know they have the problem.\n\n**What to say:** name the problem or desire in the viewer's words, show one surprising or relatable moment, introduce the br"
-   },
    {
     "id": "ad-disclosure-and-labelling",
     "title": "Disclose paid, gifted and synthetic content",
@@ -2938,19 +2933,24 @@
     "excerpt": "Five ad body structures and when to use each. **When to use:** after the hook is chosen, to pick the body of a 15 to 30 second ad.\n\n**Structures with timing:**\n- *Problem-Agitate-Solve:* problem 2-3 s, agitate 3-5 s (the consequence of not solving it), solve 5"
    },
    {
-    "id": "proof-and-claims-safety",
-    "title": "Proof and claims safety",
-    "excerpt": "Proof and claims safety. **When to use:** any time a statement about the product, price, results or people is written.\n\n**Rules:** every factual claim traces to a fact the user supplied (a document, page, figure or approved quote). If it does not, remove it, r"
+    "id": "explainer-story-arc",
+    "title": "Explainer: problem, stakes, solution, how, payoff",
+    "excerpt": "Explainer: problem, stakes, solution, how, payoff. **When to use:** a 30 to 90 second product, how-it-works or onboarding explainer.\n\n**Structure:** an explainer is an argument, not a feature tour. State one core idea in one sentence first; cut what does not s"
    },
    {
-    "id": "ship-platform-sizes-and-deliverable-pack",
-    "title": "Ask the platform first, then ship the right sizes",
-    "excerpt": "Ask the platform first, then ship the right sizes. **When to use:** before rendering, whenever the user has not said where the video will be published.\n\n**Rule:** ask which platforms before rendering, because cropping a landscape cut to vertical afterwards rar"
+    "id": "map-every-feature-to-a-shot",
+    "title": "List the product's features and give each a shot",
+    "excerpt": "List the product's features and give each a shot. **When to use:** at storyboard time for any feature-led promo.\n\n**Rule:** list the product's features first and map each core feature to a shot. A core feature missing from the film means rework. Rank features "
    },
    {
-    "id": "funnel-retention",
-    "title": "Retention stage: what the video should say",
-    "excerpt": "Retention stage: what the video should say. **When to use:** the viewer is already a customer.\n\n**What to say:** how to get more value (tips, new features, best practices), recognition, and community.\n\n**Format:** 20 to 60 seconds, helpful and short; email, in"
+    "id": "saas-feature-launch",
+    "title": "SaaS feature launch announcement",
+    "excerpt": "SaaS feature launch announcement. **When to use:** a new feature ships and existing and prospective users should notice it.\n\n**Structure:** the user's pain before, the feature in one action, the after-state, where to find it.\n\n**Scene beats (20 s):** 0-3 s the"
+   },
+   {
+    "id": "saas-launch-video-storyboard-first",
+    "title": "SaaS launch clip: storyboard before any build",
+    "excerpt": "SaaS launch clip: storyboard before any build. **When to use:** a 15 to 30 second launch, feature demo or before/after clip for social and landing pages.\n\n**Structure:** gather the brief, brand tokens and a real screen recording first. Then write a shot table "
    },
    {
     "id": "storyboard-shot-table",
@@ -2958,29 +2958,19 @@
     "excerpt": "Write the storyboard as a shot table the user can approve. **When to use:** before any build, and as the document the user approves at the first gate.\n\n**Format:** one row per scene: number, start and end time, purpose in one line, visual (what is on screen an"
    },
    {
-    "id": "one-offer-one-motion",
-    "title": "One offer, one next step per video",
-    "excerpt": "One offer, one next step per video. **When to use:** before scripting any promotional video, to fix what is being sold and what the viewer does next.\n\n**Structure:** record the single current offer (name, price, where, one-sentence outcome, deliverables flagsh"
+    "id": "promo-pipeline-understand-then-shoot",
+    "title": "Product promo pipeline: understand, direction, shots, storyboard, build, sound, review",
+    "excerpt": "Product promo pipeline: understand, direction, shots, storyboard, build, sound, review. **When to use:** a full product promo for a web or desktop product.\n\n**Stages:** (0) product understanding and execution limits; (1) visual direction and one styleframe, pl"
    },
    {
-    "id": "cta-and-offer-clarity",
-    "title": "Make the CTA and the offer unmistakable",
-    "excerpt": "Make the CTA and the offer unmistakable. **When to use:** the last beat of every video and any video that states an offer.\n\n**Rules:** one CTA per video; it names the action and the place (\"Start your free trial at example.com\"); the offer states what, how muc"
+    "id": "promo-creation-mode-choice",
+    "title": "Choose how to make a promo: template, autonomous or guided",
+    "excerpt": "Choose how to make a promo: template, autonomous or guided. **When to use:** the user asks for a full product promo without saying how involved they want to be.\n\n**Modes:** (1) use a proven template and swap in the product's captures, copy and brand; (2) auton"
    },
    {
-    "id": "hook-patterns",
-    "title": "Hook patterns for the first three seconds",
-    "excerpt": "Hook patterns for the first three seconds. **When to use:** every video, at the start of scene design.\n\n**Patterns (pick one and name it):** result first (open on the end state); problem in their words; pattern interrupt (unexpected action or visual); open-loo"
-   },
-   {
-    "id": "one-theme-applied-consistently",
-    "title": "Pick one theme and apply its colours and fonts everywhere",
-    "excerpt": "Pick one theme and apply its colours and fonts everywhere. **General visual-design skill (not video-specific).**\n\n**When to use:** a deck, end card or set of slides needs consistent styling.\n\n**Method:** a theme is a cohesive palette with hex values plus a hea"
-   },
-   {
-    "id": "cutdowns-and-versions",
-    "title": "Plan cutdowns and versions from one master",
-    "excerpt": "Plan cutdowns and versions from one master. **When to use:** the same story must run at several lengths or placements.\n\n**Method:** edit the full version first; make shorter versions by removing whole beats, not by speeding up. A typical set: a 30-second maste"
+    "id": "launch-hard-won-lessons",
+    "title": "Product launch lessons: real labels, one moment, before then after",
+    "excerpt": "Product launch lessons: real labels, one moment, before then after. **When to use:** reviewing or planning any launch or feature clip.\n\n**Lessons:** never invent product UI labels; mirror the real app's copy exactly. Find the one moment only your product can d"
    },
    {
     "id": "launch-multi-critic-review",
@@ -3067,7 +3057,7 @@
   "id": "H042",
   "query": "The cursor should lead the viewer's eye to the button and then click it.",
   "kind": "scene",
-  "category": "all",
+  "category": "saas",
   "scope": "editor",
   "candidates": [
    {
@@ -3096,14 +3086,14 @@
     "excerpt": "Give every phase of a scene a purposeful motion route. **When to use:** a scene finishes its entrance with seconds left.\n\n**Rule:** idle sine loops (breathe, float, drift, glow pulse) are not allowed as sustained motion; they read as the video waiting. A scene"
    },
    {
+    "id": "explainer-pacing-per-beat",
+    "title": "Match cut rhythm to each explainer beat",
+    "excerpt": "Match cut rhythm to each explainer beat. **When to use:** when editing or timing an explainer.\n\n**Structure:** pace tracks tension. Problem and stakes are brisk, with faster cuts and short holds. The solution gets one clear hold, a beat of relief. How-it-works"
+   },
+   {
     "id": "data-and-chart-scenes",
     "title": "Show numbers with simple, honest chart scenes",
     "excerpt": "Show numbers with simple, honest chart scenes. **When to use:** the story depends on a number, a trend or a comparison.\n\n**Rules:** one chart, one message per scene. State the takeaway in a title (\"Invoices paid sooner\"), then reveal the data in order: axis, t"
-   },
-   {
-    "id": "hyperframes-film-workflow",
-    "title": "Film workflow: story, spec, check, review, then render",
-    "excerpt": "Film workflow: story, spec, check, review, then render. **When to use:** a new film of more than about 15 seconds that tells something.\n\n**Flow:** read the video type's guidance (launch, explainer, music, data, vertical, 3D, character); write three storylines "
    },
    {
     "id": "basic-colour-order-of-work",
@@ -3121,9 +3111,14 @@
     "excerpt": "Hand a concrete object across the cut; chain motion by cause. **When to use:** designing seams and in-scene action.\n\n**Carriers:** the eye follows objects, not abstractions. The strongest seams hand the viewer something tangible that keeps travelling through t"
    },
    {
-    "id": "multi-language-and-text-expansion",
-    "title": "Plan text for other languages and writing directions",
-    "excerpt": "Plan text for other languages and writing directions. **When to use:** the video will be localised or the audience reads another language.\n\n**Rules:** leave room for text to grow; translated text is often longer, so avoid fixed-width cards and tight layouts. U"
+    "id": "oversized-cursor-causal-motion",
+    "title": "Use an oversized cursor to lead the eye and cause the next action",
+    "excerpt": "Use an oversized cursor to lead the eye and cause the next action. **When to use:** UI demos and scenes that feel static or stale.\n\n**Rule:** a deliberately large pointer comes in from off-screen, leads the viewer's gaze to the next place of interest, triggers"
+   },
+   {
+    "id": "cursor-entry-click-and-tip-targeting",
+    "title": "Oversized cursor: physical entry, tip targeting, asymmetric click",
+    "excerpt": "Oversized cursor: physical entry, tip targeting, asymmetric click. **When to use:** any scene with a pointer-led action.\n\n**Entry:** the cursor always enters from off-screen (canonically from below), in one decelerating glide of roughly 0.4 to 0.9 s. Never fad"
    },
    {
     "id": "stillness-before-climax-and-timing-intents",
@@ -4083,7 +4078,7 @@
   "id": "H056",
   "query": "How should the voice over word count set the length of each scene?",
   "kind": "scene",
-  "category": "all",
+  "category": "saas",
   "scope": "editor",
   "candidates": [
    {
@@ -4132,24 +4127,19 @@
     "excerpt": "Design scene beats and set pacing in seconds. **When to use:** turning a script into scenes.\n\n**Method:** one idea per scene. Give each scene a purpose line, a duration, a visual, on-screen text and a transition in. Typical shot lengths: 1 to 3 s for fast soci"
    },
    {
-    "id": "hyperframes-film-workflow",
-    "title": "Film workflow: story, spec, check, review, then render",
-    "excerpt": "Film workflow: story, spec, check, review, then render. **When to use:** a new film of more than about 15 seconds that tells something.\n\n**Flow:** read the video type's guidance (launch, explainer, music, data, vertical, 3D, character); write three storylines "
-   },
-   {
     "id": "audio-levels-music-under-voice",
     "title": "Set audio targets: loudness, music under voice, ducking",
     "excerpt": "Set audio targets: loudness, music under voice, ducking. **When to use:** at the mix stage of any video with speech and music.\n\n**Structure:** master to about -14 LUFS integrated with true peak at or below -1 dBTP for video platforms. Keep background music wel"
    },
    {
-    "id": "remotion-timing-in-frames",
-    "title": "Remotion timing: think in frames, convert from seconds",
-    "excerpt": "Remotion timing: think in frames, convert from seconds. **When to use:** setting durations, delays and animation timing.\n\n**Rules:** all timing is in frames; convert with frames = seconds x frame rate (for example 2.5 s at 30 fps is 75 frames). Round durations"
-   },
-   {
     "id": "graphics-text-timing-and-safe-zones",
     "title": "Time graphics to speech and keep text legible",
     "excerpt": "Time graphics to speech and keep text legible. **When to use:** adding titles, lower thirds, callouts or captions to narrated video.\n\n**Structure:** add a graphic only to show what the camera cannot (a number, a comparison, a structure); if it can be removed w"
+   },
+   {
+    "id": "explainer-vo-timing-math",
+    "title": "Time scenes from the voice-over word count",
+    "excerpt": "Time scenes from the voice-over word count. **When to use:** an explainer built script-first.\n\n**Math:** clear, friendly narration runs about 2.3 words per second (roughly 140 words per minute); slow technical lines to about 2.0. Scene seconds = words / 2.3, p"
    }
   ]
  },
@@ -4591,78 +4581,73 @@
   "id": "H063",
   "query": "Use a real screen recording instead of drawing a fake interface.",
   "kind": "scene",
-  "category": "all",
-  "scope": "editor",
+  "category": "saas",
+  "scope": "director",
   "candidates": [
    {
-    "id": "sound-sourcing-local-files-and-credits",
-    "title": "Source sound effects once, keep them local, keep the credits",
-    "excerpt": "Source sound effects once, keep them local, keep the credits. **When to use:** adding sound effects or music to a film.\n\n**Rules:** keep the sound timeline as one central table of pinned effects, not audio inside scene components. Choose by real sound source: "
+    "id": "saas-onboarding-walkthrough",
+    "title": "SaaS onboarding walkthrough",
+    "excerpt": "SaaS onboarding walkthrough. **When to use:** new users need to reach their first success quickly.\n\n**Structure:** the first success defined up front, then the shortest path to it, one screen per step, and what to do next.\n\n**Scene beats (60-90 s):** 0-5 s the"
    },
    {
-    "id": "hyperframes-film-workflow",
-    "title": "Film workflow: story, spec, check, review, then render",
-    "excerpt": "Film workflow: story, spec, check, review, then render. **When to use:** a new film of more than about 15 seconds that tells something.\n\n**Flow:** read the video type's guidance (launch, explainer, music, data, vertical, 3D, character); write three storylines "
+    "id": "storyboard-shot-table",
+    "title": "Write the storyboard as a shot table the user can approve",
+    "excerpt": "Write the storyboard as a shot table the user can approve. **When to use:** before any build, and as the document the user approves at the first gate.\n\n**Format:** one row per scene: number, start and end time, purpose in one line, visual (what is on screen an"
    },
    {
-    "id": "remotion-scene-graph-mapping",
-    "title": "Map a digikon scene graph to Remotion",
-    "excerpt": "Map a digikon scene graph to Remotion. **When to use:** a scene is authored as a scene graph and must be drawn by Remotion.\n\n**Mapping:** each graph is validated first, then compiled. Elements (text, shape, image, video, mask, group, chart, cursor) become posi"
+    "id": "final-review-independent-pass",
+    "title": "Independent final review checklist",
+    "excerpt": "Independent final review checklist. **When to use:** before declaring any promo finished.\n\n**Checks (reviewer who did not build it):** product goal met; every planned feature present; visual direction held; shot choices consistent with the storyboard; data and"
    },
    {
-    "id": "basic-colour-order-of-work",
-    "title": "Basic colour: normalise, expose, balance, match, then look",
-    "excerpt": "Basic colour: normalise, expose, balance, match, then look. **When to use:** correcting footage for a short video.\n\n**Order:** normalise log or wide-gamut footage into the delivery space first; set exposure with the waveform, not by eye; set white balance so n"
+    "id": "promo-pipeline-understand-then-shoot",
+    "title": "Product promo pipeline: understand, direction, shots, storyboard, build, sound, review",
+    "excerpt": "Product promo pipeline: understand, direction, shots, storyboard, build, sound, review. **When to use:** a full product promo for a web or desktop product.\n\n**Stages:** (0) product understanding and execution limits; (1) visual direction and one styleframe, pl"
    },
    {
-    "id": "onscreen-text-and-captions",
-    "title": "On-screen text and captions",
-    "excerpt": "On-screen text and captions. **When to use:** any video; most feeds start muted.\n\n**Rules:** burn captions in for social; at most two short lines at once; keep to roughly 3 to 7 words on hook cards; high contrast (text on a solid or scrimmed area, never direct"
+    "id": "saas-product-demo",
+    "title": "SaaS product demo video",
+    "excerpt": "SaaS product demo video. **When to use:** a viewer is evaluating the product and wants to see it work.\n\n**Structure:** (1) the job to be done in one sentence; (2) the product doing that job in one continuous, real flow; (3) the result on screen; (4) one next s"
    },
    {
-    "id": "waterfall-entry-and-nudge-curve",
-    "title": "Staggered arrivals and slow-fast-slow group slides",
-    "excerpt": "Staggered arrivals and slow-fast-slow group slides. **When to use:** inside a scene, with no cut.\n\n**Waterfall entry:** title cards, segment openers and list intros arrive as a staggered cascade rising from below, one element after another, instead of everythi"
+    "id": "saas-testimonial-case-study",
+    "title": "SaaS testimonial or case study",
+    "excerpt": "SaaS testimonial or case study. **When to use:** a prospect needs proof from someone like them.\n\n**Structure:** the customer and their situation, the problem, the change they made, the result in their own words, the CTA.\n\n**Scene beats (60-90 s):** 0-6 s a one"
    },
    {
-    "id": "multi-language-and-text-expansion",
-    "title": "Plan text for other languages and writing directions",
-    "excerpt": "Plan text for other languages and writing directions. **When to use:** the video will be localised or the audience reads another language.\n\n**Rules:** leave room for text to grow; translated text is often longer, so avoid fixed-width cards and tight layouts. U"
+    "id": "saas-faq-support-short",
+    "title": "SaaS support or FAQ short",
+    "excerpt": "SaaS support or FAQ short. **When to use:** one common customer question deserves a clear 30 to 60 second answer.\n\n**Structure:** the question as the hook, the answer in one sentence, a short demonstration of the steps on the real product, and where to find mo"
    },
    {
-    "id": "audio-music-and-voiceover",
-    "title": "Audio, music and voice-over guidance",
-    "excerpt": "Audio, music and voice-over guidance. **When to use:** deciding sound for a video.\n\n**Rules:** speech is the priority; music sits well below the voice and is ducked while someone speaks; use music and sound effects only with a recorded licence that allows the "
+    "id": "launch-hard-won-lessons",
+    "title": "Product launch lessons: real labels, one moment, before then after",
+    "excerpt": "Product launch lessons: real labels, one moment, before then after. **When to use:** reviewing or planning any launch or feature clip.\n\n**Lessons:** never invent product UI labels; mirror the real app's copy exactly. Find the one moment only your product can d"
    },
    {
-    "id": "render-audit-stills-first",
-    "title": "Audit one still per scene before any full render",
-    "excerpt": "Audit one still per scene before any full render. **When to use:** building a video in code.\n\n**Method:** render one frame per scene first and fix layout problems, then render the full video. Check that text is not clipped (give fonts with descenders enough li"
+    "id": "ad-disclosure-and-labelling",
+    "title": "Disclose paid, gifted and synthetic content",
+    "excerpt": "Disclose paid, gifted and synthetic content. **When to use:** any ad, creator video, testimonial, giveaway or video using generated people or voices.\n\n**Rules:** label paid partnerships and promotional content using the platform's disclosure tools and plain on"
    },
    {
-    "id": "tiktok-loop-and-clean-ending",
-    "title": "Design the last frame so the video restarts cleanly",
-    "excerpt": "Design the last frame so the video restarts cleanly. **When to use:** short vertical videos where rewatches help.\n\n**Method:** make the ending connect to the opening, by finishing a sentence that began the video, returning to the first frame, or holding the sa"
+    "id": "real-captures-not-mock-ui",
+    "title": "Use genuine captures; do not hand-build fake UI",
+    "excerpt": "Use genuine captures; do not hand-build fake UI. **When to use:** any scene that shows the product.\n\n**Rule:** reproduce existing pages from real screenshots or recordings. Hand-built mock UI is allowed only where nothing real is being reproduced and only if i"
    },
    {
-    "id": "scene-beat-design-and-pacing",
-    "title": "Design scene beats and set pacing in seconds",
-    "excerpt": "Design scene beats and set pacing in seconds. **When to use:** turning a script into scenes.\n\n**Method:** one idea per scene. Give each scene a purpose line, a duration, a visual, on-screen text and a transition in. Typical shot lengths: 1 to 3 s for fast soci"
+    "id": "media-use-assets-and-audio",
+    "title": "Source music, sfx, images, logos and voice with a recorded licence",
+    "excerpt": "Source music, sfx, images, logos and voice with a recorded licence. **When to use:** a scene needs media the user has not supplied.\n\n**Rule:** media lands as a local file in the project with a ledger record of where it came from; renders never fetch at render "
    },
    {
-    "id": "pacing-by-video-type",
-    "title": "How often the picture should change, by video type",
-    "excerpt": "How often the picture should change, by video type. **When to use:** setting the cut rhythm for a given format.\n\n**Guide (creator and house practice, not official):** talking head, a change every 2 to 5 seconds using jump cuts and punch-ins; explainer, a first"
+    "id": "saas-launch-video-storyboard-first",
+    "title": "SaaS launch clip: storyboard before any build",
+    "excerpt": "SaaS launch clip: storyboard before any build. **When to use:** a 15 to 30 second launch, feature demo or before/after clip for social and landing pages.\n\n**Structure:** gather the brief, brand tokens and a real screen recording first. Then write a shot table "
    },
    {
-    "id": "port-remotion-to-hyperframes",
-    "title": "Port existing video code and verify it frame by frame",
-    "excerpt": "Port existing video code and verify it frame by frame. **When to use:** moving a Remotion composition, or other canvas or HTML animation, into the HyperFrames renderer.\n\n**Three levels:** native (translate code that can become HTML plus timeline tweens), hoste"
-   },
-   {
-    "id": "sound-design-riser-impact-sparkle",
-    "title": "Sound design: riser, impact, sparkle",
-    "excerpt": "Sound design: riser, impact, sparkle. **When to use:** adding sound effects to a promo or UI film.\n\n**Method:** derive search terms from the picture, check candidates for repetition, and judge each UI sound by its timbre. Pin each sound to a frame, duration an"
+    "id": "platform-vertical-9x16",
+    "title": "Vertical 9:16 (TikTok, Reels, Shorts)",
+    "excerpt": "Vertical 9:16 (TikTok, Reels, Shorts). **When to use:** any vertical short.\n\n**Rules:** 9:16; hook in the first 1 to 3 seconds (spoken line, text and visual together); captions on because many viewers start muted; keep key text and faces away from the top and "
    }
   ]
  },
@@ -4947,77 +4932,77 @@
   "query": "Choose a typeface and colours once and keep them everywhere in the film.",
   "kind": "scene",
   "category": "all",
-  "scope": "editor",
+  "scope": "director",
   "candidates": [
    {
-    "id": "audio-music-and-voiceover",
-    "title": "Audio, music and voice-over guidance",
-    "excerpt": "Audio, music and voice-over guidance. **When to use:** deciding sound for a video.\n\n**Rules:** speech is the priority; music sits well below the voice and is ducked while someone speaks; use music and sound effects only with a recorded licence that allows the "
+    "id": "cover-frame-and-first-frame",
+    "title": "Choose the cover frame and the first frame on purpose",
+    "excerpt": "Choose the cover frame and the first frame on purpose. **When to use:** every video that will appear in a grid, feed or search result.\n\n**Rules:** the cover frame should show the payoff or the subject clearly, with a few words of large text, and still read at "
    },
    {
-    "id": "multi-language-and-text-expansion",
-    "title": "Plan text for other languages and writing directions",
-    "excerpt": "Plan text for other languages and writing directions. **When to use:** the video will be localised or the audience reads another language.\n\n**Rules:** leave room for text to grow; translated text is often longer, so avoid fixed-width cards and tight layouts. U"
+    "id": "platform-vertical-9x16",
+    "title": "Vertical 9:16 (TikTok, Reels, Shorts)",
+    "excerpt": "Vertical 9:16 (TikTok, Reels, Shorts). **When to use:** any vertical short.\n\n**Rules:** 9:16; hook in the first 1 to 3 seconds (spoken line, text and visual together); captions on because many viewers start muted; keep key text and faces away from the top and "
    },
    {
-    "id": "beat-hit-limits",
-    "title": "Cut points on the beat, but limit full-frame impacts",
-    "excerpt": "Cut points on the beat, but limit full-frame impacts. **When to use:** a strong-beat track on a promo.\n\n**Rule:** cutting on the beat does not mean hitting the picture on every beat. Impacts on the whole frame or camera (scale pump, shake, flash frames, negati"
+    "id": "launch-multi-critic-review",
+    "title": "Review a draft with four critics before the next render",
+    "excerpt": "Review a draft with four critics before the next render. **When to use:** after a few self-iterations of any short video, before final render.\n\n**Method:** render about 20 frames (the peak moments and transitions) and have four independent reviews, each produc"
    },
    {
-    "id": "captions-overlay-law",
-    "title": "Captions are an overlay, never a reserved band",
-    "excerpt": "Captions are an overlay, never a reserved band. **When to use:** composing any frame that will carry captions.\n\n**Rule:** the caption is a small, minimal line composited over the whole film, near the bottom of the canvas (roughly the bottom 5 to 8 percent). Ce"
+    "id": "cta-patterns-by-funnel-intent",
+    "title": "Choose the CTA from the viewer's intent",
+    "excerpt": "Choose the CTA from the viewer's intent. **When to use:** when writing or reviewing the closing beat of any ad.\n\n**Structure:** one CTA only, matched to intent.\n- Direct (\"Shop now\"): clear purchase intent, e-commerce.\n- Curiosity (\"See how it works\"): conside"
    },
    {
-    "id": "onscreen-text-and-captions",
-    "title": "On-screen text and captions",
-    "excerpt": "On-screen text and captions. **When to use:** any video; most feeds start muted.\n\n**Rules:** burn captions in for social; at most two short lines at once; keep to roughly 3 to 7 words on hook cards; high contrast (text on a solid or scrimmed area, never direct"
+    "id": "multi-format-platform-guide",
+    "title": "Pick formats and lengths per placement",
+    "excerpt": "Pick formats and lengths per placement. **When to use:** when a campaign must run on more than one placement.\n\n**Structure:** build the 9:16 hero first, then adapt. 9:16 for TikTok, Reels and Shorts; 1:1 or 4:5 for feed placements; 16:9 for YouTube and landsca"
    },
    {
-    "id": "seam-render-white-flash-guard",
-    "title": "Paint the stage so transitions never flash white",
-    "excerpt": "Paint the stage so transitions never flash white. **When to use:** when assembling the master timeline or when a transition shows a bright flash, especially on dark films.\n\n**Cause:** during crossfades and zoom-throughs the two scene wrappers' combined opacity"
+    "id": "one-theme-applied-consistently",
+    "title": "Pick one theme and apply its colours and fonts everywhere",
+    "excerpt": "Pick one theme and apply its colours and fonts everywhere. **General visual-design skill (not video-specific).**\n\n**When to use:** a deck, end card or set of slides needs consistent styling.\n\n**Method:** a theme is a cohesive palette with hex values plus a hea"
    },
    {
-    "id": "hyperframes-film-workflow",
-    "title": "Film workflow: story, spec, check, review, then render",
-    "excerpt": "Film workflow: story, spec, check, review, then render. **When to use:** a new film of more than about 15 seconds that tells something.\n\n**Flow:** read the video type's guidance (launch, explainer, music, data, vertical, 3D, character); write three storylines "
+    "id": "visual-philosophy-before-layout",
+    "title": "Write a short visual philosophy, then express it",
+    "excerpt": "Write a short visual philosophy, then express it. **General visual-design skill (not video-specific).**\n\n**When to use:** a brand frame, poster-style end card or title design needs a distinct look, not a template.\n\n**Method:** two steps. First name the look (o"
    },
    {
-    "id": "remotion-composition-structure",
-    "title": "Remotion composition structure: root, compositions and sequences",
-    "excerpt": "Remotion composition structure: root, compositions and sequences. **When to use:** planning or reviewing a Remotion video project.\n\n**Structure:** a root registers one or more compositions, each with an id, width, height, frame rate and duration in frames. A c"
+    "id": "brand-consistency",
+    "title": "Keep colour, font and logo consistent",
+    "excerpt": "Keep colour, font and logo consistent. **When to use:** every video that carries a brand.\n\n**Rules:** use the brand's supplied colours, fonts and logo files; one palette (primary, accent, neutrals) and one or two typefaces; keep the logo clear space and minimu"
    },
    {
-    "id": "sound-sourcing-local-files-and-credits",
-    "title": "Source sound effects once, keep them local, keep the credits",
-    "excerpt": "Source sound effects once, keep them local, keep the credits. **When to use:** adding sound effects or music to a film.\n\n**Rules:** keep the sound timeline as one central table of pinned effects, not audio inside scene components. Choose by real sound source: "
+    "id": "tiktok-three-layer-hook",
+    "title": "Write the TikTok hook as spoken line, text and opening visual",
+    "excerpt": "Write the TikTok hook as spoken line, text and opening visual. **When to use:** any vertical short for TikTok, Reels or Shorts.\n\n**Structure:** the hook is the first one to three seconds, and it has three layers that fire together: the spoken line, the first o"
    },
    {
-    "id": "captions-drop-rail-embed",
-    "title": "Classify each phrase: drop, rail or embed",
-    "excerpt": "Classify each phrase: drop, rail or embed. **When to use:** captioning talking-head, launch or explainer video.\n\n**Model:** each spoken phrase is dropped (filler, stutters), set on the rail (the default: a clean, readable verbatim subtitle composited over the "
+    "id": "final-review-independent-pass",
+    "title": "Independent final review checklist",
+    "excerpt": "Independent final review checklist. **When to use:** before declaring any promo finished.\n\n**Checks (reviewer who did not build it):** product goal met; every planned feature present; visual direction held; shot choices consistent with the storyboard; data and"
    },
    {
-    "id": "single-hero-and-stable-camera",
-    "title": "Open with one hero element and keep the camera steady",
-    "excerpt": "Open with one hero element and keep the camera steady. **When to use:** opening shots and any product close-up.\n\n**Rules:** open on a single protagonist with a complete action arc rather than a crowd of elements dancing. Keep the camera stable; no handheld sha"
+    "id": "voice-over-script-writing",
+    "title": "Write voice-over in spoken language and time it",
+    "excerpt": "Write voice-over in spoken language and time it. **When to use:** any video with narration.\n\n**Rules:** write for the ear: short sentences, contractions, one idea per line, concrete words, no jargon the viewer has not met. Open with the payoff or the problem, "
    },
    {
-    "id": "accessibility",
-    "title": "Accessibility basics for video",
-    "excerpt": "Accessibility basics for video. **When to use:** every video.\n\n**Rules:** captions for all speech, synchronised and accurate; text contrast high and readable at small sizes; do not rely on colour alone to carry meaning; avoid flashing more than three times a s"
+    "id": "asset-gaps-questions",
+    "title": "What to ask when assets or facts are missing",
+    "excerpt": "What to ask when assets or facts are missing. **When to use:** before planning, whenever the brief lacks something a scene needs.\n\n**Check and ask:** logo (file, clear-space rules); brand colours and fonts; product footage or screenshots (real, current, permis"
    },
    {
-    "id": "waterfall-entry-and-nudge-curve",
-    "title": "Staggered arrivals and slow-fast-slow group slides",
-    "excerpt": "Staggered arrivals and slow-fast-slow group slides. **When to use:** inside a scene, with no cut.\n\n**Waterfall entry:** title cards, segment openers and list intros arrive as a staggered cascade rising from below, one element after another, instead of everythi"
+    "id": "proof-and-claims-safety",
+    "title": "Proof and claims safety",
+    "excerpt": "Proof and claims safety. **When to use:** any time a statement about the product, price, results or people is written.\n\n**Rules:** every factual claim traces to a fact the user supplied (a document, page, figure or approved quote). If it does not, remove it, r"
    },
    {
-    "id": "film-current-direction",
-    "title": "Pick one dominant direction for the whole film",
-    "excerpt": "Pick one dominant direction for the whole film. **When to use:** at the start of motion design for any multi-scene film.\n\n**Rule:** choose one dominant direction (the \"current\", left by default) and use it for every ordinary seam, so the film reads as one cont"
+    "id": "distinctive-type-and-hero-first",
+    "title": "Ground the design in the subject; choose type on purpose",
+    "excerpt": "Ground the design in the subject; choose type on purpose. **General visual-design skill (not video-specific); useful for landing-page hero loops and title cards.**\n\n**Principles:** identify the actual subject, audience and the one thing they must do before des"
    }
   ]
  },
