@@ -1,0 +1,856 @@
+{
+ "_readme": "42 queries for `npm run eval:local`: briefs, paraphrases and scene intents, plus 5 off-topic. A DEVELOPMENT set for the local semantic retriever. It was written once and looked at while the defaults were checked, so it is NOT held out; the locked held-out set is deferred (see the plan). For each query any listed skill counts as a correct answer.",
+ "queries": [
+  {
+   "id": "L01",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "A 30 second vertical ad for a meal-kit subscription aimed at busy parents; it must open with something that stops the scroll and end with a clear next step",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "platform-vertical-9x16",
+    "hook-patterns",
+    "tiktok-three-layer-hook"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L02",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "We sell project management software to small agencies and want a clip walking a new user through their first board",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-onboarding-walkthrough"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L03",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Our new reporting feature just shipped and we need an announcement video for existing customers",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-feature-launch"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L04",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Show a customer explaining how switching tools saved their team hours each week",
+   "filter": {
+    "category": "saas",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "saas-testimonial-case-study"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L05",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Short film for a flash sale on running shoes this weekend, discount front and centre",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-offer-sale"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L06",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Reveal the packaging and the product inside it for our new skincare range, filmed like a reaction",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-unboxing",
+    "ecom-ugc-style-ad"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L07",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Our dentist practice wants a spot for local families to book a first check-up",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-local-service-ad"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L08",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "We are hiring engineers and want a video showing what working here feels like",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-recruitment-employer-brand"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L09",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Teaser for our annual conference, build curiosity without giving away the speakers",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-event-teaser"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L10",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Tell the story of why our family bakery started, for the about page",
+   "filter": {
+    "category": "general-promo",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "promo-brand-story"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L11",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "Compare our two phone cases side by side so shoppers can choose",
+   "filter": {
+    "category": "ecommerce",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ecom-comparison"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L12",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "brief"
+   ],
+   "query": "A looping background clip for the top of our homepage",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "platform-landing-hero-loop"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L13",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "What should the first few seconds say so people do not swipe away",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "hook-patterns",
+    "hook-formulas-pattern-question-claim",
+    "tiktok-three-layer-hook"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L14",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Do not promise a result in the opening that the rest of the film never delivers",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "hook-must-pay-off"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L15",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Which statements about our product are we allowed to make and how do we back them up",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "proof-and-claims-safety"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L16",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Tell viewers when the content is sponsored or made by AI",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "ad-disclosure-and-labelling"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L17",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "The person watching is just hearing about us for the first time, what do we say",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-awareness"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L18",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "The viewer is comparing us with two competitors and nearly ready to decide",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-consideration"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L19",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Viewer already has a trial account but has gone quiet, bring them back",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "funnel-retention"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L20",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Make one master video and derive shorter versions for other placements",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "cutdowns-and-versions",
+    "multi-format-platform-guide"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L21",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Which button should we ask them to press and how do we phrase the ask",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "cta-patterns-by-funnel-intent",
+    "cta-and-offer-clarity",
+    "one-offer-one-motion"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L22",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "We have no logo file and no product photos yet, what must we ask the client first",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "asset-gaps-questions",
+    "media-use-assets-and-audio"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L23",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Write the narration so it sounds like a person talking and fits the time",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "voice-over-script-writing"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L24",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Lay the whole plan out as a table of shots that the client can sign off",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "storyboard-shot-table"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L25",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "paraphrase"
+   ],
+   "query": "Problem first, then our answer, then evidence, then what to do next",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "problem-solution-proof-cta",
+    "ad-body-structures"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L26",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "How many seconds should each cut last in a calm explainer versus a fast ad",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "pacing-by-video-type",
+    "explainer-pacing-per-beat",
+    "what-a-cut-is-for"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L27",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Where should subtitles sit so they never cover the product",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "captions-overlay-law",
+    "graphics-text-timing-and-safe-zones",
+    "onscreen-text-and-captions"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L28",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Keep the music quiet while someone is speaking",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "audio-levels-music-under-voice",
+    "audio-music-and-voiceover"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L29",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Hand a cursor across the screen so the viewer knows where to look next",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "oversized-cursor-causal-motion",
+    "cursor-entry-click-and-tip-targeting"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L30",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Words should arrive one after another instead of all at once",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "waterfall-entry-and-nudge-curve",
+    "remotion-captions-and-text"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L31",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Avoid a white flash between two scenes",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "seam-render-white-flash-guard",
+    "cut-the-curve-seams"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L32",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Turn raw numbers into a chart without misleading anyone",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "data-and-chart-scenes"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L33",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Let the key line sit on screen long enough to be read",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "pacing-slower-with-room-to-breathe",
+    "graphics-text-timing-and-safe-zones"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L34",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Cut on the beat of the music but not every hit",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "beat-hit-limits",
+    "beat-sync-music-to-grid"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L35",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Check one frame of every scene before spending time on a full render",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "render-audit-stills-first",
+    "hyperframes-render-work-loop"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L36",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Plan the text so the German and Arabic versions still fit",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "multi-language-and-text-expansion"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L37",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "scene"
+   ],
+   "query": "Add a riser and a hit sound when the logo lands",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "editor"
+   },
+   "kind": "retrieval",
+   "expect": [
+    "sound-design-riser-impact-sparkle"
+   ],
+   "why": "Written from how a brief or a scene is phrased, not from skill titles; any listed skill is an acceptable answer."
+  },
+  {
+   "id": "L38",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "off_topic"
+   ],
+   "query": "quantum chromodynamics lecture notes",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "L39",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "off_topic"
+   ],
+   "query": "how do I repair a leaking kitchen tap",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "L40",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "off_topic"
+   ],
+   "query": "best sourdough starter feeding schedule",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "L41",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "off_topic"
+   ],
+   "query": "history of the roman republic taxation",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  },
+  {
+   "id": "L42",
+   "collection": "skills",
+   "tags": [
+    "skills",
+    "local",
+    "off_topic"
+   ],
+   "query": "tax filing deadlines for freelancers",
+   "filter": {
+    "category": "all",
+    "include_draft": true,
+    "skill_scope": "director"
+   },
+   "kind": "negative",
+   "expect": [],
+   "why": "Off-topic: nothing in a video-production skills library covers it."
+  }
+ ]
+}

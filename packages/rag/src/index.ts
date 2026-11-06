@@ -11,3 +11,6 @@ export * from "./templates.js";
 export * from "./skills.js";
 export * from "./db-retriever.js";
 export * from "./skills-defaults.js";
+export * from "./status.js";
+export * from "./embedding-cache.js";
+export * from "./local-retriever.js";

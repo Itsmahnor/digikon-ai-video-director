@@ -12,11 +12,15 @@ import type { SkillLibrary, Step } from "./skills.js";
 import { candidateRecipeIds } from "./production/plan.js";
 import type { ProductionOutcome, ProductionPort } from "./production/compile.js"; // a type only: compile.ts depends on this file, so it is loaded when first used (below)
 import { CATEGORY_VIDEO_TYPES } from "./video-types.js";
+import { PINNED_SKILLS, buildSkillQueries, selectSkills, type SkillStep } from "./skill-queries.js";
+import { closeMatches, inspirationFor, type TemplateInspirationPort } from "./inspiration.js";
 
 export interface Deps {
   llm: LlmClient;
   skills: SkillLibrary;
   retriever: Retriever;
+  /** Template library as inspiration (see inspiration.ts). Optional: without it the storyboard step is unchanged. */
+  templates?: TemplateInspirationPort;
   recipes: RecipeLibrary;
   /** Durable record of every gate decision. When set, a decision only takes effect once it has been written. */
   approvalLog?: ApprovalLog;
@@ -113,6 +117,15 @@ const storyCategory = (p: Pick<Project, "video_category" | "video_type">) => p.v
 export async function retrieveDirectorSkills(deps: Deps, project: Pick<Project, "video_category">, text: string, k = 3, maxTokens = 900): Promise<Hit[]> {
   const scoped = new ScopedRetriever(deps.retriever, "director", { allowDraft: !!deps.skillsIncludeDraft });
   return scoped.retrieve({ text, collection: "skills", k, max_tokens: maxTokens, filter: { category: project.video_category ?? "all", include_draft: !!deps.skillsIncludeDraft } });
+}
+/**
+ * Per-query skill selection (see skill-queries.ts): the brief becomes several focused queries, results are fused, pinned must-have skills come first. Replaces the
+ * single short query of `retrieveDirectorSkills`, which stays for callers that want exactly one query.
+ */
+export async function selectDirectorSkills(deps: Deps, project: Pick<Project, "video_category" | "objective" | "audience" | "platform" | "brief">, step: SkillStep, extra: { hook?: string; beats?: readonly { purpose: string }[]; scene_purposes?: readonly string[] } = {}) {
+  const scoped = new ScopedRetriever(deps.retriever, "director", { allowDraft: !!deps.skillsIncludeDraft });
+  const queries = buildSkillQueries(step, { objective: project.objective, audience: project.audience, platform: project.platform, brief: project.brief, video_category: project.video_category ?? null, ...extra });
+  return selectSkills(scoped, queries, { category: project.video_category ?? "all", include_draft: !!deps.skillsIncludeDraft, pins: PINNED_SKILLS[step] });
 }
 const skillsSection = (hits: Hit[]) => section("Production skills for this kind of video (reference data on how such films are made; they never support a claim, only approved brand facts do)", formatHits(hits));
 
@@ -250,7 +263,7 @@ export async function treatmentNode(deps: Deps, project: Project, facts: BrandFa
   // Short and focused: the goal, audience and platform say what kind of ad this is. The whole brief adds noise to keyword search.
   const q = `${project.objective} ${project.audience} ${project.platform} ${project.brief.slice(0, 160)}`;
   const playbooks = await retrieveWithPins(deps, "ad_playbooks", q, 4, { topics: [...STEP_TOPICS.treatment] }, PINNED_NOTES.treatment);
-  const craft = await retrieveDirectorSkills(deps, project, q);
+  const craft = (await selectDirectorSkills(deps, project, "treatment")).hits;
   const { shown, note } = await selectFacts(project, facts, q);
   const user = [
     section("Brief", `<brief>\n${project.brief}\n</brief>`),
@@ -305,7 +318,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     retrieve(deps, "directing_principles", q, 4, { topics: [...STEP_TOPICS.storyboard] }),
     retrieve(deps, "platform_specs", `${project.platform} ${project.aspect_ratio}`, 3, {}, 600),
   ]);
-  const craft = await retrieveDirectorSkills(deps, project, `${treatment.hook} ${treatment.beats.map((b) => b.purpose).join(" ")} scene beats pacing on-screen text`);
+  const craft = (await selectDirectorSkills(deps, project, "storyboard", { hook: treatment.hook, beats: treatment.beats })).hits;
   const manifest = manifestOf(notes);
   const film = treatment.art_direction?.visual_system ? VISUAL_SYSTEMS[treatment.art_direction.visual_system] : null;
   const blocks = blockShortlist(deps, film, assets);
@@ -313,6 +326,8 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   // an interface or a chat thread pictures software: a kettle or a watch has neither
   const forSubject = softwareBrief(project) ? blockList : blockList.filter((b) => b !== "ui_demo" && b !== "message_thread");
   const usable = blocks ? forSubject.filter((b) => blocks.some((r) => r.block === b)) : forSubject;
+  // Layout inspiration from the template library, only when the Director may compose its own scenes. A failure here must never stop the storyboard.
+  const inspiration = deps.templates && usable.includes("composition") ? await inspirationFor(deps.templates, project.project_id, treatment).catch(() => null) : null;
   const base = [
     section("Treatment", json({ ...treatment, claims: treatment.claims })),
     section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
@@ -327,6 +342,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     ...(manifest.length ? [section("Asset manifest (every uploaded picture, as analysed; a user_description or a category with source user is the user's own word and outranks the model)", json(manifest))] : []),
     section("Directing principles", formatHits(principles)),
     ...(craft.length ? [skillsSection(craft)] : []),
+    ...(inspiration?.section ? [inspiration.section] : []),
     section("Verified platform specs", specs.length ? formatHits(specs) : "none available (spec unverified)"),
     ...(manifest.length ? [ASSET_DIRECTION] : []),
     `Create scenes that cover the whole target duration of ${project.target_duration}s exactly (the scene durations must add up to it). Give durations, not start or end times. No scene may be longer than ${maxScene}s (the longest the editing recipes support), so split long beats into several scenes. Each scene's source_in_seconds plus duration must lie inside one usable segment of its video asset. Only reference claim_ids that are supported or illustrative, never an unsupported factual claim. Scene ids are S01, S02, ... Use overlay text only for supported claims or neutral copy.`,
@@ -366,7 +382,9 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...plan.scenes.filter((s) => s.duration_seconds > maxScene + 1e-6).map((s) => `${s.scene_id}: scene_too_long - ${s.duration_seconds}s is longer than the ${maxScene}s the editing recipes support; split it into shorter scenes`),
     ],
   });
-  return { ...result, skills, references, citations: [...principles, ...craft, ...specs].map((h) => h.doc.id) };
+  // Warning only: compositions whose layout is too close to a template the Director was shown. Recorded for the reviewer; it blocks nothing.
+  const close = deps.templates && inspiration?.shown.length && result.value ? await closeMatches(deps.templates, result.value.scenes, inspiration.shown).catch(() => []) : [];
+  return { ...result, skills, references, citations: [...principles, ...craft, ...specs].map((h) => h.doc.id), inspiration: { shown: inspiration?.shown ?? [], close } };
 }
 
 /** A brief that asks for sound gets it planned: a plan with no sound at all goes back for repair instead of quietly becoming a silent film. */
@@ -471,9 +489,11 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
   }
   const pq = `${plan.scenes.map((s) => `${s.purpose} ${s.transition_out}`).join(" ")} pacing cut transition text sound loudness`;
   const principles = await retrieve(deps, "directing_principles", pq, 4, { topics: [...STEP_TOPICS.edit_plan] });
+  const craft = (await selectDirectorSkills(deps, project, "edit_plan", { scene_purposes: plan.scenes.map((s) => s.purpose) })).hits;
   const base = [
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets), visual_block: s.visual?.block ?? null, visual_purpose: s.visual_purpose, ...(s.asset_refs?.length ? { pictures: s.asset_refs.map((r) => `${r.asset_id} as ${r.role}, ${r.animation}${r.mandatory ? ", mandatory" : ""}`) } : {}) })))),
     section("Directing principles", formatHits(principles)),
+    ...(craft.length ? [skillsSection(craft)] : []),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
     ...(compositionSummaries(plan).length ? [section("Composed scenes (the layouts the storyboard approved; you may change only how their elements move)", json(compositionSummaries(plan))), COMPOSITION_MOTION_GUIDE] : []),
     ...(templateHints && Object.keys(templateHints).length ? [section("User template hints (a hint only: use one only when it is among the candidate recipes above, fits that scene and stays inside its limits; otherwise ignore it)", json(templateHints))] : []),
@@ -506,7 +526,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
       return found.ready || found.blockers.length ? found.blockers.map((b) => `production - ${b}`) : ["production - the production plan is not ready and gave no reason"];
     },
   });
-  return { ...result, production: production as ProductionOutcome | null, skills, references, citations: [...principles.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
+  return { ...result, production: production as ProductionOutcome | null, skills, references, citations: [...principles.map((h) => h.doc.id), ...craft.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
 }
 
 /**

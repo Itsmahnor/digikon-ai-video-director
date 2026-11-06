@@ -338,3 +338,4 @@ html, body { overflow-x: clip; } /* the decorative aurora layer is wider than th
 .why ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; color: var(--text); }
 /* on a phone the sticky approval bar would cover the plan it is asking about: it flows after the plan instead, with the buttons full width */
 @media (max-width: 700px) { .approve-bar { position: static; } .approve-bar.gate .row { width: 100%; margin-left: 0; } .approve-bar.gate .row > button { flex: 1 1 auto; } }
+.retrieval-banner { background: linear-gradient(90deg, #92400e, #b45309); }

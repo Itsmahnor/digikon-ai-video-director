@@ -17,3 +17,5 @@ export * from "./video-types.js";
 export * from "./requirements.js";
 export * from "./change-request.js";
 export * from "./template-picker.js";
+export * from "./skill-queries.js";
+export * from "./inspiration.js";

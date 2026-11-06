@@ -4,7 +4,8 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
-import { KeywordRetriever, chooseEmbedder, createDbBackedRetriever, SKILLS_HYBRID_OPTIONS, SKILLS_KEYWORD_FLOOR, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type Retriever } from "@digikon/rag";
+import { CachedEmbedder, KeywordRetriever, MemoryDataStore, SKILLS_KEYWORD_FLOOR, SKILLS_LOCAL_OPTIONS, chooseEmbedder, createDbBackedRetriever, createLocalHybridRetriever, describeRetrieval, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type RetrievalStatus, type Retriever } from "@digikon/rag";
+import { buildInspiration, ingestTemplateText, loadLibrary } from "@digikon/templates";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import { detectAudio, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
 import { LocalVision, availableOcr } from "@digikon/media";
@@ -41,6 +42,13 @@ const skillsIncludeDraft = process.env.SKILLS_INCLUDE_DRAFT === "1";
 let skillDocs: Doc[] = loadSkillDocs(join(repoRoot, "examples", "skills"));
 let skillsFrom = "files (examples/skills)";
 let buildDbRetriever: ((docs: Doc[]) => Retriever) | null = null;
+// Which retriever is running is decided here and then said out loud: in the log, on /api/health and as a banner in the console when it is degraded.
+const degraded: string[] = [];
+const modelsDir = join(repoRoot, "storage", "models");
+const chosen = chooseEmbedder(modelsDir);
+const embedder = chosen.real ? new CachedEmbedder(chosen.embedder, join(repoRoot, "storage", "index", `${chosen.embedder.model.replace(/[\/]/g, "_")}@${chosen.embedder.version}.json`)) : chosen.embedder;
+let mode: RetrievalStatus["mode"] = "bm25-only";
+if (!chosen.real) degraded.push(`No sentence-embedding model under storage/models, so search matches words, not meaning. Place Xenova/bge-small-en-v1.5 there (nothing is downloaded automatically).`);
 if (process.env.DATABASE_URL) {
   try {
     const store = await openStore();
@@ -49,18 +57,45 @@ if (process.env.DATABASE_URL) {
     const rows = await store.listSkills();
     skillDocs = rows.map(skillDoc).filter((d): d is Doc => d !== null);
     skillsFrom = `Postgres (${rows.length} skills)`;
-    if (rows.length === 0) console.warn("DATABASE_URL is set but the skills table is empty: run `npm run skills -- import examples/skills`. No skills will be retrieved.");
-    const { embedder, note } = chooseEmbedder(join(repoRoot, "storage", "models"));
-    buildDbRetriever = await createDbBackedRetriever(store, embedder, [...recipeDocs(recipes), ...knowledge], SKILLS_HYBRID_OPTIONS);
-    console.log(`Retrieval: database-backed hybrid (BM25 + vectors; ${note}).`);
+    if (rows.length === 0) throw new Error("the skills table is empty: run `npm run skills -- import examples/skills`");
+    if (!chosen.real) throw new Error("no real embedding model, so database vectors would be meaningless");
+    buildDbRetriever = await createDbBackedRetriever(store, embedder, [...recipeDocs(recipes), ...knowledge], SKILLS_LOCAL_OPTIONS);
+    mode = "pgvector-hybrid";
   } catch (e) {
-    console.warn(`DATABASE_URL is set but the database cannot be used (${e instanceof Error ? e.message : String(e)}); falling back to the keyword retriever with skills from files.`);
+    degraded.push(`DATABASE_URL is set but the database cannot be used (${e instanceof Error ? e.message : String(e)}); using ${chosen.real ? "the in-process index" : "keyword search"} with skills from files.`);
     skillDocs = loadSkillDocs(join(repoRoot, "examples", "skills"));
     skillsFrom = "files (examples/skills)";
     buildDbRetriever = null;
   }
-} else console.log("Retrieval: keyword (BM25). Set DATABASE_URL to use the database-backed hybrid retriever.");
+}
+if (!buildDbRetriever && chosen.real) {
+  // No Docker needed: embed every document once (cached on disk), hold the vectors in memory, search with the same hybrid retriever.
+  try {
+    buildDbRetriever = await createLocalHybridRetriever(embedder, [...recipeDocs(recipes), ...knowledge, ...skillDocs], SKILLS_LOCAL_OPTIONS);
+    (embedder as CachedEmbedder).save();
+    mode = "memory-hybrid";
+  } catch (e) { degraded.push(`The in-process vector index could not be built (${e instanceof Error ? e.message : String(e)}); using keyword search.`); }
+}
 console.log(`Skills: ${skillDocs.length} from ${skillsFrom}; draft skills ${skillsIncludeDraft ? "ARE" : "are not"} retrieved (SKILLS_INCLUDE_DRAFT).`);
+// Template library as layout inspiration for the Director (in-process: files -> text embeddings -> memory store). Needs a real embedder; otherwise it is off, and that is reported.
+let templates: Awaited<ReturnType<typeof buildInspiration>> | undefined;
+if (mode !== "bm25-only") {
+  try {
+    const records = loadLibrary(join(repoRoot, "templates")).flatMap((l) => (l.record ? [l.record] : []));
+    if (records.length) {
+      const tstore = new MemoryDataStore();
+      await ingestTemplateText(tstore, embedder, records);
+      (embedder as CachedEmbedder).save();
+      templates = await buildInspiration(tstore, embedder);
+    } else degraded.push("No template files found under templates/, so the Director gets no layout inspiration.");
+  } catch (e) { degraded.push(`Template inspiration is off (${e instanceof Error ? e.message : String(e)}).`); }
+} else degraded.push("Template inspiration is off because meaning-based search is off.");
+const retrievalStatus: RetrievalStatus = {
+  mode, embedder: { model: chosen.embedder.model, version: chosen.embedder.version, real: chosen.real },
+  counts: { skills: skillDocs.length, templates: templates?.count ?? 0, recipes: recipes.length, notes: knowledge.length }, degraded,
+  vectors: embedder instanceof CachedEmbedder ? `${embedder.hits} from cache, ${embedder.misses} computed` : null,
+};
+console.log(describeRetrieval(retrievalStatus));
 const retrieverFor = (implemented?: ReadonlySet<string>, validated?: ReadonlySet<string>): Retriever => {
   const docs = [...recipeDocs(recipes, implemented ? { implemented, ...(validated ? { validated } : {}) } : {}), ...knowledge, ...skillDocs];
   return buildDbRetriever ? buildDbRetriever(docs) : new KeywordRetriever(docs, 1.5, 0.75, SKILLS_KEYWORD_FLOOR);
@@ -79,7 +114,7 @@ const renderFont = [process.env.RENDER_FONT_FILE ? resolve(repoRoot, process.env
 if (!renderFont) console.warn("No font file found for preview renders. Set RENDER_FONT_FILE to a .ttf file to enable them.");
 
 const app = createApp({
-  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, knowledge: [...knowledge, ...skillDocs], skillsIncludeDraft, recipes: library, ffmpegOk,
+  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, retrievalStatus, ...(templates ? { templates } : {}), knowledge: [...knowledge, ...skillDocs], skillsIncludeDraft, recipes: library, ffmpegOk,
   vision: new LocalVision({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") }), ocr: await availableOcr(),
   editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir, audio: detectAudio(),
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),

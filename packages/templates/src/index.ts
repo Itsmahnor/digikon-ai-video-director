@@ -14,3 +14,4 @@ export { PreviewRenderer, PREVIEW_AT, PREVIEW_AT_BY_CATEGORY } from "./preview.j
 export * from "./sheets.js";
 export * from "./starter.js";
 export { ALL_FAMILIES, familyById } from "./families/index.js";
+export * from "./inspiration.js";

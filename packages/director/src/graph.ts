@@ -265,7 +265,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       return {
         scenePlan: r.value, editPlan: null, advisory, requirementsSheet, productionPlan: null, compiledPlan: null, pendingRevision: null, gate: "storyboard" as const, status: "awaiting_approval" as const,
         skillsUsed: r.skills, referencesUsed: r.references, citations: r.citations,
-        trace: [`storyboard: version ${version}, ${r.value.scenes.length} scenes in ${r.attempts} attempt(s)`],
+        trace: [`storyboard: version ${version}, ${r.value.scenes.length} scenes in ${r.attempts} attempt(s)`, ...(r.inspiration.shown.length ? [`layout inspiration: ${r.inspiration.shown.length} templates shown${r.inspiration.close.length ? `; too close to a template (warning only): ${r.inspiration.close.map((c) => `${c.scene_id} ~ ${c.template_id} (${c.similarity})`).join(", ")}` : "; no scene too close to one"}`] : [])],
       };
     })
     .addNode("storyboard_gate", gateNode("storyboard"))

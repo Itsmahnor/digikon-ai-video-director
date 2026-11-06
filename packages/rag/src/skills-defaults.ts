@@ -12,3 +12,10 @@ import type { LexicalFloor } from "./keyword.js";
 export const SKILLS_FLOOR_IDF = 0.2;
 export const SKILLS_KEYWORD_FLOOR: LexicalFloor = { min_idf_coverage: SKILLS_FLOOR_IDF, collections: ["skills"] };
 export const SKILLS_HYBRID_OPTIONS: HybridOptions = { min_similarity: 0.6, rrf_k: 60, floor: { ...SKILLS_KEYWORD_FLOOR, require_keyword: true } };
+
+/**
+ * Local semantic default (no database, no keyword requirement). `skills-defaults` above was tuned to answer off-topic queries with nothing by requiring a keyword hit, which also
+ * stops a paraphrase that shares no word with a skill from being found. This one lets a close-in-meaning skill through on vectors alone (cosine >= min_similarity) and answers with
+ * nothing when no skill is at least `abstain_below` similar. abstain_below 0.6 was read off the similarity distributions of the independent and old sets (off-topic queries peak near 0.62, on-topic best matches have a 10th percentile of 0.59 to 0.67), then checked on the local set. On-topic and off-topic similarities overlap, so a skill-less answer is a best effort, not a guarantee. Re-check with `npm run eval:local`.
+ */
+export const SKILLS_LOCAL_OPTIONS: HybridOptions = { min_similarity: 0.6, rrf_k: 60, floor: { min_idf_coverage: 0, collections: ["skills"], abstain_below: 0.6 } };

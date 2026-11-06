@@ -74,8 +74,12 @@ function renderPills() {
   p.push(`<span class="pill ${w.state === "ready" ? "ok" : w.state === "error" ? "bad" : "warn"}"><i></i>Whisper <b>${w.state === "ready" ? esc(w.model.split("/").pop()) : w.state === "error" ? "unavailable" : "loading, up to a minute"}</b></span>`);
   p.push(`<span class="pill ${h.ffmpeg ? "ok" : "bad"}"><i></i>FFmpeg <b>${h.ffmpeg ? "ready" : "missing"}</b></span>`);
   p.push(`<span class="pill ${h.recipes.mode === "draft" ? "warn" : "ok"}"><i></i>Recipes <b>${h.recipes.available} ${esc(h.recipes.mode)}</b></span>`);
+  const r = h.retrieval;
+  if (r) p.push(`<span class="pill ${r.mode !== "bm25-only" && r.embedder && r.embedder.real ? "ok" : "bad"}" title="${esc(r.degraded.join(" "))}"><i></i>Search <b>${r.mode === "bm25-only" ? "keywords only" : esc(r.mode)}</b></span>`);
   $("#pills").innerHTML = p.join("");
   $("#demo-banner").hidden = !h.llm.demo;
+  const rb = $("#retrieval-banner");
+  if (rb) { const bad = r && r.degraded.length > 0; rb.hidden = !bad; if (bad) rb.textContent = "SEARCH IS DEGRADED: " + r.degraded.join(" "); }
 }
 async function refreshHealth() {
   try { state.health = await api("/api/health"); state.offline = false; }

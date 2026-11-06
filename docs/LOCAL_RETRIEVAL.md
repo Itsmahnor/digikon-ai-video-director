@@ -1,0 +1,11 @@
+# Local semantic retrieval (no Docker)
+
+Branch `feature/semantic-retrieval-local`. Everything here is local: no network at run time, no model or render API.
+
+- **Status is loud.** The console builds a `RetrievalStatus` at start-up, logs it, serves it on `/api/health` (`retrieval`) and shows a "Search" pill plus an amber banner when anything is degraded (no embedding model, database unreachable, no templates). Modes: `pgvector-hybrid`, `memory-hybrid`, `bm25-only`.
+- **In-process index.** With a sentence model in `storage/models/Xenova/bge-small-en-v1.5` (nothing downloads it automatically) the console embeds skills, recipes, notes and templates once, caches the vectors in `storage/index/` keyed by the exact text, and searches with the same hybrid retriever (BM25 + vectors, RRF) as the Postgres path. `DATABASE_URL` still selects Postgres when it works; when it does not, the console falls back to the in-process index and says so.
+- **Per-query skills.** `packages/director/src/skill-queries.ts`: the brief becomes up to 8 focused queries (whole brief, hook, each beat), results are fused, one topic is limited, skills beyond the top few get an excerpt, and `PINNED_SKILLS` are always shown first. The edit-plan step now gets skills too. The skills default no longer requires a keyword hit (`SKILLS_LOCAL_OPTIONS`).
+- **Template inspiration.** `packages/director/src/inspiration.ts` and `packages/templates/src/inspiration.ts`: when the Director may compose scenes it is shown 3 templates per beat (a different family per beat) as references, with wording that they are not a menu. After the storyboard, each composition's layout is compared with the templates it was shown; matches at or above `TOO_CLOSE` (0.6, uncalibrated) are noted in the trace. Warning only: nothing is blocked.
+- **Benchmark.** `npm run eval:local` compares BM25, the old keyword-gated hybrid and the local hybrid on `evals/local-retrieval-benchmark.json` (42, a development set, not held out), the independent set and the old set. The locked held-out set is deferred.
+
+Not done on purpose: Postgres parity tests, strict mode, retriever status inside approval records (those are hash-sealed), Editor template references, model and reranker comparison.

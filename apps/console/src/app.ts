@@ -29,7 +29,7 @@ import {
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
 import { ALL_EXTENSIONS, AssetRegistry, MEDIA_LIMITS, analyseContent, analyseMedia, buildAssetNotes, manifestEntry, measureImage, notesWithAnalysis, probeFile, understandAsset, type OcrEngine, type VisionModel } from "@digikon/media";
-import type { Doc, Retriever } from "@digikon/rag";
+import type { Doc, Retriever, RetrievalStatus } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { routeRequest } from "@digikon/router";
 import { languageName, transcribeFile, type SpeechEngine } from "@digikon/speech";
@@ -44,6 +44,10 @@ export interface AppContext {
   whisper: () => WhisperStatus;
   skills: SkillLibrary;
   retriever: Retriever;
+  /** Which retriever and embedder are running, served on /api/health and shown as a banner when degraded. */
+  retrievalStatus?: RetrievalStatus;
+  /** Template library as layout inspiration for the Director (see packages/director/src/inspiration.ts). */
+  templates?: TemplateInspirationPort;
   /** Tests only: lets the website reader reach a local fixture server. The console never sets it. */
   websiteOptions?: ReadOptions;
   /** Let draft skills reach the Director and Editor (SKILLS_INCLUDE_DRAFT=1). Off by default, because every shipped skill is a draft. Only affects which skills may be read. */
@@ -74,7 +78,7 @@ export interface AppContext {
 }
 
 import { registerKitRoutes, type Extraction } from "./kit-routes.js";
-import { kitIsStarted } from "@digikon/director";
+import { kitIsStarted, type TemplateInspirationPort } from "@digikon/director";
 import { approvedFacts, type ProjectKit } from "@digikon/contracts";
 import type { ReadOptions } from "@digikon/media";
 import { PLAIN_CANNOT_PRODUCE, PLAIN_PLAN_CHANGED, plainEscalation, plainReasons, publicApprovals } from "./public-view.js";
@@ -207,6 +211,7 @@ export function createApp(ctx: AppContext) {
   app.get("/api/health", (c) => c.json({
     llm: { available: !!ctx.llm, model: ctx.llm?.model ?? null, demo: ctx.demo, problem: llmProblem },
     whisper: { model: ctx.speech.model, ...ctx.whisper() },
+    retrieval: ctx.retrievalStatus ?? null,
     ffmpeg: ctx.ffmpegOk,
     recipes: { available: ctx.recipes.available().length, mode: ctx.recipes.minStatus },
     render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }).usable.map((x) => x.capability_id), note: "Preview renders only. Nothing is production-ready." },
@@ -602,7 +607,7 @@ export function createApp(ctx: AppContext) {
     s.facts = [...typed, ...kitFacts.map((f, i) => BrandFact.parse({ ...f, fact_id: `F${String(typed.length + i + 1).padStart(2, "0")}` }))];
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
@@ -699,7 +704,7 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);
