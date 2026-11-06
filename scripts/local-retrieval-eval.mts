@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { CachedEmbedder, HybridRetriever, KeywordRetriever, MemoryVectorIndex, SKILLS_HYBRID_OPTIONS, SKILLS_KEYWORD_FLOOR, SKILLS_LOCAL_OPTIONS, chooseEmbedder, loadSkillDocs, type Doc, type HybridOptions, type Retriever } from "@digikon/rag";
+import { CachedEmbedder, HybridRetriever, KeywordRetriever, MemoryVectorIndex, SKILLS_HYBRID_OPTIONS, SKILLS_KEYWORD_FLOOR, SKILLS_LOCAL_OPTIONS, chooseEmbedder, embeddingTextOf, loadSkillDocs, type Doc, type HybridOptions, type Retriever } from "@digikon/rag";
 import { scoreQuery } from "../packages/evals/src/retrieval-eval.js";
 
 /**
@@ -15,7 +15,7 @@ const docs: Doc[] = loadSkillDocs(join(root, "examples", "skills"));
 const chosen = chooseEmbedder(join(root, "storage", "models"));
 if (!chosen.real) { console.error("No local sentence model under storage/models: this evaluation needs one."); process.exit(1); }
 const emb = new CachedEmbedder(chosen.embedder, join(root, "storage", "index", "eval-skills.json"));
-const vs = await emb.embed(docs.map((d) => `${d.title}. ${d.title}. ${d.text}`));
+const vs = await emb.embed(docs.map(embeddingTextOf));
 emb.save();
 const hybrid = (o: HybridOptions): Retriever => { const ix = new MemoryVectorIndex(); const m = new Map<string, readonly number[]>(); docs.forEach((d, i) => { ix.set(`${d.collection}\u0000${d.id}`, vs[i]!); m.set(`${d.collection}\u0000${d.id}`, vs[i]!); }); return new HybridRetriever(docs, emb, ix, o, m); };
 const noGate: HybridOptions = { min_similarity: 0.6, rrf_k: 60 };

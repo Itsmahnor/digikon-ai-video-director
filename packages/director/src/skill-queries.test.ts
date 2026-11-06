@@ -51,3 +51,12 @@ describe("template inspiration", () => {
     expect(close).toEqual([{ scene_id: "S01", template_id: "t-f1", similarity: 0.7 }]);
   });
 });
+
+import { COMPOSITION_GUIDE } from "./nodes.js";
+describe("composition preference", () => {
+  it("tells the Director to compose by default and keep fixed blocks for the cases they fit", () => {
+    expect(COMPOSITION_GUIDE).toContain("Compose by default");
+    expect(COMPOSITION_GUIDE).toContain("only where it is clearly the right tool");
+    expect(COMPOSITION_GUIDE).toContain("must never share one layout");
+  });
+});

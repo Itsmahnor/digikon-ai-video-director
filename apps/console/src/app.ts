@@ -1031,7 +1031,7 @@ export function createApp(ctx: AppContext) {
     const s = session(c.req.param("id"));
     if (!ctx.editorSkills) throw new HttpError(503, "no_editor", "The Editor skills are not loaded, so the Editor cannot run.");
     const handoff = await currentHandoff(s); // refuses until both approvals match the current plans
-    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, ...(editorModel() ? { llm: editorModel()! } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
+    const run = await runEditor(handoff, { recipes: ctx.recipes, skills: ctx.editorSkills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(editorModel() ? { llm: editorModel()! } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), store: new RunStore(s.dir), storageRoot: s.dir, requireContentHash: true, audio_production: !!ctx.audio });
     if (!run.ok) return c.json({ error: "editor_refused", message: "The Editor refused this handoff.", stage: run.stage, reasons: run.reasons.map((r) => scrub(r, scrubRoots(s))) }, 409);
     saveEditorOutput(renderDirs(s.dir, runIdOf(s)).editor, runIdOf(s), run.output);
     return c.json({ run_id: runIdOf(s), output: run.output, check: run.check });
