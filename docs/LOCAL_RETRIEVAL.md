@@ -9,3 +9,9 @@ Branch `feature/semantic-retrieval-local`. Everything here is local: no network 
 - **Benchmark.** `npm run eval:local` compares BM25, the old keyword-gated hybrid and the local hybrid on `evals/local-retrieval-benchmark.json` (42, a development set, not held out), the independent set and the old set. The locked held-out set is deferred.
 
 Not done on purpose: Postgres parity tests, strict mode, retriever status inside approval records (those are hash-sealed), Editor template references, model and reranker comparison.
+
+## Added later on this branch
+- **Strict mode:** `RAG_REQUIRE_VECTORS=1` makes `/direct` answer 503 `search_degraded` while search is keyword-only. Off by default.
+- **Run trace:** the first treatment line of a run's trace records which retriever and embedder were active (not part of any approved plan or hash).
+- **Held-out set:** `npm run heldout -- pool | lock | eval`. 100 draft queries in `evals/heldout/queries.json`; `review.html` lists pooled candidates (shuffled, ranks hidden) for a person to grade; `lock` freezes the hashes; `eval` refuses if the lock is missing or broken or `HELDOUT_TUNING=1`, prints a bootstrap interval and logs every run. Nobody has graded it yet, so it is not locked and `eval` refuses to run.
+- **Parity and review:** `npm run eval:parity`, `npm run review:library` (writes `docs/LIBRARY_REVIEW.md`).

@@ -243,7 +243,7 @@ export function buildDirectorGraph(deps: Deps, checkpointer = new MemorySaver())
       const proj = { ...s.project, video_type: s.chosenVideoType ?? s.project.video_type ?? null };
       const { treatment, skills, references, citations } = await treatmentNode(deps, proj, s.facts ?? [], s.notes ?? []);
       const unsupported = treatment.claims.filter((c) => c.brand_fact_id === null).length;
-      return { treatmentDoc: treatment, skillsUsed: skills, referencesUsed: references, citations, trace: [`treatment: ${treatment.beats.length} beats, ${treatment.claims.length} claims (${unsupported} unsupported)`] };
+      return { treatmentDoc: treatment, skillsUsed: skills, referencesUsed: references, citations, trace: [...(deps.retrievalNote ? [deps.retrievalNote] : []), `treatment: ${treatment.beats.length} beats, ${treatment.claims.length} claims (${unsupported} unsupported)`] };
     })
     // Makes the first storyboard, or the next version of it when the reviewer asked for changes. Always ends at gate 1.
     .addNode("storyboard", async (s: DirectorStateType) => {

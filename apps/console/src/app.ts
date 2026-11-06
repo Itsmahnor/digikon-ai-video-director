@@ -29,7 +29,7 @@ import {
 } from "@digikon/render";
 import { isInside, loadEditorOutput, publicRecord, renderDirs, saveEditorOutput, scrub, timelineEnd } from "./render-service.js";
 import { ALL_EXTENSIONS, AssetRegistry, MEDIA_LIMITS, analyseContent, analyseMedia, buildAssetNotes, manifestEntry, measureImage, notesWithAnalysis, probeFile, understandAsset, type OcrEngine, type VisionModel } from "@digikon/media";
-import type { Doc, Retriever, RetrievalStatus } from "@digikon/rag";
+import { describeRetrieval, isSemantic, type Doc, type Retriever, type RetrievalStatus } from "@digikon/rag";
 import type { RecipeLibrary } from "@digikon/recipes";
 import { routeRequest } from "@digikon/router";
 import { languageName, transcribeFile, type SpeechEngine } from "@digikon/speech";
@@ -46,6 +46,8 @@ export interface AppContext {
   retriever: Retriever;
   /** Which retriever and embedder are running, served on /api/health and shown as a banner when degraded. */
   retrievalStatus?: RetrievalStatus;
+  /** RAG_REQUIRE_VECTORS=1: refuse to plan while search is keyword-only, instead of quietly planning on weaker retrieval. */
+  requireVectors?: boolean;
   /** Template library as layout inspiration for the Director (see packages/director/src/inspiration.ts). */
   templates?: TemplateInspirationPort;
   /** Tests only: lets the website reader reach a local fixture server. The console never sets it. */
@@ -596,6 +598,7 @@ export function createApp(ctx: AppContext) {
   app.post("/api/sessions/:id/direct", async (c) => {
     const s = session(c.req.param("id"));
     const llm = needLlm();
+    if (ctx.requireVectors && ctx.retrievalStatus && !isSemantic(ctx.retrievalStatus)) throw new HttpError(503, "search_degraded", `Meaning-based search is off (${ctx.retrievalStatus.degraded[0] ?? "no embedding model"}) and RAG_REQUIRE_VECTORS=1 is set, so planning is refused. Fix the search, or unset RAG_REQUIRE_VECTORS to plan on keyword search.`);
     const body = DirectBody.parse(await c.req.json().catch(() => ({})));
     if (s.route?.status !== "ready") throw new HttpError(409, "not_routed", "Describe the video first so I know what to plan.");
     const request = s.route.request;
@@ -607,7 +610,7 @@ export function createApp(ctx: AppContext) {
     s.facts = [...typed, ...kitFacts.map((f, i) => BrandFact.parse({ ...f, fact_id: `F${String(typed.length + i + 1).padStart(2, "0")}` }))];
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
@@ -704,7 +707,7 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);

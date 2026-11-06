@@ -7,3 +7,6 @@ storage/
 .workspaces/
 *.log
 .DS_Store
+
+# local ffmpeg binaries
+tools/ffmpeg/

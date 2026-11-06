@@ -22,6 +22,7 @@
     "eval:hybrid": "tsx packages/evals/src/hybrid-cli.ts",
     "eval:parity": "tsx scripts/retrieval-parity.mts",
     "review:library": "tsx scripts/review-library.mts",
+    "heldout": "tsx scripts/heldout.mts",
     "eval:local": "tsx scripts/local-retrieval-eval.mts",
     "eval:skills": "tsx packages/evals/src/skills-cli.ts",
     "eval:skills:db": "tsx packages/evals/src/skills-db-cli.ts",

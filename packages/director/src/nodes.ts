@@ -21,6 +21,8 @@ export interface Deps {
   retriever: Retriever;
   /** Template library as inspiration (see inspiration.ts). Optional: without it the storyboard step is unchanged. */
   templates?: TemplateInspirationPort;
+  /** One line saying which retriever ran (mode, embedder, warnings). Recorded in the run trace so a plan can be traced to the search that informed it. Not part of any approved plan or hash. */
+  retrievalNote?: string;
   recipes: RecipeLibrary;
   /** Durable record of every gate decision. When set, a decision only takes effect once it has been written. */
   approvalLog?: ApprovalLog;
