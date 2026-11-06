@@ -326,7 +326,31 @@ export class DemoClient implements LlmClient {
       }
     });
     if (user.includes("- id: loudness-normalise ")) add(scenes[scenes.length - 1]!.scene_id, "loudness-normalise", "Level the final mix once, at the end.");
-    return { uses };
+    // asked to compose: the Editor's share is how the composed scenes move. It changes motion only, never copy or layout (a patch cannot carry them).
+    if (this.opts.compose) {
+      const head = "## Composed scenes (the layouts the storyboard approved; you may change only how their elements move)";
+      const i = user.indexOf(head);
+      if (i >= 0) {
+        const from = user.indexOf("[", i), to = user.indexOf("\n\n", from);
+        try {
+          const scenes = JSON.parse(user.slice(from, to < 0 ? undefined : to)) as { scene_id: string; duration_seconds: number; elements: { id: string; kind: string; text?: string }[] }[];
+          const enters = ["rise", "slide_left", "drop", "scale_in"] as const;
+          const motion = scenes.map((s, k) => {
+            const texts = s.elements.filter((e) => e.kind === "text");
+            const lead = texts[0], second = s.elements.find((e) => e !== lead);
+            const words = (lead?.text ?? "").split(/\s+/).length;
+            // everything must still be fully shown 0.8 s before the end: a stagger spans (words - 1) * each of the scene
+            const each = Math.min(0.03, Math.max(0.005, (0.12 * s.duration_seconds) / Math.max(1, words - 1) / s.duration_seconds));
+            const elements = [
+              ...(lead ? [{ id: lead.id, motion: { enter: "rise", easing: "spring", delay: 0.02, stagger: { unit: "word", each } } }] : []),
+              ...(second ? [{ id: second.id, motion: { enter: enters[k % enters.length], delay: 0.12 } }] : []),
+            ];
+            return elements.length ? { scene_id: s.scene_id, rationale: "Give the scene its own rhythm: the line it is about arrives word by word, the rest follows.", elements } : null;
+          }).filter((m) => m !== null);
+          if (motion.length) return { uses, composition_motion: motion };
+        } catch { /* no usable summary: keep the motion as it is */ }
+      }
+    }    return { uses };
   }
 }
 

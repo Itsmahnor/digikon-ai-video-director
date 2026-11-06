@@ -644,7 +644,7 @@ function results(res) {
     },
     edits: () => `<div class="notice info" style="margin-bottom:12px">Built on storyboard version ${res.versions.storyboard} <span class="mono">(${esc(String(res.hashes.storyboard).slice(0, 12))})</span>, which you approved. Edit plan version ${res.versions.edit_plan}.</div>` + sp.scenes.map((s) => {
       const uses = ep.uses.filter((u) => u.scene_id === s.scene_id);
-      return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}${scenePreviewHtml(res, s)}</div>`;
+      return `<div class="scene"><div class="head"><b>${s.scene_id} · ${esc(s.purpose)}</b><span class="mono hint">${fmtDur(s.duration_seconds)}</span></div>${uses.length ? uses.map((u) => `<div style="margin:8px 0"><span class="chip recipe">${esc(u.recipe_id)}</span> ${Object.keys(u.params).length ? `<span class="mono hint">${esc(JSON.stringify(u.params))}</span>` : '<span class="hint">default parameters</span>'}<div class="sub" style="margin:4px 0 0">${esc(u.rationale)}</div></div>`).join("") : '<div class="sub">No special treatment</div>'}${motionHtml(ep, s)}${scenePreviewHtml(res, s)}</div>`;
     }).join(""),
     claims: () => `<table><thead><tr><th>Claim</th><th>Text</th><th>Status</th><th>Used in</th></tr></thead><tbody>${(res.claimsAudit ?? []).map((c) => {
       const chip = c.status === "supported" ? `<span class="chip ok">supported by ${esc(c.fact?.fact_id ?? "")}</span>` : c.status === "illustrative" ? '<span class="chip warn">illustrative concept, not a verified fact</span>' : '<span class="chip bad">unsupported factual claim, blocked</span>';
@@ -713,6 +713,22 @@ async function previewScene(sceneId) {
     state.previews[sceneId] = { result: r };
   } catch (e) { state.previews[sceneId] = { error: e?.message ? `This scene could not be previewed: ${e.message}` : "This scene could not be previewed." }; }
   renderAll();
+}
+// The Editor's changes to how a composed scene moves (part of the edit plan, so Gate 2 approves them). Plain words; the story and layout are not touched by them.
+const ENTER_WORDS = { none: "is simply there", fade: "fades in", rise: "rises in", drop: "drops in", slide_left: "slides in from the right", slide_right: "slides in from the left", scale_in: "grows in", wipe: "draws across" };
+function motionHtml(ep, s) {
+  const m = (ep?.composition_motion ?? []).find((x) => x.scene_id === s.scene_id);
+  if (!m) return "";
+  const rows = m.elements.map((e) => {
+    const x = e.motion, bits = [];
+    if (x.enter) bits.push(ENTER_WORDS[x.enter] ?? x.enter);
+    if (x.stagger) bits.push(`one ${x.stagger.unit} at a time`);
+    if (x.delay !== undefined) bits.push(`starts ${Math.round(x.delay * 100)}% into the scene`);
+    if (x.duration !== undefined) bits.push(`takes ${Math.round(x.duration * 100)}% of the scene`);
+    if (x.easing) bits.push(`${x.easing.replace("_", " ")} easing`);
+    return `<li><span class="mono">${esc(e.id)}</span> ${esc(bits.join(", ") || "no change")}</li>`;
+  }).join("");
+  return `<div class="notice info" style="margin-top:10px"><b>How it moves (the Editor)</b> <span class="hint">${esc(m.rationale)}</span><ul style="margin:6px 0 0;padding-left:18px">${rows}</ul><div class="hint" style="margin-top:4px">Only motion is changed here. The words, layout and colours are the ones you approved in the storyboard.</div></div>`;
 }
 function requirementsSheetHtml(req) {
   if (!req) return "";

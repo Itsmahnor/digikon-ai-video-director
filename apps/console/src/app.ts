@@ -962,7 +962,7 @@ export function createApp(ctx: AppContext) {
     const { registry, available } = registryFor(join(draftDir, "work"));
     if (!available) throw new HttpError(409, "no_engine", "No render engine is available on this machine.");
     const r = await renderDraftScene(
-      { scenePlan: state.scenePlan, assets: state.assets, art_direction: state.treatmentDoc?.art_direction ?? null, operations: state.compiledPlan.operations, templates, aspect_ratio: state.project.aspect_ratio },
+      { scenePlan: state.scenePlan, assets: state.assets, art_direction: state.treatmentDoc?.art_direction ?? null, operations: state.compiledPlan.operations, templates, aspect_ratio: state.project.aspect_ratio, ...(state.editPlan?.composition_motion?.length ? { composition_motion: state.editPlan.composition_motion } : {}) },
       sceneId,
       { adapters: registry, draftDir, fontFile: ctx.renderFont, assetFiles: (id, role) => assets.renderFile(s.id, id, role), audio: ctx.audio ?? null },
     );

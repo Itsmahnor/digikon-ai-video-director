@@ -1,7 +1,7 @@
 import { basename, isAbsolute, relative, resolve } from "node:path";
 import { authorGraph } from "./scene-graph/author.js";
 import { validateSceneGraph } from "./scene-graph/validate.js";
-import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, VISUAL_SYSTEMS, contrastRatio, type Finish, type Palette, type SceneAssetRef, type TypeFace } from "@digikon/contracts";
+import { ArtDirection, SceneVisual, STORYBOARD_CAMERA, applyCompositionMotion, VISUAL_SYSTEMS, contrastRatio, type CompositionMotionPlan, type Finish, type Palette, type SceneAssetRef, type TypeFace } from "@digikon/contracts";
 import { planLayers, type AssetFileResolver, type AssetLayer, type ResolvedAssetFile } from "./asset-layers.js";
 import type { RenderJob } from "./adapter.js";
 import { hasInvalidControl, normaliseText, wrapText } from "./text.js";

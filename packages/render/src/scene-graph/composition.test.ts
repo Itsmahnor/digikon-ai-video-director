@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BUILDING_BLOCKS as B, SceneVisual, compositionGroundingIssues, type EditorOperation } from "@digikon/contracts";
 import { EXAMPLE_ART_DIRECTION, EXAMPLE_VISUALS } from "../composition-examples.js";
-import { planCompositionScenes } from "../composition.js";
+import { jobVisuals, planCompositionScenes } from "../composition.js";
 
 const job = (visual: SceneVisual, overlay: string | null, [width, height]: readonly [number, number], seconds = 4) => ({
   render_id: "rn_0000000000000000", settings: { aspect_ratio: width > height ? "16:9" : width === height ? "1:1" : "9:16", width, height, fps: 30, duration_s: seconds, container: "mp4", video_codec: "h264", audio_codec: null, source: { kind: "user_approved", reference: "test" } },
@@ -81,5 +81,35 @@ describe("a composition's words must come from the scene's approved text", () =>
     expect(compositionGroundingIssues(shapeOnly, ctx).join(" ")).toContain("at least one text element");
     const dup = SceneVisual.parse({ block: "composition", intent: "x", elements: [{ id: "a", kind: "text", text: "Fresh coffee", at: { x: 0.1, y: 0.1, w: 0.5 }, size: 0.05 }, { id: "a", kind: "text", text: "Fresh coffee", at: { x: 0.1, y: 0.5, w: 0.5 }, size: 0.05 }] }) as Extract<SceneVisual, { block: "composition" }>;
     expect(compositionGroundingIssues(dup, ctx).join(" ")).toContain("duplicate element id a");
+  });
+});
+
+describe("the edit plan's motion is laid over the approved composition when the scene is planned", () => {
+  const visual = comp([
+    { id: "head", kind: "text", text: "Roasted weekly in small batches", at: { x: 0.1, y: 0.3, w: 0.8 }, size: 0.08, motion: { enter: "fade", delay: 0, duration: 0.2 } },
+    { id: "bar", kind: "shape", shape: "rect", at: { x: 0.1, y: 0.7, w: 0.3, h: 0.02 }, fill: "accent", motion: { enter: "fade", delay: 0, duration: 0.2 } },
+  ]);
+  const handoff = (motion?: unknown) => ({ storyboard: { scenes: [{ scene_id: "S01", visual, visual_purpose: "x", overlay: null }] }, treatment: { art_direction: EXAMPLE_ART_DIRECTION }, ...(motion ? { edit_plan: { composition_motion: motion } } : {}) }) as never;
+  const graphOf = (motion?: unknown) => {
+    const j = job(visual, null, [1280, 720]) as unknown as Record<string, unknown>;
+    const p = planCompositionScenes({ ...j, ...jobVisuals(handoff(motion)) } as never, { outputRoot: "/tmp/out" });
+    if (!p.ok) throw new Error(p.issues.join("; "));
+    return (p.scenes[0]!.geom as { graph: { elements: { id: string; props: Record<string, unknown>; timeline: { start_s: number; duration_s: number; tracks: { property: string }[] }; stagger?: { unit: string } }[] } }).graph;
+  };
+  it("changes how the elements arrive, and nothing about what they say or where they sit", () => {
+    const before = graphOf(), after = graphOf([{ scene_id: "S01", rationale: "rhythm", elements: [{ id: "head", motion: { enter: "rise", easing: "spring", delay: 0.2, stagger: { unit: "word", each: 0.03 } } }] }]);
+    const h0 = before.elements.find((e) => e.id === "head")!, h1 = after.elements.find((e) => e.id === "head")!;
+    expect(h1.stagger).toMatchObject({ unit: "word" });
+    expect(h0.stagger).toBeUndefined();
+    expect(h1.timeline.start_s).toBeCloseTo(0.2 * 4, 5);
+    expect(h1.timeline.tracks.map((t) => t.property)).toContain("y"); // "rise" moves it; "fade" did not
+    expect(h0.timeline.tracks.map((t) => t.property)).not.toContain("y");
+    expect(h1.props).toEqual(h0.props); // text, position, size, colour: unchanged
+    expect(after.elements.find((e) => e.id === "bar")).toEqual(before.elements.find((e) => e.id === "bar"));
+  });
+  it("a patched scene that can no longer be read is refused by the planner, like any other composition", () => {
+    const j = job(visual, null, [1280, 720]) as unknown as Record<string, unknown>;
+    const late = planCompositionScenes({ ...j, ...jobVisuals(handoff([{ scene_id: "S01", rationale: "too slow", elements: [{ id: "head", motion: { delay: 0.9, duration: 0.5 } }] }])) } as never, { outputRoot: "/tmp/out" });
+    expect(late.ok).toBe(false);
   });
 });

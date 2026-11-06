@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { QuestionList, completeness, questionsFor, type ProjectKit } from "@digikon/contracts";
 import {
-  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, compositionGroundingIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
+  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, CompositionMotionPlan, applyCompositionMotion, compositionGroundingIssues, compositionMotionIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
   type Asset, type VisualBlock, type VisualSystem, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
 } from "@digikon/contracts";
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
@@ -44,7 +44,7 @@ export type IntakeOut = z.infer<typeof IntakeOut>;
 /** The model supplies durations; code assigns start and end times and the production method so the timeline can never have gaps or overlaps. */
 const StoryboardScene = Scene.omit({ start_time: true, end_time: true, production_method: true });
 export const StoryboardOut = z.object({ scenes: z.array(StoryboardScene).min(1) });
-export const EditPlanOut = z.object({ uses: z.array(RecipeUse) });
+export const EditPlanOut = z.object({ uses: z.array(RecipeUse), /** The Editor's motion changes for composed scenes. Optional: leave it out to keep the motion the storyboard's composition already has. */ composition_motion: z.array(CompositionMotionPlan).optional() });
 /** What the model must return for a treatment: the schema, with art direction required (the stored schema keeps it optional so older treatments still load). */
 export const TreatmentOut = Treatment.extend({ art_direction: ArtDirection });
 export const COMPOSITION_RECIPE = "scene-composition";
@@ -475,6 +475,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets), visual_block: s.visual?.block ?? null, visual_purpose: s.visual_purpose, ...(s.asset_refs?.length ? { pictures: s.asset_refs.map((r) => `${r.asset_id} as ${r.role}, ${r.animation}${r.mandatory ? ", mandatory" : ""}`) } : {}) })))),
     section("Directing principles", formatHits(principles)),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
+    ...(compositionSummaries(plan).length ? [section("Composed scenes (the layouts the storyboard approved; you may change only how their elements move)", json(compositionSummaries(plan))), COMPOSITION_MOTION_GUIDE] : []),
     ...(templateHints && Object.keys(templateHints).length ? [section("User template hints (a hint only: use one only when it is among the candidate recipes above, fits that scene and stays inside its limits; otherwise ignore it)", json(templateHints))] : []),
     `Return uses as {use_id (U01, U02, ...), scene_id, recipe_id, params, rationale}. Omit a parameter to use its default. Each non-final scene whose transition_out is crossfade, dip_to_black or wipe needs the matching transition recipe. Respect max uses per film across the whole plan. Add loudness-normalise once on the last scene only if it is listed among the candidate recipes above (it is listed only when the storyboard has voiceover, audio cues or audio assets). Never plan an audio operation for a brief that asked for no voiceover, music or sound effects. Do not request any operation that is not a candidate recipe. A scene with a visual_block is drawn entirely by the scene-composition recipe (no parameters): give it that one use and no text, camera or end-card recipe; give its transition recipe as usual. A scene without a visual_block never uses scene-composition.`,
     ...(revision ? [revisionSection("edit plan", revision)] : []),
@@ -489,11 +490,11 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
       let n = Math.max(0, ...uses.map((u) => Number(u.use_id.slice(1)) || 0));
       const rec = deps.recipes.get(COMPOSITION_RECIPE);
       if (rec && deps.recipes.isAvailable(rec)) for (const s of plan.scenes) if (s.visual && !uses.some((u) => u.scene_id === s.scene_id && u.recipe_id === COMPOSITION_RECIPE)) uses.push({ use_id: `U${String(++n).padStart(2, "0")}`, scene_id: s.scene_id, recipe_id: COMPOSITION_RECIPE, params: {}, rationale: `Draws the scene from its approved ${s.visual.block.replaceAll("_", " ")} visual: ${s.visual_purpose ?? s.purpose}`.slice(0, 280) });
-      return EditPlan.parse({ project_id: project.project_id, version, uses });
+      return EditPlan.parse({ project_id: project.project_id, version, uses, ...(out.composition_motion?.length ? { composition_motion: out.composition_motion } : {}) });
     },
     check: async (edit) => {
       production = null;
-      const issues = [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project)];
+      const issues = [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project), ...compositionMotionProblems(edit, plan, deps, project, treatment)];
       // Only a valid Director plan is turned into a production plan; the model is shown every production problem so it can repair its plan or the run escalates.
       if (!deps.production) return issues;
       // Fail closed: with a ProductionPort configured, an edit plan without the approved treatment cannot be production-checked, so it cannot pass as if it had been.
@@ -508,6 +509,30 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
   return { ...result, production: production as ProductionOutcome | null, skills, references, citations: [...principles.map((h) => h.doc.id), ...candidates.map((r) => r.recipe_id)] };
 }
 
+/**
+ * The Editor's motion changes for composed scenes, checked: they must name real composed scenes and elements, and each patched composition must still pass the same bounds, legibility and
+ * timing checks the storyboard's did (a slower arrival can leave text too little time to be read). A patch carries motion only, so copy, facts and layout cannot have changed.
+ */
+export function compositionMotionProblems(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "production">, project: Pick<Project, "aspect_ratio">, treatment?: Treatment): string[] {
+  const out = compositionMotionIssues(edit.composition_motion, plan.scenes).map((m) => `composition_motion - ${m}`);
+  if (out.length) return out;
+  for (const m of edit.composition_motion ?? []) {
+    const sc = plan.scenes.find((s) => s.scene_id === m.scene_id);
+    if (sc?.visual?.block !== "composition") continue;
+    const patched = applyCompositionMotion(sc.visual, [m]);
+    for (const x of deps.production?.composition?.({ visual: patched, duration_seconds: sc.duration_seconds, art_direction: treatment?.art_direction ?? null, aspect_ratio: project.aspect_ratio }) ?? []) out.push(`composition_motion - ${m.scene_id}: ${x}`);
+  }
+  return out;
+}
+
+/** The scenes the Editor can change the motion of, as the edit-plan prompt shows them: what each element is and how it arrives now. Text is shown so the Editor knows what it is moving; it cannot change it. */
+export function compositionSummaries(plan: ScenePlan) {
+  return plan.scenes.flatMap((s) => (s.visual?.block === "composition"
+    ? [{ scene_id: s.scene_id, duration_seconds: s.duration_seconds, intent: s.visual.intent, elements: s.visual.elements.map((e) => ({ id: e.id, kind: e.kind, ...(e.kind === "text" ? { text: e.text, size: e.size } : { shape: e.shape }), at: e.at, motion: e.motion })) }]
+    : []));
+}
+
+export const COMPOSITION_MOTION_GUIDE = `Composed scenes (listed above): you are the Editor for how they MOVE. You may adjust, per element, only its motion: enter (none, fade, rise, drop, slide_left, slide_right, scale_in, wipe), delay and duration (shares of the scene, 0 to 1), easing (ease_out, ease_in_out, spring) and, for text, stagger {unit: line|word|char, each}. Put changes in composition_motion as [{scene_id, rationale, elements:[{id, motion:{...only the fields you change}}]}]. You cannot change text, position, size, colour, shapes or pictures: those are approved. Use motion to give each scene its own rhythm: stagger the line the scene is about, let supporting elements arrive after it, hold the closing still. Every element must still be fully shown for at least 0.8 s before the scene ends, and a patched scene is re-checked like the original. Leave composition_motion out to keep the motion as it is.`;
 /**
  * Production planning for one Director edit plan, the same call whether the edit-plan step or the approval gate asks for it: decide against the live registry, compile,
  * and run the renderer's pre-flight. The registry is read fresh each time. Deterministic: the same plans and registry give the same hashes.

@@ -70,7 +70,7 @@ export function sealPreflightResult(body: { status: PreflightStatus; frame: { wi
 export function runAdapterPreflight(req: PreflightRequest, opts: PreflightOptions): PreflightResult {
   const frame = opts.settings ? { width: opts.settings.width, height: opts.settings.height, fps: opts.settings.fps } : opts.frame ?? DEFAULT_PREFLIGHT_FRAMES[req.aspect_ratio];
   const settings = opts.settings ?? preflightSettings(req, frame);
-  const handoff = { storyboard: req.scenePlan, treatment: { art_direction: req.art_direction }, assets: req.assets as readonly Asset[] };
+  const handoff = { storyboard: req.scenePlan, treatment: { art_direction: req.art_direction }, assets: req.assets as readonly Asset[], edit_plan: { composition_motion: req.composition_motion } };
   const scenes: PreflightSceneResult[] = [];
 
   for (const scene of [...req.scenePlan.scenes].sort((a, b) => a.start_time - b.start_time)) {

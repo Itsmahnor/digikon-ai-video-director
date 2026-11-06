@@ -1,6 +1,6 @@
 import {
   COMPILED_PLAN_VERSION, CompiledEditPlan, canonicalJson, compiledPlanHash, productionSelectionHash,
-  type Asset, type CapabilitySnapshot, type CompileDiagnostic, type EditPlan, type EditorOperation, type ProductionDecisionPlan, type Renderer, type RevisionRequest, type ScenePlan, type SceneVisual, type Treatment,
+  type Asset, type CapabilitySnapshot, type CompileDiagnostic, type EditPlan, type EditorOperation, type ProductionDecisionPlan, type CompositionMotionPlan, type Renderer, type RevisionRequest, type ScenePlan, type SceneVisual, type Treatment,
 } from "@digikon/contracts";
 import type { RecipeLibrary } from "@digikon/recipes";
 import type { Retriever } from "@digikon/rag";
@@ -38,6 +38,8 @@ export interface PreflightRequest {
   /** operation_id to the implementation reference the production plan selected for it. */
   templates: Readonly<Record<string, string>>;
   aspect_ratio: "16:9" | "9:16" | "1:1";
+  /** The Editor's motion changes for composed scenes, laid over the storyboard's compositions when the scene jobs are planned. */
+  composition_motion?: readonly CompositionMotionPlan[];
   /** What the result must be bound to: the selection and the compiled plan these operations come from. */
   selection_hash: string;
   compiled_hash: string;
@@ -132,7 +134,7 @@ export async function produceProduction(input: ProductionInput, port: Production
     try {
       plan = attachPreflight(plan, port.preflight({
         scenePlan: input.scenePlan, assets: input.assets, art_direction: input.art_direction, operations: compiled.operations, templates,
-        aspect_ratio: input.source.constraints.aspect_ratio, selection_hash: productionSelectionHash(plan), compiled_hash: compiledPlanHash(compiled),
+        aspect_ratio: input.source.constraints.aspect_ratio, ...(input.editPlan.composition_motion?.length ? { composition_motion: input.editPlan.composition_motion } : {}), selection_hash: productionSelectionHash(plan), compiled_hash: compiledPlanHash(compiled),
       } as PreflightRequest), compiledPlanHash(compiled));
       for (const s of plan.preflight.scenes.filter((x) => x.status === "failed")) blockers.push(`${s.scene_id}: the renderer's planner refuses this scene [${s.kind}]: ${s.diagnostics.join("; ")}`);
     } catch (e) {

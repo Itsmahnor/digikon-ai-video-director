@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { RenderSettings, hashCanonical, type Asset, type EditorOperation, type ScenePlan, type Treatment } from "@digikon/contracts";
+import { RenderSettings, hashCanonical, type CompositionMotionPlan, type Asset, type EditorOperation, type ScenePlan, type Treatment } from "@digikon/contracts";
 import { createHash } from "node:crypto";
 import type { AdapterRegistry } from "./adapter.js";
 import { checkMixedAudio, mixAudio, planAudio, type AudioCapabilities } from "./audio.js";
@@ -33,6 +33,8 @@ export interface DraftRequest {
   operations: readonly EditorOperation[];
   templates: Readonly<Record<string, string>>;
   aspect_ratio: "16:9" | "9:16" | "1:1";
+  /** The edit plan's motion changes for composed scenes (the draft shows the plan as proposed, motion included). */
+  composition_motion?: readonly CompositionMotionPlan[];
 }
 
 /** A frame large enough to judge the scene by, whatever the final output size will be chosen as later. */
@@ -68,7 +70,7 @@ function planOne(req: DraftRequest, sceneId: string, opts: DraftOptions) {
   const frame = DRAFT_FRAMES[req.aspect_ratio];
   const total = req.scenePlan.scenes.reduce((n, s) => n + s.duration_seconds, 0);
   const settings = RenderSettings.parse({ aspect_ratio: req.aspect_ratio, ...frame, duration_s: total, container: "mp4", video_codec: "h264", audio_codec: null, source: { kind: "user_approved", reference: "draft preview frame; the real output settings are chosen later" } });
-  const handoff = { storyboard: req.scenePlan, treatment: { art_direction: req.art_direction }, assets: req.assets as readonly Asset[] };
+  const handoff = { storyboard: req.scenePlan, treatment: { art_direction: req.art_direction }, assets: req.assets as readonly Asset[], edit_plan: { composition_motion: req.composition_motion } };
   const r = planSceneJob({
     scene, visual,
     info: (o) => {

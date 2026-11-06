@@ -40,7 +40,10 @@ async function film(app: ReturnType<typeof createApp>, brief: string, name: stri
   expect(state.status, JSON.stringify(state.escalation)).toBe("awaiting_approval");
   expect(state.aspectRatio, "both briefs are drawn at the same size, so their pictures can be compared").toBe("16:9");
   expect((await app.request(`/api/sessions/${id}/approve`, json({ stage: "storyboard", plan_version: 1, decision: "approved" }))).status).toBe(200);
-  expect((await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: 1, decision: "approved", storyboard_version: 1 }))).status).toBe(200);
+  const g2 = await app.request(`/api/sessions/${id}/approve`, json({ stage: "edit_plan", plan_version: 1, decision: "approved", storyboard_version: 1 }));
+  expect(g2.status).toBe(200);
+  // the Editor's share: the approved edit plan carries motion changes for the composed scenes
+  expect(((await body(g2)).state.editPlan.composition_motion ?? []).length, "the Editor changed how the composed scenes move").toBeGreaterThan(0);
   expect((await app.request(`/api/sessions/${id}/editor`, { method: "POST" })).status).toBe(200);
   const res = await app.request(`/api/sessions/${id}/render`, json({ settings: SETTINGS }));
   const r = await body(res);
