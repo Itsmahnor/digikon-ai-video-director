@@ -149,6 +149,13 @@ export function proposeVideoTypes(
   return ordered.map((item) => VideoTypeProposal.parse(item));
 }
 
+/** The category a video type belongs to, or null for an id nobody lists. */
+export function categoryOfVideoType(id: string | null | undefined): "saas" | "ecommerce" | "general-promo" | null {
+  if (!id) return null;
+  for (const cat of ["saas", "ecommerce", "general-promo"] as const) if (CATEGORY_VIDEO_TYPES[cat].some((t) => t.id === id)) return cat;
+  return null;
+}
+
 export interface VideoTypeNodeOut {
   proposals: VideoTypeProposal[];
   chosen: string;
@@ -163,11 +170,11 @@ export async function videoTypeNode(
   project: Pick<Project, "video_category" | "video_type" | "brief">,
   chosenVideoType?: string | null,
 ): Promise<VideoTypeNodeOut> {
-  const category = project.video_category ?? detectCategory(project.brief);
-  const proposals = proposeVideoTypes(category, project.brief);
-
   // User explicit choice takes priority; fallback to project field, then top recommended proposal
   const candidate = chosenVideoType || project.video_type;
+  // The proposals come from the category of the type the user already chose, so a SaaS type is never offered beside brand-story and event-teaser ideas from another category.
+  const category = categoryOfVideoType(candidate) ?? project.video_category ?? detectCategory(project.brief);
+  const proposals = proposeVideoTypes(category, project.brief);
   const matched = proposals.find((p) => p.id === candidate);
   const chosen = matched ? matched.id : candidate ? candidate : proposals[0]!.id;
 

@@ -100,3 +100,18 @@ describe("D1: video type proposals and selection", () => {
     expect(record.proposed_video_types.length).toBe(3);
   });
 });
+
+import { categoryOfVideoType } from "./video-types.js";
+describe("proposals follow the category of the chosen type", () => {
+  it("offers SaaS types when a SaaS type was chosen, even if the category said something else", async () => {
+    const out = await videoTypeNode({ video_category: "general-promo", video_type: "saas-product-demo", brief: "An SEO automation tool for agencies." } as never);
+    expect(out.chosen).toBe("saas-product-demo");
+    expect(out.proposals.map((p) => p.id)).toContain("saas-product-demo");
+    expect(out.proposals.every((p) => p.category === "saas")).toBe(true);
+  });
+  it("knows the category of a type, and of nothing else", () => {
+    expect(categoryOfVideoType("ecom-product-showcase")).toBe("ecommerce");
+    expect(categoryOfVideoType("nope")).toBeNull();
+    expect(categoryOfVideoType(null)).toBeNull();
+  });
+});
