@@ -387,6 +387,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...claimWordingIssues(plan.scenes, treatment.claims, facts).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...requestedAudioIssues(project, plan, assets),
       ...soundPolicyIssues(plan.scenes, policy),
+      ...unavailableTransitionIssues(deps, project, assets, plan),
       ...plan.scenes.flatMap((s) => (s.visual?.block === "composition"
         ? [...compositionGroundingIssues(s.visual, {
           overlay: s.overlay?.text ?? null, voiceover: s.voiceover ?? null,
@@ -401,7 +402,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   });
   // Look-and-fix (off unless a port is supplied): ONE model call looks at a still of each composed scene. If it finds problems, one repair attempt tries to fix them; the revised
   // plan is kept only if it passes every check the first one did, and any failure here leaves the storyboard exactly as it was.
-  let critique: { ran: boolean; problems: number; revised: boolean; note: string } = { ran: false, problems: 0, revised: false, note: "" };
+  let critique: { ran: boolean; problems: number; revised: boolean; note: string; seen: string[]; failed: string[] } = { ran: false, problems: 0, revised: false, note: "", seen: [], failed: [] };
   let value = result.value;
   if (deps.critique && result.issues.length === 0) {
     try {
@@ -410,10 +411,11 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       else if (shots.stills.length) {
         const review = await critiqueStoryboard(deps.llm, { stills: shots.stills, skipped: shots.skipped, treatment, scenes: value.scenes.map((x) => ({ scene_id: x.scene_id, duration_seconds: x.duration_seconds, purpose: x.purpose })) });
         const problems = critiqueIssues(review, new Set(value.scenes.map((x) => x.scene_id)));
-        critique = { ran: true, problems: problems.length, revised: false, note: review?.summary ?? "" };
+        critique = { ran: true, problems: problems.length, revised: false, note: review?.summary ?? "", seen: problems, failed: [] };
         if (problems.length) {
           const revised = await runAttempt({ value, issues: problems });
-          if ((await runCheck(revised)).length === 0) { value = revised; critique.revised = true; }
+          const after = await runCheck(revised);
+          if (after.length === 0) { value = revised; critique.revised = true; } else critique.failed = after.slice(0, 5);
         }
       }
     } catch (e) { critique.note = `look-and-fix skipped: ${e instanceof Error ? e.message.slice(0, 120) : String(e)}`; }
@@ -435,6 +437,23 @@ export function planHasAudio(plan: ScenePlan, assets: Asset[]): boolean {
 }
 
 /** Per-scene candidate recipes. Two-stage: find by intent and filters here, then show full records to the model. */
+/**
+ * A storyboard may only end a scene with a transition the live capability registry can carry out here (a wipe or a dip to black needs a validated recipe). Checked while the storyboard is
+ * written, because after Gate 1 the storyboard is fixed and a transition that cannot be carried out would strand the edit plan. Without production intelligence nothing is checked.
+ */
+export function unavailableTransitionIssues(deps: Pick<Deps, "production">, project: Pick<Project, "aspect_ratio">, assets: Asset[], plan: ScenePlan): string[] {
+  const live = deps.production?.capabilities();
+  if (!live) return [];
+  const out: string[] = [];
+  plan.scenes.forEach((s, i) => {
+    const want = TRANSITION_RECIPE[s.transition_out];
+    if (!want || i === plan.scenes.length - 1) return;
+    const ok = candidateRecipeIds(live.snapshot, s, "concat", { assets, aspect_ratio: project.aspect_ratio, available_engines: live.available_engines }).includes(want);
+    if (!ok) out.push(`${s.scene_id}: transition_unavailable - a ${s.transition_out.replace("_", " ")} cannot be carried out here right now (the ${want} recipe is not validated for this machine and code); end the scene with a cut or a crossfade instead`);
+  });
+  return out;
+}
+
 export async function candidateRecipes(deps: Deps, project: Project, assets: Asset[], plan: ScenePlan): Promise<Recipe[]> {
   const include_draft = deps.recipes.minStatus === "draft";
   const found = new Map<string, Recipe>();
@@ -463,6 +482,15 @@ export async function candidateRecipes(deps: Deps, project: Project, assets: Ass
     add(await retrieve(deps, "shot_recipes", `${s.shot.camera_motion} ${s.shot.visual_action}`, 3, { ...base, recipe_type: "camera_move" }, 900), s);
     if (s.overlay) add(await retrieve(deps, "shot_recipes", `${s.overlay.text} ${s.purpose} on-screen text`, 3, { ...base, recipe_type: "animation" }, 900), s);
   }
+  // A transition the storyboard asks for (a wipe, a crossfade, a dip to black) is always a candidate for the scene it ends. Searching by the scene's purpose text can leave it out of
+  // the few results a scene gets, and a plan that needs a recipe the model was never shown cannot pass.
+  plan.scenes.forEach((s, i) => {
+    const want = TRANSITION_RECIPE[s.transition_out];
+    if (!want || i === plan.scenes.length - 1) return;
+    const r = deps.recipes.get(want);
+    const allowed = allowedFor(s);
+    if (r && deps.recipes.isAvailable(r) && (!allowed || allowed.has(r.recipe_id))) found.set(r.recipe_id, r);
+  });
   // A scene with a structured visual is drawn by the scene-composition recipe: it is always a candidate when one exists.
   if (plan.scenes.some((s) => s.visual && (!live || allowedFor(s)!.has(COMPOSITION_RECIPE)))) { const r = deps.recipes.get(COMPOSITION_RECIPE); if (r && deps.recipes.isAvailable(r)) found.set(r.recipe_id, r); }
   // Sound recipes only make sense when the approved storyboard has something to mix. A brief with no voiceover, music, sound
@@ -559,11 +587,30 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
       let n = Math.max(0, ...uses.map((u) => Number(u.use_id.slice(1)) || 0));
       const rec = deps.recipes.get(COMPOSITION_RECIPE);
       if (rec && deps.recipes.isAvailable(rec)) for (const s of plan.scenes) if (s.visual && !uses.some((u) => u.scene_id === s.scene_id && u.recipe_id === COMPOSITION_RECIPE)) uses.push({ use_id: `U${String(++n).padStart(2, "0")}`, scene_id: s.scene_id, recipe_id: COMPOSITION_RECIPE, params: {}, rationale: `Draws the scene from its approved ${s.visual.block.replaceAll("_", " ")} visual: ${s.visual_purpose ?? s.purpose}`.slice(0, 280) });
+      // A transition the storyboard asks for is filled in by code when the model leaves it out and the recipe can do it: the defaults are inside the recipe's limits, and the
+      // recipe's per-film limit is respected. If the recipe is unavailable or its limit is used up, the check below still says so.
+      const lastId = plan.scenes[plan.scenes.length - 1]?.scene_id;
+      for (const sc of plan.scenes) {
+        const want = TRANSITION_RECIPE[sc.transition_out];
+        if (!want || sc.scene_id === lastId || uses.some((u) => u.scene_id === sc.scene_id && u.recipe_id === want)) continue;
+        const tr = deps.recipes.get(want);
+        if (!tr || !deps.recipes.isAvailable(tr)) continue;
+        const cap = tr.constraints.max_uses_per_film;
+        if (cap !== null && cap !== undefined && uses.filter((u) => u.recipe_id === want).length >= cap) continue;
+        uses.push({ use_id: `U${String(++n).padStart(2, "0")}`, scene_id: sc.scene_id, recipe_id: want, params: {}, rationale: `Added by the system: the storyboard ends this scene with a ${sc.transition_out.replace("_", " ")}, and this recipe does it with its default settings.` });
+      }
       return EditPlan.parse({ project_id: project.project_id, version, uses, ...(out.composition_motion?.length ? { composition_motion: out.composition_motion } : {}) });
     },
     check: async (edit) => {
       production = null;
-      const issues = [...editIssues(edit, plan, deps, project, assets), ...unrequestedAudioIssues(edit, plan, deps, project), ...compositionMotionProblems(edit, plan, deps, project, treatment)];
+      const offered = new Set(candidates.map((r) => r.recipe_id));
+      const explain = (m: string) => {
+        const hit = /^(S\d+): transition_out is "([a-z_]+)" but no "([a-z-]+)" recipe use exists for it$/.exec(m);
+        return hit && !offered.has(hit[3]!)
+          ? `${hit[1]}: the storyboard ends this scene with a ${hit[2]!.replace("_", " ")}, but the ${hit[3]} recipe cannot be used here right now (it is not validated for this machine and code; \"npm run capabilities\" validates it again). The approved storyboard cannot change at this step, so this needs a person: validate the recipe, or ask for a storyboard change.`
+          : m;
+      };
+      const issues = [...editIssues(edit, plan, deps, project, assets).map(explain), ...unrequestedAudioIssues(edit, plan, deps, project), ...compositionMotionProblems(edit, plan, deps, project, treatment)];
       // Only a valid Director plan is turned into a production plan; the model is shown every production problem so it can repair its plan or the run escalates.
       if (!deps.production) return issues;
       // Fail closed: with a ProductionPort configured, an edit plan without the approved treatment cannot be production-checked, so it cannot pass as if it had been.

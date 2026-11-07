@@ -509,3 +509,14 @@ describe.skipIf(skipReal(!!font))("engine selection never goes beyond what the a
     expect(findCapabilityGaps(x.record, undefined, B.output.operations).find((g) => g.recipe_id === "directional-wipe")).toMatchObject({ scene_id: "S01", parameters: { direction: "up" }, learnable: true });
   });
 });
+
+describe("the shipped capability records match the code", () => {
+  it("none is invalidated because the code it was validated against has changed", async () => {
+    const { fileURLToPath } = await import("node:url");
+    const { join } = await import("node:path");
+    const registry = loadCapabilityRegistry(join(fileURLToPath(new URL("../../../", import.meta.url)), "capabilities"));
+    const stale = registry.unusable.filter((u) => /(?:code|implementation) changed after it was validated/i.test(u.reason)).map((u) => `${u.record.capability_id}: ${u.reason}`);
+    // If this fails, code that a transition or scene capability depends on was edited: run \`npm run capabilities -- --force <template>\` and commit the new records.
+    expect(stale).toEqual([]);
+  });
+});

@@ -77,7 +77,8 @@ function renderPills() {
   rows.push(["ok", "Recipes", `${h.recipes.available} available${h.recipes.mode === "draft" ? " (draft: previews only)" : ""}`]);
   const r = h.retrieval;
   if (r) rows.push([r.mode !== "bm25-only" && r.embedder && r.embedder.real ? "ok" : "warn", "Search", r.mode === "bm25-only" ? "keywords only" : "by meaning"]);
-  const bad = rows.filter((x) => x[0] === "bad").length, warn = rows.filter((x) => x[0] === "warn").length, notes = (r && r.degraded) || [];
+  const stale = ((h.render && h.render.unusable) || []).map((u) => `${u.id} cannot be used right now: ${u.reason}`);
+  const bad = rows.filter((x) => x[0] === "bad").length, warn = rows.filter((x) => x[0] === "warn").length, notes = [...((r && r.degraded) || []), ...stale];
   const level = bad ? "bad" : warn || notes.length ? "warn" : h.llm.demo ? "demo" : "ok";
   const label = bad ? `${bad} thing${bad === 1 ? "" : "s"} to fix` : warn || notes.length ? "Ready, with notes" : h.llm.demo ? "Demo mode" : "All set";
   const pop = state.statusOpen

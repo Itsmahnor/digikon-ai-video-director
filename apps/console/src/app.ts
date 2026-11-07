@@ -219,7 +219,7 @@ export function createApp(ctx: AppContext) {
     retrieval: ctx.retrievalStatus ?? null,
     ffmpeg: ctx.ffmpegOk,
     recipes: { available: ctx.recipes.available().length, mode: ctx.recipes.minStatus },
-    render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }).usable.map((x) => x.capability_id), note: "Preview renders only. Nothing is production-ready." },
+    render: { available: ctx.ffmpegOk && !!ctx.renderFont && !!ctx.editorSkills, templates: [...Object.keys(FFMPEG_TEMPLATES), ...Object.keys(REMOTION_TEMPLATES), ...Object.keys(HYPERFRAMES_TEMPLATES)], renderers: availableRenderers(), learned: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }).usable.map((x) => x.capability_id), unusable: loadCapabilityRegistry(ctx.capabilitiesDir, { recipes: ctx.recipes }).unusable.filter((u) => u.record.status === "validated").map((u) => ({ id: u.record.capability_id, reason: u.reason })), note: "Preview renders only. Nothing is production-ready." },
     limits: { maxVoicePromptSeconds: MEDIA_LIMITS.maxVoicePromptSeconds, maxAssets: MEDIA_LIMITS.maxAssetsPerProject, maxRequestMb: MAX_REQUEST_BYTES / 1048576, extensions: ALL_EXTENSIONS },
   }));
 
