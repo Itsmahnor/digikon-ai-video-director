@@ -12,7 +12,9 @@ export const STEPS = [
   { id: "platform", title: "Platform", fields: ["platform"] },
   { id: "brand", title: "Brand", fields: ["brand.colours", "brand.fonts", "brand.logo", "brand.tone"] },
   { id: "website", title: "Website", fields: ["website", "guideline"] },
-  { id: "assets", title: "Files", fields: ["assets"] },
+  { id: "assets", title: "Material", fields: ["assets"] },
+  // The last step is the review: nothing is asked there, it shows what was collected and creates the story.
+  { id: "review", title: "Review", fields: [], local: true },
 ];
 
 export const PLATFORMS = ["Instagram Reels", "TikTok", "YouTube Shorts", "YouTube", "LinkedIn", "Instagram or Facebook feed", "Website hero", "Other"];
@@ -21,13 +23,14 @@ const item = (c, field) => c.items.find((i) => i.field === field);
 
 /** "done" (everything provided), "skipped" (everything skipped or provided), "partial", or "open". */
 export function stepStatus(step, completeness) {
+  if (step.local) return "open";
   const states = step.fields.map((f) => item(completeness, f)?.state ?? "missing");
   if (states.every((s) => s === "provided")) return "done";
   if (states.every((s) => s === "provided" || s === "skipped")) return "skipped";
   if (states.some((s) => s === "provided")) return "partial";
   return "open";
 }
-export const canSkipStep = (step, completeness) => step.fields.every((f) => item(completeness, f)?.can_skip === true);
+export const canSkipStep = (step, completeness) => !step.local && step.fields.every((f) => item(completeness, f)?.can_skip === true);
 export const stepNeedsConfirmation = (step, completeness) => step.fields.some((f) => item(completeness, f)?.needs_confirmation);
 
 /** Lower-case #rrggbb colours from text like "#C8501E, 0a7a5a #fff". Returns { colours, bad } so the wizard can say which entries it could not use. */
@@ -40,6 +43,7 @@ export function parseColours(text) {
   }
   return { colours, bad };
 }
+export const parseFactLines = (text) => [...new Set(String(text ?? "").split(/\r?\n/).map((x) => x.trim()).filter(Boolean))].slice(0, 20);
 export const parseList = (text) => [...new Set(String(text ?? "").split(/[,\n;]+/).map((s) => s.trim()).filter(Boolean))];
 
 /** Checks a file before it is sent: the wrong type or a huge file is refused here with a plain reason. Returns null when it is fine. */
@@ -57,13 +61,33 @@ export function fileProblem(file, kind) {
   return null;
 }
 
-/** The request text built from the kit, for the prompt box. Only provided values are used; nothing is invented. */
-export function composePrompt(kit) {
+export const LENGTHS = [15, 20, 25, 30, 45, 60];
+export const FORMATS = [["16:9", "Wide 16:9 (YouTube, LinkedIn, websites)"], ["9:16", "Vertical 9:16 (Reels, TikTok, Shorts)"], ["1:1", "Square 1:1 (feeds)"]];
+export const SOUNDS = [["", "Let the Director decide"], ["music", "Music only"], ["narration", "Narration (voice-over)"], ["both", "Narration and music"], ["silent", "Silent, text on screen only"]];
+const SOUND_TEXT = { music: "music only, no voice-over", narration: "narration (voice-over), no music", both: "narration and music", silent: "silent, text on screen only" };
+/** The format a platform usually wants, so the choice starts in the right place. */
+export function defaultFormat(platform) {
+  const p = String(platform ?? "").toLowerCase();
+  if (/reels|tiktok|shorts/.test(p)) return "9:16";
+  if (/feed/.test(p)) return "1:1";
+  if (p) return "16:9";
+  return "";
+}
+
+/** The request text built from the kit, for the prompt box. Only provided values are used; nothing is invented. `extra` holds the answers that are not kit fields: product, length, format, sound, call to action. */
+export function composePrompt(kit, extra = {}) {
   const v = (f) => (f.state === "provided" ? f.value : null);
   const parts = [];
   if (v(kit.goal)) parts.push(String(v(kit.goal)).replace(/[.\s]+$/, "") + ".");
   if (v(kit.audience)) parts.push(`Audience: ${String(v(kit.audience)).replace(/[.\s]+$/, "")}.`);
+  const trim = (x) => String(x).replace(/[.\s]+$/, "");
+  if (extra.product) parts.push(`Product or business: ${extra.product}${extra.does ? `, ${trim(extra.does)}` : ""}.`);
+  else if (extra.does) parts.push(`What it is: ${trim(extra.does)}.`);
   if (v(kit.platform)) parts.push(`Platform: ${String(v(kit.platform)).replace(/[.\s]+$/, "")}.`);
+  if (extra.format) parts.push(`Format: ${extra.format}${extra.format === "16:9" ? " (wide)" : extra.format === "9:16" ? " (vertical)" : " (square)"}.`);
+  if (extra.length) parts.push(`Length: ${extra.length} seconds.`);
+  if (extra.cta) parts.push(`Call to action: ${trim(extra.cta)}.`);
+  if (extra.sound && SOUND_TEXT[extra.sound]) parts.push(`Sound: ${SOUND_TEXT[extra.sound]}.`);
   const brand = [];
   if (v(kit.brand.colours)) brand.push(`colours ${v(kit.brand.colours).join(", ")}`);
   if (v(kit.brand.fonts)) brand.push(`fonts ${v(kit.brand.fonts).join(", ")}`);
@@ -94,6 +118,7 @@ const LEVEL_ORDER = ["required", "recommended", "optional"];
 export const stepIndexOfField = (field) => { const i = STEPS.findIndex((s) => s.fields.includes(field)); return i < 0 ? null : i; };
 /** The strongest level among a step's fields, so the step can say whether it is required. */
 export function stepLevel(step, completeness) {
+  if (step.local) return "required";
   const levels = step.fields.map((f) => item(completeness, f)?.level ?? "optional");
   return LEVEL_ORDER.find((l) => levels.includes(l)) ?? "optional";
 }
@@ -125,12 +150,12 @@ const store = {
 export function mountWizard(deps) {
   const { $, esc, api, post, toast, uploadFiles, getAssets, getSid, onFinish } = deps;
   const root = $("#wizard");
-  const w = { view: null, idx: 0, error: "", busy: false, extraction: null, notice: "", brands: [], restored: false };
+  const w = { view: null, idx: 0, error: "", busy: false, extraction: null, notice: "", brands: [], restored: false, extra: {}, collapsed: false };
   const kit = () => w.view.kit;
   const comp = () => w.view.completeness;
 
   const field = async (f, action, value) => { w.view = await post(`/api/sessions/${getSid()}/kit/field`, { field: f, action, value }); };
-  const persist = () => store.write({ sid: getSid(), idx: w.idx, kit: w.view?.kit ?? null });
+  const persist = () => store.write({ sid: getSid(), idx: w.idx, kit: w.view?.kit ?? null, extra: w.extra });
   async function load() {
     w.view = await api(`/api/sessions/${getSid()}/kit`);
     w.brands = (await api("/api/brand-kits").catch(() => ({ brands: [] }))).brands;
@@ -158,13 +183,26 @@ export function mountWizard(deps) {
   const bodies = {
     goal: () => `<label class="field-label" for="wz-goal">What is this video for?</label>
       <textarea id="wz-goal" rows="3" maxlength="500" placeholder="e.g. Get free-trial sign-ups for our invoicing app">${esc(val("goal") ?? "")}</textarea>
+      <label class="field-label" for="wz-product">Product or business name <span class="hint">the name shown in the video</span></label>
+      <input id="wz-product" type="text" maxlength="120" value="${esc(w.extra.product ?? "")}" placeholder="e.g. Slotly">
+      <label class="field-label" for="wz-does">What it does, in one line</label>
+      <input id="wz-does" type="text" maxlength="200" value="${esc(w.extra.does ?? "")}" placeholder="e.g. a scheduling app for small agencies">
       <label class="field-label" for="wz-category">Kind of video <span class="hint">optional</span></label>
       <select id="wz-category"><option value="">Not specified</option>${[["saas", "Software / SaaS"], ["ecommerce", "E-commerce / product"], ["general-promo", "General promotion"]].map(([v, t]) => `<option value="${v}" ${kit().video_category === v ? "selected" : ""}>${t}</option>`).join("")}</select>`,
     audience: () => `<label class="field-label" for="wz-audience">Who should watch it?</label>
-      <input id="wz-audience" type="text" maxlength="500" value="${esc(val("audience") ?? "")}" placeholder="e.g. Freelancers and small agencies">`,
+      <input id="wz-audience" type="text" maxlength="500" value="${esc(val("audience") ?? "")}" placeholder="e.g. Freelancers and small agencies">
+      <label class="field-label" for="wz-facts">True facts the video may state <span class="hint">one per line. Only these can appear as claims</span></label>
+      <textarea id="wz-facts" rows="4" maxlength="3000" placeholder="Free for 14 days.&#10;Works with Google Calendar.">${esc(factsFromKit(kit()).join("\n"))}</textarea>
+      <label class="field-label" for="wz-cta">What should viewers do at the end? <span class="hint">the button or invitation, in your words</span></label>
+      <input id="wz-cta" type="text" maxlength="120" value="${esc(w.extra.cta ?? "")}" placeholder="e.g. Start your free trial">`,
     platform: () => { const cur = val("platform") ?? "", known = PLATFORMS.slice(0, -1).includes(cur); return `<label class="field-label" for="wz-platform">Where will it be shown?</label>
       <select id="wz-platform"><option value="">Choose...</option>${PLATFORMS.map((p) => `<option ${p === cur || (p === "Other" && cur && !known) ? "selected" : ""}>${esc(p)}</option>`).join("")}</select>
-      <input id="wz-platform-other" type="text" maxlength="100" aria-label="Other platform" placeholder="Type the platform" value="${cur && !known ? esc(cur) : ""}" ${cur && !known ? "" : "hidden"}>`; },
+      <input id="wz-platform-other" type="text" maxlength="100" aria-label="Other platform" placeholder="Type the platform" value="${cur && !known ? esc(cur) : ""}" ${cur && !known ? "" : "hidden"}>
+      <label class="field-label" for="wz-format">Shape of the video</label>
+      <select id="wz-format">${FORMATS.map(([v, t]) => `<option value="${v}" ${(w.extra.format ?? defaultFormat(cur) ?? "") === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+      <label class="field-label" for="wz-length">Length</label>
+      <select id="wz-length">${LENGTHS.map((n) => `<option value="${n}" ${Number(w.extra.length ?? 25) === n ? "selected" : ""}>${n} seconds</option>`).join("")}</select>
+      <p class="hint">Short videos hold attention, but a video that explains several things needs 25 seconds or more.</p>`; },
     brand: () => `<p class="hint">Everything here is optional. Skip it and I will use neutral choices and say so.</p>
       <label class="field-label" for="wz-colours">Brand colours <span class="hint">hex codes, e.g. #c8501e #0a7a5a</span></label>
       <input id="wz-colours" type="text" value="${esc((val("brand.colours") ?? []).join(" "))}" autocomplete="off">
@@ -182,11 +220,41 @@ export function mountWizard(deps) {
       <input id="wz-guide" type="file" accept="application/pdf,.pdf">
       ${val("guideline") ? '<p class="hint">Guideline file added.</p>' : ""}
       ${extractionHtml()}`,
-    assets: () => `<p class="hint">Videos, images and audio you want me to use. You can skip this and I will plan a graphics-led video.</p>
+    assets: () => `<p class="hint">The best videos use real material. Add any of these, all optional: screenshots of your product, a screen recording, other video clips, a voice-over recording, music you have the right to use. Without them I draw concept graphics and label them as such.</p>
       <label class="field-label" for="wz-files">Add files</label>
       <input id="wz-files" type="file" multiple>
-      <p class="hint" id="wz-files-status">${getAssets().length ? `${getAssets().length} file${getAssets().length === 1 ? "" : "s"} added.` : "No files yet."}</p>`,
+      <p class="hint" id="wz-files-status">${getAssets().length ? `${getAssets().length} file${getAssets().length === 1 ? "" : "s"} added.` : "No files yet."}</p>
+      <label class="field-label" for="wz-sound">Sound</label>
+      <select id="wz-sound">${SOUNDS.map(([v, t]) => `<option value="${v}" ${(w.extra.sound ?? "") === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>`,
+    review: () => reviewHtml(),
   };
+
+  function reviewHtml() {
+    const goto = (i) => `<button type="button" class="wz-link" data-wz="goto" data-i="${i}">Change</button>`;
+    const idx = (id) => STEPS.findIndex((x) => x.id === id);
+    const facts = factsFromKit(kit()), files = getAssets();
+    const kinds = (t) => files.filter((a) => a.media_type === t).length;
+    const rows = [
+      ["Goal", val("goal"), idx("goal")],
+      ["Product", [w.extra.product, w.extra.does].filter(Boolean).join(", ") || null, idx("goal")],
+      ["Audience", val("audience"), idx("audience")],
+      ["Facts it may state", facts.length ? `${facts.length} fact${facts.length === 1 ? "" : "s"}` : null, idx("audience")],
+      ["Call to action", w.extra.cta ?? null, idx("audience")],
+      ["Platform", val("platform"), idx("platform")],
+      ["Shape and length", [w.extra.format ?? defaultFormat(val("platform")), (w.extra.length ?? 25) + " seconds"].filter(Boolean).join(", "), idx("platform")],
+      ["Brand", [val("brand.tone"), (val("brand.colours") ?? []).join(" "), val("brand.logo") ? "logo added" : ""].filter(Boolean).join(" · ") || null, idx("brand")],
+      ["Website", val("website"), idx("website")],
+      ["Material", files.length ? [kinds("video") ? `${kinds("video")} video` : "", kinds("image") ? `${kinds("image")} image${kinds("image") === 1 ? "" : "s"}` : "", kinds("audio") ? `${kinds("audio")} audio` : ""].filter(Boolean).join(", ") : null, idx("assets")],
+      ["Sound", (SOUNDS.find(([v]) => v === (w.extra.sound ?? "")) ?? SOUNDS[0])[1], idx("assets")],
+    ];
+    const notes = [];
+    if (!files.length) notes.push("No pictures or recordings yet, so the scenes will be drawn graphics, labelled as concept illustrations.");
+    if (!facts.length) notes.push("No facts given, so nothing in the video will be presented as a verified claim.");
+    if (!w.extra.product) notes.push("No product name, so the video will not show one.");
+    return `<p class="hint">This is everything I have. Change anything, then create the story.</p>
+      <dl class="wz-review">${rows.map(([k, v, i]) => `<dt>${esc(k)}</dt><dd class="${v ? "" : "none"}">${v ? esc(String(v)) : "not given"} ${goto(i)}</dd>`).join("")}</dl>
+      ${notes.length ? `<details class="wz-notes"><summary>${notes.length} thing${notes.length === 1 ? "" : "s"} to know</summary><ul>${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></details>` : ""}`;
+  }
 
   function extractionHtml() {
     const ex = w.view.pending_extractions?.[0] ?? null;
@@ -211,14 +279,14 @@ export function mountWizard(deps) {
   function render() {
     if (!w.view) return;
     const step = STEPS[w.idx], last = w.idx === STEPS.length - 1, canSkip = canSkipStep(step, comp());
-    root.hidden = false;
-    root.querySelector("#wz-body").innerHTML = `${w.idx === 0 ? saved() : ""}<h3 class="wz-title">${esc(step.title)} <span class="wz-level ${stepLevel(step, comp())}">${stepLevel(step, comp())}</span> <span class="hint">step ${w.idx + 1} of ${STEPS.length}</span></h3>${bodies[step.id]()}<p class="wz-error" id="wz-error" role="alert">${esc(w.error)}</p>${summaryHtml(last)}`;
+    root.hidden = w.collapsed;
+    root.querySelector("#wz-body").innerHTML = `${w.idx === 0 ? saved() : ""}<h3 class="wz-title">${esc(step.title)} ${step.local ? "" : `<span class="wz-level ${stepLevel(step, comp())}">${stepLevel(step, comp())}</span>`} <span class="hint">step ${w.idx + 1} of ${STEPS.length}</span></h3>${bodies[step.id]()}<p class="wz-error" id="wz-error" role="alert">${esc(w.error)}</p>${step.local ? "" : summaryHtml(last)}`;
     root.querySelector("#wz-steps").innerHTML = chips();
     root.querySelector("#wz-progress-wrap").innerHTML = progress();
     root.querySelector("#wz-back").disabled = w.idx === 0 || w.busy;
     const skip = root.querySelector("#wz-skip"); skip.hidden = !canSkip; skip.disabled = w.busy;
-    const next = root.querySelector("#wz-next"); next.disabled = w.busy; next.textContent = last ? "Finish" : "Continue";
-    const plat = root.querySelector("#wz-platform"); if (plat) plat.addEventListener("change", () => { root.querySelector("#wz-platform-other").hidden = plat.value !== "Other"; });
+    const next = root.querySelector("#wz-next"); next.disabled = w.busy; next.textContent = last ? "Create the story" : "Continue";
+    const plat = root.querySelector("#wz-platform"); if (plat) plat.addEventListener("change", () => { root.querySelector("#wz-platform-other").hidden = plat.value !== "Other"; const f = defaultFormat(plat.value), fs = root.querySelector("#wz-format"); if (f && fs) fs.value = f; });
     persist();
   }
 
@@ -230,17 +298,23 @@ export function mountWizard(deps) {
       const goal = v("#wz-goal"), cat = v("#wz-category") || null;
       if (cat !== kit().video_category) w.view = await post(`/api/sessions/${getSid()}/kit/category`, { video_category: cat });
       if (goal) await field("goal", "provide", goal); else if (!val("goal")) { w.error = "Say what the video is for, even in a few words."; return false; }
+      w.extra.product = v("#wz-product"); w.extra.does = v("#wz-does");
     } else if (id === "audience") {
       const a = v("#wz-audience"); if (a) await field("audience", "provide", a); else if (!val("audience")) { w.error = "Say who should watch it."; return false; }
+      const lines = parseFactLines(v("#wz-facts")); if (lines.length) await field("facts", "provide", lines); else if (factsFromKit(kit()).length) await field("facts", "unset");
+      w.extra.cta = v("#wz-cta");
     } else if (id === "platform") {
       const p = v("#wz-platform") === "Other" ? v("#wz-platform-other") : v("#wz-platform");
       if (p) await field("platform", "provide", p); else if (!val("platform")) { w.error = "Choose where it will be shown, or pick Other and type it."; return false; }
+      w.extra.format = v("#wz-format") || defaultFormat(p); w.extra.length = Number(v("#wz-length")) || 25;
     } else if (id === "brand") {
       const { colours, bad } = parseColours(v("#wz-colours"));
       if (bad.length) { w.error = `I could not read ${bad.map((b) => `"${b}"`).join(", ")} as a colour. Use hex codes like #c8501e.`; return false; }
       if (colours.length) await field("brand.colours", "provide", colours); else if (!v("#wz-colours") && val("brand.colours")) await field("brand.colours", "unset");
       const fonts = parseList(v("#wz-fonts")); if (fonts.length) await field("brand.fonts", "provide", fonts); else if (val("brand.fonts")) await field("brand.fonts", "unset");
       const tone = v("#wz-tone"); if (tone) await field("brand.tone", "provide", tone); else if (val("brand.tone")) await field("brand.tone", "unset");
+    } else if (id === "assets") {
+      w.extra.sound = v("#wz-sound");
     } else if (id === "website") {
       const u = v("#wz-url"); if (u && u !== val("website")) { try { new URL(u); } catch { w.error = "That does not look like a web address. It should start with https://"; return false; } await field("website", "provide", u); }
     }
@@ -257,9 +331,10 @@ export function mountWizard(deps) {
   async function finish() {
     const c = comp();
     const open = c.next.map((f) => f.replace("brand.", "brand ")).join(", ");
-    onFinish({ kit: kit(), prompt: composePrompt(kit()), facts: factsFromKit(kit()), video_category: kit().video_category, ready: c.ready, open });
+    if (c.ready) w.collapsed = true;
+    onFinish({ kit: kit(), prompt: composePrompt(kit(), w.extra), facts: factsFromKit(kit()), video_category: kit().video_category, ready: c.ready, open, autoSend: c.ready });
     w.notice = "";
-    toast(c.ready ? "Setup saved. Check the request below, then press Send to Director." : `Setup saved, but ${open} is still open.`, c.ready ? "ok" : "");
+    if (!c.ready) toast(`Not quite ready: ${open} is still open. Go back and fill it in.`, "");
   }
 
   async function go(i) { w.idx = Math.max(0, Math.min(STEPS.length - 1, i)); w.error = ""; w.notice = ""; }
@@ -329,6 +404,7 @@ export function mountWizard(deps) {
       try {
         await load();
         const saved = store.read();
+        if (saved?.extra) w.extra = saved.extra;
         const fresh = !w.view.kit.goal.value && !w.view.kit.audience.value;
         if (fresh && saved?.sid !== getSid()) await restore();
         await load();
@@ -337,5 +413,7 @@ export function mountWizard(deps) {
       } catch (e) { root.hidden = true; toast(`Guided setup is unavailable: ${e.message}`); }
     },
     reload: async () => { await load(); render(); },
+    setCollapsed(v) { w.collapsed = !!v; root.hidden = w.collapsed; },
+    isCollapsed: () => w.collapsed,
   };
 }

@@ -11,7 +11,7 @@ const REQ = { goal: "Get sign-ups", audience: "Freelancers", platform: "LinkedIn
 const file = (name: string, size = 1000) => ({ name, size });
 
 describe("wizard: steps and skipping", () => {
-  it("has the six steps in order", () => expect(STEPS.map((s: any) => s.id)).toEqual(["goal", "audience", "platform", "brand", "website", "assets"]));
+  it("has the setup steps in order, ending with the review", () => expect(STEPS.map((s: any) => s.id)).toEqual(["goal", "audience", "platform", "brand", "website", "assets", "review"]));
   it("goal, audience and platform cannot be skipped; brand, website and assets can", () => {
     const c = completeness(emptyKit("k"));
     for (const id of ["goal", "audience", "platform"]) expect(canSkipStep(step(id), c), id).toBe(false);
@@ -129,3 +129,29 @@ describe("wizard: the kit as one readiness view", () => {
   });
 });
 const s2 = (c: { items: { field: string }[] }) => c.items.map((i) => i.field);
+describe("the intake collects everything before the story", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  it("the review step asks nothing, cannot be skipped and is never already done", async () => {
+    const review = STEPS.at(-1);
+    const c = completeness(emptyKit("k"));
+    expect(review.id).toBe("review");
+    expect(stepStatus(review, c)).toBe("open");
+    expect(canSkipStep(review, c)).toBe(false);
+  });
+  it("answers that are not kit fields reach the request: product, format, length, call to action, sound", async () => {
+    const mod: any = W;
+    const k = kitWith({ goal: "Get sign-ups.", platform: "Instagram Reels" });
+    const text = mod.composePrompt(k, { product: "Slotly", does: "a scheduling app.", format: "9:16", length: 25, cta: "Start your free trial", sound: "music" });
+    expect(text).toContain("Product or business: Slotly, a scheduling app.");
+    expect(text).toContain("Format: 9:16 (vertical).");
+    expect(text).toContain("Length: 25 seconds.");
+    expect(text).toContain("Call to action: Start your free trial.");
+    expect(text).toContain("Sound: music only, no voice-over.");
+    expect(mod.composePrompt(k)).toBe(mod.composePrompt(k, {}));
+  });
+  it("starts the format from the platform and reads facts one per line", async () => {
+    const mod: any = W;
+    expect([mod.defaultFormat("Instagram Reels"), mod.defaultFormat("LinkedIn"), mod.defaultFormat("Instagram or Facebook feed"), mod.defaultFormat("")]).toEqual(["9:16", "16:9", "1:1", ""]);
+    expect(mod.parseFactLines("Free for 14 days.\n\n  Works with Outlook.  \nFree for 14 days.")).toEqual(["Free for 14 days.", "Works with Outlook."]);
+  });
+});

@@ -64,23 +64,35 @@ function renderPills() {
   }
   const h = state.health;
   if (!h) return;
-  const p = [];
-  const PROBLEM = { llm_billing: "no credit", llm_auth: "key rejected", llm_model: "model not found" };
-  if (h.llm.demo) p.push(`<span class="pill demo"><i></i>Model <b>Demo (not Claude)</b></span>`);
-  else if (h.llm.problem) p.push(`<span class="pill bad" title="${esc(h.llm.problem.message)}"><i></i>Claude <b>${PROBLEM[h.llm.problem.code] ?? "needs attention"}</b></span>`);
-  else if (h.llm.available) p.push(`<span class="pill ok"><i></i>Claude <b>${esc(h.llm.model)}</b></span>`);
-  else p.push(`<span class="pill bad"><i></i>Claude <b>No API key</b></span>`);
+  // One quiet chip. The details (model, speech, FFmpeg, recipes, search) live in a small panel that opens on click, so the screen is not a row of warnings.
+  const PROBLEM = { llm_billing: "no credit left", llm_auth: "key rejected", llm_model: "model not found" };
+  const rows = [];
+  if (h.llm.demo) rows.push(["demo", "Writing model", "Demo only (canned answers, not Claude)"]);
+  else if (h.llm.problem) rows.push(["bad", "Claude", PROBLEM[h.llm.problem.code] ?? "needs attention"]);
+  else if (h.llm.available) rows.push(["ok", "Claude", h.llm.model]);
+  else rows.push(["bad", "Claude", "no API key set"]);
   const w = h.whisper;
-  p.push(`<span class="pill ${w.state === "ready" ? "ok" : w.state === "error" ? "bad" : "warn"}"><i></i>Whisper <b>${w.state === "ready" ? esc(w.model.split("/").pop()) : w.state === "error" ? "unavailable" : "loading, up to a minute"}</b></span>`);
-  p.push(`<span class="pill ${h.ffmpeg ? "ok" : "bad"}"><i></i>FFmpeg <b>${h.ffmpeg ? "ready" : "missing"}</b></span>`);
-  p.push(`<span class="pill ${h.recipes.mode === "draft" ? "warn" : "ok"}"><i></i>Recipes <b>${h.recipes.available} ${esc(h.recipes.mode)}</b></span>`);
+  rows.push([w.state === "ready" ? "ok" : w.state === "error" ? "bad" : "warn", "Speech to text", w.state === "ready" ? w.model.split("/").pop() : w.state === "error" ? "unavailable" : "starting, up to a minute"]);
+  rows.push([h.ffmpeg ? "ok" : "bad", "Video tools (FFmpeg)", h.ffmpeg ? "ready" : "missing"]);
+  rows.push(["ok", "Recipes", `${h.recipes.available} available${h.recipes.mode === "draft" ? " (draft: previews only)" : ""}`]);
   const r = h.retrieval;
-  if (r) p.push(`<span class="pill ${r.mode !== "bm25-only" && r.embedder && r.embedder.real ? "ok" : "bad"}" title="${esc(r.degraded.join(" "))}"><i></i>Search <b>${r.mode === "bm25-only" ? "keywords only" : esc(r.mode)}</b></span>`);
-  $("#pills").innerHTML = p.join("");
+  if (r) rows.push([r.mode !== "bm25-only" && r.embedder && r.embedder.real ? "ok" : "warn", "Search", r.mode === "bm25-only" ? "keywords only" : "by meaning"]);
+  const bad = rows.filter((x) => x[0] === "bad").length, warn = rows.filter((x) => x[0] === "warn").length, notes = (r && r.degraded) || [];
+  const level = bad ? "bad" : warn || notes.length ? "warn" : h.llm.demo ? "demo" : "ok";
+  const label = bad ? `${bad} thing${bad === 1 ? "" : "s"} to fix` : warn || notes.length ? "Ready, with notes" : h.llm.demo ? "Demo mode" : "All set";
+  const pop = state.statusOpen
+    ? `<div class="status-pop" id="status-pop" role="dialog" aria-label="System status">${rows.map(([s, name, text]) => `<div class="st-row ${s}"><i></i><span>${esc(name)}: <b>${esc(text)}</b></span></div>`).join("")}${notes.map((n) => `<div class="st-note">${esc(n)}</div>`).join("")}</div>`
+    : "";
+  $("#pills").innerHTML = `<button type="button" class="pill ${level}" id="status-btn" aria-expanded="${!!state.statusOpen}" aria-controls="status-pop"><i></i>${esc(label)}</button>${pop}`;
   $("#demo-banner").hidden = !h.llm.demo;
   const rb = $("#retrieval-banner");
-  if (rb) { const bad = r && r.degraded.length > 0; rb.hidden = !bad; if (bad) rb.textContent = "SEARCH IS DEGRADED: " + r.degraded.join(" "); }
+  if (rb) rb.hidden = true;
 }
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest && e.target.closest("#status-btn");
+  if (btn) { state.statusOpen = !state.statusOpen; renderPills(); return; }
+  if (state.statusOpen && !(e.target.closest && e.target.closest("#status-pop"))) { state.statusOpen = false; renderPills(); }
+});
 async function refreshHealth() {
   try { state.health = await api("/api/health"); state.offline = false; }
   catch (e) { if (e.code === "offline") state.offline = true; }
@@ -488,7 +500,7 @@ async function decide(decision) {
     state.run.result = d; state.approval = res.record; state.gateNotes = "";
     if (d.status === "escalated") for (const k of Object.keys(state.run.steps)) { if (state.run.steps[k].status === "run") state.run.steps[k].status = "fail"; }
     else syncSteps(d);
-    state.tab = d.status === "approved" ? "audit" : d.gate === "edit_plan" ? "edits" : "scenes";
+    state.tab = d.status === "approved" ? "scenes" : d.gate === "edit_plan" ? "edits" : "scenes";
     if (d.status === "escalated") toast("The change limit was reached, so this needs your decision.", "");
     else if (d.status === "approved") toast("Both approvals are recorded. Preparing the preview in your chosen format.", "ok");
     else if (decision === "approved") toast("Storyboard approved. The edit plan is ready for review.", "ok");
@@ -562,10 +574,10 @@ function planSection() {
       <button class="primary sm" data-action="build" ${state.busy ? "disabled" : ""}>Build the plan</button></div>`;
   }
   const run = state.run, res = run.result;
-  const pipe = `<div class="card"><h3>Director pipeline</h3><div class="pipe">${STEPS.map(([k, label]) => {
+  const pipe = `<details class="card how" ${res && res.status !== "escalated" ? "" : "open"}><summary>${res && res.status !== "escalated" ? "How the Director worked" : "What the Director is doing"}</summary><div class="pipe">${STEPS.map(([k, label]) => {
     const s = run.steps[k];
     return `<div class="step ${s.status}"><div class="dot">${s.status === "done" ? "&#10003;" : s.status === "fail" ? "!" : STEPS.findIndex(([x]) => x === k) + 1}</div><div><h4>${label}</h4>${s.lines.length ? `<div class="lines">${s.lines.map(esc).join("<br>")}</div>` : ""}</div></div>`;
-  }).join("")}</div></div>`;
+  }).join("")}</div></details>`;
   const err = run.error ? `<div class="notice bad">${esc(run.error)}</div>` : "";
   if (!res) return pipe + err;
   if (res.status === "escalated") {
@@ -659,7 +671,7 @@ function results(res) {
       <h3 style="margin:16px 0 8px">Knowledge, facts and recipes shown to the model</h3><div class="chips">${res.citations.map((s) => `<span class="chip recipe">${esc(s)}</span>`).join("") || '<span class="hint">none</span>'}</div>
       <h3 style="margin:16px 0 8px">Approvals</h3>${approvalsHtml(res)}
       <h3 style="margin:16px 0 8px">Trace</h3><div class="mono" style="color:var(--muted)">${res.trace.map(esc).join("<br>")}</div>
-      ${state.approval ? `<h3 style="margin:16px 0 8px">Run record</h3><pre class="mono" style="white-space:pre-wrap;color:var(--muted);margin:0">${esc(JSON.stringify(state.approval, null, 2))}</pre>` : ""}`,
+      ${state.approval ? `<details class="how" style="margin-top:16px"><summary>Technical run record (for audits)</summary><pre class="mono" style="white-space:pre-wrap;color:var(--muted);margin:8px 0 0">${esc(JSON.stringify(state.approval, null, 2))}</pre></details>` : ""}`,
   };
   const gate = res.status === "awaiting_approval" ? res.gate : null;
   const done = res.status === "approved";
@@ -774,6 +786,10 @@ function renderStage() {
 }
 const PLACEHOLDER = $("#prompt").placeholder;
 function renderAll() {
+  // Until there is something to show, the screen is only the intake, centred. Then the plan appears beside it.
+  const grid = document.querySelector(".grid");
+  if (grid) grid.classList.toggle("intake", !(state.route || state.turns.length || Object.keys(state.transcripts).length));
+  if (grid && grid.classList.contains("intake")) { $("#edit-answers").hidden = true; }
   renderPhases(); renderStage(); renderAssets();
   // While a question is open, the main box also works as the answer box.
   $("#prompt").placeholder = state.route?.status === "needs_input" ? "Answer the question here, or in the box beside it" : PLACEHOLDER;
@@ -843,9 +859,9 @@ function renderPanel() {
     ${v.editor.revision_requests.map((q) => `<div class="notice warn" style="margin-bottom:6px">Needs a new approval: ${esc(q.reason)}</div>`).join("")}` : "";
   const ops = v ? `<table><thead><tr><th>Operation</th><th>Scene</th><th>Recipe</th><th>Template</th><th>Renderer</th></tr></thead><tbody>${v.plan.operations.map((o) => `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td>${esc(o.recipe_id)}</td><td class="mono">${esc(o.template)}</td><td>${o.supported ? `<span class="chip ok">${esc(o.renderer)}: supported</span>` : `<span class="chip bad" title="${esc(o.note ?? "")}">not supported${o.note ? ": audio, not built" : ""}</span>`}</td></tr>`).join("")}</tbody></table>
     <p class="hint" style="margin:6px 0 10px">${v.plan.supported} supported, ${v.plan.unsupported} not supported. Renderer for this plan: <b>${v.renderer.selected ? esc(v.renderer.selected) : "none selected"}</b>${v.renderer.composition_required ? " (the plan needs more than one renderer: each scene is rendered by its own renderer and FFmpeg assembles them; anything that cannot be rendered is listed and the preview is labelled incomplete)" : ""}. Available here: ${v.renderer.registered.length ? v.renderer.registered.map(esc).join(", ") : "none"}. The renderer comes from the recipes in your approved edit plan; nothing is swapped.</p>
-    ${v.readiness ? `<h3 style="margin:12px 0 6px">Readiness, level by level</h3><p class="hint" style="margin-bottom:6px">Registered means a renderer has the template. Validated alone means a recorded real render of the template itself. Compatible means the engine accepts this scene's approved inputs. Rendered means it drew this scene and the clip passed its checks. In final means its effect was found in the finished video. A dash means not reached yet.</p><table><thead><tr><th>Operation</th><th>Scene</th><th>Template</th><th>Registered</th><th>Validated alone</th><th>Compatible</th><th>Rendered</th><th>In final</th><th>What is missing</th></tr></thead><tbody>${v.readiness.map((o) => { const lv = (b) => b === true ? '<span class="chip ok">yes</span>' : b === false ? '<span class="chip bad">no</span>' : '<span class="chip">-</span>'; return `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td class="mono">${esc(o.template)}</td><td>${lv(o.registered)}</td><td>${lv(o.validated_in_isolation)}${o.validation_basis === "built_in" ? ' <span class="hint">built in</span>' : ""}</td><td>${lv(o.compatible_with_scene)}</td><td>${lv(o.rendered_with_scene_inputs)}</td><td>${lv(o.validated_in_final)}</td><td>${o.missing ? esc(o.missing) : "-"}</td></tr>`; }).join("")}</tbody></table>` : ""}    <div class="chips" style="margin-bottom:10px">${v.coverage.scenes.map((s) => `<span class="chip ${s.represented ? "ok" : "bad"}" title="${esc(s.missing.join("; "))}">${esc(s.scene_id)} ${s.represented ? "fully shown" : "not fully shown"}</span>`).join("")}</div>
+    ${v.readiness ? `<details class="how" style="margin:10px 0"><summary>Readiness, level by level (for engineers)</summary><p class="hint" style="margin:8px 0 6px">Registered means a renderer has the template. Validated alone means a recorded real render of the template itself. Compatible means the engine accepts this scene's approved inputs. Rendered means it drew this scene and the clip passed its checks. In final means its effect was found in the finished video. A dash means not reached yet.</p><table><thead><tr><th>Operation</th><th>Scene</th><th>Template</th><th>Registered</th><th>Validated alone</th><th>Compatible</th><th>Rendered</th><th>In final</th><th>What is missing</th></tr></thead><tbody>${v.readiness.map((o) => { const lv = (b) => b === true ? '<span class="chip ok">yes</span>' : b === false ? '<span class="chip bad">no</span>' : '<span class="chip">-</span>'; return `<tr><td class="mono">${esc(o.operation_id)}</td><td>${esc(o.scene_id)}</td><td class="mono">${esc(o.template)}</td><td>${lv(o.registered)}</td><td>${lv(o.validated_in_isolation)}${o.validation_basis === "built_in" ? ' <span class="hint">built in</span>' : ""}</td><td>${lv(o.compatible_with_scene)}</td><td>${lv(o.rendered_with_scene_inputs)}</td><td>${lv(o.validated_in_final)}</td><td>${o.missing ? esc(o.missing) : "-"}</td></tr>`; }).join("")}</tbody></table></details>` : ""}    <div class="chips" style="margin-bottom:10px">${v.coverage.scenes.map((s) => `<span class="chip ${s.represented ? "ok" : "bad"}" title="${esc(s.missing.join("; "))}">${esc(s.scene_id)} ${s.represented ? "fully shown" : "not fully shown"}</span>`).join("")}</div>
     ${v.blockers.length ? `<div class="notice bad" style="margin-bottom:10px"><b>Why a preview cannot be made yet</b>${v.blockers.map((x) => `<div>${esc(x)}</div>`).join("")}</div>` : ""}
-    <div class="notice ${v.production.ready ? "info" : "warn"}" style="margin-bottom:12px"><b>Production readiness: ${v.production.ready ? "ready" : "not ready"}.</b> ${v.production.blockers.slice(0, 4).map(esc).join("; ")}${v.production.blockers.length > 4 ? "; ..." : ""}${v.production.operations?.some((o) => o.missing) ? `<div class="hint" style="margin-top:6px">Missing: ${v.production.operations.filter((o) => o.missing).map((o) => `${esc(o.operation_id)} ${esc(o.missing)}`).join("; ")}</div>` : ""}</div>` : "";
+    <div class="notice ${v.production.ready ? "info" : "warn"}" style="margin-bottom:12px"><b>${v.production.ready ? "Ready for production." : "This is a preview, not a final video yet."}</b> ${v.production.ready ? "" : `<details class="how"><summary>Why, and what to do (${v.production.blockers.length})</summary><ul style="margin:6px 0 0;padding-left:18px">${v.production.blockers.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="hint" style="margin-top:6px">Recipes marked draft have not been reviewed by a person yet. A reviewed recipe has a real render checked and approved.</p></details>`}${v.production.operations?.some((o) => o.missing) ? `<div class="hint" style="margin-top:6px">Missing: ${v.production.operations.filter((o) => o.missing).map((o) => `${esc(o.operation_id)} ${esc(o.missing)}`).join("; ")}</div>` : ""}</div>` : "";
   const field = (id, label, key) => `<label class="hint" style="display:block">${label}<input id="rs-${id}" inputmode="numeric" value="${esc(r.settings[key])}" style="display:block;width:110px;margin-top:4px" aria-label="${label}"></label>`;
   const form = v ? `<h3 style="margin:14px 0 8px">Output settings</h3>
     <p class="hint" style="margin-bottom:8px">Fixed by your approved plan: ${esc(v.needs.aspect_ratio)}, ${fmtDur(v.needs.duration_s)}. The only output the renderers write: ${esc(v.needs.supported_output.container)}, ${esc(v.needs.supported_output.video_codec)}, ${v.needs.supported_output.audio_codec ? esc(v.needs.supported_output.audio_codec) + " sound" : "no audio"}. Size and frame rate are yours to choose; none are assumed.</p>
@@ -931,6 +947,7 @@ async function init() {
   $("#prompt").addEventListener("input", updateCount);
   $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendText($("#prompt").value); });
   $("#send").addEventListener("click", () => sendText($("#prompt").value));
+  $("#edit-answers").addEventListener("click", () => { const open = state.wiz?.isCollapsed?.(); state.wiz?.setCollapsed(!open); $("#edit-answers").textContent = open ? "Hide my answers" : "Edit my answers"; });
   $("#mic").addEventListener("click", toggleMic);
   $("#voice-file").addEventListener("click", () => $("#voice-input").click());
   $("#voice-input").addEventListener("change", (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) transcribeBlob(f, f.name); });
@@ -944,6 +961,7 @@ async function init() {
   $("#reset").addEventListener("click", async () => {
     try { await post(`/api/sessions/${state.sid}/reset`); } catch { /* session may be gone */ }
     Object.assign(state, { turns: [], route: null, run: null, approval: null, transcripts: {}, fromVoice: false, language: null, videoType: null, proposedVideoTypes: [], previews: {} });
+    state.wiz?.setCollapsed(false); $("#edit-answers").hidden = true; $("#edit-answers").textContent = "Edit my answers"; state.wiz?.reload?.();
     $("#prompt").value = ""; $("#lang-chip").hidden = true; updateCount(); micStatus("Speak instead of typing. Runs locally with Whisper."); renderAll();
     refreshVideoTypes();
   });
@@ -962,12 +980,12 @@ async function init() {
     // Guided setup: its answers fill the request, facts and kind-of-video boxes below; the user reviews them and presses Send as before.
     const wiz = mountWizard({
       $, esc, api, post, toast, uploadFiles, getAssets: () => state.assets, getSid: () => state.sid,
-      onFinish: ({ prompt, facts, video_category }) => {
+      onFinish: ({ prompt, facts, video_category, autoSend }) => {
         if (prompt) { $("#prompt").value = prompt; updateCount(); }
         $("#facts").value = facts.join("\n"); if (facts.length) $("details.facts").open = true;
         $("#video-category").value = video_category ?? "";
         refreshVideoTypes();
-        $("#prompt").focus({ preventScroll: false });
+        if (autoSend && prompt) { $("#edit-answers").hidden = false; $("#edit-answers").textContent = "Edit my answers"; sendText(prompt); } else $("#prompt").focus({ preventScroll: false });
       },
     });
     state.wiz = wiz;
