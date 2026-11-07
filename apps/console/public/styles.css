@@ -339,3 +339,5 @@ html, body { overflow-x: clip; } /* the decorative aurora layer is wider than th
 /* on a phone the sticky approval bar would cover the plan it is asking about: it flows after the plan instead, with the buttons full width */
 @media (max-width: 700px) { .approve-bar { position: static; } .approve-bar.gate .row { width: 100%; margin-left: 0; } .approve-bar.gate .row > button { flex: 1 1 auto; } }
 .retrieval-banner { background: linear-gradient(90deg, #92400e, #b45309); }
+/* Narrow screens: the step chips and the plan tabs wrap instead of hiding the last ones behind a sideways scroll. */
+@media (max-width: 560px) { .phases { flex-wrap: wrap; overflow-x: visible; } .phase { padding: 6px 12px 6px 6px; font-size: 13px; } .tabs { flex-wrap: wrap; } }

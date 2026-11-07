@@ -1,5 +1,7 @@
 import type { Composition, SceneGraphV2, SgEasing } from "@digikon/contracts";
 import type { z } from "zod";
+import type { TextMeter } from "../font-metrics.js";
+import { wrapMeasured } from "../layout.js";
 
 /**
  * Turns a composition (what the Director wrote: elements placed as shares of the frame, with their own type, colour and motion) into a scene graph in pixels for one frame
@@ -11,7 +13,12 @@ type Easing = z.infer<typeof SgEasing>;
 type Element = SceneGraphV2["elements"][number];
 type Track = Element["timeline"]["tracks"][number];
 
-export interface AuthorFrame { width: number; height: number; fps: number; duration_s: number }
+/**
+ * `meter`: when given, each text is broken into lines at its box width with the same measure the validator uses. The scene-graph renderers draw text as given (white-space: pre), so a
+ * text without explicit line breaks is ONE line however wide it is. Without this, the validator judged a headline as wrapped over three lines while the render drew it on one line
+ * under a neighbouring card.
+ */
+export interface AuthorFrame { width: number; height: number; fps: number; duration_s: number; meter?: TextMeter }
 
 const spring: Easing = { spring: { damping: 14, stiffness: 120, mass: 1, overshoot_clamp: true } };
 const easingOf = (e: "ease_out" | "ease_in_out" | "spring"): Easing => (e === "spring" ? spring : e);
@@ -48,7 +55,7 @@ export function authorGraph(c: Comp, f: AuthorFrame): SceneGraphV2 {
       const px = ((portrait && e.portrait?.size) || e.size) * short;
       return {
         id: e.id, kind: "text" as const, parent: null,
-        props: { text: e.text, x, y, w, font_px: px, weight: e.weight, align: e.align, upper: e.upper, color: e.color, line_height: e.line_height, ...(e.font ? { font: e.font } : {}) },
+        props: { text: f.meter ? wrapMeasured(e.text, f.meter, px, w, { upper: e.upper, bold: e.weight !== "regular" }, false).lines.join(String.fromCharCode(10)) : e.text, x, y, w, font_px: px, weight: e.weight, align: e.align, upper: e.upper, color: e.color, line_height: e.line_height, ...(e.font ? { font: e.font } : {}) },
         timeline, ...(m.stagger ? { stagger: { unit: m.stagger.unit, each_s: Math.max(0.005, m.stagger.each * D), from: "start" as const } } : {}), bindings: {},
       };
     }

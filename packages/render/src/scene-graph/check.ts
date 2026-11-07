@@ -18,7 +18,8 @@ export function checkComposition(visual: z.infer<typeof Composition>, o: { art_d
   const palette: Palette = o.art_direction?.palette ?? DEFAULT_PALETTE;
   const system = o.art_direction?.visual_system ? VISUAL_SYSTEMS[o.art_direction.visual_system] : null;
   const face: TypeFace = o.art_direction?.typography.face ?? system?.face ?? "sans";
-  const graph = authorGraph(visual, { width, height, fps: o.fps ?? 30, duration_s: o.duration_seconds });
-  const verdict = validateSceneGraph(graph, { palette, meter: meterFor(face) });
+  const meter = meterFor(face);
+  const graph = authorGraph(visual, { width, height, fps: o.fps ?? 30, duration_s: o.duration_seconds, meter });
+  const verdict = validateSceneGraph(graph, { palette, meter });
   return verdict.ok ? [] : verdict.issues;
 }

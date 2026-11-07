@@ -358,7 +358,7 @@ export function planCompositionScenes(job: Omit<RenderJob, "signal">, opts: Comp
         break;
       case "composition": {
         // a layout written for this film: the plan's own positions, type and motion, drawn by the scene-graph engine. It is validated like any scene graph (bounds, legibility, timing) and refused as a whole when it fails.
-        const g = authorGraph(visual, { width: s.width, height: s.height, fps: s.fps, duration_s: frames / s.fps });
+        const g = authorGraph(visual, { width: s.width, height: s.height, fps: s.fps, duration_s: frames / s.fps, meter });
         const verdict = validateSceneGraph(g, { palette, meter });
         if (!verdict.ok) { for (const i of verdict.issues.slice(0, 8)) issues.push(`${at}: composition: ${i}`); break; }
         box = { x: margin, y: margin, w: inner, h: s.height - 2 * margin };

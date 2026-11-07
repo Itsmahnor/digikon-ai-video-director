@@ -80,6 +80,7 @@ export interface AppContext {
 }
 
 import { registerKitRoutes, type Extraction } from "./kit-routes.js";
+import { kitContext } from "./kit-context.js";
 import { kitIsStarted, type TemplateInspirationPort } from "@digikon/director";
 import { approvedFacts, type ProjectKit } from "@digikon/contracts";
 import type { ReadOptions } from "@digikon/media";
@@ -430,7 +431,9 @@ export function createApp(ctx: AppContext) {
     const s = session(c.req.param("id"));
     const llm = needLlm();
     const body = RouteBody.parse(await c.req.json().catch(() => ({})));
-    const turn = Turn.parse({ role: "user", text: body.text, from_voice: body.from_voice, language: body.language });
+    // What the user chose in the guided setup (platform, audience, tone) is added to what the router reads when the text does not already say it.
+    const extra = kitContext(kits.kitOf(s), body.text);
+    const turn = Turn.parse({ role: "user", text: extra ? `${body.text} ${extra}` : body.text, from_voice: body.from_voice, language: body.language });
     const turns = [...s.turns, turn];
     const result = await routeRequest({ llm, skills: ctx.skills }, { project_id: `proj_${s.id}`, owner_id: "console-user", turns, assets: s.assets });
     llmProblem = null;
