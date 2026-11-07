@@ -26,3 +26,4 @@ export * from "./questions.js";
 
 export * from "./composition-grounding.js";
 export * from "./composition-blocks.js";
+export * from "./sound-policy.js";

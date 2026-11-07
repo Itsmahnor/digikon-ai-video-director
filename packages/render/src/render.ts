@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  DirectorHandoff, EditorOutput, RENDER_SCHEMA_VERSION, RenderRecord, RenderSettings,
+  DirectorHandoff, EditorOutput, RENDER_SCHEMA_VERSION, RenderRecord, RenderSettings, soundPolicyOf,
   type Asset, type RenderError, type RenderPurpose, type Renderer,
 } from "@digikon/contracts";
 import {
@@ -163,7 +163,7 @@ export function planRender(input: RenderInput, deps: RenderDeps): PlanResult {
   const soundSources = h.assets.filter((a) => a.audio_tracks > 0 || a.media_type === "audio");
   const allSoundDropped = soundSources.length > 0 && soundSources.every((a) => a.media_type === "video" && droppedSounds(a.asset_id));
   if (allSoundDropped) notes.push(`the sound of ${soundSources.map((a) => a.asset_id).join(", ")} is left out because the approved edit plan says so (source_audio drop); no audio is produced`);
-  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped) || audioOnly || (!!deps.audio && planAudio({ scenes: h.storyboard.scenes, assets: h.assets }, deps.audio).required);
+  const audioRequired = out.operations.some((o) => o.operation_type === "mix_audio") || (h.qa.expect_audio && !allSoundDropped) || audioOnly || (!!deps.audio && planAudio({ scenes: h.storyboard.scenes, assets: h.assets, policy: soundPolicyOf(h.project.brief) }, deps.audio).required);
   if (audioOnly) notes.push(`approved audio cues cannot be produced (${out.conflicts.length} scene(s)): the film is an incomplete preview and cannot be final`);
   let settings: RenderSettings | null = null;
   if (input.settings === undefined || input.settings === null) {

@@ -69,3 +69,40 @@ describe.skipIf(!hasFfmpeg)("the sound is really in the finished file", () => {
     } finally { rmSync(work, { recursive: true, force: true }); }
   }, 90_000);
 });
+
+describe("the brief's sound rule is carried out in the audio plan: the brief wins over the storyboard and the files", () => {
+  const scenes = [
+    scene("S01", 0, { voiceover: "Our story begins here.", audio_cues: ["a slow score under the whole film"], asset_ids: ["A1"] }),
+    scene("S02", 4, { audio_cues: ["a soft chime"] }),
+  ];
+  const assets = [{ asset_id: "A1", media_type: "audio" as const }];
+  const narrationOnly = { music: false, narration: true, effects: false };
+
+  it("without a rule the score, the chime, the supplied music and the narration are all planned (the control)", () => {
+    const p = planAudio({ scenes, assets, feel: "calm" }, CAPS);
+    expect(p.tracks.map((t) => t.kind).sort()).toEqual(["music", "narration", "sfx"]);
+    expect(p.tracks.some((t) => t.kind === "music")).toBe(true);
+    expect(p.tracks.some((t) => t.kind === "sfx")).toBe(true);
+    expect(p.tracks.some((t) => t.kind === "narration")).toBe(true);
+  });
+
+  it("narration only, no music: only the narration is planned, nothing is dropped silently, and the plan says what was left out", () => {
+    const p = planAudio({ scenes, assets, feel: "calm", policy: narrationOnly }, CAPS);
+    expect(p.tracks.map((t) => t.kind)).toEqual(["narration"]);
+    expect(p.labels.join(" ")).toContain("left out because the brief rules it out: music, sound effects");
+    expect(p.unresolved).toEqual([]);
+  });
+
+  it("music only: the narration is left out and the music kept", () => {
+    const p = planAudio({ scenes, assets, feel: "calm", policy: { music: true, narration: false, effects: false } }, CAPS);
+    expect(p.tracks.some((t) => t.kind === "narration")).toBe(false);
+    expect(p.tracks.some((t) => t.kind === "music")).toBe(true);
+    expect(p.labels.join(" ")).toContain("narration");
+  });
+
+  it("silent: nothing is planned and nothing is required", () => {
+    const p = planAudio({ scenes, assets, feel: "calm", policy: { music: false, narration: false, effects: false } }, CAPS);
+    expect(p.tracks).toEqual([]);
+    expect(p.required).toBe(false);
+  });
+});

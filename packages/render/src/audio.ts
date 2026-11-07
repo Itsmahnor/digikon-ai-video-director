@@ -2,7 +2,7 @@ import { execFile, execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import type { ArtDirection, Asset, Scene } from "@digikon/contracts";
+import type { ArtDirection, Asset, Scene, SoundPolicy } from "@digikon/contracts";
 
 const run = promisify(execFile);
 
@@ -47,14 +47,16 @@ export function detectAudio(): AudioCapabilities {
   try { execFileSync("espeak-ng", ["--version"], { stdio: "ignore", timeout: 5_000 }); return { tts: "espeak" }; } catch { return { tts: null }; }
 }
 
-export function planAudio(story: { scenes: readonly Pick<Scene, "scene_id" | "start_time" | "duration_seconds" | "voiceover" | "audio_cues" | "asset_ids">[]; assets: readonly Pick<Asset, "asset_id" | "media_type">[]; feel?: MusicFeel | null }, caps: AudioCapabilities | null): AudioPlan {
+export function planAudio(story: { scenes: readonly Pick<Scene, "scene_id" | "start_time" | "duration_seconds" | "voiceover" | "audio_cues" | "asset_ids">[]; assets: readonly Pick<Asset, "asset_id" | "media_type">[]; feel?: MusicFeel | null; /** What the brief rules out. A kind of sound it rules out is never planned, whatever the storyboard cues or the files supplied say: the brief wins. */ policy?: SoundPolicy | null }, caps: AudioCapabilities | null): AudioPlan {
   const kind = new Map(story.assets.map((a) => [a.asset_id, a.media_type]));
   const tracks: AudioTrack[] = [], unresolved: AudioPlan["unresolved"] = [], labels: string[] = [];
+  const pol = story.policy ?? null, left: string[] = [];
   let wantsMusic = false, musicCueScene: string | null = null;
   const usedAudio = new Set<string>();
   for (const s of story.scenes) {
     const supplied = s.asset_ids.filter((id) => kind.get(id) === "audio");
-    if (s.voiceover) {
+    if (s.voiceover && pol && !pol.narration) { if (!left.includes("narration")) left.push("narration"); }
+    else if (s.voiceover) {
       const words = s.voiceover.trim().split(/\s+/).length;
       if (supplied[0]) { usedAudio.add(supplied[0]); tracks.push({ kind: "narration", scene_id: s.scene_id, start_s: s.start_time, max_s: s.duration_seconds, source: "supplied", asset_id: supplied[0] }); }
       else if (!caps?.tts) unresolved.push({ scene_id: s.scene_id, detail: "its voiceover needs a recording or a speech synthesiser, and neither is available here" });
@@ -63,14 +65,16 @@ export function planAudio(story: { scenes: readonly Pick<Scene, "scene_id" | "st
     }
     for (const cue of s.audio_cues) {
       const sfx = SFX_CUES.find(([re]) => re.test(cue));
-      if (sfx) tracks.push({ kind: "sfx", scene_id: s.scene_id, at_s: s.start_time, sound: sfx[1], cue });
-      else if (MUSIC_CUE.test(cue)) { wantsMusic = true; musicCueScene ??= s.scene_id; }
+      if (sfx) { if (pol && !pol.effects) { if (!left.includes("sound effects")) left.push("sound effects"); } else tracks.push({ kind: "sfx", scene_id: s.scene_id, at_s: s.start_time, sound: sfx[1], cue }); }
+      else if (MUSIC_CUE.test(cue)) { if (pol && !pol.music) { if (!left.includes("music")) left.push("music"); } else { wantsMusic = true; musicCueScene ??= s.scene_id; } }
       else unresolved.push({ scene_id: s.scene_id, detail: `its audio cue ("${cue.slice(0, 60)}") names no sound that can be made here (music, a whoosh, a hit, a chime or a click)` });
     }
   }
   const music = story.scenes.flatMap((s) => s.asset_ids).find((id) => kind.get(id) === "audio" && !usedAudio.has(id));
-  if (music) tracks.push({ kind: "music", source: "supplied", asset_id: music });
+  if (music && pol && !pol.music) { if (!left.includes("music")) left.push("music"); }
+  else if (music) tracks.push({ kind: "music", source: "supplied", asset_id: music });
   else if (wantsMusic) { tracks.push({ kind: "music", source: "generated", feel: story.feel ?? "calm" }); labels.push(`the music is a bed generated on this computer (${story.feel ?? "calm"}), not a licensed track`); }
+  if (left.length) labels.push(`left out because the brief rules it out: ${left.join(", ")}`);
   if (tracks.some((t) => t.kind === "narration" && t.source === "tts")) labels.push(`the narration is spoken by this computer's speech synthesiser (${caps?.tts}), not a voice artist`);
   if (tracks.some((t) => t.kind === "sfx")) labels.push("the sound effects are synthesised on this computer");
   return { required: tracks.length > 0 || unresolved.length > 0, tracks, unresolved, labels };

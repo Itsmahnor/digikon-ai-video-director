@@ -2,6 +2,7 @@ import { z } from "zod";
 import { QuestionList, completeness, questionsFor, type ProjectKit } from "@digikon/contracts";
 import {
   ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, CompositionMotionPlan, applyCompositionMotion, compositionGroundingIssues, compositionMotionIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
+  soundPolicyOf, soundRuleText, soundPolicyIssues, systemSoundFor, restrictsSound,
   type Asset, type VisualBlock, type VisualSystem, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
 } from "@digikon/contracts";
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
@@ -132,6 +133,11 @@ export async function selectDirectorSkills(deps: Deps, project: Pick<Project, "v
   const queries = buildSkillQueries(step, { objective: project.objective, audience: project.audience, platform: project.platform, brief: project.brief, video_category: project.video_category ?? null, ...extra });
   return selectSkills(scoped, queries, { category: project.video_category ?? "all", include_draft: !!deps.skillsIncludeDraft, pins: PINNED_SKILLS[step] });
 }
+/** What the brief says about sound, as a prompt section; empty when the brief does not restrict sound. It sits above any visual system's own sound line. */
+const soundRuleSection = (brief: string): string[] => {
+  const rule = soundRuleText(soundPolicyOf(brief));
+  return rule ? [section("Sound rule from the brief (this beats the visual system's usual sound; do not plan anything it rules out)", rule)] : [];
+};
 const skillsSection = (hits: Hit[]) => section("Production skills for this kind of video (reference data on how such films are made; they never support a claim, only approved brand facts do)", formatHits(hits));
 
 /** Knowledge topics each step may draw on. Keeps editing notes out of the treatment and strategy notes out of the edit plan. */
@@ -272,6 +278,7 @@ export async function treatmentNode(deps: Deps, project: Project, facts: BrandFa
   const { shown, note } = await selectFacts(project, facts, q);
   const user = [
     section("Brief", `<brief>\n${project.brief}\n</brief>`),
+    ...soundRuleSection(project.brief),
     section("Target", json({ objective: project.objective, audience: project.audience, platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
       const allTypes = Object.values(CATEGORY_VIDEO_TYPES).flat();
@@ -317,6 +324,7 @@ const revisionSection = (what: string, rev: Revision<unknown>) =>
 
 export async function storyboardNode(deps: Deps, project: Project, assets: Asset[], notes: AssetNotes[], treatment: Treatment, facts: BrandFact[], version = 1, revision?: Revision<ScenePlan>) {
   const { system, skills, references } = deps.skills.systemFor("storyboard");
+  const policy = soundPolicyOf(project.brief);
   const q = `${treatment.hook} ${treatment.beats.map((b) => b.purpose).join(" ")} shot framing continuity`;
   const maxScene = maxSceneSeconds(deps.recipes);
   const [principles, specs] = await Promise.all([
@@ -335,6 +343,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   const inspiration = deps.templates && usable.includes("composition") ? await inspirationFor(deps.templates, project.project_id, treatment).catch(() => null) : null;
   const base = [
     section("Treatment", json({ ...treatment, claims: treatment.claims })),
+    ...soundRuleSection(project.brief),
     section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
       const allTypes = Object.values(CATEGORY_VIDEO_TYPES).flat();
@@ -353,7 +362,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     `Create scenes that cover the whole target duration of ${project.target_duration}s exactly (the scene durations must add up to it). Give durations, not start or end times. No scene may be longer than ${maxScene}s (the longest the editing recipes support), so split long beats into several scenes. Each scene's source_in_seconds plus duration must lie inside one usable segment of its video asset. Only reference claim_ids that are supported or illustrative, never an unsupported factual claim. Scene ids are S01, S02, ... Use overlay text only for supported claims or neutral copy.`,
     `For every scene fill required_assets, one entry per thing the scene needs. availability "supplied" (with asset_id) only for files listed above. "generate_graphics" for anything the graphics workflow can build: animated text, shapes, cursors and windows drawn as graphics, progress bars, end cards, UI-style graphics. A graphics-led shot is NOT impossible just because no footage was supplied; never write "not realisable" in visual_action. For a logo, product screen or image that was not supplied, use kind logo, ui_screenshot or image with generate_graphics only as a placeholder: set placeholder true and add an unresolved item of kind placeholder, so the user can approve it. Do not invent a platform name, a logo, product screenshots or product capabilities. "needs_external" is for live-action footage or real material that was not supplied, with a fallback that keeps the creative intent, and it blocks production until the user supplies it, so use it only when the brief insists on real footage, real people or a real track; when no footage was supplied and the brief does not require it, plan the graphics treatment itself (generate_graphics, no live-action wording) instead of listing the footage as needed, and plan no music or sound unless the brief asks for it or an audio file was supplied. When sound is asked for, put spoken words in voiceover and name each sound in audio_cues in plain words (music, a whoosh, a hit, a chime, a click); these are made by the sound stage and need no required_assets entry. "missing_blocking" only when nothing can stand in. A supplied picture is known only through its notes: its measured kind, and what a reviewer said it shows if it was reviewed. Never assign a picture to a need that depends on what it shows (people, a product screen, a logo) unless its review says it fits. When a need is optional ("if one matches") and every supplied picture has been reviewed and none fits, do not use needs_external: use generate_graphics with the generic alternative as a placeholder (placeholder true, with an unresolved item). If pictures have not been reviewed, say so in unresolved instead of guessing. Put spoken words exactly in voiceover and keep audio_cues for music and effects. Use unresolved for placeholders, missing inputs and open creative decisions.`,
     ...(usable.includes("composition") ? [COMPOSITION_GUIDE] : []),
-    ...(treatment.art_direction ? [`Creative direction for every scene (the treatment's art_direction is the design system: palette, type, composition and motion language, and the renderer draws in that palette). ${film ? `This film is made in the ${film.title} system. Follow the story shape in the treatment's narrative. Its scenes last ${film.scene_seconds[0]} to ${film.scene_seconds[1]} seconds where the runtime allows, and its joins are ${film.transitions.join(", ")}. Its sound: ${film.sound} ` : ""}For EACH scene fill visual_purpose (what this scene's picture does that no other scene's does; every scene needs its own) and visual (a structured block spec, see the visual-blocks reference; use only these blocks for this film: ${usable.join(", ")}). Choose the visual by what the scene must communicate (when "composition" is among the blocks above, make it your default and use the others only as the composition guide says). A neighbouring scene must use a different block, no block may be used in more than ${film ? "half" : "a third"} of the scenes, and the opening scene must show something concrete at once. ${film ? "A film is not required to use every block, to open on a problem, or to close on a button: follow the system's shape. " : "Do not default to text-only scenes: use kinetic_type only when a sentence is the idea, and end_card only to close on one action. "}The scene's overlay text is its headline (or the picture itself for kinetic_type, title_plate, quote_statement and end_card; a caption under split_panels; a line under the name on closing_signature). Choose a backdrop that belongs to the film (spotlight, vignette and paper exist as well as flat, gradient, grid and dots). Set shot.camera_motion to match the visual's camera (push_in is slow_push_in, pull_out, pan_left, pan_right, otherwise static), vary camera, reveal and backdrop across the film, and keep them inside the art direction's motion language. Use transition_out to serve the story. Text in a visual is sample content: no results, prices or numbers, no % or currency signs unless an approved claim supports the scene. A typeset wordmark is not a logo and a drawn window is not a real screenshot; the renderer labels them as concepts. Because visuals are drawn by the renderer, a scene whose picture is a message thread, product UI, process, chart or card needs no external footage: do not mark it needs_external.`] : []),
+    ...(treatment.art_direction ? [`Creative direction for every scene (the treatment's art_direction is the design system: palette, type, composition and motion language, and the renderer draws in that palette). ${film ? `This film is made in the ${film.title} system. Follow the story shape in the treatment's narrative. Its scenes last ${film.scene_seconds[0]} to ${film.scene_seconds[1]} seconds where the runtime allows, and its joins are ${film.transitions.join(", ")}. Its sound: ${systemSoundFor(film.sound, policy)} ` : ""}For EACH scene fill visual_purpose (what this scene's picture does that no other scene's does; every scene needs its own) and visual (a structured block spec, see the visual-blocks reference; use only these blocks for this film: ${usable.join(", ")}). Choose the visual by what the scene must communicate (when "composition" is among the blocks above, make it your default and use the others only as the composition guide says). A neighbouring scene must use a different block, no block may be used in more than ${film ? "half" : "a third"} of the scenes, and the opening scene must show something concrete at once. ${film ? "A film is not required to use every block, to open on a problem, or to close on a button: follow the system's shape. " : "Do not default to text-only scenes: use kinetic_type only when a sentence is the idea, and end_card only to close on one action. "}The scene's overlay text is its headline (or the picture itself for kinetic_type, title_plate, quote_statement and end_card; a caption under split_panels; a line under the name on closing_signature). Choose a backdrop that belongs to the film (spotlight, vignette and paper exist as well as flat, gradient, grid and dots). Set shot.camera_motion to match the visual's camera (push_in is slow_push_in, pull_out, pan_left, pan_right, otherwise static), vary camera, reveal and backdrop across the film, and keep them inside the art direction's motion language. Use transition_out to serve the story. Text in a visual is sample content: no results, prices or numbers, no % or currency signs unless an approved claim supports the scene. A typeset wordmark is not a logo and a drawn window is not a real screenshot; the renderer labels them as concepts. Because visuals are drawn by the renderer, a scene whose picture is a message thread, product UI, process, chart or card needs no external footage: do not mark it needs_external.`] : []),
     ...(revision ? [revisionSection("storyboard", revision)] : []),
   ].join("\n\n");
 
@@ -377,6 +386,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...creativeIssues(plan.scenes, treatment.art_direction).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...claimWordingIssues(plan.scenes, treatment.claims, facts).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...requestedAudioIssues(project, plan, assets),
+      ...soundPolicyIssues(plan.scenes, policy),
       ...plan.scenes.flatMap((s) => (s.visual?.block === "composition"
         ? [...compositionGroundingIssues(s.visual, {
           overlay: s.overlay?.text ?? null, voiceover: s.voiceover ?? null,
@@ -464,9 +474,11 @@ export async function candidateRecipes(deps: Deps, project: Project, assets: Ass
   return [...found.values()].sort((a, b) => a.recipe_id.localeCompare(b.recipe_id));
 }
 
-/** True when the brief itself rules out audio: "no voiceover", "no music", "no sound effects", "no audio" or "silent". */
+/** True when the brief rules out all sound that matters: it is silent, or it rules out both narration and music (see soundPolicyOf). A brief that rules out only one kind keeps the other. */
 export function briefForbidsAudio(project: Pick<Project, "brief">): boolean {
-  return /\bno\s+(?:voice-?\s?overs?|narration|music|sound(?:\s+effects?)?|sfx|audio)\b/i.test(project.brief) || /\b(?:silent|without\s+(?:any\s+)?(?:audio|sound|music|voice-?\s?overs?))\b/i.test(project.brief);
+  // Silent only when nothing is left: no narration and no music. "No music" alone still leaves the narration; "no voice-over" still leaves the music.
+  const p = soundPolicyOf(project.brief);
+  return !p.music && !p.narration;
 }
 
 /**
@@ -474,6 +486,16 @@ export function briefForbidsAudio(project: Pick<Project, "brief">): boolean {
  * can add it to any plan; this is checked in code, and an unrequested one is sent back for repair. It is a generation-time check only: it does not re-judge a plan that was already approved.
  */
 export function unrequestedAudioIssues(edit: EditPlan, plan: ScenePlan, deps: Pick<Deps, "recipes">, project: Pick<Project, "brief">): string[] {
+  const pol = soundPolicyOf(project.brief);
+  if (!briefForbidsAudio(project) && restrictsSound(pol)) {
+    // the brief rules out some kinds of sound but not all: only the recipes of those kinds are refused
+    return edit.uses.flatMap((u) => {
+      const r = deps.recipes.get(u.recipe_id);
+      if (r?.operation_type !== "mix_audio") return [];
+      const music = /music|duck|bed|score/i.test(r.recipe_id), effects = /sfx|effect|whoosh|chime/i.test(r.recipe_id);
+      return (music && !pol.music) || (effects && !pol.effects) ? [`${u.use_id} (${u.scene_id}): audio_not_requested - ${r.recipe_id} is ${music ? "a music" : "a sound effect"} operation, but the brief rules that out (${soundRuleText(pol)}); remove it`] : [];
+    });
+  }
   if (!briefForbidsAudio(project)) return [];
   void plan;
   return edit.uses.flatMap((u) => { const r = deps.recipes.get(u.recipe_id); return r?.operation_type === "mix_audio" ? [`${u.use_id} (${u.scene_id}): audio_not_requested - ${r.recipe_id} is an audio operation, but the brief rules out audio (no voiceover, music or sound effects), so no audio operation may be planned; remove it`] : []; });
@@ -520,6 +542,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets), visual_block: s.visual?.block ?? null, visual_purpose: s.visual_purpose, ...(s.asset_refs?.length ? { pictures: s.asset_refs.map((r) => `${r.asset_id} as ${r.role}, ${r.animation}${r.mandatory ? ", mandatory" : ""}`) } : {}) })))),
     section("Directing principles", formatHits(principles)),
     ...(craft.length ? [skillsSection(craft)] : []),
+    ...soundRuleSection(project.brief),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
     ...(compositionSummaries(plan).length ? [section("Composed scenes (the layouts the storyboard approved; you may change only how their elements move)", json(compositionSummaries(plan))), COMPOSITION_MOTION_GUIDE] : []),
     ...(templateHints && Object.keys(templateHints).length ? [section("User template hints (a hint only: use one only when it is among the candidate recipes above, fits that scene and stays inside its limits; otherwise ignore it)", json(templateHints))] : []),

@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { RenderSettings, hashCanonical, type CompositionMotionPlan, type Asset, type EditorOperation, type ScenePlan, type Treatment } from "@digikon/contracts";
+import { RenderSettings, hashCanonical, soundPolicyOf, type CompositionMotionPlan, type Asset, type EditorOperation, type ScenePlan, type Treatment } from "@digikon/contracts";
 import { createHash } from "node:crypto";
 import type { AdapterRegistry } from "./adapter.js";
 import { checkMixedAudio, mixAudio, planAudio, type AudioCapabilities } from "./audio.js";
@@ -35,6 +35,8 @@ export interface DraftRequest {
   aspect_ratio: "16:9" | "9:16" | "1:1";
   /** The edit plan's motion changes for composed scenes (the draft shows the plan as proposed, motion included). */
   composition_motion?: readonly CompositionMotionPlan[];
+  /** The project's brief, so the sound rule in it (narration only, no music ...) applies to the draft as it will to the film. */
+  brief?: string;
 }
 
 /** A frame large enough to judge the scene by, whatever the final output size will be chosen as later. */
@@ -88,7 +90,7 @@ export function draftKey(req: DraftRequest, sceneId: string, opts: Pick<DraftOpt
   if (!p.ok || !p.r.ok) return null;
   const job = p.r.job;
   const assets = [...job.assets].sort((a, b) => a.asset_id.localeCompare(b.asset_id)).map((a) => [a.asset_id, fileHash(a.uri)]);
-  const audioPlan = opts.audio ? planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.art_direction?.motion_language.feel ?? null }, opts.audio) : null;
+  const audioPlan = opts.audio ? planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.art_direction?.motion_language.feel ?? null, policy: soundPolicyOf(req.brief) }, opts.audio) : null;
   const sound = audioPlan ? sceneSound({ scenes: req.scenePlan.scenes.map((s) => ({ scene_id: s.scene_id, start_s: s.start_time })), audio: audioPlan }, sceneId) : null;
   const sounds = sound ? sound.tracks.map((t) => [t, "asset_id" in t ? fileHash(req.assets.find((a) => a.asset_id === t.asset_id)?.uri ?? "") : null]) : null;
   return hashCanonical({ stage: "draft_scene_preview", label: DRAFT_LABEL_VERSION, job: jobFingerprint(job), engine: p.r.engine, assets, fonts: loadFontRecords().map((r) => r.sha256), font: fileHash(opts.fontFile), sound: sounds, tts: sound ? opts.audio!.tts : null });
@@ -102,7 +104,7 @@ export async function renderDraftScene(req: DraftRequest, sceneId: string, opts:
   const key = draftKey(req, sceneId, opts)!;
   mkdirSync(opts.draftDir, { recursive: true });
   const path = join(opts.draftDir, `${DRAFT_PREFIX}${key.slice(0, 32)}.mp4`), meta = `${path}.json`;
-  const audioPlan = opts.audio ? planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.art_direction?.motion_language.feel ?? null }, opts.audio) : null;
+  const audioPlan = opts.audio ? planAudio({ scenes: req.scenePlan.scenes, assets: req.assets, feel: req.art_direction?.motion_language.feel ?? null, policy: soundPolicyOf(req.brief) }, opts.audio) : null;
   const sound = audioPlan ? sceneSound({ scenes: req.scenePlan.scenes.map((s) => ({ scene_id: s.scene_id, start_s: s.start_time })), audio: audioPlan }, sceneId) : null;
   if (existsSync(path) && existsSync(meta)) {
     const m = JSON.parse(readFileSync(meta, "utf8")) as { bytes: number; sha256: string };

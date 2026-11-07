@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { z } from "zod";
-import { AssetValidationReport, DirectorHandoff, EditorOutput, RenderRecord, RenderSettings, type EditorOperation, type RenderOutput } from "@digikon/contracts";
+import { AssetValidationReport, DirectorHandoff, EditorOutput, RenderRecord, RenderSettings, soundPolicyOf, type EditorOperation, type RenderOutput } from "@digikon/contracts";
 import { checkMixedAudio, mixAudio, planAudio, type AudioCheck, type AudioPlan } from "./audio.js";
 import { diagnoseOperations, type Engine, type OperationStatus } from "./capabilities.js";
 import { previewCoverage, type PreviewCoverage, type RenderCapabilities, type SceneCoverage } from "./coverage.js";
@@ -188,7 +188,7 @@ export function planAssembly(input: RenderInput, deps: AssembleDeps): AssemblePl
   const assemblerCaps = ffmpegCapabilities(learnedT);
   const recOps = new Map(base.record.operations.map((o) => [o.operation_id, o]));
   const diag = new Map(base.diagnosis.map((d) => [d.operation_id, d]));
-  const audio = deps.audio ? planAudio({ scenes: h.storyboard.scenes, assets: h.assets, feel: h.treatment.art_direction?.motion_language.feel ?? null }, deps.audio) : null;
+  const audio = deps.audio ? planAudio({ scenes: h.storyboard.scenes, assets: h.assets, feel: h.treatment.art_direction?.motion_language.feel ?? null, policy: soundPolicyOf(h.project.brief) }, deps.audio) : null;
   const scenes: ScenePlan[] = [];
   let from = 0;
   const ordered = [...h.storyboard.scenes].sort((a, b) => a.start_time - b.start_time);
