@@ -142,9 +142,11 @@ export function kitSummary(completeness) {
 }
 // ---------------------------------------------------------------- DOM
 const KEY = "digikon.wizard.v1";
+// Answers are kept for this tab only (a reload keeps them, closing the tab forgets them), so opening the console again starts a fresh plan. The older permanent copy is removed.
+try { localStorage.removeItem(KEY); } catch { /* storage may be blocked */ }
 const store = {
-  read() { try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; } },
-  write(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* private mode: progress is still saved on the server for this session */ } },
+  read() { try { return JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch { return null; } },
+  write(v) { try { sessionStorage.setItem(KEY, JSON.stringify(v)); } catch { /* private mode: answers are still kept on the server for this session */ } },
 };
 
 export function mountWizard(deps) {
