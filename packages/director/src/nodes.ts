@@ -2,7 +2,7 @@ import { z } from "zod";
 import { QuestionList, completeness, questionsFor, type ProjectKit } from "@digikon/contracts";
 import {
   ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, CompositionMotionPlan, applyCompositionMotion, compositionGroundingIssues, compositionMotionIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
-  soundPolicyOf, soundRuleText, soundPolicyIssues, systemSoundFor, restrictsSound,
+  soundPolicyOf, soundRuleText, soundPolicyIssues, systemSoundFor, restrictsSound, narrationFitIssues, maxNarrationWords, NARRATION_WORDS_PER_SECOND,
   type Asset, type VisualBlock, type VisualSystem, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
 } from "@digikon/contracts";
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
@@ -346,6 +346,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     // The treatment is the model's own summary of the brief; the brief itself is shown too, so a product name, a call to action or a colour the user chose cannot be lost between steps.
     section("The brief as the user wrote it (everything chosen in the setup is in it; a name, wording or colour given here is to be used)", project.brief),
     ...soundRuleSection(project.brief),
+    ...(policy.narration ? [section("Voice-over length", `Narration is spoken at about ${NARRATION_WORDS_PER_SECOND} words a second. A scene of 4 seconds holds at most ${maxNarrationWords(4)} words, 6 seconds ${maxNarrationWords(6)}, 8 seconds ${maxNarrationWords(8)}, 10 seconds ${maxNarrationWords(10)}. Count the words of every voiceover; one that does not fit is sent back, so shorten it or lengthen the scene.`)] : []),
     section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
       const allTypes = Object.values(CATEGORY_VIDEO_TYPES).flat();
@@ -389,6 +390,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...claimWordingIssues(plan.scenes, treatment.claims, facts).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...requestedAudioIssues(project, plan, assets),
       ...soundPolicyIssues(plan.scenes, policy),
+      ...narrationFitIssues(plan.scenes),
       ...unavailableTransitionIssues(deps, project, assets, plan),
       ...plan.scenes.flatMap((s) => (s.visual?.block === "composition"
         ? [...compositionGroundingIssues(s.visual, {

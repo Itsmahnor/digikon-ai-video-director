@@ -41,3 +41,16 @@ describe("taste checks for composed scenes", () => {
     expect(flat).toContain("repeated_skeleton");
   });
 });
+
+import { maxNarrationWords, narrationFitIssues, NARRATION_WORDS_PER_SECOND } from "./sound-policy.js";
+describe("a voice-over has to fit its scene", () => {
+  it("allows 2.8 words a second, and says how many words a scene can hold", () => {
+    expect(NARRATION_WORDS_PER_SECOND).toBe(2.8);
+    expect([4, 6, 8, 10].map(maxNarrationWords)).toEqual([11, 16, 22, 28]);
+  });
+  it("sends back 24 words in an 8 second scene, and accepts 22", () => {
+    const words = (n: number) => Array.from({ length: n }, () => "word").join(" ");
+    expect(narrationFitIssues([{ scene_id: "S03", duration_seconds: 8, voiceover: words(24) }])).toEqual([expect.stringContaining("S03: voiceover_too_long - the voiceover has 24 words, but a 8s scene holds at most 22 words")]);
+    expect(narrationFitIssues([{ scene_id: "S03", duration_seconds: 8, voiceover: words(22) }, { scene_id: "S04", duration_seconds: 4, voiceover: null }])).toEqual([]);
+  });
+});

@@ -107,3 +107,31 @@ describe("the sound rule reaches the model and is carried out", () => {
     expect(JSON.stringify(r.escalation)).toContain("sound_policy");
   });
 });
+
+/** A model that writes a voice-over too long for its scene the first time, and a fitting one when it is sent back. */
+class LongTalker extends DemoClient {
+  prompts: { name: string; user: string }[] = [];
+  constructor() { super({ creative: true }); }
+  override async generate<T>(req: GenerateRequest<T>): Promise<T> {
+    this.prompts.push({ name: req.name, user: req.user });
+    const out = (await super.generate(req)) as any;
+    if (req.name === "storyboard" && out.scenes?.length) {
+      const repair = /Problems found in your previous answer/.test(req.user);
+      const words = (n: number) => Array.from({ length: n }, (_, i) => `word${i}`).join(" ");
+      const seconds = out.scenes[0].duration_seconds;
+      out.scenes[0] = { ...out.scenes[0], voiceover: words(repair ? Math.floor(seconds * 2.8) : Math.ceil(seconds * 2.8) + 8), audio_cues: [] };
+    }
+    return req.schema.parse(out);
+  }
+}
+describe("a voice-over that cannot be spoken in its scene is caught while the storyboard can still change", () => {
+  it("the prompt states the pace, the too-long voice-over is sent back with the limit, and the fitting one reaches Gate 1", async () => {
+    const llm = new LongTalker();
+    const r: any = await buildDirectorGraph(deps(llm as never)).invoke({ ...input, assets: [], project: { ...input.project, brief: "A calm brand film. Sound: narration (voice-over), no music." } } as never, cfg("long-vo"));
+    const story = llm.prompts.filter((x) => x.name === "storyboard");
+    expect(story[0]!.user).toContain("Narration is spoken at about 2.8 words a second");
+    expect(story.length).toBeGreaterThanOrEqual(2);
+    expect(story.at(-1)!.user).toContain("voiceover_too_long");
+    expect(r.status).toBe("awaiting_approval");
+  });
+});

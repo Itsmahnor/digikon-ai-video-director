@@ -65,3 +65,21 @@ describe("escalations and refusals shown to the user", () => {
     expect(app).toMatch(/reasons: plainReasons\(p\.assembly\.reasons/); // the assembly view repeats the render-time selection blockers
   });
 });
+
+describe("what the user sees when the plan cannot be produced", () => {
+  const esc = (evidence: string[]) => ({ what_failed: "edit plan still failed validation after 2 attempts.", evidence, what_was_tried: ["x"], options_left: ["y"], decision_needed: "z" });
+  it("says in plain words that a voice-over does not fit its scene, and names the scene, the words and the seconds", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const out = plainEscalation(esc(["production - S03: its voiceover has 24 words, which does not fit 8s when spoken clearly; shorten it or lengthen the scene", "production - the renderer's pre-flight was not run because an earlier step is blocked"]) as never)!;
+    spy.mockRestore();
+    expect(out.evidence).toEqual(["S03: the voice-over has 24 words, but the scene is only 8 seconds long. Shorten the voice-over or make the scene longer."]);
+  });
+  it("keeps the general sentence for production lines it does not recognise, and never names a company", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const out = plainEscalation(esc(["production - S02: some engine detail", "S01: a creative problem"]) as never)!;
+    spy.mockRestore();
+    expect(out.evidence).toContain("S01: a creative problem");
+    expect(out.evidence.join(" ")).toContain("what is available on this computer right now");
+    expect(JSON.stringify(out) + PLAIN_CANNOT_PRODUCE).not.toMatch(/DigiKon/i);
+  });
+});

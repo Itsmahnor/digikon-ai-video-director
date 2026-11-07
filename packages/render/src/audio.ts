@@ -2,7 +2,7 @@ import { execFile, execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import type { ArtDirection, Asset, Scene, SoundPolicy } from "@digikon/contracts";
+import { NARRATION_WORDS_PER_SECOND, type ArtDirection, type Asset, type Scene, type SoundPolicy } from "@digikon/contracts";
 
 const run = promisify(execFile);
 
@@ -37,7 +37,7 @@ export interface AudioCapabilities { tts: "sapi" | "espeak" | null }
 const SFX_CUES: readonly [RegExp, Sfx][] = [[/\b(whoosh|swoosh|swish|sweep|riser)\b/i, "whoosh"], [/\b(hit|impact|thud|boom|stinger|sting)\b/i, "hit"], [/\b(chime|ding|bell|notification)\b/i, "chime"], [/\b(click|tick|tap|pop|snap)\b/i, "click"]];
 const MUSIC_CUE = /\b(music|bed|score|soundtrack|ambien\w*|pad|beat|melody|piano|strings|drone|underscore)\b/i;
 /** A speaking rate that stays clear. Longer narration does not fit its scene, and is reported before approval rather than cut off or sped up. */
-const WORDS_PER_SECOND = 2.8;
+const WORDS_PER_SECOND = NARRATION_WORDS_PER_SECOND;
 
 /** Whether the machine has a speech synthesiser. Looked for once, at start-up: the check starts a process. */
 export function detectAudio(): AudioCapabilities {

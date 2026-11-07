@@ -64,3 +64,20 @@ export function soundPolicyIssues(scenes: readonly { scene_id: string; voiceover
   }
   return out;
 }
+
+/** How fast narration is spoken clearly, in words per second. The audio plan uses the same number, so what the storyboard check accepts is what the audio plan can speak. */
+export const NARRATION_WORDS_PER_SECOND = 2.8;
+export const wordCount = (text: string): number => text.trim().split(/\s+/).filter(Boolean).length;
+/** The most words a scene of this length can carry at a clear pace. */
+export const maxNarrationWords = (seconds: number): number => Math.floor(seconds * NARRATION_WORDS_PER_SECOND);
+
+/** Voice-overs that cannot be spoken in their scene. Checked while the storyboard is written, because after Gate 1 the storyboard is fixed and the edit plan could not repair it. */
+export function narrationFitIssues(scenes: readonly { scene_id: string; duration_seconds: number; voiceover?: string | null }[]): string[] {
+  const out: string[] = [];
+  for (const s of scenes) {
+    if (!s.voiceover) continue;
+    const words = wordCount(s.voiceover);
+    if (words / NARRATION_WORDS_PER_SECOND > s.duration_seconds) out.push(`${s.scene_id}: voiceover_too_long - the voiceover has ${words} words, but a ${s.duration_seconds}s scene holds at most ${maxNarrationWords(s.duration_seconds)} words at a clear speaking pace (${NARRATION_WORDS_PER_SECOND} words a second); shorten it to ${maxNarrationWords(s.duration_seconds)} words or fewer, or lengthen the scene`);
+  }
+  return out;
+}
