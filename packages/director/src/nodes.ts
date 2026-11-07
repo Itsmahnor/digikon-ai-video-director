@@ -40,6 +40,8 @@ export interface Deps {
    * for demos and development. It changes only which skills may be read; nothing is promoted, and no approval or render gate looks at it.
    */
   skillsIncludeDraft?: boolean;
+  /** Set by the console when this machine can speak a voiceover. A brief that says nothing about sound then gets a short spoken voiceover instead of a silent film. Off by default. */
+  defaultNarration?: boolean;
   /** A new treatment must carry art direction (the default). Only fixtures that predate it switch this off. */
   requireArtDirection?: boolean;
 }
@@ -388,7 +390,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...assetRefIssues(plan.scenes, manifest).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...creativeIssues(plan.scenes, treatment.art_direction).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...claimWordingIssues(plan.scenes, treatment.claims, facts).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
-      ...requestedAudioIssues(project, plan, assets),
+      ...requestedAudioIssues(project, plan, assets, !!deps.defaultNarration),
       ...soundPolicyIssues(plan.scenes, policy),
       ...narrationFitIssues(plan.scenes),
       ...unavailableTransitionIssues(deps, project, assets, plan),
@@ -430,8 +432,12 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
 }
 
 /** A brief that asks for sound gets it planned: a plan with no sound at all goes back for repair instead of quietly becoming a silent film. */
-export function requestedAudioIssues(project: Pick<Project, "brief">, plan: ScenePlan, assets: Asset[]): string[] {
-  if (briefForbidsAudio(project) || !/\b(music|soundtrack|voice-?\s?overs?|narrat\w+|sound\s+(?:effects?|design)|sfx|jingle)\b/i.test(project.brief) || planHasAudio(plan, assets)) return [];
+export function requestedAudioIssues(project: Pick<Project, "brief">, plan: ScenePlan, assets: Asset[], defaultNarration = false): string[] {
+  if (briefForbidsAudio(project) || planHasAudio(plan, assets)) return [];
+  if (!/\b(music|soundtrack|voice-?\s?overs?|narrat\w+|sound\s+(?:effects?|design)|sfx|jingle)\b/i.test(project.brief)) {
+    // The brief says nothing about sound: the Director decides, and a film is not left silent. A short spoken voice-over carries the message; no music or effects unless the brief asks.
+    return defaultNarration && soundPolicyOf(project.brief).narration ? ["audio_requested - the brief does not say anything about sound, so the Director decides: give the film a spoken voiceover (short lines that fit their scenes at a clear speaking pace) and no music or sound effects"] : [];
+  }
   return ["audio_requested - the brief asks for sound, but no scene has voiceover or audio_cues; plan the requested music, narration or effects"];
 }
 

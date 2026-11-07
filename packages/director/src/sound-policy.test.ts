@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ALL_SOUND, soundPolicyIssues, soundPolicyOf, soundRuleText, systemSoundFor, VISUAL_SYSTEMS, EditPlan } from "@digikon/contracts";
-import { DemoClient, buildDirectorGraph, unrequestedAudioIssues, type GenerateRequest } from "./index.js";
+import { DemoClient, buildDirectorGraph, requestedAudioIssues, unrequestedAudioIssues, type GenerateRequest } from "./index.js";
 import { cfg, deps, input, project, recipes } from "./fixtures.js";
 import { RecipeLibrary } from "@digikon/recipes";
 
@@ -133,5 +133,20 @@ describe("a voice-over that cannot be spoken in its scene is caught while the st
     expect(story.length).toBeGreaterThanOrEqual(2);
     expect(story.at(-1)!.user).toContain("voiceover_too_long");
     expect(r.status).toBe("awaiting_approval");
+  });
+});
+
+describe("a brief that says nothing about sound is not left silent when this machine can speak", () => {
+  const silent = { scenes: [{ scene_id: "S01", voiceover: null, audio_cues: [] }] } as never;
+  const spoken = { scenes: [{ scene_id: "S01", voiceover: "Hello there.", audio_cues: [] }] } as never;
+  it("asks for a voiceover only when narration can be produced", () => {
+    expect(requestedAudioIssues({ brief: "A 20 second promo for a bakery." }, silent, [], false)).toEqual([]);
+    expect(requestedAudioIssues({ brief: "A 20 second promo for a bakery." }, silent, [], true)).toEqual([expect.stringContaining("spoken voiceover")]);
+  });
+  it("is satisfied once a scene has a voiceover", () => {
+    expect(requestedAudioIssues({ brief: "A promo for a bakery." }, spoken, [], true)).toEqual([]);
+  });
+  it("never overrides the brief: silent, music only or no narration stay as written", () => {
+    for (const brief of ["A promo. Sound: silent, text on screen only.", "A promo. Sound: music only, no voice-over.", "A promo with no narration."]) expect(requestedAudioIssues({ brief }, silent, [], true).filter((x) => x.includes("spoken voiceover"))).toEqual([]);
   });
 });
