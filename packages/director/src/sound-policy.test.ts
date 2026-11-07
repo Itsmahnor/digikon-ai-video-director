@@ -82,6 +82,8 @@ describe("the sound rule reaches the model and is carried out", () => {
     }
     // what the user chose in the setup (it arrives as the brief) is in the treatment prompt word for word
     expect(llm.prompts.find((x) => x.name === "treatment")!.user).toContain(BRIEF);
+    // and the storyboard sees the brief itself, not only the treatment's summary of it
+    expect(llm.prompts.find((x) => x.name === "storyboard")!.user).toContain(BRIEF);
     const story = llm.prompts.find((x) => x.name === "storyboard")!.user;
     expect(story).toContain("This film is made in the Cinema system");
     expect(story).toContain("This replaces the system's usual sound");

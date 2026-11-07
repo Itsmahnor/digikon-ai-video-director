@@ -343,6 +343,8 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
   const inspiration = deps.templates && usable.includes("composition") ? await inspirationFor(deps.templates, project.project_id, treatment).catch(() => null) : null;
   const base = [
     section("Treatment", json({ ...treatment, claims: treatment.claims })),
+    // The treatment is the model's own summary of the brief; the brief itself is shown too, so a product name, a call to action or a colour the user chose cannot be lost between steps.
+    section("The brief as the user wrote it (everything chosen in the setup is in it; a name, wording or colour given here is to be used)", project.brief),
     ...soundRuleSection(project.brief),
     section("Target", json({ platform: project.platform, aspect_ratio: project.aspect_ratio, target_duration: project.target_duration, video_category: storyCategory(project), video_type: project.video_type ?? null })),
     ...(project.video_type ? [section("Chosen video type and format", (() => {
@@ -570,6 +572,7 @@ export async function editPlanNode(deps: Deps, project: Project, assets: Asset[]
     section("Scenes", json(plan.scenes.map((s) => ({ scene_id: s.scene_id, duration_seconds: s.duration_seconds, purpose: s.purpose, shot: s.shot, overlay: s.overlay, transition_out: s.transition_out, audio_cues: s.audio_cues, media: mediaOf(s, assets), visual_block: s.visual?.block ?? null, visual_purpose: s.visual_purpose, ...(s.asset_refs?.length ? { pictures: s.asset_refs.map((r) => `${r.asset_id} as ${r.role}, ${r.animation}${r.mandatory ? ", mandatory" : ""}`) } : {}) })))),
     section("Directing principles", formatHits(principles)),
     ...(craft.length ? [skillsSection(craft)] : []),
+    section("The brief as the user wrote it", project.brief),
     ...soundRuleSection(project.brief),
     section("Candidate recipes (use ONLY these ids; stay inside every parameter range)", candidates.map(formatRecipe).join("\n")),
     ...(compositionSummaries(plan).length ? [section("Composed scenes (the layouts the storyboard approved; you may change only how their elements move)", json(compositionSummaries(plan))), COMPOSITION_MOTION_GUIDE] : []),
