@@ -26,7 +26,7 @@ function dual(build: (portrait: boolean) => El[]): El[] {
   return L.map((e) => {
     const p = P.get(e.id);
     if (!p) return e;
-    const place = (x: El): Place => ({ x: x.at.x, y: x.at.y, w: x.at.w, ...("h" in x.at && x.at.h !== undefined ? { h: x.at.h } : {}), ...(x.kind === "text" ? { size: x.size } : {}) });
+    const place = (x: El): Place => ({ x: x.at.x, y: x.at.y, w: "w" in x.at ? x.at.w : 0, ...("h" in x.at && x.at.h !== undefined ? { h: x.at.h } : {}), ...(x.kind === "text" ? { size: x.size } : {}) });
     const a = place(e), b = place(p);
     const same = (Object.keys(b) as (keyof Place)[]).every((key) => a[key] === b[key]);
     return same ? e : { ...e, portrait: b } as El;

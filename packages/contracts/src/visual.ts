@@ -224,13 +224,13 @@ const Token = z.enum(["text", "muted", "accent", "accent_2", "surface", "backgro
 const Place = z.object({ x: Frac(-0.2, 1.2), y: Frac(-0.2, 1.2), w: Frac(0.01, 1.4), h: Frac(0, 1.4).optional() });
 const MotionObject = z.object({
   /** How it arrives. `rise` and `drop` move a little; `wipe` uncovers it left to right. */
-  enter: z.enum(["none", "fade", "rise", "drop", "slide_left", "slide_right", "scale_in", "wipe"]).default("fade"),
+  enter: z.enum(["none", "fade", "rise", "drop", "slide_left", "slide_right", "scale_in", "wipe", "pop", "zoom_out", "rotate_in", "tracking_in"]).default("fade"),
   /** When it starts and how long it takes, as shares of the scene. Everything must finish early enough to be read. */
   delay: Frac(0, 0.9).default(0),
   duration: Frac(0.03, 1).default(0.2),
-  easing: z.enum(["ease_out", "ease_in_out", "spring"]).default("ease_out"),
-  /** Text only: lines, words or characters arrive one after another, `each` of the scene apart. */
-  stagger: z.object({ unit: z.enum(["line", "word", "char"]), each: Frac(0.002, 0.2) }).optional(),
+  easing: z.enum(["ease_out", "ease_in_out", "spring", "snappy", "soft", "back_out", "bouncy"]).default("ease_out"),
+  /** Text only: lines, words or characters arrive one after another, `each` of the scene apart, from the start, the end or the middle of the text. */
+  stagger: z.object({ unit: z.enum(["line", "word", "char"]), each: Frac(0.002, 0.2), from: z.enum(["start", "end", "center"]).optional() }).optional(),
 });
 const Motion = MotionObject.default({});
 /**
@@ -249,6 +249,8 @@ const Override = z.object({ x: Frac(-0.2, 1.2).optional(), y: Frac(-0.2, 1.2).op
 
 export const CompText = z.object({
   id: Ident, kind: z.literal("text"),
+  /** A group or mask this element sits in. Its position is still a share of the frame; the group or mask moves it with them. */
+  parent: Ident.optional(),
   text: Txt(160),
   at: Place.pick({ x: true, y: true, w: true }),
   size: Frac(0.012, 0.35),
@@ -264,6 +266,7 @@ export const CompText = z.object({
 });
 export const CompShape = z.object({
   id: Ident, kind: z.literal("shape"),
+  parent: Ident.optional(),
   shape: z.enum(["rect", "ellipse", "line"]),
   at: Place.required({ h: true }).extend({ w: Frac(0, 1.4), h: Frac(0, 1.4) }),
   fill: Token.optional(),
@@ -276,7 +279,20 @@ export const CompShape = z.object({
   motion: Motion,
   portrait: Override.optional(),
 });
-export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape]);
+/** Moves its children (elements that name it as parent) together: a card and its label sliding as one, or a layer drifting at its own pace. It draws nothing itself. */
+export const CompGroup = z.object({
+  id: Ident, kind: z.literal("group"),
+  at: Place.pick({ x: true, y: true }),
+  motion: Motion,
+});
+/** Reveals its children (elements that name it as parent) through a moving edge: a wipe from a side, or a circle opening. It draws nothing itself. */
+export const CompMask = z.object({
+  id: Ident, kind: z.literal("mask"),
+  reveal: z.enum(["left", "right", "up", "down", "circle"]),
+  at: Place.required({ h: true }).extend({ w: Frac(0.01, 1.4), h: Frac(0.01, 1.4) }),
+  motion: Motion,
+});
+export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape, CompGroup, CompMask]);
 export type CompElement = z.infer<typeof CompElement>;
 
 /**
@@ -296,6 +312,11 @@ export const Composition = z.object({
 export function compositionStructureIssues(c: z.infer<typeof Composition>): string[] {
   const out: string[] = [], seen = new Set<string>();
   for (const e of c.elements) { if (seen.has(e.id)) out.push(`duplicate element id ${e.id}`); seen.add(e.id); }
+  const containers = new Set(c.elements.filter((e) => e.kind === "group" || e.kind === "mask").map((e) => e.id));
+  for (const e of c.elements) if ((e.kind === "text" || e.kind === "shape") && e.parent !== undefined && !containers.has(e.parent)) out.push(`${e.id}: parent ${e.parent} is not a group or mask in this composition`);
+  const listed = new Set<string>();
+  for (const e of c.elements) { if ((e.kind === "text" || e.kind === "shape") && e.parent !== undefined && containers.has(e.parent) && !listed.has(e.parent)) out.push(`${e.id}: its parent ${e.parent} must be listed before it`); listed.add(e.id); }
+  for (const id of containers) if (!c.elements.some((e) => (e.kind === "text" || e.kind === "shape") && e.parent === id)) out.push(`${id}: a group or mask with no children does nothing; give it elements (parent: "${id}") or remove it`);
   if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");
   return out;
 }
@@ -375,6 +396,32 @@ export const STORYBOARD_CAMERA: Record<SceneVisual["camera"], string> = { static
 export interface VisualIssue { scene_id: string; code: string; message: string }
 
 /**
+ * Taste checks for composed scenes, from what a good art director would not let through. They need no model and give the Director a specific thing to change:
+ *  - skeleton: three composed scenes in a row may not share one layout skeleton (the same places filled, the same kinds of element);
+ *  - arrivals: a film with three or more composed scenes uses at least three different kinds of entrance;
+ *  - rhythm: a film of four or more scenes may not give every scene the same length.
+ */
+export function compositionQualityIssues(scenes: readonly { scene_id: string; visual: SceneVisual | null; duration_seconds?: number }[]): VisualIssue[] {
+  const out: VisualIssue[] = [];
+  // Hierarchy (one text clearly leading) is deliberately not a rule: lists of equal steps and one-word-per-line type are good design, and a hard rule that rejects them is worse than none.
+  const composed = scenes.flatMap((s) => (s.visual?.block === "composition" ? [{ id: s.scene_id, v: s.visual }] : []));
+  const skeletonOf = (c: z.infer<typeof Composition>) => [...new Set(c.elements.flatMap((e) => (e.kind === "text" || e.kind === "shape" ? [`${e.kind}@${Math.min(2, Math.max(0, Math.floor((e.at.x + (e.kind === "shape" ? e.at.w / 2 : 0)) * 3)))}${Math.min(2, Math.max(0, Math.floor((e.at.y + (e.kind === "shape" ? e.at.h / 2 : 0)) * 3)))}`] : [])))].sort().join(",");
+  for (let i = 2; i < scenes.length; i++) {
+    const a = scenes[i - 2]!.visual, b = scenes[i - 1]!.visual, c = scenes[i]!.visual;
+    if (a?.block === "composition" && b?.block === "composition" && c?.block === "composition" && skeletonOf(a) === skeletonOf(b) && skeletonOf(b) === skeletonOf(c)) out.push({ scene_id: scenes[i]!.scene_id, code: "repeated_skeleton", message: `${scenes[i - 2]!.scene_id}, ${scenes[i - 1]!.scene_id} and this scene share one layout skeleton (the same places filled); change where the weight sits in at least one of them` });
+  }
+  if (composed.length >= 3) {
+    const enters = new Set(composed.flatMap(({ v }) => v.elements.map((e) => e.motion.enter)).filter((x) => x !== "none"));
+    if (enters.size < 3) out.push({ scene_id: composed[0]!.id, code: "few_arrivals", message: `the composed scenes use only ${enters.size} kind${enters.size === 1 ? "" : "s"} of entrance (${[...enters].join(", ") || "none"}); use at least three different ones across the film (for example rise, pop, wipe, tracking_in, zoom_out, rotate_in)` });
+  }
+  if (scenes.length >= 4 && scenes.every((s) => s.duration_seconds !== undefined)) {
+    const d = new Set(scenes.map((s) => Math.round(s.duration_seconds! * 10)));
+    if (d.size === 1) out.push({ scene_id: scenes[0]!.scene_id, code: "flat_rhythm", message: "every scene has the same length; vary them so the film has a rhythm (a short punch, a longer beat to land the point)" });
+  }
+  return out;
+}
+
+/**
  * Creative checks that need no model. They apply only to a plan whose treatment has art direction (a plan made before it existed is
  * not judged by rules it was never given). Adjacent scenes may not repeat a block, and a block may not carry more than a third of a film.
  */
@@ -429,6 +476,7 @@ export function creativeIssues(
     const limit = system ? Math.ceil(scenes.length / 2) : Math.ceil(scenes.length / 3);
     for (const [block, n] of counts) if (block !== "asset_stage" && block !== "composition" && n > limit) issues.push({ scene_id: scenes[0]!.scene_id, code: "block_overused", message: `${block} is used in ${n} of ${scenes.length} scenes; no kind of picture may carry more than ${system ? "half" : "a third"} of a film` });
   }
+  issues.push(...compositionQualityIssues(scenes as readonly { scene_id: string; visual: SceneVisual | null; duration_seconds?: number }[]));
   return issues;
 }
 

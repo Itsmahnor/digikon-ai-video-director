@@ -32,6 +32,7 @@ interface CompositionLike { elements?: readonly { kind: string; at: { x: number;
 export function compositionLayoutFeatures(c: CompositionLike): Set<string> {
   const f = new Set<string>();
   for (const e of c.elements ?? []) {
+    if (e.kind === "group" || e.kind === "mask") continue; // containers draw nothing
     const isText = e.kind === "text";
     const cx = e.at.x + (isText ? (e.align === "center" ? e.at.w / 2 : e.align === "right" ? e.at.w : 0) : e.at.w / 2), cy = e.at.y + (isText ? 0 : (e.at.h ?? 0) / 2);
     const cell = `${Math.min(2, Math.max(0, Math.floor(cx * 3)))}${Math.min(2, Math.max(0, Math.floor(cy * 3)))}`;
