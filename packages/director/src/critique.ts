@@ -51,7 +51,7 @@ export async function critiqueStoryboard(llm: LlmClient, input: CritiqueInput): 
     input.skipped.length ? `Not shown (drawn another way, so judge only how the shown scenes sit beside them): ${input.skipped.map((s) => s.scene_id).join(", ")}.` : "",
     "Review the stills and return your critique through the storyboard_critique tool.",
   ].filter(Boolean).join("\n");
-  return llm.generate({ name: "storyboard_critique", system: CRITIQUE_SYSTEM, user, schema: StoryboardCritique, maxTokens: 1500, forceTool: true, images: input.stills.map((s) => ({ label: `Scene ${s.scene_id}:`, media_type: "image/png" as const, data_base64: s.png.toString("base64") })) });
+  return llm.generate({ name: "storyboard_critique", system: CRITIQUE_SYSTEM, user, schema: StoryboardCritique, maxTokens: 1500, images: input.stills.map((s) => ({ label: `Scene ${s.scene_id}:`, media_type: "image/png" as const, data_base64: s.png.toString("base64") })) });
 }
 
 /** The critique as problems for the repair attempt, one line each. Empty when the critique is ok. Only scenes that exist are kept. */

@@ -47,8 +47,6 @@ export interface GenerateRequest<T> {
   maxTokens?: number;
   /** Pictures the model should look at, each with a short label shown before it. Scripted and demo clients ignore them. */
   images?: readonly { label: string; media_type: "image/png"; data_base64: string }[];
-  /** Make the model answer through the structured-output tool instead of letting it choose (used where it tends to answer in prose). */
-  forceTool?: boolean;
 }
 
 /** The only model interface the Director uses, so tests and later providers can swap in. */
@@ -122,7 +120,8 @@ export class AnthropicClient implements LlmClient {
         system: req.system,
         messages,
         tools: [{ name: req.name, description: `Return the ${req.name} as structured data.`, input_schema: inputSchema as Anthropic.Tool.InputSchema }],
-        tool_choice: req.forceTool ? { type: "tool", name: req.name } : { type: "auto" },
+        // "auto" on purpose: this model family rejects a forced tool choice (HTTP 400), so a prose answer is corrected by a reminder on the next attempt instead
+        tool_choice: { type: "auto" },
       }).catch((e: unknown) => {
         // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
         // Only status, error type, message, and request-id are logged — never headers or secrets.
@@ -141,6 +140,8 @@ export class AnthropicClient implements LlmClient {
       if (!block) {
         const said = res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join(" ").replace(/\s+/g, " ").slice(0, 160);
         lastError = `no structured output returned${said ? ` (the model answered in text: "${said}")` : ""}`;
+        messages.push({ role: "assistant", content: res.content.length ? res.content : [{ type: "text", text: "(no answer)" }] });
+        messages.push({ role: "user", content: `Return your answer only by calling the ${req.name} tool with the structured data. Do not reply in prose.` });
         continue;
       }
       const parsed = req.schema.safeParse(block.input);

@@ -144,13 +144,13 @@ describe("AnthropicClient with pictures and a forced tool", () => {
     (client as unknown as { client: unknown }).client = { messages: { create: async (r: Record<string, unknown>) => { requests.push(structuredClone(r)); return replies.shift(); } } };
     return requests;
   };
-  it("sends each picture after its label, then the question, and forces the tool when asked", async () => {
+  it("sends each picture after its label, then the question, with the tool choice left automatic", async () => {
     const { z } = await import("zod");
     const client = new AnthropicClient({ apiKey: "test-key" });
     const requests = fake(client, [{ content: [{ type: "tool_use", id: "t1", name: "look", input: { ok: true } }] }]);
-    const out = await client.generate({ name: "look", system: "s", user: "judge these", schema: z.object({ ok: z.boolean() }), forceTool: true, images: [{ label: "Scene S01:", media_type: "image/png", data_base64: "QUJD" }] });
+    const out = await client.generate({ name: "look", system: "s", user: "judge these", schema: z.object({ ok: z.boolean() }), images: [{ label: "Scene S01:", media_type: "image/png", data_base64: "QUJD" }] });
     expect(out).toEqual({ ok: true });
-    expect(requests[0]!["tool_choice"]).toEqual({ type: "tool", name: "look" });
+    expect(requests[0]!["tool_choice"]).toEqual({ type: "auto" });
     expect(requests[0]!["messages"][0].content).toEqual([{ type: "text", text: "Scene S01:" }, { type: "image", source: { type: "base64", media_type: "image/png", data: "QUJD" } }, { type: "text", text: "judge these" }]);
   });
   it("leaves the tool choice automatic and the message a plain string when neither is used", async () => {
@@ -160,6 +160,15 @@ describe("AnthropicClient with pictures and a forced tool", () => {
     await client.generate({ name: "x", system: "s", user: "plain", schema: z.object({ n: z.number() }) });
     expect(requests[0]!["tool_choice"]).toEqual({ type: "auto" });
     expect(requests[0]!["messages"][0].content).toBe("plain");
+  });
+  it("reminds the model to use the tool when it answers in prose, and the retry then succeeds", async () => {
+    const { z } = await import("zod");
+    const client = new AnthropicClient({ apiKey: "test-key" });
+    const requests = fake(client, [{ content: [{ type: "text", text: "Both scenes look cramped." }] }, { content: [{ type: "tool_use", id: "t9", name: "x", input: { n: 7 } }] }]);
+    expect(await client.generate({ name: "x", system: "s", user: "u", schema: z.object({ n: z.number() }) })).toEqual({ n: 7 });
+    const last = requests[1]!["messages"].at(-1);
+    expect(last.content).toContain("calling the x tool");
+    expect(requests[1]!["messages"].at(-2)).toMatchObject({ role: "assistant" });
   });
   it("says what the model wrote when it answers in text instead of the tool", async () => {
     const { z } = await import("zod");
