@@ -46,3 +46,4 @@ export * from "./fonts.js";
 export * from "./face-fonts.js";
 export * from "./draft-label.js";
 export * from "./draft-preview.js";
+export * from "./storyboard-stills.js";

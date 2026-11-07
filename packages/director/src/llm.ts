@@ -45,6 +45,10 @@ export interface GenerateRequest<T> {
   user: string;
   schema: ZodType<T, ZodTypeDef, unknown>;
   maxTokens?: number;
+  /** Pictures the model should look at, each with a short label shown before it. Scripted and demo clients ignore them. */
+  images?: readonly { label: string; media_type: "image/png"; data_base64: string }[];
+  /** Make the model answer through the structured-output tool instead of letting it choose (used where it tends to answer in prose). */
+  forceTool?: boolean;
 }
 
 /** The only model interface the Director uses, so tests and later providers can swap in. */
@@ -106,7 +110,10 @@ export class AnthropicClient implements LlmClient {
   /** Forces a tool call so the reply is JSON, validates it with zod, and gives the model one chance to correct itself. */
   async generate<T>(req: GenerateRequest<T>): Promise<T> {
     const { $schema: _omit, ...inputSchema } = zodToJsonSchema(req.schema, { $refStrategy: "none", target: "jsonSchema7" }) as Record<string, unknown>;
-    const messages: Anthropic.MessageParam[] = [{ role: "user", content: req.user }];
+    const content: string | Anthropic.ContentBlockParam[] = req.images?.length
+      ? [...req.images.flatMap((im) => [{ type: "text" as const, text: im.label }, { type: "image" as const, source: { type: "base64" as const, media_type: im.media_type, data: im.data_base64 } }]), { type: "text" as const, text: req.user }]
+      : req.user;
+    const messages: Anthropic.MessageParam[] = [{ role: "user", content }];
     let lastError = "";
     for (let attempt = 0; attempt < 2; attempt++) {
       const res = await this.client.messages.create({
@@ -115,7 +122,7 @@ export class AnthropicClient implements LlmClient {
         system: req.system,
         messages,
         tools: [{ name: req.name, description: `Return the ${req.name} as structured data.`, input_schema: inputSchema as Anthropic.Tool.InputSchema }],
-        tool_choice: { type: "auto" },
+        tool_choice: req.forceTool ? { type: "tool", name: req.name } : { type: "auto" },
       }).catch((e: unknown) => {
         // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
         // Only status, error type, message, and request-id are logged — never headers or secrets.
@@ -131,7 +138,11 @@ export class AnthropicClient implements LlmClient {
       });
       if (this.onUsage && res.usage) this.onUsage({ input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens });
       const block = res.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-      if (!block) { lastError = "no structured output returned"; continue; }
+      if (!block) {
+        const said = res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join(" ").replace(/\s+/g, " ").slice(0, 160);
+        lastError = `no structured output returned${said ? ` (the model answered in text: "${said}")` : ""}`;
+        continue;
+      }
       const parsed = req.schema.safeParse(block.input);
       if (parsed.success) return parsed.data;
       lastError = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");

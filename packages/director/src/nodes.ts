@@ -14,6 +14,7 @@ import type { ProductionOutcome, ProductionPort } from "./production/compile.js"
 import { CATEGORY_VIDEO_TYPES } from "./video-types.js";
 import { PINNED_SKILLS, buildSkillQueries, selectSkills, type SkillStep } from "./skill-queries.js";
 import { closeMatches, inspirationFor, type TemplateInspirationPort } from "./inspiration.js";
+import { critiqueIssues, critiqueStoryboard, type VisualCritiquePort } from "./critique.js";
 
 export interface Deps {
   llm: LlmClient;
@@ -21,6 +22,8 @@ export interface Deps {
   retriever: Retriever;
   /** Template library as inspiration (see inspiration.ts). Optional: without it the storyboard step is unchanged. */
   templates?: TemplateInspirationPort;
+  /** Look-and-fix: stills of the composed scenes for one model critique (see critique.ts). Optional and off by default. */
+  critique?: VisualCritiquePort;
   /** One line saying which retriever ran (mode, embedder, warnings). Recorded in the run trace so a plan can be traced to the search that informed it. Not part of any approved plan or hash. */
   retrievalNote?: string;
   recipes: RecipeLibrary;
@@ -354,8 +357,10 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
     ...(revision ? [revisionSection("storyboard", revision)] : []),
   ].join("\n\n");
 
+  let runAttempt!: (prev: { value: ScenePlan; issues: string[] } | null) => Promise<ScenePlan>;
+  let runCheck!: (plan: ScenePlan) => string[] | Promise<string[]>;
   const result = await generateWithRepair<ScenePlan>({
-    attempt: async (prev) => {
+    attempt: (runAttempt = async (prev) => {
       const out = await deps.llm.generate({ name: "storyboard", system, user: base + repairNote(prev), schema: StoryboardOut });
       let t = 0;
       const scenes = out.scenes.map((s) => {
@@ -365,8 +370,8 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
         return { ...base, production_method: deriveProductionMethod(base) };
       });
       return ScenePlan.parse({ project_id: project.project_id, version, scenes });
-    },
-    check: (plan) => [
+    }),
+    check: (runCheck = (plan) => [
       ...planIssues(plan, assets, project, notes, treatment, facts),
       ...assetRefIssues(plan.scenes, manifest).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
       ...creativeIssues(plan.scenes, treatment.art_direction).map((i) => `${i.scene_id}: ${i.code} - ${i.message}`),
@@ -382,11 +387,30 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
       ...(film ? plan.scenes.filter((s) => s.visual && !usable.includes(s.visual.block)).map((s) => `${s.scene_id}: block_not_available - ${s.visual!.block} cannot be used for this film here; use one of: ${usable.join(", ")}`) : []),
       ...(treatment.art_direction ? plan.scenes.filter((s) => s.visual && STORYBOARD_CAMERA[s.visual.camera] !== s.shot.camera_motion).map((s) => `${s.scene_id}: camera_mismatch - shot.camera_motion is ${s.shot.camera_motion} but the visual's camera draws ${STORYBOARD_CAMERA[s.visual!.camera]}; make them agree`) : []),
       ...plan.scenes.filter((s) => s.duration_seconds > maxScene + 1e-6).map((s) => `${s.scene_id}: scene_too_long - ${s.duration_seconds}s is longer than the ${maxScene}s the editing recipes support; split it into shorter scenes`),
-    ],
+    ]),
   });
+  // Look-and-fix (off unless a port is supplied): ONE model call looks at a still of each composed scene. If it finds problems, one repair attempt tries to fix them; the revised
+  // plan is kept only if it passes every check the first one did, and any failure here leaves the storyboard exactly as it was.
+  let critique: { ran: boolean; problems: number; revised: boolean; note: string } = { ran: false, problems: 0, revised: false, note: "" };
+  let value = result.value;
+  if (deps.critique && result.issues.length === 0) {
+    try {
+      const shots = await deps.critique.stills({ scenes: value.scenes, aspect_ratio: project.aspect_ratio as "16:9" | "9:16" | "1:1", art_direction: treatment.art_direction });
+      if (shots.problem) critique.note = `no stills: ${shots.problem}`;
+      else if (shots.stills.length) {
+        const review = await critiqueStoryboard(deps.llm, { stills: shots.stills, skipped: shots.skipped, treatment, scenes: value.scenes.map((x) => ({ scene_id: x.scene_id, duration_seconds: x.duration_seconds, purpose: x.purpose })) });
+        const problems = critiqueIssues(review, new Set(value.scenes.map((x) => x.scene_id)));
+        critique = { ran: true, problems: problems.length, revised: false, note: review?.summary ?? "" };
+        if (problems.length) {
+          const revised = await runAttempt({ value, issues: problems });
+          if ((await runCheck(revised)).length === 0) { value = revised; critique.revised = true; }
+        }
+      }
+    } catch (e) { critique.note = `look-and-fix skipped: ${e instanceof Error ? e.message.slice(0, 120) : String(e)}`; }
+  }
   // Warning only: compositions whose layout is too close to a template the Director was shown. Recorded for the reviewer; it blocks nothing.
-  const close = deps.templates && inspiration && result.value ? await closeMatches(deps.templates, result.value.scenes, inspiration.shown).catch(() => []) : [];
-  return { ...result, skills, references, citations: [...principles, ...craft, ...specs].map((h) => h.doc.id), inspiration: { shown: inspiration?.shown ?? [], close } };
+  const close = deps.templates && inspiration && value ? await closeMatches(deps.templates, value.scenes, inspiration.shown).catch(() => []) : [];
+  return { ...result, value, critique, skills, references, citations: [...principles, ...craft, ...specs].map((h) => h.doc.id), inspiration: { shown: inspiration?.shown ?? [], close } };
 }
 
 /** A brief that asks for sound gets it planned: a plan with no sound at all goes back for repair instead of quietly becoming a silent film. */

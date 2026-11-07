@@ -7,7 +7,7 @@ import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
 import { CachedEmbedder, KeywordRetriever, MemoryDataStore, SKILLS_KEYWORD_FLOOR, SKILLS_LOCAL_OPTIONS, chooseEmbedder, createDbBackedRetriever, createLocalHybridRetriever, describeRetrieval, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type RetrievalStatus, type Retriever } from "@digikon/rag";
 import { buildInspiration, ingestTemplateText, loadLibrary } from "@digikon/templates";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
-import { detectAudio, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
+import { detectAudio, loadCapabilityRegistry, migrateLegacyStore, renderComposedStills } from "@digikon/render";
 import { LocalVision, availableOcr } from "@digikon/media";
 import { WhisperEngine } from "@digikon/speech";
 import { createApp, type WhisperStatus } from "./app.js";
@@ -114,7 +114,7 @@ const renderFont = [process.env.RENDER_FONT_FILE ? resolve(repoRoot, process.env
 if (!renderFont) console.warn("No font file found for preview renders. Set RENDER_FONT_FILE to a .ttf file to enable them.");
 
 const app = createApp({
-  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, retrievalStatus, requireVectors: process.env.RAG_REQUIRE_VECTORS === "1", ...(templates ? { templates } : {}), knowledge: [...knowledge, ...skillDocs], skillsIncludeDraft, recipes: library, ffmpegOk,
+  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, retrievalStatus, requireVectors: process.env.RAG_REQUIRE_VECTORS === "1", ...(process.env.DIRECTOR_VISUAL_CRITIQUE === "1" ? { critique: { stills: (req: Parameters<typeof renderComposedStills>[0]) => renderComposedStills(req) } } : {}), ...(templates ? { templates } : {}), knowledge: [...knowledge, ...skillDocs], skillsIncludeDraft, recipes: library, ffmpegOk,
   vision: new LocalVision({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") }), ocr: await availableOcr(),
   editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir, audio: detectAudio(),
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),

@@ -50,6 +50,8 @@ export interface AppContext {
   requireVectors?: boolean;
   /** Template library as layout inspiration for the Director (see packages/director/src/inspiration.ts). */
   templates?: TemplateInspirationPort;
+  /** Look-and-fix for the storyboard (DIRECTOR_VISUAL_CRITIQUE=1): stills of the composed scenes for one model critique. */
+  critique?: VisualCritiquePort;
   /** Tests only: lets the website reader reach a local fixture server. The console never sets it. */
   websiteOptions?: ReadOptions;
   /** Let draft skills reach the Director and Editor (SKILLS_INCLUDE_DRAFT=1). Off by default, because every shipped skill is a draft. Only affects which skills may be read. */
@@ -81,7 +83,7 @@ export interface AppContext {
 
 import { registerKitRoutes, type Extraction } from "./kit-routes.js";
 import { kitContext } from "./kit-context.js";
-import { kitIsStarted, type TemplateInspirationPort } from "@digikon/director";
+import { kitIsStarted, type TemplateInspirationPort, type VisualCritiquePort } from "@digikon/director";
 import { approvedFacts, type ProjectKit } from "@digikon/contracts";
 import type { ReadOptions } from "@digikon/media";
 import { PLAIN_CANNOT_PRODUCE, PLAIN_PLAN_CHANGED, plainEscalation, plainReasons, publicApprovals } from "./public-view.js";
@@ -613,7 +615,7 @@ export function createApp(ctx: AppContext) {
     s.facts = [...typed, ...kitFacts.map((f, i) => BrandFact.parse({ ...f, fact_id: `F${String(typed.length + i + 1).padStart(2, "0")}` }))];
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.critique ? { critique: ctx.critique } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
@@ -710,7 +712,7 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.retrievalStatus ? { retrievalNote: describeRetrieval(ctx.retrievalStatus) } : {}), ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.critique ? { critique: ctx.critique } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);

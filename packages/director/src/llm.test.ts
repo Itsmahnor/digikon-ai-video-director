@@ -138,3 +138,33 @@ describe("AnthropicClient retry after a schema error", () => {
     expect(results.map((r) => [r.type, r.tool_use_id])).toEqual([["tool_result", "toolu_a"], ["tool_result", "toolu_b"]]);
   });
 });
+describe("AnthropicClient with pictures and a forced tool", () => {
+  const fake = (client: AnthropicClient, replies: unknown[]) => {
+    const requests: Record<string, any>[] = [];
+    (client as unknown as { client: unknown }).client = { messages: { create: async (r: Record<string, unknown>) => { requests.push(structuredClone(r)); return replies.shift(); } } };
+    return requests;
+  };
+  it("sends each picture after its label, then the question, and forces the tool when asked", async () => {
+    const { z } = await import("zod");
+    const client = new AnthropicClient({ apiKey: "test-key" });
+    const requests = fake(client, [{ content: [{ type: "tool_use", id: "t1", name: "look", input: { ok: true } }] }]);
+    const out = await client.generate({ name: "look", system: "s", user: "judge these", schema: z.object({ ok: z.boolean() }), forceTool: true, images: [{ label: "Scene S01:", media_type: "image/png", data_base64: "QUJD" }] });
+    expect(out).toEqual({ ok: true });
+    expect(requests[0]!["tool_choice"]).toEqual({ type: "tool", name: "look" });
+    expect(requests[0]!["messages"][0].content).toEqual([{ type: "text", text: "Scene S01:" }, { type: "image", source: { type: "base64", media_type: "image/png", data: "QUJD" } }, { type: "text", text: "judge these" }]);
+  });
+  it("leaves the tool choice automatic and the message a plain string when neither is used", async () => {
+    const { z } = await import("zod");
+    const client = new AnthropicClient({ apiKey: "test-key" });
+    const requests = fake(client, [{ content: [{ type: "tool_use", id: "t1", name: "x", input: { n: 1 } }] }]);
+    await client.generate({ name: "x", system: "s", user: "plain", schema: z.object({ n: z.number() }) });
+    expect(requests[0]!["tool_choice"]).toEqual({ type: "auto" });
+    expect(requests[0]!["messages"][0].content).toBe("plain");
+  });
+  it("says what the model wrote when it answers in text instead of the tool", async () => {
+    const { z } = await import("zod");
+    const client = new AnthropicClient({ apiKey: "test-key" });
+    fake(client, [{ content: [{ type: "text", text: "Both scenes look cramped on the left." }] }, { content: [{ type: "text", text: "Still prose." }] }]);
+    await expect(client.generate({ name: "x", system: "s", user: "u", schema: z.object({ n: z.number() }) })).rejects.toThrow(/answered in text: "Still prose\."/);
+  });
+});
