@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ZodType, ZodTypeDef } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { realCalls } from "./call-guard.js";
 
 /**
  * Extracts loggable diagnostic fields from an Anthropic SDK error object.
@@ -92,6 +93,8 @@ export function classifyLlmError(err: unknown, model = DEFAULT_MODEL): LlmError 
 
 export class AnthropicClient implements LlmClient {
   private readonly client: Anthropic;
+  /** The SDK client this class built. A test that swaps `client` for a fake is not talking to the API, so its requests are not metered. */
+  private readonly sdk: Anthropic;
   readonly model: string;
   private readonly onUsage: ((u: { input_tokens: number; output_tokens: number }) => void) | undefined;
 
@@ -100,7 +103,35 @@ export class AnthropicClient implements LlmClient {
     const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set. Add it to .env (see .env.example).");
     this.client = new Anthropic({ apiKey });
+    this.sdk = this.client;
     this.model = opts.model ?? (process.env.ANTHROPIC_MODEL || DEFAULT_MODEL);
+  }
+
+  /**
+   * The one place a request leaves for the API (every constructor of this class, in the console, the CLI, the scripts and the live evals, ends here). Each request is counted and
+   * logged by the meter (call-guard.ts), with its structured-output name as the node.
+   */
+  private async send(node: string, params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> {
+    const metered = this.client === this.sdk;
+    const n = metered ? realCalls.begin() : 0;
+    try {
+      const res = await this.client.messages.create(params);
+      if (metered) realCalls.end(n, { node, model: this.model, input_tokens: res.usage?.input_tokens ?? 0, output_tokens: res.usage?.output_tokens ?? 0, outcome: "ok" });
+      return res;
+    } catch (e) {
+      if (metered) realCalls.end(n, { node, model: this.model, input_tokens: 0, output_tokens: 0, outcome: "error" });
+      // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
+      // Only status, error type, message, and request-id are logged — never headers or secrets.
+      const diag = extractApiDiagnostics(e);
+      if (diag) {
+        const parts = [`[llm] HTTP ${diag.status}`];
+        if (diag.errorType) parts.push(`type=${diag.errorType}`);
+        if (diag.errorMessage) parts.push(`message="${diag.errorMessage}"`);
+        if (diag.requestId) parts.push(`request-id=${diag.requestId}`);
+        console.error(parts.join(" "));
+      }
+      throw classifyLlmError(e, this.model) ?? e;
+    }
   }
 
   /** Forces a tool call so the reply is JSON, validates it with zod, and gives the model one chance to correct itself. */
@@ -109,25 +140,13 @@ export class AnthropicClient implements LlmClient {
     const messages: Anthropic.MessageParam[] = [{ role: "user", content: req.user }];
     let lastError = "";
     for (let attempt = 0; attempt < 2; attempt++) {
-      const res = await this.client.messages.create({
+      const res = await this.send(req.name, {
         model: this.model,
         max_tokens: req.maxTokens ?? 8000,
         system: req.system,
         messages,
         tools: [{ name: req.name, description: `Return the ${req.name} as structured data.`, input_schema: inputSchema as Anthropic.Tool.InputSchema }],
         tool_choice: { type: "auto" },
-      }).catch((e: unknown) => {
-        // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
-        // Only status, error type, message, and request-id are logged — never headers or secrets.
-        const diag = extractApiDiagnostics(e);
-        if (diag) {
-          const parts = [`[llm] HTTP ${diag.status}`];
-          if (diag.errorType) parts.push(`type=${diag.errorType}`);
-          if (diag.errorMessage) parts.push(`message="${diag.errorMessage}"`);
-          if (diag.requestId) parts.push(`request-id=${diag.requestId}`);
-          console.error(parts.join(" "));
-        }
-        throw classifyLlmError(e, this.model) ?? e;
       });
       if (this.onUsage && res.usage) this.onUsage({ input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens });
       const block = res.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
