@@ -1,0 +1,8 @@
+{
+  "about": "Storyboard hashes that the console recorded in the Gate 1 approval of each baseline run (storage/sessions/<session>/runs/<run>/approvals/000001.json, field plan_hash). The hash safety test recomputes them from baseline/<folder>/treatment.json and storyboard.json and must always get the same value: a schema change that alters how an old plan parses would change them and break approved plans.",
+  "storyboard": {
+    "01-logo-brand-16x9": { "session": "61df7c739b74", "plan_hash": "28db4caf9f5967981fa120527e4c1af68913b77c64287ccb7ceeb2781b6e0290" },
+    "02-no-assets-16x9": { "session": "60ac2cc10914", "plan_hash": "39b8f3c626b7f70d47c1f651a2788c45cc9940ac2e2f3bc94d573f8c50532b7c" },
+    "03-vertical-9x16": { "session": "4457625c1382", "plan_hash": "f09fab79b917468fcfc2799758fbeeeb29557908b173958f50e7ddee5f1a215b" }
+  }
+}
