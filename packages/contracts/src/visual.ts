@@ -280,6 +280,22 @@ const TrackExtras = {
   tracks: z.array(CompTrack).max(MAX_TRACKS).optional(),
 };
 const MotionExtras = { ...TrackExtras, pivot: CompPivot.optional() };
+/**
+ * A reveal mask uncovers an element (or a group) as it enters: a rectangular wipe from one edge, or a circle growing from the middle. It always ends fully uncovered, so it can
+ * hide nothing in the finished scene, and the region it clips to is never smaller than the element it reveals (the renderer widens it if need be).
+ * `from` names the edge the picture is uncovered from: left uncovers left to right, up uncovers top to bottom, circle grows from the centre.
+ * `region` (frame shares) is the area to clip; it is optional for text, shapes and pictures, which use their own box, and required for a group, which has none of its own.
+ */
+export const COMP_REVEALS = ["left", "right", "up", "down", "circle"] as const;
+export const CompReveal = z.object({
+  from: z.enum(COMP_REVEALS),
+  /** Start and length, as shares of the scene. Without them the reveal starts with the element's own delay and takes 0.3 of the scene. */
+  delay: Frac(0, 0.9).optional(),
+  duration: Frac(0.03, 1).optional(),
+  easing: z.enum(COMP_EASINGS).optional(),
+  region: z.object({ x: Frac(-0.2, 1.2), y: Frac(-0.2, 1.2), w: Frac(0.01, 1.4), h: Frac(0.01, 1.4) }).optional(),
+});
+const RevealExtra = { reveal: CompReveal.optional() };
 /** An element may sit in a group: its position stays in frame shares, and the group moves, rotates, scales and fades it together with its siblings. */
 const Nest = { parent: Ident.optional() };
 
@@ -310,6 +326,7 @@ export const CompText = z.object({
   portrait: Override.optional(),
   ...MotionExtras,
   ...Nest,
+  ...RevealExtra,
 });
 export const CompShape = z.object({
   id: Ident, kind: z.literal("shape"),
@@ -326,6 +343,7 @@ export const CompShape = z.object({
   portrait: Override.optional(),
   ...MotionExtras,
   ...Nest,
+  ...RevealExtra,
   /** Replaces the flat fill with a gradient. The first stop's colour is kept as the solid fallback, and is what legibility is checked against. */
   gradient: CompGradient.optional(),
   glow: CompGlow.optional(),
@@ -340,6 +358,7 @@ export const CompGroup = z.object({
   motion: MotionObject.optional(),
   portrait: Override.optional(),
   ...TrackExtras,
+  ...RevealExtra,
   /** The children arrive one after another, `each` of the scene apart, in the order they are listed (or from the end, or from the middle). */
   stagger_children: z.object({ each: Frac(0.005, 0.15), from: z.enum(["start", "end", "center"]).optional() }).optional(),
 });
@@ -354,6 +373,7 @@ export const CompImage = z.object({
   portrait: Override.optional(),
   ...MotionExtras,
   ...Nest,
+  ...RevealExtra,
 });
 export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape, CompGroup, CompImage]);
 export type CompElement = z.infer<typeof CompElement>;
@@ -392,6 +412,11 @@ export function compositionStructureIssues(c: z.infer<typeof Composition>): stri
     else kids.set(parent, (kids.get(parent) ?? 0) + 1);
   }
   for (const [g, n] of kids) if (n > MAX_GROUP_CHILDREN) out.push(`group ${g} holds ${n} elements; at most ${MAX_GROUP_CHILDREN}`);
+  for (const e of c.elements) {
+    if (!e.reveal) continue;
+    if (e.kind === "group" && !e.reveal.region) out.push(`${e.id}: a group has no box of its own, so its reveal needs a region`);
+    if (byId.has(`${e.id}_mask`)) out.push(`${e.id}: the id ${e.id}_mask is kept for its reveal; rename that element`);
+  }
   const images = c.elements.filter((e) => e.kind === "image").length;
   if (images > MAX_IMAGES) out.push(`${images} picture elements; at most ${MAX_IMAGES} in one scene`);
   if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");

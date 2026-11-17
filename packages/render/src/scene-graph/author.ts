@@ -64,7 +64,7 @@ export function authorGraph(c: Comp, f: AuthorFrame): SceneGraphV2 {
     kids.forEach((k, i) => arrival.set(k.id, (from === "center" ? order.indexOf(i) : order[i]!) * g.stagger_children!.each * D));
   }
   const STILL = { enter: "none" as const, delay: 0, duration: 1, easing: "ease_out" as const, stagger: undefined };
-  const elements: Element[] = c.elements.map((e) => {
+  const built: Element[] = c.elements.map((e) => {
     const { at, x: ax, y: ay, w: aw } = placeOf(e);
     // a child's position is relative to its group in the engine; the plan keeps frame shares, so the group's own place is taken away here
     const po = "parent" in e && e.parent ? origin.get(e.parent) : undefined;
@@ -119,5 +119,37 @@ export function authorGraph(c: Comp, f: AuthorFrame): SceneGraphV2 {
       props: { shape: e.shape, x, y, w, h: (at.h ?? e.at.h) * H, ...(fill ? { fill } : {}), ...(e.stroke ? { stroke: e.stroke } : {}), stroke_w: e.stroke_w * short, radius: e.radius * short, ...pivot, ...look },
       timeline, bindings: {},
     };
-  });  return { format: "digikon.scene-graph", format_version: 2, canvas: { width: W, height: H, fps: f.fps }, duration_s: D, elements } as SceneGraphV2;
+  });
+  // A reveal mask wraps its element: the mask clips a box and uncovers it from progress 0 to 1, so the element is fully shown when the reveal is over. The box is the Director's region
+  // joined with the element's own box (text height is estimated generously), so it is never smaller than what it reveals and nothing is left cropped.
+  const elements: Element[] = [];
+  c.elements.forEach((src, i) => {
+    const el = built[i]!;
+    const rv = src.reveal;
+    if (!rv) { elements.push(el); return; }
+    const own = placeOf(src);
+    const grow = src.kind === "shape" && src.glow ? src.glow.radius * short * 2 : 0;
+    const ox = own.x, oy = own.y;
+    let ow = 0, oh = 0;
+    if (src.kind === "text") {
+      const px = ((portrait && src.portrait?.size) || src.size) * short;
+      const lines = Math.max(1, Math.ceil((Array.from(src.text).length * px * 0.62) / own.w));
+      ow = own.w; oh = lines * px * src.line_height + px * 0.5;
+    } else if (src.kind === "shape" || src.kind === "image") { ow = own.w; oh = (own.at.h ?? src.at.h) * H; }
+    let x0 = ox - grow, y0 = oy - grow, x1 = ox + ow + grow, y1 = oy + oh + grow;
+    if (rv.region) { x0 = Math.min(x0, rv.region.x * W); y0 = Math.min(y0, rv.region.y * H); x1 = Math.max(x1, (rv.region.x + rv.region.w) * W); y1 = Math.max(y1, (rv.region.y + rv.region.h) * H); }
+    const holder = "parent" in src && src.parent ? origin.get(src.parent) : undefined;
+    const delay = rv.delay ?? (src.kind === "group" ? src.motion?.delay : src.motion.delay) ?? 0;
+    const mask: Element = {
+      id: `${src.id}_mask`, kind: "mask", parent: el.parent,
+      props: { reveal: rv.from, x: x0 - (holder?.x ?? 0), y: y0 - (holder?.y ?? 0), w: x1 - x0, h: y1 - y0 },
+      timeline: { start_s: delay * D + (arrival.get(src.id) ?? 0), duration_s: Math.max(0.05, (rv.duration ?? 0.3) * D), tracks: [ramp("progress", 0, 1, NAMED[rv.easing ?? "ease_out"])] },
+      bindings: {},
+    };
+    // the element now sits in the mask, so its position is taken from the mask's corner
+    const props = el.props as Record<string, unknown>;
+    props["x"] = ox - x0; props["y"] = oy - y0;
+    elements.push(mask, { ...el, parent: mask.id });
+  });
+  return { format: "digikon.scene-graph", format_version: 2, canvas: { width: W, height: H, fps: f.fps }, duration_s: D, elements } as SceneGraphV2;
 }
