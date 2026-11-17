@@ -36,6 +36,15 @@ export interface AudioCapabilities { tts: "sapi" | "espeak" | null }
 
 const SFX_CUES: readonly [RegExp, Sfx][] = [[/\b(whoosh|swoosh|swish|sweep|riser)\b/i, "whoosh"], [/\b(hit|impact|thud|boom|stinger|sting)\b/i, "hit"], [/\b(chime|ding|bell|notification)\b/i, "chime"], [/\b(click|tick|tap|pop|snap)\b/i, "click"]];
 const MUSIC_CUE = /\b(music|bed|score|soundtrack|ambien\w*|pad|beat|melody|piano|strings|drone|underscore)\b/i;
+/**
+ * Where inside its scene a sound effect lands. A cue is plain approved text, so the moment is written in it: "a hit at 1.5s", "a click at 0.8 seconds", "a chime @2s". The number is
+ * seconds from the scene's start. A cue with no moment lands at the scene's start, as before. Returns null when the cue names no moment.
+ */
+export function cueOffset(cue: string): number | null {
+  const m = /(?:\bat|@)\s*(\d+(?:\.\d+)?)\s*(?:s|secs?|seconds?)\b/i.exec(cue);
+  return m ? Number(m[1]) : null;
+}
+
 /** A speaking rate that stays clear. Longer narration does not fit its scene, and is reported before approval rather than cut off or sped up. */
 const WORDS_PER_SECOND = 2.8;
 
@@ -63,7 +72,12 @@ export function planAudio(story: { scenes: readonly Pick<Scene, "scene_id" | "st
     }
     for (const cue of s.audio_cues) {
       const sfx = SFX_CUES.find(([re]) => re.test(cue));
-      if (sfx) tracks.push({ kind: "sfx", scene_id: s.scene_id, at_s: s.start_time, sound: sfx[1], cue });
+      if (sfx) {
+        const offset = cueOffset(cue);
+        // The moment must be inside the scene it belongs to: a sound placed after the scene has ended is reported before approval, never moved or dropped.
+        if (offset !== null && offset >= s.duration_seconds) unresolved.push({ scene_id: s.scene_id, detail: `its audio cue ("${cue.slice(0, 60)}") puts a sound at ${offset}s, which is outside the ${s.duration_seconds}s scene; use a moment before the scene ends` });
+        else tracks.push({ kind: "sfx", scene_id: s.scene_id, at_s: offset === null ? s.start_time : Math.round((s.start_time + offset) * 1000) / 1000, sound: sfx[1], cue });
+      }
       else if (MUSIC_CUE.test(cue)) { wantsMusic = true; musicCueScene ??= s.scene_id; }
       else unresolved.push({ scene_id: s.scene_id, detail: `its audio cue ("${cue.slice(0, 60)}") names no sound that can be made here (music, a whoosh, a hit, a chime or a click)` });
     }
