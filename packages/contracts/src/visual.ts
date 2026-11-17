@@ -247,6 +247,40 @@ export const CompositionMotionPlan = z.object({
 export type CompositionMotionPlan = z.infer<typeof CompositionMotionPlan>;
 const Override = z.object({ x: Frac(-0.2, 1.2).optional(), y: Frac(-0.2, 1.2).optional(), w: Frac(0, 1.4).optional(), h: Frac(0, 1.4).optional(), size: Frac(0.012, 0.35).optional() });
 
+// ---------- richer motion (optional on every element: a plan written before these existed has none of them and keeps its exact JSON and hash) ----------
+
+/**
+ * The easings a Director may name. A fixed list: no formulas, no numbers. ease_out and ease_in_out are the plain curves; the three springs differ in how much they overshoot and
+ * settle; the bezier presets are named curves (their numbers live in the renderer's authoring step, not in the plan).
+ */
+export const COMP_EASINGS = ["ease_out", "ease_in_out", "spring", "spring_soft", "spring_bouncy", "bezier_smooth", "bezier_swift", "bezier_snap", "bezier_overshoot", "bezier_anticipate"] as const;
+export type CompEasing = (typeof COMP_EASINGS)[number];
+/** What a track may animate. x and y are offsets as shares of the frame (a move of 0.1 is a tenth of the frame), scale is a multiple, rotate is degrees, opacity is 0 to 1. */
+export const COMP_TRACK_PROPERTIES = ["x", "y", "scale", "rotate", "opacity"] as const;
+export const COMP_TRACK_LIMITS: Record<(typeof COMP_TRACK_PROPERTIES)[number], readonly [number, number]> = { x: [-1.5, 1.5], y: [-1.5, 1.5], scale: [0.05, 4], rotate: [-360, 360], opacity: [0, 1] };
+const MAX_TRACKS = 5, MAX_KEYS = 8;
+
+/** One keyframe: `t` is a share of the element's own motion window (its delay to delay + duration), and `easing` shapes the segment that starts at this key. */
+export const CompTrackKey = z.object({ t: Frac(0, 1), value: z.number().min(-360).max(360), easing: z.enum(COMP_EASINGS).optional() });
+export const CompTrack = z.object({
+  property: z.enum(COMP_TRACK_PROPERTIES),
+  keys: z.array(CompTrackKey).min(2).max(MAX_KEYS),
+}).superRefine((tr, ctx) => {
+  const [lo, hi] = COMP_TRACK_LIMITS[tr.property];
+  tr.keys.forEach((k, i) => {
+    if (k.value < lo || k.value > hi) ctx.addIssue({ code: "custom", path: ["keys", i, "value"], message: `${tr.property} must stay between ${lo} and ${hi}` });
+    if (i > 0 && k.t <= tr.keys[i - 1]!.t) ctx.addIssue({ code: "custom", path: ["keys", i, "t"], message: "keys must be in time order, each after the one before" });
+  });
+});
+/** Where a rotation or scale is anchored, as shares of the element's own box: 0.5, 0.5 is the middle (the default), 0, 0.5 the middle of its left edge. */
+export const CompPivot = z.object({ x: Frac(0, 1), y: Frac(0, 1) });
+/** Optional on every composition element. Nothing here has a default, so an element that does not use them is unchanged. */
+const MotionExtras = {
+  /** Keyframed motion. A track replaces the entrance's own track for that property; the entrance still animates the rest. At most one track per property. */
+  tracks: z.array(CompTrack).max(MAX_TRACKS).optional(),
+  pivot: CompPivot.optional(),
+};
+
 export const CompText = z.object({
   id: Ident, kind: z.literal("text"),
   text: Txt(160),
@@ -261,6 +295,7 @@ export const CompText = z.object({
   line_height: Frac(0.8, 1.8).default(1.15),
   motion: Motion,
   portrait: Override.optional(),
+  ...MotionExtras,
 });
 export const CompShape = z.object({
   id: Ident, kind: z.literal("shape"),
@@ -275,6 +310,7 @@ export const CompShape = z.object({
   opacity: Frac(0, 1).default(1),
   motion: Motion,
   portrait: Override.optional(),
+  ...MotionExtras,
 });
 export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape]);
 export type CompElement = z.infer<typeof CompElement>;
@@ -295,7 +331,13 @@ export const Composition = z.object({
 /** Structure problems of a composition that the schema cannot express (the union needs a plain object): repeated ids, and no words at all. */
 export function compositionStructureIssues(c: z.infer<typeof Composition>): string[] {
   const out: string[] = [], seen = new Set<string>();
-  for (const e of c.elements) { if (seen.has(e.id)) out.push(`duplicate element id ${e.id}`); seen.add(e.id); }
+  for (const e of c.elements) {
+    if (seen.has(e.id)) out.push(`duplicate element id ${e.id}`);
+    seen.add(e.id);
+    const props = (e.tracks ?? []).map((t) => t.property);
+    const dup = props.find((p, i) => props.indexOf(p) !== i);
+    if (dup) out.push(`${e.id}: two tracks animate ${dup}; use one track per property`);
+  }
   if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");
   return out;
 }
