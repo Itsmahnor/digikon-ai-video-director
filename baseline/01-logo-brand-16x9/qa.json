@@ -1,0 +1,63 @@
+{
+  "findings": [
+    {
+      "finding_id": "F01",
+      "scene_id": "S03",
+      "severity": "minor",
+      "category": "audio",
+      "evidence_ref": "probe:silencedetect@9.68-11.13",
+      "description": "Silence from 9.68s to 11.13s.",
+      "suggested_fix": "Add music or sound here, or confirm the silence is intended.",
+      "status": "open"
+    },
+    {
+      "finding_id": "F02",
+      "scene_id": "S04",
+      "severity": "minor",
+      "category": "audio",
+      "evidence_ref": "probe:silencedetect@13.96-15",
+      "description": "Silence from 13.96s to 15s.",
+      "suggested_fix": "Add music or sound here, or confirm the silence is intended.",
+      "status": "open"
+    }
+  ],
+  "passed": [
+    {
+      "check": "duration",
+      "evidence": "probe:duration=15 (plan 15)"
+    },
+    {
+      "check": "resolution",
+      "evidence": "probe:size=1280x720"
+    },
+    {
+      "check": "frame_rate",
+      "evidence": "probe:fps=30"
+    },
+    {
+      "check": "audio_track",
+      "evidence": "probe:audio_tracks=1"
+    },
+    {
+      "check": "black_frames",
+      "evidence": "probe:blackdetect found 0 span(s), all intended"
+    },
+    {
+      "check": "frozen_frames",
+      "evidence": "probe:freezedetect found 1 span(s), all intended"
+    },
+    {
+      "check": "true_peak",
+      "evidence": "probe:truepeak=-1.4dB (ceiling -1)"
+    }
+  ],
+  "measurements": {
+    "duration_s": 15,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "audio_tracks": 1,
+    "loudness_lufs": -16.4,
+    "true_peak_db": -1.4
+  }
+}

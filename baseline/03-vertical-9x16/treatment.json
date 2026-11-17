@@ -1,0 +1,93 @@
+﻿{
+    "logline":  "A small, relatable bakery-run problem gets solved in one tap: Crumb lets busy people order from local bakeries and pick up the same day.",
+    "hook":  "A group chat in big, bouncy type: \"Bakery run?\" \"No time.\" \"Closing soon!\" The first frame is already a chat about a craving that doesn\u0027t fit the day.",
+    "tone":  "Playful, friendly, quick. Light humour with no exaggeration.",
+    "beats":  [
+                  {
+                      "beat":  "Craving vs. calendar",
+                      "purpose":  "Hook: a chat thread shows the relatable bind, wanting a bakery treat with no time for the trip. VO: \"Bakery craving? Packed day?\"",
+                      "approx_seconds":  3
+                  },
+                  {
+                      "beat":  "One gesture",
+                      "purpose":  "Show Crumb doing one thing: pick a local bakery and an item in a concept-illustration app window. VO: \"Pick a local bakery. Tap to order.\"",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "Three easy steps",
+                      "purpose":  "Explain the flow simply: choose, order, pick up the same day. VO: \"Order ahead. Pick up today.\"",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "Your move",
+                      "purpose":  "Hold on one action: a Crumb end card with a single button. VO: \"Crumb. Your bakery run, sorted.\"",
+                      "approx_seconds":  4
+                  }
+              ],
+    "cta":  "Get Crumb",
+    "art_direction":  {
+                          "audience_response":  "Busy people should smile at the familiar \"no time for the bakery\" moment, think \"I could just order ahead\", and tap to get Crumb.",
+                          "concept":  "The running joke: a bakery craving keeps losing to a packed day, until one tap on Crumb lines up an order for same-day pickup.",
+                          "visual_metaphor":  null,
+                          "palette":  {
+                                          "background":  "#FFF4E0",
+                                          "surface":  "#FFFFFF",
+                                          "text":  "#3A2216",
+                                          "muted":  "#7A5A47",
+                                          "accent":  "#E4572E",
+                                          "accent_2":  "#F5B841"
+                                      },
+                          "typography":  {
+                                             "weight":  "bold",
+                                             "scale":  "large",
+                                             "case":  "sentence",
+                                             "rationale":  "Big, friendly sentence-case sans reads fast on a phone and keeps the tone warm. Large type stays legible inside Reels safe areas."
+                                         },
+                          "visual_system":  "saas_clarity",
+                          "composition":  "Vertical stack. Headline in the upper third inside the safe area, the picture centred below it, and generous cream space around both. One idea per frame, and nothing in the bottom 20% where Reels UI sits.",
+                          "motion_language":  {
+                                                  "feel":  "playful",
+                                                  "easing":  "spring",
+                                                  "description":  "Quick springy pops and slight overshoot on bubbles and buttons, crisp cuts between scenes, and a click on interface moments."
+                                              },
+                          "narrative":  {
+                                            "opening":  "Open on a chat thread in the first frame: a craving for a bakery treat against a day with no spare time, told as a light, relatable joke.",
+                                            "development":  "Crumb does one thing in a concept-illustrated app window, then a three-step flow (choose, order, pick up today) shows how simple it is.",
+                                            "conclusion":  "Hold still on a Crumb end card with one button, \"Get Crumb\", and a quiet line, while the voice-over closes with the name."
+                                        }
+                      },
+    "claims":  [
+                   {
+                       "claim_id":  "C01",
+                       "text":  "Crumb is a mobile app for ordering from local bakeries.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Show it as a concept illustration of an app window, with wording like \"Bakery run? Crumb is designed for that.\" Do not claim a bakery count, coverage or availability."
+                   },
+                   {
+                       "claim_id":  "C02",
+                       "text":  "Orders from Crumb are for same-day pickup.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Use invitation wording such as \"Order ahead, pick up today\" with no speed, freshness or time-saved promise, and no guarantee that every bakery offers it."
+                   }
+               ],
+    "conflicts_log":  [
+                          {
+                              "conflict":  "No approved brand facts were provided, but the brief describes the app (local bakeries, same-day pickup).",
+                              "decision":  "Register both ideas as illustrative claims with null fact ids and safe alternatives. Use plain, non-superlative wording. Add no numbers, prices, bakery counts, freshness, speed or ratings."
+                          },
+                          {
+                              "conflict":  "The e-commerce showcase type asks for a hero close-up and in-use shots, but no product footage or real app screens were supplied.",
+                              "decision":  "Use the Clarity system with drawn concept illustrations (message thread, ui_demo, process flow) labelled as illustrations. Show no real screens, logo or bakery photos. Say in the final output that real captures are unresolved."
+                          },
+                          {
+                              "conflict":  "The pacing wanted for Reels is quick, but the voice-over cap is 2 words per second.",
+                              "decision":  "Keep every voice-over line at 6 words or fewer for 3s scenes and 8 or fewer for 4s scenes. Give the scenes air and let the type carry the energy."
+                          },
+                          {
+                              "conflict":  "Playful style could push toward hyperbole such as \"best\" or \"fresh from the oven\".",
+                              "decision":  "Legal text and approved claims outrank style. Keep the humour in the situation and the motion, not in claims about the product."
+                          }
+                      ]
+}

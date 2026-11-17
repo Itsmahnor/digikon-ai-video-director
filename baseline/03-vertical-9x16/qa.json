@@ -1,0 +1,46 @@
+{
+  "findings": [],
+  "passed": [
+    {
+      "check": "duration",
+      "evidence": "probe:duration=15 (plan 15)"
+    },
+    {
+      "check": "resolution",
+      "evidence": "probe:size=720x1280"
+    },
+    {
+      "check": "frame_rate",
+      "evidence": "probe:fps=30"
+    },
+    {
+      "check": "audio_track",
+      "evidence": "probe:audio_tracks=1"
+    },
+    {
+      "check": "black_frames",
+      "evidence": "probe:blackdetect found 0 span(s), all intended"
+    },
+    {
+      "check": "frozen_frames",
+      "evidence": "probe:freezedetect found 2 span(s), all intended"
+    },
+    {
+      "check": "silence",
+      "evidence": "probe:silencedetect found no silence of 1s or more"
+    },
+    {
+      "check": "true_peak",
+      "evidence": "probe:truepeak=-1.5dB (ceiling -1)"
+    }
+  ],
+  "measurements": {
+    "duration_s": 15,
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "audio_tracks": 1,
+    "loudness_lufs": -16.4,
+    "true_peak_db": -1.5
+  }
+}

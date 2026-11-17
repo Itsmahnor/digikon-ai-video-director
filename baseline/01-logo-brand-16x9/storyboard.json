@@ -1,0 +1,348 @@
+﻿{
+    "project_id":  "proj_61df7c739b74",
+    "version":  1,
+    "scenes":  [
+                   {
+                       "scene_id":  "S01",
+                       "purpose":  "Open on the busy-owner moment: waiting leads and follow-ups pile up as a conversation.",
+                       "start_time":  0,
+                       "end_time":  3,
+                       "duration_seconds":  3,
+                       "voiceover":  "Leads. Follow-ups. Websites. Too much?",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Message thread drawn as animated graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+
+                                      ],
+                       "visual_purpose":  "Shows the mess: unanswered messages piling up, the only scene told as a conversation.",
+                       "visual":  {
+                                      "block":  "message_thread",
+                                      "messages":  [
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Any update on my enquiry?"
+                                                       },
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Following up on my lead"
+                                                       },
+                                                       {
+                                                           "from":  "you",
+                                                           "text":  "Can you update the website?"
+                                                       },
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Are you still there?"
+                                                       },
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Another follow-up"
+                                                       }
+                                                   ],
+                                      "mode":  "pile_up",
+                                      "camera":  "push_in",
+                                      "reveal":  "none",
+                                      "backdrop":  "dots"
+                                  },
+                       "needs":  [
+                                     {
+                                         "kind":  "emotional_beat",
+                                         "description":  "Make the viewer recognise the feeling of being buried in leads and tasks.",
+                                         "claim_id":  "C03",
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C03"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "medium",
+                                    "camera_motion":  "slow_push_in",
+                                    "visual_action":  "Lead and follow-up messages stack up fast in a thread while the headline asks the question."
+                                },
+                       "overlay":  {
+                                       "text":  "Too much to keep up with?",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "wipe",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S02",
+                       "purpose":  "Turn the mess into order: the four services DigiKon offers.",
+                       "start_time":  3,
+                       "end_time":  7,
+                       "duration_seconds":  4,
+                       "voiceover":  "DigiKon builds automation, CRM, websites and apps.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Four service cards drawn as animated graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+
+                                      ],
+                       "visual_purpose":  "Shows order replacing mess: the service range as ordered, layered cards.",
+                       "visual":  {
+                                      "block":  "layered_cards",
+                                      "cards":  [
+                                                    {
+                                                        "title":  "GoHighLevel automation",
+                                                        "detail":  null
+                                                    },
+                                                    {
+                                                        "title":  "CRM systems",
+                                                        "detail":  null
+                                                    },
+                                                    {
+                                                        "title":  "Websites",
+                                                        "detail":  null
+                                                    },
+                                                    {
+                                                        "title":  "Mobile apps",
+                                                        "detail":  null
+                                                    }
+                                                ],
+                                      "depth":  "subtle",
+                                      "camera":  "static",
+                                      "reveal":  "wipe_right",
+                                      "backdrop":  "grid"
+                                  },
+                       "needs":  [
+                                     {
+                                         "kind":  "explain_concept",
+                                         "description":  "Name the four services as calm, ordered cards.",
+                                         "claim_id":  "C01",
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C01"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "close_up",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "Four service cards settle into a neat layered stack, one after another."
+                                },
+                       "overlay":  {
+                                       "text":  "One team for the whole stack",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S03",
+                       "purpose":  "Show the in-house AI tools in one gesture.",
+                       "start_time":  7,
+                       "end_time":  11,
+                       "duration_seconds":  4,
+                       "voiceover":  "Plus in-house AI tools for SEO and video.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Interface window with two tool rows, drawn as concept graphics",
+                                                   "kind":  "ui_screenshot",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  true,
+                                                   "fallback":  "Illustrative window, labelled as a concept, not the real product."
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "placeholder",
+                                              "note":  "The tool window is a concept illustration, not a real product screen. Send real captures of the tools if you want them shown."
+                                          }
+                                      ],
+                       "visual_purpose":  "Shows one product-style gesture: a cursor choosing between the two in-house AI tools, in a concept interface.",
+                       "visual":  {
+                                      "block":  "ui_demo",
+                                      "window_title":  "DigiKon AI tools",
+                                      "sidebar":  [
+
+                                                  ],
+                                      "rows":  [
+                                                   {
+                                                       "label":  "Product SEO Automation",
+                                                       "tag":  "In-house",
+                                                       "state":  "open"
+                                                   },
+                                                   {
+                                                       "label":  "AI Video Generation",
+                                                       "tag":  "In-house",
+                                                       "state":  "selected"
+                                                   }
+                                               ],
+                                      "cursor_target":  1,
+                                      "confirm_text":  null,
+                                      "camera":  "pan_left",
+                                      "reveal":  "wipe_up",
+                                      "backdrop":  "gradient"
+                                  },
+                       "needs":  [
+                                     {
+                                         "kind":  "show_process",
+                                         "description":  "Show the two named tools in one interface gesture, as a concept illustration.",
+                                         "claim_id":  "C02",
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C02"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "close_up",
+                                    "camera_motion":  "pan_left",
+                                    "visual_action":  "A cursor selects one of two tool rows in a drawn interface window."
+                                },
+                       "overlay":  {
+                                       "text":  "Plus in-house AI tools",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+                                          "a light interface click as the cursor selects the second row"
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S04",
+                       "purpose":  "Hold on the supplied logo and one invitation to talk.",
+                       "start_time":  11,
+                       "end_time":  15,
+                       "duration_seconds":  4,
+                       "voiceover":  "DigiKon Solutions. Let\u0027s talk.",
+                       "production_method":  "mixed",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Company logo, shown whole",
+                                                   "kind":  "logo",
+                                                   "availability":  "supplied",
+                                                   "asset_id":  "asset_84784780",
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               },
+                                               {
+                                                   "need":  "End card with headline and button",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "missing_input",
+                                              "note":  "The logo image reads \"DIGKON\" but the brief says \"DigiKon Solutions\". Please confirm the spelling."
+                                          },
+                                          {
+                                              "kind":  "creative_decision",
+                                              "note":  "The logo has a white background. The end card cannot draw a white panel behind it, so check how it sits on the dark card and approve or supply a version for dark backgrounds."
+                                          }
+                                      ],
+                       "visual_purpose":  "The one thing to do: the real logo and a single button, held still.",
+                       "visual":  {
+                                      "block":  "end_card",
+                                      "wordmark":  null,
+                                      "button":  "Let\u0027s talk",
+                                      "subline":  "DigiKon Solutions",
+                                      "camera":  "static",
+                                      "reveal":  "none",
+                                      "backdrop":  "spotlight"
+                                  },
+                       "needs":  [
+                                     {
+                                         "kind":  "call_to_action",
+                                         "description":  "One clear invitation: start the conversation.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     },
+                                     {
+                                         "kind":  "introduce_brand",
+                                         "description":  "Show the supplied logo whole at the close.",
+                                         "claim_id":  null,
+                                         "priority":  "secondary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+                                         "asset_84784780"
+                                     ],
+                       "asset_refs":  [
+                                          {
+                                              "asset_id":  "asset_84784780",
+                                              "role":  "logo",
+                                              "placement":  "top",
+                                              "scale":  0.3,
+                                              "fit":  "contain",
+                                              "crop":  null,
+                                              "layer":  1,
+                                              "animation":  "fade_in",
+                                              "frame":  "none",
+                                              "mandatory":  true,
+                                              "reason":  "The supplied company logo identifies DigiKon and belongs on the closing frame, shown whole and unaltered."
+                                          }
+                                      ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "medium",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "The supplied logo fades in at the top, then the headline and a single button settle and hold."
+                                },
+                       "overlay":  {
+                                       "text":  "Start the conversation",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "dip_to_black",
+                       "constraints":  [
+
+                                       ]
+                   }
+               ]
+}

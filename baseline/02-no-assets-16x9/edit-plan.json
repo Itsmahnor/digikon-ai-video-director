@@ -1,0 +1,171 @@
+﻿{
+    "project_id":  "proj_60ac2cc10914",
+    "version":  1,
+    "uses":  [
+                 {
+                     "use_id":  "U01",
+                     "scene_id":  "S01",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S01 is graphics-led with a composed visual block and no footage, so scene-composition draws it."
+                 },
+                 {
+                     "use_id":  "U02",
+                     "scene_id":  "S01",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.8
+                                },
+                     "rationale":  "A calm, slow-morning mood flows into the question. 0.8s is under half of the 3.5s scene."
+                 },
+                 {
+                     "use_id":  "U03",
+                     "scene_id":  "S02",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S02 is a title plate with a visual block, so scene-composition draws it."
+                 },
+                 {
+                     "use_id":  "U04",
+                     "scene_id":  "S02",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.6
+                                },
+                     "rationale":  "A soft blend from the quiet question into the labelled diagram keeps the pace calm."
+                 },
+                 {
+                     "use_id":  "U05",
+                     "scene_id":  "S03",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S03 is a diagram scene with a visual block and no footage, so scene-composition draws it."
+                 },
+                 {
+                     "use_id":  "U06",
+                     "scene_id":  "S03",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.6
+                                },
+                     "rationale":  "A gentle blend into the closing signature. 0.6s is well under half of the 4s scene."
+                 },
+                 {
+                     "use_id":  "U07",
+                     "scene_id":  "S04",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S04 is a closing signature with a visual block, so scene-composition draws it. As the final scene it has no outgoing transition recipe. The dip_to_black listed for it is not planned, and the film ends on the held still."
+                 }
+             ],
+    "composition_motion":  [
+                               {
+                                   "scene_id":  "S01",
+                                   "elements":  [
+                                                    {
+                                                        "id":  "saucer",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0,
+                                                                       "duration":  0.12,
+                                                                       "easing":  "ease_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "cup",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0,
+                                                                       "duration":  0.15,
+                                                                       "easing":  "ease_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "handle",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0.04,
+                                                                       "duration":  0.15,
+                                                                       "easing":  "ease_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "line",
+                                                        "motion":  {
+                                                                       "enter":  "rise",
+                                                                       "delay":  0.15,
+                                                                       "duration":  0.2,
+                                                                       "easing":  "ease_out",
+                                                                       "stagger":  {
+                                                                                       "unit":  "word",
+                                                                                       "each":  0.05
+                                                                                   }
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "steam1",
+                                                        "motion":  {
+                                                                       "enter":  "rise",
+                                                                       "delay":  0.35,
+                                                                       "duration":  0.25,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "steam2",
+                                                        "motion":  {
+                                                                       "enter":  "rise",
+                                                                       "delay":  0.4,
+                                                                       "duration":  0.25,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "steam3",
+                                                        "motion":  {
+                                                                       "enter":  "rise",
+                                                                       "delay":  0.45,
+                                                                       "duration":  0.25,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "bean1",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0.4,
+                                                                       "duration":  0.22,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "bean2",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0.45,
+                                                                       "duration":  0.22,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    },
+                                                    {
+                                                        "id":  "bean3",
+                                                        "motion":  {
+                                                                       "enter":  "fade",
+                                                                       "delay":  0.5,
+                                                                       "duration":  0.22,
+                                                                       "easing":  "ease_in_out"
+                                                                   }
+                                                    }
+                                                ],
+                                   "rationale":  "The line arrives first, word by word, as the scene\u0027s message. The cup settles quickly, then steam and beans follow. Everything is fully shown for at least 0.8s before the end."
+                               }
+                           ]
+}

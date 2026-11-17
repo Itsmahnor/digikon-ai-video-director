@@ -1,0 +1,105 @@
+﻿{
+    "logline":  "A calm, crafted invitation to slow down: one cup, one handful of beans, and the question of what a weekly delivery of freshly roasted coffee could add to your mornings.",
+    "hook":  "First frame: steam curls up from a just-poured cup in low, warm morning light, with dark roasted beans in soft focus beside it. No logo.",
+    "tone":  "Warm, crafted, calm. Unhurried and honest, with no hype, superlatives or numbers.",
+    "beats":  [
+                  {
+                      "beat":  "Tease: the steam",
+                      "purpose":  "Open on a concrete, sensory image: steam over a fresh cup, beans in soft focus. Withhold the product name. Voice-over: \"Some mornings deserve slowing down.\" (5 words)",
+                      "approx_seconds":  3.5
+                  },
+                  {
+                      "beat":  "Reveal: the beans",
+                      "purpose":  "Show the beans once, poured into a hand, as a quiet title plate that asks a question rather than stating a result. Voice-over: \"What if coffee arrived freshly roasted?\" (6 words)",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "Detail: three things to care about",
+                      "purpose":  "Three short labels around one drawn bean form (illustrative, not the real product): Where it grew, How it\u0027s roasted, When it arrives. They invite curiosity and assert nothing. Voice-over: \"Small farms. Careful roasting. Every week.\" is NOT used because it is unsupported; use \"Where it grew. How it\u0027s roasted.\" (6 words)",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "Signature: the name and the invitation",
+                      "purpose":  "Hold quietly on the typeset name Ember Roast with one line of action. Voice-over: \"Ember Roast. Try a week with us.\" (6 words)",
+                      "approx_seconds":  3.5
+                  }
+              ],
+    "cta":  "Try Ember Roast this week",
+    "art_direction":  {
+                          "audience_response":  "Feel a quiet pull toward better mornings and curious about trying a week of Ember Roast; then take the one step to try it.",
+                          "concept":  "Slow the morning down: one cup, one handful of beans, and three small things worth caring about, shown with warmth and restraint.",
+                          "visual_metaphor":  null,
+                          "palette":  {
+                                          "background":  "#F4EADB",
+                                          "surface":  "#E6D3B8",
+                                          "text":  "#2B1B12",
+                                          "muted":  "#7A6350",
+                                          "accent":  "#B4441F",
+                                          "accent_2":  "#C98B2B"
+                                      },
+                          "typography":  {
+                                             "weight":  "regular",
+                                             "scale":  "large",
+                                             "case":  "sentence",
+                                             "face":  "serif",
+                                             "rationale":  "A serif in sentence case feels crafted and calm, like a roaster\u0027s hand-written label. Regular weight keeps it unhurried."
+                                         },
+                          "visual_system":  "atelier",
+                          "composition":  "One subject at a time, centred or slightly left, with generous negative space. The headline sits in the lower third or beside the picture, and the end holds on the name alone.",
+                          "motion_language":  {
+                                                  "feel":  "calm",
+                                                  "easing":  "ease_in_out",
+                                                  "description":  "Slow, soft fades and gentle push-ins, with text settling into place rather than snapping. Nothing bounces."
+                                              },
+                          "narrative":  {
+                                            "opening":  "Tease: steam rising from a fresh cup in warm light, with no name and no logo, building a mood of slowing down.",
+                                            "development":  "Reveal the beans with a question, then three quiet labelled details (where it grew, how it\u0027s roasted, when it arrives) around one drawn form.",
+                                            "conclusion":  "Hold still on the typeset name Ember Roast with one invitation: try it this week."
+                                        }
+                      },
+    "claims":  [
+                   {
+                       "claim_id":  "C01",
+                       "text":  "Ember Roast is a weekly coffee subscription.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Show the offer as an invitation: closing line \"Try a week with us\" and the CTA \"Try Ember Roast this week\", without stating delivery terms."
+                   },
+                   {
+                       "claim_id":  "C02",
+                       "text":  "The beans are freshly roasted.",
+                       "brand_fact_id":  null,
+                       "kind":  "factual",
+                       "safe_alternative":  "Ask it as a question (\"What if coffee arrived freshly roasted?\") and label the detail \"How it\u0027s roasted\" instead of asserting freshness."
+                   },
+                   {
+                       "claim_id":  "C03",
+                       "text":  "The coffee comes from small farms.",
+                       "brand_fact_id":  null,
+                       "kind":  "factual",
+                       "safe_alternative":  "Use the neutral label \"Where it grew\" and draw no farm imagery as real; do not state that the farms are small."
+                   }
+               ],
+    "conflicts_log":  [
+                          {
+                              "conflict":  "The brief describes the product (weekly, freshly roasted, small farms), but no approved brand facts were provided to support those statements.",
+                              "decision":  "Registered as unsupported (brand_fact_id null). On screen and in the voice-over they appear only as questions, neutral labels or invitations. Approved facts are needed to state them directly."
+                          },
+                          {
+                              "conflict":  "Atelier suggests sparse slow music; the brief says no music.",
+                              "decision":  "The brief wins. The voice-over is the only sound, with no music bed. Any effect must earn its place, and none is planned."
+                          },
+                          {
+                              "conflict":  "The ecommerce showcase calls for in-use context and three features; Atelier calls for restraint with one object at a time.",
+                              "decision":  "Keep the showcase order (hero, three details, CTA) but use Atelier\u0027s tease, reveal, detail, signature shape. The three features are non-asserting labels. In-use context is the poured cup, with no live footage claimed."
+                          },
+                          {
+                              "conflict":  "Voice-over density limit (at most 2 words per second) against the need to name the offer.",
+                              "decision":  "Every line stays at 6 words or fewer for 3.5 to 4 s scenes. Message clarity is served by the end card CTA, not by longer narration."
+                          },
+                          {
+                              "conflict":  "The brief gives 16:9 for Instagram, and no platform numbers or safe-area figures were supplied.",
+                              "decision":  "Build at 16:9 as briefed. Keep headlines and the CTA centred and away from the edges, and invent no platform numbers."
+                          }
+                      ]
+}

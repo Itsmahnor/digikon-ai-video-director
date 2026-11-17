@@ -1,0 +1,113 @@
+﻿{
+    "logline":  "Busy owners are buried in leads, tools and tasks; DigiKon Solutions brings automation, CRM, web, apps and AI tools together so the work runs more smoothly.",
+    "hook":  "A conversation thread of waiting leads and follow-ups fills the frame from the first second, with the question \"Too much to keep up with?\"",
+    "tone":  "Professional, modern, confident and trustworthy. Premium and business-focused, in plain customer-centric language. No hype and no numbers.",
+    "beats":  [
+                  {
+                      "beat":  "The busy-owner moment",
+                      "purpose":  "Show a stack of unanswered lead messages with a message_thread. VO: \"Leads. Follow-ups. Websites. Too much?\" Opens on something concrete, not the logo.",
+                      "approx_seconds":  3
+                  },
+                  {
+                      "beat":  "What DigiKon does",
+                      "purpose":  "Show the service range as four layered cards: GoHighLevel automation, CRM systems, websites, mobile apps. VO: \"DigiKon builds automation, CRM, websites and apps.\"",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "In-house AI tools",
+                      "purpose":  "Show one gesture in a concept-illustration ui_demo with two rows: Product SEO Automation and AI Video Generation. VO: \"Plus in-house AI tools for SEO and video.\"",
+                      "approx_seconds":  4
+                  },
+                  {
+                      "beat":  "One action",
+                      "purpose":  "Hold still on the supplied logo and an end_card with a single invitation. VO: \"DigiKon Solutions. Let\u0027s talk.\"",
+                      "approx_seconds":  4
+                  }
+              ],
+    "cta":  "Start the conversation with DigiKon Solutions",
+    "art_direction":  {
+                          "audience_response":  "Business owners and marketers should feel \"that\u0027s the help I need\" and start a conversation with DigiKon Solutions.",
+                          "concept":  "Clarity over clutter: a pile of tasks and leads turns into one calm, ordered set of DigiKon services, ending in a single invitation to talk.",
+                          "visual_metaphor":  "A pile of messages that settles into neatly stacked cards, showing mess becoming order.",
+                          "palette":  {
+                                          "background":  "#03171d",
+                                          "surface":  "#1c2e33",
+                                          "text":  "#f7f8f5",
+                                          "muted":  "#8fa0a3",
+                                          "accent":  "#81d870",
+                                          "accent_2":  "#b2ee9e"
+                                      },
+                          "typography":  {
+                                             "weight":  "bold",
+                                             "scale":  "standard",
+                                             "case":  "sentence",
+                                             "face":  "sans",
+                                             "rationale":  "Bold sans in sentence case reads as modern and trustworthy on LinkedIn. Off-white on the brand deep green-black looks premium and stays legible."
+                                         },
+                          "visual_system":  "saas_clarity",
+                          "composition":  "Headline top-left with generous space. The picture sits right of or below it. Green accent only on highlights and the button. The logo sits on a white panel in the closing card.",
+                          "motion_language":  {
+                                                  "feel":  "precise",
+                                                  "easing":  "ease_out",
+                                                  "description":  "Clean slides and short wipes that settle firmly. Messages pile up quickly, then cards and rows order themselves calmly."
+                                              },
+                          "narrative":  {
+                                            "opening":  "Show a stack of waiting leads and follow-ups in a message thread, with the question \"Too much?\"",
+                                            "development":  "Tidy the mess into four service cards, then one gesture in an illustrative interface shows the in-house AI tools.",
+                                            "conclusion":  "Hold on the supplied logo and one end card: \"Start the conversation with DigiKon Solutions.\""
+                                        }
+                      },
+    "claims":  [
+                   {
+                       "claim_id":  "C01",
+                       "text":  "DigiKon Solutions offers GoHighLevel automation, CRM systems, website development and mobile app development.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Show the services as named cards in a concept illustration. Make no claim about results, scale or experience."
+                   },
+                   {
+                       "claim_id":  "C02",
+                       "text":  "DigiKon has in-house AI tools: Product SEO Automation and AI Video Generation.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Show the two tool names as concept rows in an illustrative interface. Do not state what they achieve or call the screen the real product."
+                   },
+                   {
+                       "claim_id":  "C03",
+                       "text":  "Too many leads, follow-ups and websites can feel like too much to keep up with.",
+                       "brand_fact_id":  null,
+                       "kind":  "illustrative",
+                       "safe_alternative":  "Ask it as a question (\"Too much?\") so it describes a familiar feeling and asserts no statistic."
+                   }
+               ],
+    "conflicts_log":  [
+                          {
+                              "conflict":  "No approved brand facts were provided, but the brief wants capabilities shown.",
+                              "decision":  "Register the services and tools as illustrative concepts with null fact ids. Use questions and service names only: no results, numbers, rankings or comparisons."
+                          },
+                          {
+                              "conflict":  "The brand lists Manrope and DM Serif Display, but only one typeface can be used and the system uses a sans.",
+                              "decision":  "Use the sans face (the Manrope-style choice) throughout. Do not use the serif."
+                          },
+                          {
+                              "conflict":  "The brief says no music, but saas_clarity suggests a rhythmic bed.",
+                              "decision":  "No music. Voice-over plus a light interface click on the demo scene only."
+                          },
+                          {
+                              "conflict":  "The brand-story type calls for a belief and human moments, but no photos or facts were supplied.",
+                              "decision":  "Use a compact version of the saas_clarity shape: a recognisable busy-owner moment, the offer, one gesture, one action. Do not invent a founding story."
+                          },
+                          {
+                              "conflict":  "The logo image reads \"DIGKON\" while the brief says \"DigiKon Solutions\".",
+                              "decision":  "Show the supplied logo image unaltered through asset_refs. Typeset \"DigiKon Solutions\" in the end card as plain text, not as a logo. Flag the spelling difference for the client to confirm."
+                          },
+                          {
+                              "conflict":  "The brand light green #81d870 has only 1.64 contrast on the off-white #f7f8f5, so a light background fails the accent check.",
+                              "decision":  "Use the brand dark #03171d as the background and the brand greens as accents. Lighten the muted grey from #647174 to #8fa0a3 so small text stays legible on dark panels. Place the white-background logo on a white panel in the end card."
+                          },
+                          {
+                              "conflict":  "Voice-over limit of 2 words per second.",
+                              "decision":  "Lines are 5, 7, 8 and 4 words for scenes of 3, 4, 4 and 4 seconds, all within the limit."
+                          }
+                      ]
+}

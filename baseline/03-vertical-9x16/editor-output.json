@@ -1,0 +1,352 @@
+{
+  "format": "digikon.editor-output",
+  "format_version": 1,
+  "run_id": "4457625c1382-1794907615940",
+  "output": {
+    "schema_version": "1.1.0",
+    "handoff_schema_version": "1.3.0",
+    "handoff_id": "ho_01a99112b96c6e18",
+    "handoff_content_hash": "01a99112b96c6e183a093ff239468990acf2cc2995eee5669ad6738867887e63",
+    "approved": {
+      "storyboard": {
+        "version": 1,
+        "hash": "f09fab79b917468fcfc2799758fbeeeb29557908b173958f50e7ddee5f1a215b"
+      },
+      "edit_plan": {
+        "version": 1,
+        "hash": "a886f25b7d3dc6de1659c01a99a5117426dfb5a355d1c4cc3b7805c8caaa27e1"
+      }
+    },
+    "status": "ready",
+    "operations": [
+      {
+        "operation_id": "E01",
+        "target_scene_id": "S01",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): Graphics-led scene with a message_thread visual block and no footage; scene-composition draws it with the spring bubbles and slow push-in from the spec.",
+        "validation_status": "valid",
+        "source_use_id": "U01",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 0,
+          "duration_s": 3
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E02",
+        "target_scene_id": "S01",
+        "operation_type": "concat",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Hard cut: Punchy hook into the demo; a hard cut keeps pace tight and matches the cut transition_out.",
+        "validation_status": "valid",
+        "source_use_id": "U02",
+        "recipe_id": "hard-cut",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 2.96,
+          "duration_s": 0.04
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E03",
+        "target_scene_id": "S02",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): The ui_demo visual block is drawn entirely by scene-composition, which shows the cursor selecting a bakery and the confirm button.",
+        "validation_status": "valid",
+        "source_use_id": "U03",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 3,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E04",
+        "target_scene_id": "S02",
+        "operation_type": "concat",
+        "parameters": {
+          "direction": "left",
+          "duration_s": 0.5
+        },
+        "preconditions": [],
+        "expected_result": "Directional wipe: Storyboard asks for a wipe out of the UI demo. Energetic and graphic, suits a UI reveal. 0.5s is within half of the 4s scene. Uses 1 of 3.",
+        "validation_status": "valid",
+        "source_use_id": "U04",
+        "recipe_id": "directional-wipe",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 6.5,
+          "duration_s": 0.5
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E05",
+        "target_scene_id": "S03",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): The process_flow block is drawn by scene-composition: three connected steps with the rightward pan.",
+        "validation_status": "valid",
+        "source_use_id": "U05",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 7,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E06",
+        "target_scene_id": "S03",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.6
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: Soft blend from the explanatory flow into the calm end card; 0.6s is the default and within half the scene.",
+        "validation_status": "valid",
+        "source_use_id": "U06",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 10.4,
+          "duration_s": 0.6
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E07",
+        "target_scene_id": "S04",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): The end_card visual block is drawn by scene-composition with the wordmark and single Get Crumb button. No end-card-cta or text recipe is added, and no transition is needed because this is the final scene.",
+        "validation_status": "valid",
+        "source_use_id": "U07",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 11,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      }
+    ],
+    "validation": {
+      "ok": true,
+      "issues": []
+    },
+    "conflicts": [],
+    "revision_requests": [],
+    "provenance": {
+      "skills": [
+        "core-contract@0.1.0",
+        "continuity-pacing@0.1.0",
+        "transitions-scene-assembly@0.1.0",
+        "captions-typography@0.1.0",
+        "audio-voiceover-mixing@0.1.0",
+        "motion-graphics-product-ui@0.1.0",
+        "remotion-implementation@0.1.0",
+        "final-video-qa@0.1.0",
+        "safe-assets-and-tools@0.1.0"
+      ],
+      "recipes": [
+        "crossfade@0.1.0",
+        "directional-wipe@0.1.0",
+        "hard-cut@0.1.0",
+        "scene-composition@0.1.0"
+      ],
+      "retrievals": [
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "motion graphics animation easing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "motion-purpose-easing",
+            "cut-on-motion",
+            "axis-180-rule"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "cut transition continuity pacing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "cut-on-motion",
+            "j-and-l-cuts",
+            "cut-priority-murch"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "platform_specs",
+          "query": "Instagram Reels 9:16",
+          "filter": {
+            "include_draft": false
+          },
+          "returned_ids": []
+        },
+        {
+          "agent": "editor",
+          "collection": "skills",
+          "query": "motion graphics animation easing cut transition continuity pacing",
+          "filter": {
+            "category": "ecommerce",
+            "include_draft": true,
+            "skill_scope": "editor"
+          },
+          "returned_ids": [
+            "cut-the-curve-parameters"
+          ]
+        }
+      ]
+    },
+    "execution": {
+      "rendered": false,
+      "executable": false,
+      "production_executable": false,
+      "operations": [
+        {
+          "operation_id": "E01",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E02",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/concat-cut, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E03",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E04",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-wipe, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E05",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E06",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E07",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        }
+      ],
+      "missing_inputs": [
+        "no verified platform specification for Instagram Reels (9:16) in the knowledge base",
+        "target resolution and frame rate: the handoff carries only the aspect ratio"
+      ],
+      "notes": [
+        "the plan uses draft recipes: this output is for planning and tests, not production"
+      ]
+    }
+  }
+}

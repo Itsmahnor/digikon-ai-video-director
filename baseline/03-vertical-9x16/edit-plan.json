@@ -1,0 +1,70 @@
+﻿{
+    "project_id":  "proj_4457625c1382",
+    "version":  1,
+    "uses":  [
+                 {
+                     "use_id":  "U01",
+                     "scene_id":  "S01",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "Graphics-led scene with a message_thread visual block and no footage; scene-composition draws it with the spring bubbles and slow push-in from the spec."
+                 },
+                 {
+                     "use_id":  "U02",
+                     "scene_id":  "S01",
+                     "recipe_id":  "hard-cut",
+                     "params":  {
+
+                                },
+                     "rationale":  "Punchy hook into the demo; a hard cut keeps pace tight and matches the cut transition_out."
+                 },
+                 {
+                     "use_id":  "U03",
+                     "scene_id":  "S02",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "The ui_demo visual block is drawn entirely by scene-composition, which shows the cursor selecting a bakery and the confirm button."
+                 },
+                 {
+                     "use_id":  "U04",
+                     "scene_id":  "S02",
+                     "recipe_id":  "directional-wipe",
+                     "params":  {
+                                    "direction":  "left",
+                                    "duration_s":  0.5
+                                },
+                     "rationale":  "Storyboard asks for a wipe out of the UI demo. Energetic and graphic, suits a UI reveal. 0.5s is within half of the 4s scene. Uses 1 of 3."
+                 },
+                 {
+                     "use_id":  "U05",
+                     "scene_id":  "S03",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "The process_flow block is drawn by scene-composition: three connected steps with the rightward pan."
+                 },
+                 {
+                     "use_id":  "U06",
+                     "scene_id":  "S03",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.6
+                                },
+                     "rationale":  "Soft blend from the explanatory flow into the calm end card; 0.6s is the default and within half the scene."
+                 },
+                 {
+                     "use_id":  "U07",
+                     "scene_id":  "S04",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "The end_card visual block is drawn by scene-composition with the wordmark and single Get Crumb button. No end-card-cta or text recipe is added, and no transition is needed because this is the final scene."
+                 }
+             ]
+}

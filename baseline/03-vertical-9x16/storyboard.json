@@ -1,0 +1,345 @@
+﻿{
+    "project_id":  "proj_4457625c1382",
+    "version":  1,
+    "scenes":  [
+                   {
+                       "scene_id":  "S01",
+                       "purpose":  "Hook: a group chat shows the relatable bind of wanting a bakery treat with no time for the trip.",
+                       "start_time":  0,
+                       "end_time":  3,
+                       "duration_seconds":  3,
+                       "voiceover":  "Bakery craving? Packed day?",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Animated chat bubbles drawn as graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+
+                                      ],
+                       "visual_purpose":  "Opens on a concrete, funny conversation that sets up the craving-versus-calendar joke.",
+                       "visual":  {
+                                      "block":  "message_thread",
+                                      "messages":  [
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Bakery run?"
+                                                       },
+                                                       {
+                                                           "from":  "you",
+                                                           "text":  "No time."
+                                                       },
+                                                       {
+                                                           "from":  "them",
+                                                           "text":  "Closing soon!"
+                                                       }
+                                                   ],
+                                      "mode":  "stack",
+                                      "camera":  "push_in",
+                                      "reveal":  "none",
+                                      "backdrop":  "dots"
+                                  },
+                       "scene_archetype":  "chat_hook",
+                       "needs":  [
+                                     {
+                                         "kind":  "emotional_beat",
+                                         "description":  "Show the familiar bind of a craving against a packed day, told lightly.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "medium",
+                                    "camera_motion":  "slow_push_in",
+                                    "visual_action":  "Chat bubbles pop in with a spring overshoot, one after another: \"Bakery run?\", \"No time.\", \"Closing soon!\". A slow push-in holds on the stack."
+                                },
+                       "overlay":  {
+                                       "text":  "Bakery run?",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+                                          "light rhythmic bed starts",
+                                          "soft pop on each chat bubble"
+                                      ],
+                       "transition_out":  "cut",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S02",
+                       "purpose":  "Show Crumb doing one thing: pick a local bakery and an item, then tap to order.",
+                       "start_time":  3,
+                       "end_time":  7,
+                       "duration_seconds":  4,
+                       "voiceover":  "Pick a local bakery. Tap to order.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Drawn app window with rows and cursor, labelled as a concept illustration",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               },
+                                               {
+                                                   "need":  "Real Crumb app screen capture",
+                                                   "kind":  "ui_screenshot",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  true,
+                                                   "fallback":  "Drawn concept-illustration window, labelled as an illustration."
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "placeholder",
+                                              "note":  "No real Crumb app screens were supplied. The window is a drawn concept illustration. Supply real captures to replace it."
+                                          },
+                                          {
+                                              "kind":  "creative_decision",
+                                              "note":  "Row labels are generic sample text, not real bakeries or items."
+                                          }
+                                      ],
+                       "visual_purpose":  "Shows the single gesture of choosing a bakery and tapping to order, as a concept illustration of an app window.",
+                       "visual":  {
+                                      "block":  "ui_demo",
+                                      "window_title":  "Crumb",
+                                      "sidebar":  [
+
+                                                  ],
+                                      "rows":  [
+                                                   {
+                                                       "label":  "Neighbourhood bakery",
+                                                       "tag":  null,
+                                                       "state":  "open"
+                                                   },
+                                                   {
+                                                       "label":  "Sourdough loaf",
+                                                       "tag":  null,
+                                                       "state":  "selected"
+                                                   },
+                                                   {
+                                                       "label":  "Pastry box",
+                                                       "tag":  null,
+                                                       "state":  "open"
+                                                   }
+                                               ],
+                                      "cursor_target":  1,
+                                      "confirm_text":  "Order",
+                                      "camera":  "static",
+                                      "reveal":  "wipe_up",
+                                      "backdrop":  "grid"
+                                  },
+                       "scene_archetype":  "one_gesture_demo",
+                       "needs":  [
+                                     {
+                                         "kind":  "show_process",
+                                         "description":  "Show one tap to order from a local bakery in an app window.",
+                                         "claim_id":  "C01",
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C01"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "close_up",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "In a drawn app window a cursor moves to a bakery row, selects it, and a confirm button pops with a click."
+                                },
+                       "overlay":  {
+                                       "text":  "Pick a bakery. Tap to order.",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+                                          "click when the cursor selects the row",
+                                          "chime when the order button appears"
+                                      ],
+                       "transition_out":  "wipe",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S03",
+                       "purpose":  "Explain the flow in three easy steps: choose, order, pick up today.",
+                       "start_time":  7,
+                       "end_time":  11,
+                       "duration_seconds":  4,
+                       "voiceover":  "Order ahead. Pick up today.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Three-step flow drawn as graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+
+                                      ],
+                       "visual_purpose":  "Lays out the whole journey as a simple three-step sequence, the only scene that shows steps in order.",
+                       "visual":  {
+                                      "block":  "process_flow",
+                                      "steps":  [
+                                                    {
+                                                        "label":  "Choose",
+                                                        "detail":  "A local bakery"
+                                                    },
+                                                    {
+                                                        "label":  "Order",
+                                                        "detail":  "Ahead, in a tap"
+                                                    },
+                                                    {
+                                                        "label":  "Pick up",
+                                                        "detail":  "Today"
+                                                    }
+                                                ],
+                                      "camera":  "pan_right",
+                                      "reveal":  "wipe_right",
+                                      "backdrop":  "gradient"
+                                  },
+                       "scene_archetype":  "three_step_flow",
+                       "needs":  [
+                                     {
+                                         "kind":  "explain_concept",
+                                         "description":  "Make the order-ahead, same-day pickup flow clear in three steps, with no speed or freshness promise.",
+                                         "claim_id":  "C02",
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C02"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "wide",
+                                    "camera_motion":  "pan_right",
+                                    "visual_action":  "Three steps connect left to right in order: Choose, Order, Pick up today, each popping in with a light spring. The camera drifts right with the flow."
+                                },
+                       "overlay":  {
+                                       "text":  "Order ahead, pick up today",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+                                          "soft tick as each step lands",
+                                          "bed continues"
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S04",
+                       "purpose":  "Close by holding on one action: a Crumb end card with a single button.",
+                       "start_time":  11,
+                       "end_time":  15,
+                       "duration_seconds":  4,
+                       "voiceover":  "Crumb. Your bakery run, sorted.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "End card with button drawn as graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               },
+                                               {
+                                                   "need":  "Crumb logo",
+                                                   "kind":  "logo",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  true,
+                                                   "fallback":  "Typeset \"Crumb\" wordmark, labelled as a concept."
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "placeholder",
+                                              "note":  "No logo was supplied. The \"Crumb\" wordmark is typeset text, not the real logo. Supply the logo for approval."
+                                          },
+                                          {
+                                              "kind":  "missing_input",
+                                              "note":  "No approved brand facts or platform specs were provided. Both claims stay illustrative, and the layout keeps the bottom 20% clear as a precaution for Reels."
+                                          }
+                                      ],
+                       "visual_purpose":  "Holds on one thing to do: the Get Crumb button under the typeset name.",
+                       "visual":  {
+                                      "block":  "end_card",
+                                      "wordmark":  "Crumb",
+                                      "button":  "Get Crumb",
+                                      "subline":  "Your bakery run, sorted.",
+                                      "camera":  "static",
+                                      "reveal":  "none",
+                                      "backdrop":  "paper"
+                                  },
+                       "scene_archetype":  "end_card_cta",
+                       "needs":  [
+                                     {
+                                         "kind":  "call_to_action",
+                                         "description":  "One call to action: Get Crumb.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     },
+                                     {
+                                         "kind":  "introduce_brand",
+                                         "description":  "Name the brand quietly with a typeset wordmark.",
+                                         "claim_id":  null,
+                                         "priority":  "secondary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "medium",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "The Crumb wordmark and a single \"Get Crumb\" button pop in, then hold still while the voice-over closes with the name."
+                                },
+                       "overlay":  {
+                                       "text":  "Your bakery run, sorted.",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+                                          "chime as the button lands",
+                                          "bed resolves and fades out"
+                                      ],
+                       "transition_out":  "cut",
+                       "constraints":  [
+
+                                       ]
+                   }
+               ]
+}

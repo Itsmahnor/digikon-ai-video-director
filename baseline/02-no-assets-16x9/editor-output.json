@@ -1,0 +1,351 @@
+{
+  "format": "digikon.editor-output",
+  "format_version": 1,
+  "run_id": "60ac2cc10914-1794907419527",
+  "output": {
+    "schema_version": "1.1.0",
+    "handoff_schema_version": "1.3.0",
+    "handoff_id": "ho_e3bee69627a360c3",
+    "handoff_content_hash": "e3bee69627a360c3a4e259adea3abee4be6c7233024d7bc21e035f04c99c564e",
+    "approved": {
+      "storyboard": {
+        "version": 1,
+        "hash": "39b8f3c626b7f70d47c1f651a2788c45cc9940ac2e2f3bc94d573f8c50532b7c"
+      },
+      "edit_plan": {
+        "version": 1,
+        "hash": "33c7ebf3184940b3d5194bd6fbe09eb0a3fd2af64d829725e51b104bc05df070"
+      }
+    },
+    "status": "ready",
+    "operations": [
+      {
+        "operation_id": "E01",
+        "target_scene_id": "S01",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S01 is graphics-led with a composed visual block and no footage, so scene-composition draws it.",
+        "validation_status": "valid",
+        "source_use_id": "U01",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 0,
+          "duration_s": 3.5
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E02",
+        "target_scene_id": "S01",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.8
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: A calm, slow-morning mood flows into the question. 0.8s is under half of the 3.5s scene.",
+        "validation_status": "valid",
+        "source_use_id": "U02",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 2.7,
+          "duration_s": 0.8
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E03",
+        "target_scene_id": "S02",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S02 is a title plate with a visual block, so scene-composition draws it.",
+        "validation_status": "valid",
+        "source_use_id": "U03",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 3.5,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E04",
+        "target_scene_id": "S02",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.6
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: A soft blend from the quiet question into the labelled diagram keeps the pace calm.",
+        "validation_status": "valid",
+        "source_use_id": "U04",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 6.9,
+          "duration_s": 0.6
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E05",
+        "target_scene_id": "S03",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S03 is a diagram scene with a visual block and no footage, so scene-composition draws it.",
+        "validation_status": "valid",
+        "source_use_id": "U05",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 7.5,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E06",
+        "target_scene_id": "S03",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.6
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: A gentle blend into the closing signature. 0.6s is well under half of the 4s scene.",
+        "validation_status": "valid",
+        "source_use_id": "U06",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 10.9,
+          "duration_s": 0.6
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E07",
+        "target_scene_id": "S04",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S04 is a closing signature with a visual block, so scene-composition draws it. As the final scene it has no outgoing transition recipe. The dip_to_black listed for it is not planned, and the film ends on the held still.",
+        "validation_status": "valid",
+        "source_use_id": "U07",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 11.5,
+          "duration_s": 3.5
+        },
+        "caption": null,
+        "audio_cues": []
+      }
+    ],
+    "validation": {
+      "ok": true,
+      "issues": []
+    },
+    "conflicts": [],
+    "revision_requests": [],
+    "provenance": {
+      "skills": [
+        "core-contract@0.1.0",
+        "continuity-pacing@0.1.0",
+        "transitions-scene-assembly@0.1.0",
+        "captions-typography@0.1.0",
+        "audio-voiceover-mixing@0.1.0",
+        "motion-graphics-product-ui@0.1.0",
+        "remotion-implementation@0.1.0",
+        "final-video-qa@0.1.0",
+        "safe-assets-and-tools@0.1.0"
+      ],
+      "recipes": [
+        "crossfade@0.1.0",
+        "scene-composition@0.1.0"
+      ],
+      "retrievals": [
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "motion graphics animation easing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "motion-purpose-easing",
+            "cut-on-motion",
+            "axis-180-rule"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "cut transition continuity pacing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "cut-on-motion",
+            "j-and-l-cuts",
+            "cut-priority-murch"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "platform_specs",
+          "query": "Instagram 16:9",
+          "filter": {
+            "include_draft": false
+          },
+          "returned_ids": []
+        },
+        {
+          "agent": "editor",
+          "collection": "skills",
+          "query": "motion graphics animation easing cut transition continuity pacing",
+          "filter": {
+            "category": "ecommerce",
+            "include_draft": true,
+            "skill_scope": "editor"
+          },
+          "returned_ids": [
+            "cut-the-curve-parameters"
+          ]
+        }
+      ]
+    },
+    "execution": {
+      "rendered": false,
+      "executable": false,
+      "production_executable": false,
+      "operations": [
+        {
+          "operation_id": "E01",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E02",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E03",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E04",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E05",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E06",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E07",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        }
+      ],
+      "missing_inputs": [
+        "no verified platform specification for Instagram (16:9) in the knowledge base",
+        "target resolution and frame rate: the handoff carries only the aspect ratio"
+      ],
+      "notes": [
+        "the plan uses draft recipes: this output is for planning and tests, not production"
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+﻿{
+    "label":  "02-no-assets-16x9",
+    "session":  "60ac2cc10914",
+    "run":  "60ac2cc10914-1794907419527",
+    "render_file":  "rn_1d6df9babe6445d7.mp4",
+    "blocks":  [
+                   "composition",
+                   "title_plate",
+                   "spec_callouts",
+                   "closing_signature"
+               ],
+    "distinct_blocks":  4,
+    "composition_scenes":  1,
+    "audio_cues_total":  0,
+    "cues_at_non_zero_offset":  0,
+    "cues_note":  "the audio plan places every effect at its scene start (packages/render/src/audio.ts:66)",
+    "face_chosen":  "serif",
+    "visual_system":  "atelier",
+    "recipes":  [
+                    "scene-composition",
+                    "crossfade"
+                ],
+    "voiceover_scenes":  4,
+    "scenes":  4
+}

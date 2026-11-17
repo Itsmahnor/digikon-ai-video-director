@@ -1,0 +1,359 @@
+{
+  "format": "digikon.editor-output",
+  "format_version": 1,
+  "run_id": "61df7c739b74-1794906567151",
+  "output": {
+    "schema_version": "1.1.0",
+    "handoff_schema_version": "1.3.0",
+    "handoff_id": "ho_beaa47db91c1142c",
+    "handoff_content_hash": "beaa47db91c1142c5993e4680c9ff9bc461950213ca31ceea0b771d28e706198",
+    "approved": {
+      "storyboard": {
+        "version": 1,
+        "hash": "28db4caf9f5967981fa120527e4c1af68913b77c64287ccb7ceeb2781b6e0290"
+      },
+      "edit_plan": {
+        "version": 1,
+        "hash": "d3f5e034961e68c39f0c10faf19ca9d8605c7047340b19e1492c741bc026f30e"
+      }
+    },
+    "status": "ready",
+    "operations": [
+      {
+        "operation_id": "E01",
+        "target_scene_id": "S01",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S01 has a message_thread visual block and no footage, so scene-composition draws the whole scene. It takes no other operation.",
+        "validation_status": "valid",
+        "source_use_id": "U01",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 0,
+          "duration_s": 3
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E02",
+        "target_scene_id": "S01",
+        "operation_type": "concat",
+        "parameters": {
+          "direction": "left",
+          "duration_s": 0.4
+        },
+        "preconditions": [],
+        "expected_result": "Directional wipe: The storyboard asks for a wipe out of S01. It is a punchy, graphic move from the mess into the ordered stack. 0.4s is under half of the 3s scene, and it is use 1 of 3.",
+        "validation_status": "valid",
+        "source_use_id": "U02",
+        "recipe_id": "directional-wipe",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 2.6,
+          "duration_s": 0.4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E03",
+        "target_scene_id": "S02",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S02 has a layered_cards visual block, so scene-composition draws the whole scene.",
+        "validation_status": "valid",
+        "source_use_id": "U03",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 3,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E04",
+        "target_scene_id": "S02",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.6
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: The storyboard asks for a crossfade out of S02. It is a calm blend from the service cards into the AI tools. 0.6s is under half of the 4s scene.",
+        "validation_status": "valid",
+        "source_use_id": "U04",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 6.4,
+          "duration_s": 0.6
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E05",
+        "target_scene_id": "S03",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S03 has a ui_demo visual block, so scene-composition draws the cursor and the two tool rows.",
+        "validation_status": "valid",
+        "source_use_id": "U05",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 7,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E06",
+        "target_scene_id": "S03",
+        "operation_type": "concat",
+        "parameters": {
+          "duration_s": 0.6
+        },
+        "preconditions": [],
+        "expected_result": "Crossfade: The storyboard asks for a crossfade out of S03. It is a soft hand-off to the closing logo card. 0.6s is under half of the 4s scene.",
+        "validation_status": "valid",
+        "source_use_id": "U06",
+        "recipe_id": "crossfade",
+        "recipe_version": "0.1.0",
+        "asset_ids": [],
+        "timing": {
+          "start_s": 10.4,
+          "duration_s": 0.6
+        },
+        "caption": null,
+        "audio_cues": []
+      },
+      {
+        "operation_id": "E07",
+        "target_scene_id": "S04",
+        "operation_type": "render_graphics_scene",
+        "parameters": {},
+        "preconditions": [
+          "asset asset_84784780 is present and unchanged"
+        ],
+        "expected_result": "Drawn scene from the approved visual spec (Remotion): S04 has an end_card visual block, so scene-composition draws the supplied logo, the headline and the button. It takes no end-card-cta or logo-reveal in the same scene. S04 is the final scene, so it needs no outgoing transition recipe.",
+        "validation_status": "valid",
+        "source_use_id": "U07",
+        "recipe_id": "scene-composition",
+        "recipe_version": "0.1.0",
+        "asset_ids": [
+          "asset_84784780"
+        ],
+        "timing": {
+          "start_s": 11,
+          "duration_s": 4
+        },
+        "caption": null,
+        "audio_cues": []
+      }
+    ],
+    "validation": {
+      "ok": true,
+      "issues": []
+    },
+    "conflicts": [],
+    "revision_requests": [],
+    "provenance": {
+      "skills": [
+        "core-contract@0.1.0",
+        "footage-review@0.1.0",
+        "continuity-pacing@0.1.0",
+        "transitions-scene-assembly@0.1.0",
+        "captions-typography@0.1.0",
+        "audio-voiceover-mixing@0.1.0",
+        "motion-graphics-product-ui@0.1.0",
+        "remotion-implementation@0.1.0",
+        "final-video-qa@0.1.0",
+        "safe-assets-and-tools@0.1.0"
+      ],
+      "recipes": [
+        "crossfade@0.1.0",
+        "directional-wipe@0.1.0",
+        "scene-composition@0.1.0"
+      ],
+      "retrievals": [
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "motion graphics animation easing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "motion-purpose-easing",
+            "cut-on-motion",
+            "axis-180-rule"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "directing_principles",
+          "query": "cut transition continuity pacing",
+          "filter": {
+            "include_draft": false,
+            "topics": [
+              "editing",
+              "cuts",
+              "priority",
+              "transitions",
+              "continuity",
+              "pacing",
+              "rhythm",
+              "audio",
+              "sound",
+              "loudness",
+              "ducking",
+              "captions",
+              "motion",
+              "animation",
+              "easing",
+              "text",
+              "legibility"
+            ]
+          },
+          "returned_ids": [
+            "cut-on-motion",
+            "j-and-l-cuts",
+            "cut-priority-murch"
+          ]
+        },
+        {
+          "agent": "editor",
+          "collection": "platform_specs",
+          "query": "LinkedIn 16:9",
+          "filter": {
+            "include_draft": false
+          },
+          "returned_ids": []
+        },
+        {
+          "agent": "editor",
+          "collection": "skills",
+          "query": "motion graphics animation easing cut transition continuity pacing",
+          "filter": {
+            "category": "general-promo",
+            "include_draft": true,
+            "skill_scope": "editor"
+          },
+          "returned_ids": [
+            "cut-the-curve-parameters"
+          ]
+        }
+      ]
+    },
+    "execution": {
+      "rendered": false,
+      "executable": false,
+      "production_executable": false,
+      "operations": [
+        {
+          "operation_id": "E01",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E02",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-wipe, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E03",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E04",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E05",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E06",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for ffmpeg/xfade-fade, and no remotion or ffmpeg renderer is available"
+          ]
+        },
+        {
+          "operation_id": "E07",
+          "renderer": null,
+          "executable": false,
+          "production_executable": false,
+          "blockers": [
+            "no template is registered for remotion/scene-composition, and no remotion renderer is available"
+          ]
+        }
+      ],
+      "missing_inputs": [
+        "no verified platform specification for LinkedIn (16:9) in the knowledge base",
+        "target resolution and frame rate: the handoff carries only the aspect ratio"
+      ],
+      "notes": [
+        "S04 uses supplied footage or images, but the approved edit plan has no shot or camera recipe for it, so no operation places the clip; the renderer's default placement would apply.",
+        "the plan uses draft recipes: this output is for planning and tests, not production"
+      ]
+    }
+  }
+}

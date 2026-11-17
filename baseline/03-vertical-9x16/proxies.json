@@ -1,0 +1,27 @@
+﻿{
+    "label":  "03-vertical-9x16",
+    "session":  "4457625c1382",
+    "run":  "4457625c1382-1794907615940",
+    "render_file":  "rn_9c5ebb42cf4547d6.mp4",
+    "blocks":  [
+                   "message_thread",
+                   "ui_demo",
+                   "process_flow",
+                   "end_card"
+               ],
+    "distinct_blocks":  4,
+    "composition_scenes":  0,
+    "audio_cues_total":  8,
+    "cues_at_non_zero_offset":  0,
+    "cues_note":  "the audio plan places every effect at its scene start (packages/render/src/audio.ts:66)",
+    "face_chosen":  null,
+    "visual_system":  "saas_clarity",
+    "recipes":  [
+                    "scene-composition",
+                    "hard-cut",
+                    "directional-wipe",
+                    "crossfade"
+                ],
+    "voiceover_scenes":  4,
+    "scenes":  4
+}

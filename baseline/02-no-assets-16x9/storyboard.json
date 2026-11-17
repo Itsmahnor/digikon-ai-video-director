@@ -1,0 +1,539 @@
+﻿{
+    "project_id":  "proj_60ac2cc10914",
+    "version":  1,
+    "scenes":  [
+                   {
+                       "scene_id":  "S01",
+                       "purpose":  "Tease: open on a concrete, sensory image of steam over a fresh cup with beans in soft focus, withholding the name.",
+                       "start_time":  0,
+                       "end_time":  3.5,
+                       "duration_seconds":  3.5,
+                       "voiceover":  "Some mornings deserve slowing down.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Drawn cup, steam wisps and beans as animated shapes and text",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "creative_decision",
+                                              "note":  "No cup or bean photo or footage was supplied; the opening is drawn. Supply real imagery if you want a photographic first frame."
+                                          }
+                                      ],
+                       "visual_purpose":  "Opens on a concrete drawn cup with rising steam and loose beans, so the mood of slowing down arrives before any name.",
+                       "visual":  {
+                                      "block":  "composition",
+                                      "intent":  "A drawn cup, rising steam and a few beans set a slow morning mood. The single line sits in the lower third with generous space.",
+                                      "elements":  [
+                                                       {
+                                                           "id":  "saucer",
+                                                           "kind":  "shape",
+                                                           "shape":  "ellipse",
+                                                           "at":  {
+                                                                      "x":  0.27,
+                                                                      "y":  0.62,
+                                                                      "w":  0.17,
+                                                                      "h":  0.04
+                                                                  },
+                                                           "fill":  "muted",
+                                                           "stroke_w":  0,
+                                                           "radius":  0,
+                                                           "opacity":  0.7,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0,
+                                                                          "duration":  0.2,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "cup",
+                                                           "kind":  "shape",
+                                                           "shape":  "rect",
+                                                           "at":  {
+                                                                      "x":  0.3,
+                                                                      "y":  0.42,
+                                                                      "w":  0.1,
+                                                                      "h":  0.21
+                                                                  },
+                                                           "fill":  "surface",
+                                                           "stroke":  "text",
+                                                           "stroke_w":  0.004,
+                                                           "radius":  0.3,
+                                                           "opacity":  1,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0,
+                                                                          "duration":  0.25,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "handle",
+                                                           "kind":  "shape",
+                                                           "shape":  "ellipse",
+                                                           "at":  {
+                                                                      "x":  0.395,
+                                                                      "y":  0.47,
+                                                                      "w":  0.035,
+                                                                      "h":  0.09
+                                                                  },
+                                                           "stroke":  "text",
+                                                           "stroke_w":  0.004,
+                                                           "radius":  0,
+                                                           "opacity":  1,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0.05,
+                                                                          "duration":  0.25,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "steam1",
+                                                           "kind":  "shape",
+                                                           "shape":  "rect",
+                                                           "at":  {
+                                                                      "x":  0.33,
+                                                                      "y":  0.2,
+                                                                      "w":  0.007,
+                                                                      "h":  0.18
+                                                                  },
+                                                           "fill":  "muted",
+                                                           "stroke_w":  0,
+                                                           "radius":  0.5,
+                                                           "opacity":  0.55,
+                                                           "motion":  {
+                                                                          "enter":  "rise",
+                                                                          "delay":  0.15,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "steam2",
+                                                           "kind":  "shape",
+                                                           "shape":  "rect",
+                                                           "at":  {
+                                                                      "x":  0.35,
+                                                                      "y":  0.15,
+                                                                      "w":  0.007,
+                                                                      "h":  0.23
+                                                                  },
+                                                           "fill":  "muted",
+                                                           "stroke_w":  0,
+                                                           "radius":  0.5,
+                                                           "opacity":  0.45,
+                                                           "motion":  {
+                                                                          "enter":  "rise",
+                                                                          "delay":  0.22,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "steam3",
+                                                           "kind":  "shape",
+                                                           "shape":  "rect",
+                                                           "at":  {
+                                                                      "x":  0.37,
+                                                                      "y":  0.22,
+                                                                      "w":  0.007,
+                                                                      "h":  0.16
+                                                                  },
+                                                           "fill":  "muted",
+                                                           "stroke_w":  0,
+                                                           "radius":  0.5,
+                                                           "opacity":  0.5,
+                                                           "motion":  {
+                                                                          "enter":  "rise",
+                                                                          "delay":  0.3,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "bean1",
+                                                           "kind":  "shape",
+                                                           "shape":  "ellipse",
+                                                           "at":  {
+                                                                      "x":  0.52,
+                                                                      "y":  0.56,
+                                                                      "w":  0.05,
+                                                                      "h":  0.07
+                                                                  },
+                                                           "fill":  "text",
+                                                           "stroke_w":  0,
+                                                           "radius":  0,
+                                                           "opacity":  0.6,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0.1,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "bean2",
+                                                           "kind":  "shape",
+                                                           "shape":  "ellipse",
+                                                           "at":  {
+                                                                      "x":  0.58,
+                                                                      "y":  0.52,
+                                                                      "w":  0.045,
+                                                                      "h":  0.065
+                                                                  },
+                                                           "fill":  "accent",
+                                                           "stroke_w":  0,
+                                                           "radius":  0,
+                                                           "opacity":  0.5,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0.18,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "bean3",
+                                                           "kind":  "shape",
+                                                           "shape":  "ellipse",
+                                                           "at":  {
+                                                                      "x":  0.63,
+                                                                      "y":  0.58,
+                                                                      "w":  0.05,
+                                                                      "h":  0.07
+                                                                  },
+                                                           "fill":  "text",
+                                                           "stroke_w":  0,
+                                                           "radius":  0,
+                                                           "opacity":  0.45,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0.25,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       },
+                                                       {
+                                                           "id":  "line",
+                                                           "kind":  "text",
+                                                           "text":  "Some mornings deserve slowing down.",
+                                                           "at":  {
+                                                                      "x":  0.1,
+                                                                      "y":  0.75,
+                                                                      "w":  0.8
+                                                                  },
+                                                           "size":  0.07,
+                                                           "weight":  "regular",
+                                                           "align":  "center",
+                                                           "upper":  false,
+                                                           "color":  "text",
+                                                           "font":  "display",
+                                                           "line_height":  1.15,
+                                                           "motion":  {
+                                                                          "enter":  "fade",
+                                                                          "delay":  0.3,
+                                                                          "duration":  0.3,
+                                                                          "easing":  "ease_in_out"
+                                                                      }
+                                                       }
+                                                   ],
+                                      "camera":  "push_in",
+                                      "reveal":  "none",
+                                      "backdrop":  "paper"
+                                  },
+                       "scene_archetype":  "steam_tease",
+                       "needs":  [
+                                     {
+                                         "kind":  "emotional_beat",
+                                         "description":  "Set a calm, unhurried morning mood with steam and warm colour.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     },
+                                     {
+                                         "kind":  "show_place_or_object",
+                                         "description":  "Show a cup and beans as a concrete first image without naming the product.",
+                                         "claim_id":  null,
+                                         "priority":  "secondary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "medium",
+                                    "camera_motion":  "slow_push_in",
+                                    "visual_action":  "A drawn cup with steam wisps rising slowly beside a few dark beans on a warm paper backdrop; steam settles upward while the line of text fades in below."
+                                },
+                       "overlay":  {
+                                       "text":  "Some mornings deserve slowing down.",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+                                           "No logo or product name in the opening.",
+                                           "No music; voice-over only.",
+                                           "Drawn cup is a concept illustration, not a photo."
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S02",
+                       "purpose":  "Reveal: pose the central question alone on the frame as a quiet title.",
+                       "start_time":  3.5,
+                       "end_time":  7.5,
+                       "duration_seconds":  4,
+                       "voiceover":  "What if coffee arrived freshly roasted?",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Animated title text with hairline rules",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "missing_input",
+                                              "note":  "Freshly roasted is unsupported (no approved brand fact). It is asked as a question; supply a brand fact to state it."
+                                          },
+                                          {
+                                              "kind":  "creative_decision",
+                                              "note":  "The beans poured into a hand are not shown, because no footage or image was supplied. The question carries the beat."
+                                          }
+                                      ],
+                       "visual_purpose":  "Gives the film\u0027s one question a full, still frame of its own, with no picture competing with the words.",
+                       "visual":  {
+                                      "block":  "title_plate",
+                                      "eyebrow":  null,
+                                      "subline":  null,
+                                      "plate":  "hairline",
+                                      "camera":  "static",
+                                      "reveal":  "wipe_up",
+                                      "backdrop":  "vignette"
+                                  },
+                       "scene_archetype":  "question_title",
+                       "needs":  [
+                                     {
+                                         "kind":  "emphasise_claim",
+                                         "description":  "Raise freshness as a question, not as a stated fact.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "close_up",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "A single question settles onto the frame, tracked out, between two hairlines on a soft vignette."
+                                },
+                       "overlay":  {
+                                       "text":  "What if coffee arrived freshly roasted?",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+                                           "Freshness stays a question because no approved fact supports it.",
+                                           "No numbers or superlatives."
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S03",
+                       "purpose":  "Detail: three neutral labels around one drawn bean form invite curiosity without asserting anything.",
+                       "start_time":  7.5,
+                       "end_time":  11.5,
+                       "duration_seconds":  4,
+                       "voiceover":  "Where it grew. How it\u0027s roasted.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Drawn orb form with three callout labels",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "missing_input",
+                                              "note":  "Farm origin, roasting and weekly delivery are unsupported (no approved brand facts). They appear only as neutral labels."
+                                          }
+                                      ],
+                       "visual_purpose":  "Breaks the idea into three labelled parts around a single drawn form, the film\u0027s only scene built as a diagram.",
+                       "visual":  {
+                                      "block":  "spec_callouts",
+                                      "form":  "orb",
+                                      "style":  "spotlight",
+                                      "notes":  [
+                                                    {
+                                                        "label":  "Where it grew",
+                                                        "detail":  null
+                                                    },
+                                                    {
+                                                        "label":  "How it\u0027s roasted",
+                                                        "detail":  null
+                                                    },
+                                                    {
+                                                        "label":  "When it arrives",
+                                                        "detail":  null
+                                                    }
+                                                ],
+                                      "camera":  "pull_out",
+                                      "reveal":  "none",
+                                      "backdrop":  "spotlight"
+                                  },
+                       "scene_archetype":  "three_cares",
+                       "needs":  [
+                                     {
+                                         "kind":  "explain_concept",
+                                         "description":  "Name what is worth caring about with three labels that assert nothing.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     },
+                                     {
+                                         "kind":  "show_place_or_object",
+                                         "description":  "Draw one abstract bean-like form as a stand-in for the product.",
+                                         "claim_id":  null,
+                                         "priority":  "secondary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "wide",
+                                    "camera_motion":  "pull_out",
+                                    "visual_action":  "One drawn orb in a spotlight; three labels appear one after another around it as the frame eases back."
+                                },
+                       "overlay":  {
+                                       "text":  "Worth caring about",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "crossfade",
+                       "constraints":  [
+                                           "Labels are neutral: no farm size, roast date or delivery terms are stated.",
+                                           "The orb is an abstract form, not the real product."
+                                       ]
+                   },
+                   {
+                       "scene_id":  "S04",
+                       "purpose":  "Signature: hold quietly on the typeset name with one invitation to try it this week.",
+                       "start_time":  11.5,
+                       "end_time":  15,
+                       "duration_seconds":  3.5,
+                       "voiceover":  "Ember Roast. Try a week with us.",
+                       "production_method":  "graphics",
+                       "required_assets":  [
+                                               {
+                                                   "need":  "Typeset wordmark and closing line as graphics",
+                                                   "kind":  "graphics",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  false,
+                                                   "fallback":  null
+                                               },
+                                               {
+                                                   "need":  "Ember Roast logo",
+                                                   "kind":  "logo",
+                                                   "availability":  "generate_graphics",
+                                                   "asset_id":  null,
+                                                   "placeholder":  true,
+                                                   "fallback":  "Typeset name in the film\u0027s serif."
+                                               }
+                                           ],
+                       "unresolved":  [
+                                          {
+                                              "kind":  "placeholder",
+                                              "note":  "No logo was supplied; the typeset name Ember Roast stands in. Please approve it or supply the logo."
+                                          },
+                                          {
+                                              "kind":  "missing_input",
+                                              "note":  "No platform safe-area numbers were verified. Text is kept centred and away from the edges."
+                                          }
+                                      ],
+                       "visual_purpose":  "Ends on the name alone, still, with the single action to take.",
+                       "visual":  {
+                                      "block":  "closing_signature",
+                                      "wordmark":  "Ember Roast",
+                                      "action":  "Try Ember Roast this week",
+                                      "subline":  null,
+                                      "camera":  "static",
+                                      "reveal":  "none",
+                                      "backdrop":  "flat"
+                                  },
+                       "scene_archetype":  "quiet_signature",
+                       "needs":  [
+                                     {
+                                         "kind":  "introduce_brand",
+                                         "description":  "Name the brand for the first time, quietly.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     },
+                                     {
+                                         "kind":  "call_to_action",
+                                         "description":  "One invitation: try Ember Roast this week.",
+                                         "claim_id":  null,
+                                         "priority":  "primary"
+                                     }
+                                 ],
+                       "asset_ids":  [
+
+                                     ],
+                       "source_in_seconds":  0,
+                       "claim_ids":  [
+                                         "C01"
+                                     ],
+                       "shot":  {
+                                    "shot_size":  "close_up",
+                                    "camera_motion":  "static",
+                                    "visual_action":  "The typeset name Ember Roast settles in the centre with one line above it and the action beneath, held still."
+                                },
+                       "overlay":  {
+                                       "text":  "Try a week with us",
+                                       "safe_area":  "platform_safe"
+                                   },
+                       "audio_cues":  [
+
+                                      ],
+                       "transition_out":  "dip_to_black",
+                       "constraints":  [
+                                           "The wordmark is typeset text, not the real logo.",
+                                           "Offer stays an invitation: no delivery terms, prices or discounts."
+                                       ]
+                   }
+               ]
+}

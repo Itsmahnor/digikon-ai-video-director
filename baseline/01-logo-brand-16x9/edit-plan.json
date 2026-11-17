@@ -1,0 +1,70 @@
+﻿{
+    "project_id":  "proj_61df7c739b74",
+    "version":  1,
+    "uses":  [
+                 {
+                     "use_id":  "U01",
+                     "scene_id":  "S01",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S01 has a message_thread visual block and no footage, so scene-composition draws the whole scene. It takes no other operation."
+                 },
+                 {
+                     "use_id":  "U02",
+                     "scene_id":  "S01",
+                     "recipe_id":  "directional-wipe",
+                     "params":  {
+                                    "direction":  "left",
+                                    "duration_s":  0.4
+                                },
+                     "rationale":  "The storyboard asks for a wipe out of S01. It is a punchy, graphic move from the mess into the ordered stack. 0.4s is under half of the 3s scene, and it is use 1 of 3."
+                 },
+                 {
+                     "use_id":  "U03",
+                     "scene_id":  "S02",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S02 has a layered_cards visual block, so scene-composition draws the whole scene."
+                 },
+                 {
+                     "use_id":  "U04",
+                     "scene_id":  "S02",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.6
+                                },
+                     "rationale":  "The storyboard asks for a crossfade out of S02. It is a calm blend from the service cards into the AI tools. 0.6s is under half of the 4s scene."
+                 },
+                 {
+                     "use_id":  "U05",
+                     "scene_id":  "S03",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S03 has a ui_demo visual block, so scene-composition draws the cursor and the two tool rows."
+                 },
+                 {
+                     "use_id":  "U06",
+                     "scene_id":  "S03",
+                     "recipe_id":  "crossfade",
+                     "params":  {
+                                    "duration_s":  0.6
+                                },
+                     "rationale":  "The storyboard asks for a crossfade out of S03. It is a soft hand-off to the closing logo card. 0.6s is under half of the 4s scene."
+                 },
+                 {
+                     "use_id":  "U07",
+                     "scene_id":  "S04",
+                     "recipe_id":  "scene-composition",
+                     "params":  {
+
+                                },
+                     "rationale":  "S04 has an end_card visual block, so scene-composition draws the supplied logo, the headline and the button. It takes no end-card-cta or logo-reveal in the same scene. S04 is the final scene, so it needs no outgoing transition recipe."
+                 }
+             ]
+}
