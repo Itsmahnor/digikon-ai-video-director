@@ -22,7 +22,7 @@ Evidence: code read in `packages/director`, `packages/rag`, `packages/templates`
 
 1. **The creative ceiling is the renderer vocabulary, not the plan.** The stored plan is good (clear hook, concept "clutter to order", palette, 4 beats). Yet it becomes: `message_thread`, `ui_demo`, `layered_cards`, `end_card`, drawn with 3 typefaces, crossfades and one wipe. The Director cannot ask for anything outside ~15 visual blocks + 40 recipes, so every film converges on text and cards on a gradient. Good planning cannot exceed what the engine can draw.
 2. **Templates, the main source of visual richness, are disconnected** (finding above). 476 validated templates sit unused.
-3. **No look-and-fix loop.** `DIRECTOR_VISUAL_CRITIQUE` is off, so the model never sees its own frames. Single-pass generation of visuals is the weakest possible agent design; quality comes from render -> critique -> revise.
+3. **No look-and-fix loop.** The overview mentions `DIRECTOR_VISUAL_CRITIQUE`, but that name appears nowhere in the code (corrected after a later grep): the feature does not exist and must be built, not switched on. The model never sees its own frames. Single-pass generation of visuals is the weakest possible agent design; quality comes from render -> critique -> revise.
 4. **No real footage or imagery.** Without user assets the film is abstract card animation. There is no stock/b-roll/image-generation source, so "enquiries piling up" is a text-bubble mock-up.
 5. **Audio is robotic.** SAPI/espeak voice plus a generated bed. Viewers judge "average" within seconds of hearing it. Verified only with the demo model, never with the real Claude model.
 6. **Everything is `draft`, so output is `complete_preview` only**, and the real model path (sound, default voice-over, visual critique) is unverified end to end.
@@ -41,7 +41,7 @@ Retrieval feeds Treatment (playbooks, 3 skills), Storyboard (principles, specs, 
 ## 4. Recommended fixes, in order of impact
 
 1. **Wire templates into the Director.** Add a `templates` collection (ingest from `packages/templates`, with look vectors), retrieve 3 to 5 per scene by purpose, energy and category, show them in the storyboard prompt as "adapt one of these". Biggest quality gain for the least work.
-2. **Turn on visual critique** (render a frame per scene, give it to Claude vision, one repair pass). Cap at 1 to 2 iterations for cost.
+2. **Build visual critique** (it does not exist yet) (render a frame per scene, give it to Claude vision, one repair pass). Cap at 1 to 2 iterations for cost.
 3. **Raise skill budget to 6 to 8 snippets and review the draft skills** so they can be shown; set `SKILLS_INCLUDE_DRAFT=1` for evaluation, then promote the good ones.
 4. **Grow the vocabulary where it limits the look:** more typefaces (Manrope, DM Serif Display etc.), more blocks (kinetic type, device mock-ups, data charts), image/video sources.
 5. **Better voice:** swap SAPI/espeak for a neural TTS (ElevenLabs, OpenAI TTS or local Kokoro/Piper) and licensed music instead of a generated bed.
