@@ -31,7 +31,7 @@ The MP4s are small (about 0.5 to 1.5 MB each) so they are committed here. Bigger
 
 - **01** needed three sessions. Session 1 (no voice-over asked) rendered only after the output settings were approved and had no audio. Session 2 escalated after Gate 1: the edit plan's speech-fit check rejected a 12-word line in a 4 s scene (`packages/render/src/audio.ts:61`, the storyboard has no such check). Session 3 (with a shorter-line sentence in the brief) escalated once (the model combined `image-scene` with `scene-composition`) and rendered on the second `/direct` of the same session. The film here is that last one.
 - **02** and **03** rendered on the first attempt.
-- **04** was started, then stopped. Its routing call finished and the Director call was interrupted when the credit-saving rules came in. It needs an explicit go-ahead before it is run (about 6 real model calls).
+- **04 (1:1) was intentionally not run, to save credits.** It was started, its routing call finished, and the Director call was interrupted when the credit-saving rules came in. The baseline is final with briefs 1 to 3. Brief 4 can be run once, at the end, with an explicit go-ahead (about 6 real model calls); add it as `04-square-1x1/` then.
 
 ## What the baseline shows (from the plans; see `proxies.json`)
 
