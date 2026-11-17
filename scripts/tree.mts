@@ -16,10 +16,12 @@ export interface Annotation { path: string; steps: string; status: Status; note:
  * Longest matching prefix wins; a directory with no entry of its own shows its nearest annotated parent.
  */
 export const ANNOTATIONS: Annotation[] = [
-  { path: "apps", steps: "base, B3, C2-C6, D1, E2-E6", status: "done", note: "The console: server, routes and browser UI" },
+  { path: ".claude", steps: "audit", status: "done", note: "Project skills for Claude Code (claude-code-enhance: rewrites a rough request into a scoped prompt)" },
+  { path: "apps",steps: "base, B3, C2-C6, D1, E2-E6", status: "done", note: "The console: server, routes and browser UI" },
   { path: "apps/console", steps: "base, B3, C2-C6, D1, E2-E6", status: "done", note: "Hono server + plain-JS UI (no build step)" },
   { path: "apps/console/public", steps: "C4, C6, D1", status: "done", note: "UI: guided-intake wizard (C4), typed question card (C6), video-type card (D1)" },
   { path: "apps/console/src", steps: "B3, C2-C6, D1", status: "done", note: "Routes; kit-routes.ts holds the kit, website, guideline and question routes" },
+  { path: "baseline", steps: "audit", status: "done", note: "Before-films for comparing builds: three real-Claude runs with plans, reports and frames, the briefs and the 0-5 polish rubric" },
   { path: "capabilities", steps: "base", status: "base", note: "Capability registry: what each renderer can really do, with validation evidence" },
   { path: "db", steps: "A1, A2, B1", status: "done", note: "SQL migrations" },
   { path: "db/migrations", steps: "A1, A2, B1", status: "done", note: "0001 pgvector foundation (base), 0002 skills (A2), 0003 skill scope and topic (B1)" },
