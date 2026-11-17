@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ZodType, ZodTypeDef } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { realCalls } from "./call-guard.js";
+import { describePrompt, fixtureDir, fixtureMode, noteFixture, promptHash, readFixture, writeFixture } from "./llm-fixtures.js";
 
 /**
  * Extracts loggable diagnostic fields from an Anthropic SDK error object.
@@ -100,7 +101,8 @@ export class AnthropicClient implements LlmClient {
 
   constructor(opts: { apiKey?: string; model?: string; onUsage?: (u: { input_tokens: number; output_tokens: number }) => void } = {}) {
     this.onUsage = opts.onUsage;
-    const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
+    // Replay never reaches the API, so it needs no key; the placeholder is never sent anywhere.
+    const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY ?? (fixtureMode() === "replay" ? "replay-mode-no-key" : undefined);
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set. Add it to .env (see .env.example).");
     this.client = new Anthropic({ apiKey });
     this.sdk = this.client;
@@ -113,14 +115,24 @@ export class AnthropicClient implements LlmClient {
    */
   private async send(node: string, params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> {
     const metered = this.client === this.sdk;
+    // Record and replay (llm-fixtures.ts) apply to the real client only, like metering.
+    const mode = metered ? fixtureMode() : "off";
+    const hash = mode === "off" ? "" : promptHash({ model: params.model, max_tokens: params.max_tokens, system: params.system, messages: params.messages, tools: params.tools, tool_choice: params.tool_choice });
+    if (mode === "replay") {
+      // Never calls the API, never counts as a real call. A prompt with no fixture is a loud failure, not a quiet request.
+      const hit = readFixture(fixtureDir(), hash);
+      if (!hit) throw new LlmError("llm_error", `Replay mode has no recorded response for this prompt (node ${node}, hash ${hash.slice(0, 12)}). Nothing was sent to Anthropic. Record it once with LLM_FIXTURE_MODE=record and REAL_CALL_CAP set, or change the prompt back.`);
+      noteFixture("replayed");
+      return hit.response as unknown as Anthropic.Message;
+    }
     const turn = metered ? realCalls.begin(node) : null;
     // Over the cap, or the cap is off: nothing is sent. The message names the env var to set.
     if (turn && !turn.ok) throw new LlmError("llm_budget", turn.message);
     const n = turn && turn.ok ? turn.n : 0;
+    let res: Anthropic.Message;
     try {
-      const res = await this.client.messages.create(params);
+      res = await this.client.messages.create(params);
       if (metered) realCalls.end(n, { node, model: this.model, input_tokens: res.usage?.input_tokens ?? 0, output_tokens: res.usage?.output_tokens ?? 0, outcome: "ok" });
-      return res;
     } catch (e) {
       if (metered) realCalls.end(n, { node, model: this.model, input_tokens: 0, output_tokens: 0, outcome: "error" });
       // Log Anthropic's original error metadata so failures can be diagnosed from the server log.
@@ -135,6 +147,12 @@ export class AnthropicClient implements LlmClient {
       }
       throw classifyLlmError(e, this.model) ?? e;
     }
+    // After the call has been counted and has succeeded: a problem saving the fixture is reported as itself, never as an API failure.
+    if (mode === "record") {
+      writeFixture(fixtureDir(), { format: "digikon.llm-fixture", hash, node, model: this.model, recorded_at: new Date().toISOString(), prompt: describePrompt(params.system, params.messages), response: { content: res.content as unknown[], ...(res.usage ? { usage: { input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens } } : {}) } });
+      noteFixture("recorded");
+    }
+    return res;
   }
 
   /** Forces a tool call so the reply is JSON, validates it with zod, and gives the model one chance to correct itself. */
