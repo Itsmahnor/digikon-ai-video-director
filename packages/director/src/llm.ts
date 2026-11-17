@@ -113,7 +113,10 @@ export class AnthropicClient implements LlmClient {
    */
   private async send(node: string, params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> {
     const metered = this.client === this.sdk;
-    const n = metered ? realCalls.begin() : 0;
+    const turn = metered ? realCalls.begin(node) : null;
+    // Over the cap, or the cap is off: nothing is sent. The message names the env var to set.
+    if (turn && !turn.ok) throw new LlmError("llm_budget", turn.message);
+    const n = turn && turn.ok ? turn.n : 0;
     try {
       const res = await this.client.messages.create(params);
       if (metered) realCalls.end(n, { node, model: this.model, input_tokens: res.usage?.input_tokens ?? 0, output_tokens: res.usage?.output_tokens ?? 0, outcome: "ok" });

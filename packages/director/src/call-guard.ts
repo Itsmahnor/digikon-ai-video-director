@@ -34,6 +34,7 @@ export interface MeterOptions {
 
 export class CallMeter {
   private count = 0;
+  private turnedAway = 0;
   private exitHook = false;
   private warned = false;
   private readonly env: () => Record<string, string | undefined>;
@@ -51,11 +52,32 @@ export class CallMeter {
   /** Real requests made by this process so far. */
   get total(): number { return this.count; }
 
-  /** Called before a request is sent: counts it and returns its number. */
-  begin(): number {
-    this.count++;
+  /**
+   * The cap on real requests, from REAL_CALL_CAP. Unset, empty, 0, negative or not a number all mean 0: real calls are off, so nothing can spend credits by accident.
+   * There is no default; set it to the number of calls you accept, for example REAL_CALL_CAP=4.
+   */
+  get cap(): number {
+    const n = Math.floor(Number(this.env()["REAL_CALL_CAP"]));
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  /**
+   * Called before a request is sent. When the request is allowed it is counted and its number is returned. When it is not (the cap is 0, or already reached) nothing is sent, nothing is
+   * counted as a call, and the reason is returned in words a person can act on.
+   */
+  begin(node = "request"): { ok: true; n: number } | { ok: false; message: string } {
     this.printTotalAtExit();
-    return this.count;
+    const cap = this.cap;
+    if (cap === 0) {
+      this.turnedAway++;
+      return { ok: false, message: `Real model calls are switched off, so nothing was sent to Anthropic. Set REAL_CALL_CAP to the number of calls you accept (for example REAL_CALL_CAP=4) and run again. The call that was refused: ${node}.` };
+    }
+    if (this.count >= cap) {
+      this.turnedAway++;
+      return { ok: false, message: `The real model call cap is reached (REAL_CALL_CAP=${cap}, ${this.count} used), so nothing more was sent to Anthropic. The call that was refused: ${node}. Raise REAL_CALL_CAP to continue.` };
+    }
+    this.count++;
+    return { ok: true, n: this.count };
   }
 
   /** Called when the request has ended, with the tokens the provider reported (0 when it failed before answering). */
@@ -72,18 +94,19 @@ export class CallMeter {
   }
 
   summary(): string {
-    return `Real model calls this run: ${this.count}. Log: ${this.logPath()}`;
+    const cap = this.cap;
+    return `Real model calls this run: ${this.count} (cap ${cap === 0 ? "off: REAL_CALL_CAP is not set" : cap}${this.turnedAway ? `, ${this.turnedAway} refused` : ""}). Log: ${this.logPath()}`;
   }
 
-  /** Prints the total once, when the process ends, if anything was counted. */
+  /** Prints the total once, when the process ends, if a real call was made or refused. */
   private printTotalAtExit(): void {
     if (this.exitHook) return;
     this.exitHook = true;
-    process.once("exit", () => { if (this.count > 0) this.print(this.summary()); });
+    process.once("exit", () => { if (this.count > 0 || this.turnedAway > 0) this.print(this.summary()); });
   }
 
   /** Tests only. */
-  reset(): void { this.count = 0; this.warned = false; }
+  reset(): void { this.count = 0; this.turnedAway = 0; this.warned = false; }
 }
 
 /** The one meter of this process. */
