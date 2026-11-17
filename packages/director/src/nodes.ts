@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { QuestionList, completeness, questionsFor, type ProjectKit } from "@digikon/contracts";
 import {
-  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, CompositionMotionPlan, applyCompositionMotion, compositionGroundingIssues, compositionMotionIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
+  ArtDirection, AssetNotes as AssetNotesSchema, EditPlan, VISUAL_BLOCKS, CompositionMotionPlan, applyCompositionMotion, compositionGroundingIssues, compositionPictureIssues, compositionMotionIssues, VISUAL_SYSTEMS, assetFeasibility, claimWordingIssues, rankVisualBlocks, rankVisualSystems, storyboardHash, STORYBOARD_CAMERA, assetRefIssues, creativeIssues, RecipeUse, Scene, ScenePlan, Treatment, deriveProductionMethod, validatePlan,
   type Asset, type VisualBlock, type VisualSystem, type AssetManifestEntry, type AssetNotes, type BrandFact, type Claim, type Escalation, type Project, type Recipe,
 } from "@digikon/contracts";
 import { describeParam, validateEditPlan, type RecipeLibrary } from "@digikon/recipes";
@@ -374,7 +374,7 @@ export async function storyboardNode(deps: Deps, project: Project, assets: Asset
           overlay: s.overlay?.text ?? null, voiceover: s.voiceover ?? null,
           claims: s.claim_ids.map((id) => treatment.claims.find((c) => c.claim_id === id)?.text).filter((x): x is string => !!x),
           facts: facts.map((f) => f.text), brief: project.brief, treatment: [treatment.logline, treatment.hook, treatment.cta],
-        }), ...(deps.production?.composition?.({ visual: s.visual, duration_seconds: s.duration_seconds, art_direction: treatment.art_direction, aspect_ratio: project.aspect_ratio }) ?? [])].map((m) => `${s.scene_id}: composition - ${m}`)
+        }), ...compositionPictureIssues(s.visual, s.asset_refs ?? []), ...(deps.production?.composition?.({ visual: s.visual, duration_seconds: s.duration_seconds, art_direction: treatment.art_direction, aspect_ratio: project.aspect_ratio }) ?? [])].map((m) => `${s.scene_id}: composition - ${m}`)
         : [])),
       ...(film ? plan.scenes.filter((s) => s.visual && !usable.includes(s.visual.block)).map((s) => `${s.scene_id}: block_not_available - ${s.visual!.block} cannot be used for this film here; use one of: ${usable.join(", ")}`) : []),
       ...(treatment.art_direction ? plan.scenes.filter((s) => s.visual && STORYBOARD_CAMERA[s.visual.camera] !== s.shot.camera_motion).map((s) => `${s.scene_id}: camera_mismatch - shot.camera_motion is ${s.shot.camera_motion} but the visual's camera draws ${STORYBOARD_CAMERA[s.visual!.camera]}; make them agree`) : []),
@@ -543,7 +543,7 @@ export function compositionMotionProblems(edit: EditPlan, plan: ScenePlan, deps:
 /** The scenes the Editor can change the motion of, as the edit-plan prompt shows them: what each element is and how it arrives now. Text is shown so the Editor knows what it is moving; it cannot change it. */
 export function compositionSummaries(plan: ScenePlan) {
   return plan.scenes.flatMap((s) => (s.visual?.block === "composition"
-    ? [{ scene_id: s.scene_id, duration_seconds: s.duration_seconds, intent: s.visual.intent, elements: s.visual.elements.map((e) => ({ id: e.id, kind: e.kind, ...(e.kind === "text" ? { text: e.text, size: e.size } : { shape: e.shape }), at: e.at, motion: e.motion })) }]
+    ? [{ scene_id: s.scene_id, duration_seconds: s.duration_seconds, intent: s.visual.intent, elements: s.visual.elements.map((e) => ({ id: e.id, kind: e.kind, ...(e.kind === "text" ? { text: e.text, size: e.size } : e.kind === "shape" ? { shape: e.shape } : e.kind === "image" ? { asset_ref: e.asset_ref } : {}), at: e.at, motion: e.motion })) }]
     : []));
 }
 

@@ -47,11 +47,30 @@ const ramp = (property: Track["property"], from: number, to: number, easing: Eas
 
 export function authorGraph(c: Comp, f: AuthorFrame): SceneGraphV2 {
   const { width: W, height: H } = f, short = Math.min(W, H), portrait = H >= W, D = f.duration_s;
-  const elements: Element[] = c.elements.map((e) => {
+  /** Where each element sits in this frame, in pixels, with the portrait override applied. */
+  const placeOf = (e: Comp["elements"][number]) => {
     const o = portrait ? e.portrait : undefined;
-    const at = { ...e.at, ...(o ? Object.fromEntries(Object.entries(o).filter(([key, v]) => key !== "size" && v !== undefined)) : {}) } as { x: number; y: number; w: number; h?: number };
-    const x = at.x * W, y = at.y * H, w = Math.max(1, at.w * W);
-    const m = e.motion;
+    const at = { ...e.at, ...(o ? Object.fromEntries(Object.entries(o).filter(([key, v]) => key !== "size" && v !== undefined)) : {}) } as { x: number; y: number; w?: number; h?: number };
+    return { at, x: at.x * W, y: at.y * H, w: Math.max(1, (at.w ?? 0) * W) };
+  };
+  const origin = new Map(c.elements.map((e) => [e.id, placeOf(e)] as const));
+  // A group's children arrive one after another: each child's start is pushed back by its place in the order times the group's `each`.
+  const arrival = new Map<string, number>();
+  for (const g of c.elements) {
+    if (g.kind !== "group" || !g.stagger_children) continue;
+    const kids = c.elements.filter((k) => "parent" in k && k.parent === g.id);
+    const n = kids.length, from = g.stagger_children.from ?? "start";
+    const order = from === "start" ? kids.map((_, i) => i) : from === "end" ? kids.map((_, i) => n - 1 - i) : kids.map((_, i) => i).sort((a, b) => Math.abs(a - (n - 1) / 2) - Math.abs(b - (n - 1) / 2) || a - b);
+    kids.forEach((k, i) => arrival.set(k.id, (from === "center" ? order.indexOf(i) : order[i]!) * g.stagger_children!.each * D));
+  }
+  const STILL = { enter: "none" as const, delay: 0, duration: 1, easing: "ease_out" as const, stagger: undefined };
+  const elements: Element[] = c.elements.map((e) => {
+    const { at, x: ax, y: ay, w: aw } = placeOf(e);
+    // a child's position is relative to its group in the engine; the plan keeps frame shares, so the group's own place is taken away here
+    const po = "parent" in e && e.parent ? origin.get(e.parent) : undefined;
+    const x = ax - (po?.x ?? 0), y = ay - (po?.y ?? 0), w = aw;
+    const parent = "parent" in e && e.parent ? e.parent : null;
+    const m = e.kind === "group" ? (e.motion ?? STILL) : e.motion;
     const ease = easingOf(m.easing);
     const tracks: Track[] = [];
     const dy = 0.045 * H, dx = 0.07 * W;
@@ -76,21 +95,29 @@ export function authorGraph(c: Comp, f: AuthorFrame): SceneGraphV2 {
       for (let i = tracks.length - 1; i >= 0; i--) if (own.has(tracks[i]!.property as never)) tracks.splice(i, 1);
       for (const t of e.tracks) tracks.push(trackOf(t, W, H));
     }
-    const pivot = e.pivot ? { pivot_x: e.pivot.x, pivot_y: e.pivot.y } : {};
-    const timeline = { start_s: m.delay * D, duration_s: Math.max(0.05, m.duration * D), tracks };
+    const pivot = "pivot" in e && e.pivot ? { pivot_x: e.pivot.x, pivot_y: e.pivot.y } : {};
+    const timeline = { start_s: m.delay * D + (arrival.get(e.id) ?? 0), duration_s: e.kind === "group" && !e.motion ? D : Math.max(0.05, m.duration * D), tracks };
     if (e.kind === "text") {
       const px = ((portrait && e.portrait?.size) || e.size) * short;
       return {
-        id: e.id, kind: "text" as const, parent: null,
+        id: e.id, kind: "text" as const, parent,
         props: { text: e.text, x, y, w, font_px: px, weight: e.weight, align: e.align, upper: e.upper, color: e.color, line_height: e.line_height, ...(e.font ? { font: e.font } : {}), ...pivot },
         timeline, ...(m.stagger ? { stagger: { unit: m.stagger.unit, each_s: Math.max(0.005, m.stagger.each * D), from: "start" as const } } : {}), bindings: {},
       };
     }
+    if (e.kind === "group") return { id: e.id, kind: "group" as const, parent: null, props: { x: ax, y: ay }, timeline, bindings: {} };
+    if (e.kind === "image") return { id: e.id, kind: "image" as const, parent, props: { asset_ref: e.asset_ref, x, y, w, h: (at.h ?? e.at.h) * H, fit: e.fit ?? "contain", ...pivot }, timeline, bindings: {} };
+    // A gradient or a glow is drawn by the richer drawing code; the first stop is kept as the solid fill, so a drawer that does not know them still shows the shape and legibility is checked against a real colour.
+    const look = {
+      ...(e.gradient ? { gradient: { type: e.gradient.type, angle: e.gradient.angle, stops: e.gradient.stops.map((s) => ({ at: s.at, color: s.color, ...(s.alpha !== undefined ? { alpha: s.alpha } : {}) })) } } : {}),
+      ...(e.glow ? { glow: { color: e.glow.color, radius: e.glow.radius * short, strength: e.glow.strength } } : {}),
+      ...(e.blend ? { blend: e.blend } : {}),
+    };
+    const fill = e.fill ?? e.gradient?.stops[0]?.color;
     return {
-      id: e.id, kind: "shape" as const, parent: null,
-      props: { shape: e.shape, x, y, w, h: (at.h ?? e.at.h) * H, ...(e.fill ? { fill: e.fill } : {}), ...(e.stroke ? { stroke: e.stroke } : {}), stroke_w: e.stroke_w * short, radius: e.radius * short, ...pivot },
+      id: e.id, kind: "shape" as const, parent,
+      props: { shape: e.shape, x, y, w, h: (at.h ?? e.at.h) * H, ...(fill ? { fill } : {}), ...(e.stroke ? { stroke: e.stroke } : {}), stroke_w: e.stroke_w * short, radius: e.radius * short, ...pivot, ...look },
       timeline, bindings: {},
     };
-  });
-  return { format: "digikon.scene-graph", format_version: 2, canvas: { width: W, height: H, fps: f.fps }, duration_s: D, elements } as SceneGraphV2;
+  });  return { format: "digikon.scene-graph", format_version: 2, canvas: { width: W, height: H, fps: f.fps }, duration_s: D, elements } as SceneGraphV2;
 }

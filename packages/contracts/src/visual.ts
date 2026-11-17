@@ -258,7 +258,7 @@ export type CompEasing = (typeof COMP_EASINGS)[number];
 /** What a track may animate. x and y are offsets as shares of the frame (a move of 0.1 is a tenth of the frame), scale is a multiple, rotate is degrees, opacity is 0 to 1. */
 export const COMP_TRACK_PROPERTIES = ["x", "y", "scale", "rotate", "opacity"] as const;
 export const COMP_TRACK_LIMITS: Record<(typeof COMP_TRACK_PROPERTIES)[number], readonly [number, number]> = { x: [-1.5, 1.5], y: [-1.5, 1.5], scale: [0.05, 4], rotate: [-360, 360], opacity: [0, 1] };
-const MAX_TRACKS = 5, MAX_KEYS = 8;
+const MAX_TRACKS = 5, MAX_KEYS = 8, MAX_GROUP_CHILDREN = 12, MAX_IMAGES = 4;
 
 /** One keyframe: `t` is a share of the element's own motion window (its delay to delay + duration), and `easing` shapes the segment that starts at this key. */
 export const CompTrackKey = z.object({ t: Frac(0, 1), value: z.number().min(-360).max(360), easing: z.enum(COMP_EASINGS).optional() });
@@ -275,11 +275,24 @@ export const CompTrack = z.object({
 /** Where a rotation or scale is anchored, as shares of the element's own box: 0.5, 0.5 is the middle (the default), 0, 0.5 the middle of its left edge. */
 export const CompPivot = z.object({ x: Frac(0, 1), y: Frac(0, 1) });
 /** Optional on every composition element. Nothing here has a default, so an element that does not use them is unchanged. */
-const MotionExtras = {
+const TrackExtras = {
   /** Keyframed motion. A track replaces the entrance's own track for that property; the entrance still animates the rest. At most one track per property. */
   tracks: z.array(CompTrack).max(MAX_TRACKS).optional(),
-  pivot: CompPivot.optional(),
 };
+const MotionExtras = { ...TrackExtras, pivot: CompPivot.optional() };
+/** An element may sit in a group: its position stays in frame shares, and the group moves, rotates, scales and fades it together with its siblings. */
+const Nest = { parent: Ident.optional() };
+
+// ---------- look: gradient, glow, blend (optional, palette colours only) ----------
+
+export const COMP_BLENDS = ["screen", "add"] as const;
+const GradientStop = z.object({ at: Frac(0, 1), color: Token, /** 0 is clear, 1 is solid; lets a beam or a glow fade out. */ alpha: Frac(0, 1).optional() });
+/** A linear gradient between two or three palette colours. `angle` is in degrees: 0 runs left to right, 90 top to bottom. */
+export const CompGradient = z.object({ type: z.literal("linear"), angle: z.number().min(0).max(360), stops: z.array(GradientStop).min(2).max(3) }).superRefine((g, ctx) => {
+  g.stops.forEach((s, i) => { if (i > 0 && s.at <= g.stops[i - 1]!.at) ctx.addIssue({ code: "custom", path: ["stops", i, "at"], message: "gradient stops must be in order, each after the one before" }); });
+});
+/** A soft light around an element in a palette colour. `radius` is a share of the frame's shorter side; `strength` is how bright the light is at the edge. */
+export const CompGlow = z.object({ color: Token, radius: Frac(0.005, 0.1), strength: Frac(0.1, 1) });
 
 export const CompText = z.object({
   id: Ident, kind: z.literal("text"),
@@ -296,6 +309,7 @@ export const CompText = z.object({
   motion: Motion,
   portrait: Override.optional(),
   ...MotionExtras,
+  ...Nest,
 });
 export const CompShape = z.object({
   id: Ident, kind: z.literal("shape"),
@@ -311,8 +325,37 @@ export const CompShape = z.object({
   motion: Motion,
   portrait: Override.optional(),
   ...MotionExtras,
+  ...Nest,
+  /** Replaces the flat fill with a gradient. The first stop's colour is kept as the solid fallback, and is what legibility is checked against. */
+  gradient: CompGradient.optional(),
+  glow: CompGlow.optional(),
+  /** How this shape's light adds to what is behind it: screen or add. Without it the shape simply covers what is behind. */
+  blend: z.enum(COMP_BLENDS).optional(),
 });
-export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape]);
+/** A group moves as one: its position is the point its children rotate and scale about. It draws nothing itself. Its children name it with `parent`. */
+export const CompGroup = z.object({
+  id: Ident, kind: z.literal("group"),
+  at: Place.pick({ x: true, y: true }),
+  /** Absent means the group itself does not enter or fade: only its children's own motion shows. Its tracks (below) can still move it. */
+  motion: MotionObject.optional(),
+  portrait: Override.optional(),
+  ...TrackExtras,
+  /** The children arrive one after another, `each` of the scene apart, in the order they are listed (or from the end, or from the middle). */
+  stagger_children: z.object({ each: Frac(0.005, 0.15), from: z.enum(["start", "end", "center"]).optional() }).optional(),
+});
+/** A picture the scene already carries in `asset_refs` (so it is approved, analysed and checked like any other). Never a new file. */
+export const CompImage = z.object({
+  id: Ident, kind: z.literal("image"),
+  asset_ref: z.string().trim().min(1).max(64),
+  at: Place.required({ h: true }).extend({ w: Frac(0.01, 1.4), h: Frac(0.01, 1.4) }),
+  /** contain shows the whole picture (the default); cover fills the box by cropping. A logo is always shown whole. */
+  fit: z.enum(["contain", "cover"]).optional(),
+  motion: Motion,
+  portrait: Override.optional(),
+  ...MotionExtras,
+  ...Nest,
+});
+export const CompElement = z.discriminatedUnion("kind", [CompText, CompShape, CompGroup, CompImage]);
 export type CompElement = z.infer<typeof CompElement>;
 
 /**
@@ -338,7 +381,35 @@ export function compositionStructureIssues(c: z.infer<typeof Composition>): stri
     const dup = props.find((p, i) => props.indexOf(p) !== i);
     if (dup) out.push(`${e.id}: two tracks animate ${dup}; use one track per property`);
   }
+  const byId = new Map(c.elements.map((e) => [e.id, e]));
+  const kids = new Map<string, number>();
+  for (const e of c.elements) {
+    const parent = "parent" in e ? e.parent : undefined;
+    if (parent === undefined) continue;
+    const p = byId.get(parent);
+    if (!p) out.push(`${e.id}: its parent ${parent} is not an element of this scene`);
+    else if (p.kind !== "group") out.push(`${e.id}: its parent ${parent} is a ${p.kind}; only a group can hold elements`);
+    else kids.set(parent, (kids.get(parent) ?? 0) + 1);
+  }
+  for (const [g, n] of kids) if (n > MAX_GROUP_CHILDREN) out.push(`group ${g} holds ${n} elements; at most ${MAX_GROUP_CHILDREN}`);
+  const images = c.elements.filter((e) => e.kind === "image").length;
+  if (images > MAX_IMAGES) out.push(`${images} picture elements; at most ${MAX_IMAGES} in one scene`);
   if (!c.elements.some((e) => e.kind === "text")) out.push("a composition needs at least one text element: a scene with no words says nothing the reviewer can approve");
+  return out;
+}
+
+/**
+ * The picture rules of a composition, checked against the scene's own `asset_refs` (the pictures the plan already placed and that assetRefIssues has approved against the manifest):
+ * an image element may only name one of them, and a logo is always shown whole. A composition never brings in a file of its own.
+ */
+export function compositionPictureIssues(c: z.infer<typeof Composition>, refs: readonly { asset_id: string; role: string }[] = []): string[] {
+  const out: string[] = [];
+  for (const e of c.elements) {
+    if (e.kind !== "image") continue;
+    const ref = refs.find((r) => r.asset_id === e.asset_ref);
+    if (!ref) { out.push(`${e.id}: ${e.asset_ref} is not one of this scene's pictures; place it in the scene's asset_refs first`); continue; }
+    if (ref.role === "logo" && e.fit === "cover") out.push(`${e.id}: ${e.asset_ref} is a logo, so it is shown whole (fit contain), never cropped`);
+  }
   return out;
 }
 /** The composition with the Editor's motion patches applied. Only the motion of the named elements changes; every other field is returned untouched. Ids the composition does not have are ignored here and reported by compositionMotionIssues. */
@@ -350,7 +421,7 @@ export function applyCompositionMotion(c: z.infer<typeof Composition>, plan: rea
     const p = patches.get(e.id);
     if (!p) return e;
     const { stagger, ...rest } = p;
-    const next = { ...e.motion, ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined)) } as typeof e.motion;
+    const next = { ...(e.motion ?? MotionObject.parse({})), ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined)) } as NonNullable<typeof e.motion>;
     if (stagger !== undefined) { if (stagger === null || e.kind !== "text") delete (next as { stagger?: unknown }).stagger; else next.stagger = stagger; }
     return { ...e, motion: next } as typeof e;
   }) };
