@@ -15,7 +15,7 @@ import { ApprovalSubmission, RenderSettings, AssetUsage, BrandFact, CATEGORY_LAB
 import {
   Command, HandoffRefusedError, matchAssetsToScenes, MAX_REVISIONS, PersistenceError, RunStore, StaleApprovalError, buildDirectorGraph, buildHandoff, buildRunRecord, checkRenderable, classifyLlmError, currentEditPlan, currentStoryboard,
   checkpointOf, restoreRun, runEditor, verifyHandoffWithStore,
-  type DirectorStateType, type ProductionPort, type LlmClient, type SkillLibrary,
+  type DirectorStateType, type Deps, type ProductionPort, type LlmClient, type SkillLibrary,
   classifyChange,
   templateOptions,
 } from "@digikon/director";
@@ -55,6 +55,8 @@ export interface AppContext {
   retrieverFor?: (implemented: ReadonlySet<string>, validated?: ReadonlySet<string>) => Retriever;
   /** The knowledge notes behind the retriever. Used only to name the sources in the Editor handoff; optional. */
   knowledge?: readonly Doc[];
+  /** Template inspiration for the storyboard (search over the template library in the database). Absent without a database. */
+  templates?: Deps["templates"];
   recipes: RecipeLibrary;
   ffmpegOk: boolean;
   storageDir: string;
@@ -602,7 +604,7 @@ export function createApp(ctx: AppContext) {
     s.facts = [...typed, ...kitFacts.map((f, i) => BrandFact.parse({ ...f, fact_id: `F${String(typed.length + i + 1).padStart(2, "0")}` }))];
     s.threadId = `${s.id}-${Date.now()}`;
     // Every gate decision is written to storage/sessions/<id>/runs/<run id>/approvals before it takes effect.
-    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
+    s.graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(s.id) ? { production: productionPortFor(s.id)! } : {}), recipes: ctx.recipes, approvalLog: new RunStore(s.dir).approvalLog(s.threadId) });
     const graph = s.graph;
     const config = { configurable: { thread_id: s.threadId } };
     // The user's choice wins; otherwise whatever the request already carried (null when nothing said).
@@ -699,7 +701,7 @@ export function createApp(ctx: AppContext) {
     if (existing?.threadId === runId && existing.graph) throw new HttpError(409, "run_active", "That run is already open. Reload the page instead of resuming it.");
     const llm = needLlm();
     const store = new RunStore(dir);
-    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
+    const graph = buildDirectorGraph({ llm, skills: ctx.skills, retriever: liveRetriever, ...(ctx.templates ? { templates: ctx.templates } : {}), ...(ctx.skillsIncludeDraft ? { skillsIncludeDraft: true } : {}), ...(productionPortFor(id) ? { production: productionPortFor(id)! } : {}), recipes: ctx.recipes, approvalLog: store.approvalLog(runId) });
     const r = await restoreRun({ store, graph, session_id: id, run_id: runId, ctx: { recipes: ctx.recipes, storageRoot: dir, requireContentHash: true } });
     if (!r.ok) {
       if (r.missing) throw new HttpError(404, "no_checkpoint", r.reasons[0]!);

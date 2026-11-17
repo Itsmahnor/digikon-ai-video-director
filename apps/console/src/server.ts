@@ -3,7 +3,8 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
-import { AnthropicClient, DemoClient, SkillLibrary } from "@digikon/director";
+import { AnthropicClient, DemoClient, SkillLibrary, type Deps } from "@digikon/director";
+import { searchTemplates } from "@digikon/templates";
 import { KeywordRetriever, chooseEmbedder, createDbBackedRetriever, SKILLS_HYBRID_OPTIONS, SKILLS_KEYWORD_FLOOR, loadKnowledge, loadSkillDocs, openStore, recipeDocs, skillDoc, type Doc, type Retriever } from "@digikon/rag";
 import { RecipeLibrary, loadRecipes } from "@digikon/recipes";
 import { detectAudio, loadCapabilityRegistry, migrateLegacyStore } from "@digikon/render";
@@ -41,6 +42,7 @@ const skillsIncludeDraft = process.env.SKILLS_INCLUDE_DRAFT === "1";
 let skillDocs: Doc[] = loadSkillDocs(join(repoRoot, "examples", "skills"));
 let skillsFrom = "files (examples/skills)";
 let buildDbRetriever: ((docs: Doc[]) => Retriever) | null = null;
+let templates: Deps["templates"] | undefined;
 if (process.env.DATABASE_URL) {
   try {
     const store = await openStore();
@@ -53,6 +55,15 @@ if (process.env.DATABASE_URL) {
     const { embedder, note } = chooseEmbedder(join(repoRoot, "storage", "models"));
     buildDbRetriever = await createDbBackedRetriever(store, embedder, [...recipeDocs(recipes), ...knowledge], SKILLS_HYBRID_OPTIONS);
     console.log(`Retrieval: database-backed hybrid (BM25 + vectors; ${note}).`);
+    // Template inspiration for the storyboard: hybrid search over the template library. Reviewed and draft templates are both offered as reference designs only.
+    const bodies = new Map((await store.listTemplates()).map((r) => [r.id, r.body as { retrieval_text?: string }]));
+    if (bodies.size) {
+      templates = async ({ text, k, aspect }) => {
+        const hits = await searchTemplates(store, embedder, { text, k, status: ["reviewed", "draft"], ...(aspect === "16:9" || aspect === "9:16" || aspect === "1:1" ? { aspect } : {}) });
+        return hits.map((h) => ({ template_id: h.template_id, title: h.title, category: h.category, family: h.family, note: `${h.why.join(", ")}. ${(bodies.get(h.template_id)?.retrieval_text ?? "").slice(0, 240)}` }));
+      };
+    }
+    console.log(`Template library: ${bodies.size ? `${bodies.size} templates offered to the storyboard as inspiration` : "empty (run `npm run templates` to ingest); the storyboard gets no template inspiration"}.`);
   } catch (e) {
     console.warn(`DATABASE_URL is set but the database cannot be used (${e instanceof Error ? e.message : String(e)}); falling back to the keyword retriever with skills from files.`);
     skillDocs = loadSkillDocs(join(repoRoot, "examples", "skills"));
@@ -79,7 +90,7 @@ const renderFont = [process.env.RENDER_FONT_FILE ? resolve(repoRoot, process.env
 if (!renderFont) console.warn("No font file found for preview renders. Set RENDER_FONT_FILE to a .ttf file to enable them.");
 
 const app = createApp({
-  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, knowledge: [...knowledge, ...skillDocs], skillsIncludeDraft, recipes: library, ffmpegOk,
+  llm, demo, speech, whisper: () => whisper, skills, retriever, retrieverFor, knowledge: [...knowledge, ...skillDocs], ...(templates ? { templates } : {}), skillsIncludeDraft, recipes: library, ffmpegOk,
   vision: new LocalVision({ cacheDir: process.env.WHISPER_CACHE_DIR ? resolve(repoRoot, process.env.WHISPER_CACHE_DIR) : join(repoRoot, "storage", "models") }), ocr: await availableOcr(),
   editorSkills: new SkillLibrary(join(repoRoot, "skills", "editor")), renderFont, capabilitiesDir, audio: detectAudio(),
   storageDir: join(repoRoot, "storage"), publicDir: join(repoRoot, "apps", "console", "public"),
